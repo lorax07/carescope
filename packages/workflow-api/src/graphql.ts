@@ -48,11 +48,14 @@ const WorkflowType = new GraphQLObjectType({
     publishedAt: { type: GraphQLString },
     nodeCount: {
       type: GraphQLInt,
-      resolve: (w: { nodes?: unknown[] }) => w.nodes?.length ?? 0,
+      resolve: (source: unknown) => {
+        const w = source as { nodes?: unknown[] };
+        return w.nodes?.length ?? 0;
+      },
     },
     definitionJson: {
       type: GraphQLString,
-      resolve: (w: unknown) => JSON.stringify(w),
+      resolve: (source: unknown) => JSON.stringify(source),
     },
   },
 });
