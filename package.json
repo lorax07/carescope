@@ -1,0 +1,18 @@
+{
+  "name": "carescope",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CareScope LIMS — laboratory information management with a foundational workflow automation platform",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm --filter @carescope/designer dev",
+    "dev:api": "pnpm --filter @carescope/workflow-api dev",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint --if-present",
+    "typecheck": "pnpm -r run typecheck --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
