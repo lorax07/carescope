@@ -1,15 +1,15 @@
-import express from "express";
+import express, { type Application } from "express";
 import cors from "cors";
 import { createHandler } from "graphql-http/lib/use/express";
 import { createRestRouter } from "./rest.js";
 import { workflowGraphQLSchema, getGraphQLSchemaSDL } from "./graphql.js";
 import { getPlatform } from "./platform.js";
 
-export function createApp() {
+export function createApp(): Application {
   // Ensure platform is bootstrapped
   getPlatform();
 
-  const app = express();
+  const app: Application = express();
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
 

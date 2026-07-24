@@ -62,7 +62,7 @@ function toFlowEdges(def: WorkflowDefinition): Edge[] {
 function fromFlow(
   nodes: WfFlowNode[],
   edges: Edge[],
-  base: WorkflowDefinition
+  _base: WorkflowDefinition
 ): Pick<WorkflowDefinition, "nodes" | "edges"> {
   const wfNodes: WorkflowNode[] = nodes.map((n) => ({
     id: n.id,

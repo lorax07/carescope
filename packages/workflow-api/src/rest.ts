@@ -19,6 +19,13 @@ function userId(req: Request): string {
   return String(req.header("x-user-id") ?? "admin");
 }
 
+/** Express params may be string | string[]; normalize to a single string. */
+function param(req: Request, name: string): string {
+  const value = req.params[name];
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+}
+
 function asyncHandler(
   fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
 ) {
@@ -117,7 +124,7 @@ export function createRestRouter(): Router {
   router.get(
     "/workflows/:id",
     asyncHandler(async (req, res) => {
-      const def = getPlatform().store.get(req.params["id"]!, tenantId(req));
+      const def = getPlatform().store.get(param(req, "id"), tenantId(req));
       if (!def) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -130,7 +137,7 @@ export function createRestRouter(): Router {
     "/workflows/:id",
     asyncHandler(async (req, res) => {
       const { store } = getPlatform();
-      const existing = store.get(req.params["id"]!, tenantId(req));
+      const existing = store.get(param(req, "id"), tenantId(req));
       if (!existing) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -159,7 +166,7 @@ export function createRestRouter(): Router {
     "/workflows/:id/validate",
     asyncHandler(async (req, res) => {
       const { store, engine } = getPlatform();
-      const def = store.get(req.params["id"]!, tenantId(req));
+      const def = store.get(param(req, "id"), tenantId(req));
       if (!def) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -172,7 +179,7 @@ export function createRestRouter(): Router {
     "/workflows/:id/publish",
     asyncHandler(async (req, res) => {
       const { store, engine } = getPlatform();
-      const def = store.get(req.params["id"]!, tenantId(req));
+      const def = store.get(param(req, "id"), tenantId(req));
       if (!def) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -190,7 +197,7 @@ export function createRestRouter(): Router {
   router.post(
     "/workflows/:id/archive",
     asyncHandler(async (req, res) => {
-      const archived = getPlatform().store.archive(req.params["id"]!, tenantId(req));
+      const archived = getPlatform().store.archive(param(req, "id"), tenantId(req));
       if (!archived) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -203,7 +210,7 @@ export function createRestRouter(): Router {
     "/workflows/:id/clone",
     asyncHandler(async (req, res) => {
       const cloned = getPlatform().store.clone(
-        req.params["id"]!,
+        param(req, "id"),
         tenantId(req),
         userId(req),
         req.body
@@ -220,7 +227,7 @@ export function createRestRouter(): Router {
     "/workflows/:id/version",
     asyncHandler(async (req, res) => {
       const next = getPlatform().store.createVersion(
-        req.params["id"]!,
+        param(req, "id"),
         tenantId(req),
         userId(req),
         req.body
@@ -236,7 +243,7 @@ export function createRestRouter(): Router {
   router.get(
     "/workflows/:id/versions",
     asyncHandler(async (req, res) => {
-      const def = getPlatform().store.get(req.params["id"]!, tenantId(req));
+      const def = getPlatform().store.get(param(req, "id"), tenantId(req));
       if (!def) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -248,7 +255,7 @@ export function createRestRouter(): Router {
   router.post(
     "/workflows/:id/rollback",
     asyncHandler(async (req, res) => {
-      const def = getPlatform().store.get(req.params["id"]!, tenantId(req));
+      const def = getPlatform().store.get(param(req, "id"), tenantId(req));
       if (!def) {
         res.status(404).json({ error: "Workflow not found" });
         return;
@@ -276,7 +283,7 @@ export function createRestRouter(): Router {
     "/templates/:id/instantiate",
     asyncHandler(async (req, res) => {
       const instance = getPlatform().store.createFromTemplate(
-        req.params["id"]!,
+        param(req, "id"),
         tenantId(req),
         userId(req),
         req.body?.name
@@ -293,7 +300,7 @@ export function createRestRouter(): Router {
   router.post(
     "/workflows/:id/start",
     asyncHandler(async (req, res) => {
-      const exec = await getPlatform().engine.start(req.params["id"]!, {
+      const exec = await getPlatform().engine.start(param(req, "id"), {
         tenantId: tenantId(req),
         userId: userId(req),
         eventPayload: req.body?.eventPayload,
@@ -311,7 +318,7 @@ export function createRestRouter(): Router {
     "/workflows/:id/simulate",
     asyncHandler(async (req, res) => {
       const result = await getPlatform().engine.simulate({
-        workflowId: req.params["id"]!,
+        workflowId: param(req, "id"),
         tenantId: tenantId(req),
         userId: userId(req),
         version: req.body?.version,
@@ -339,7 +346,7 @@ export function createRestRouter(): Router {
   router.get(
     "/executions/:id",
     asyncHandler(async (req, res) => {
-      const exec = getPlatform().engine.getExecution(req.params["id"]!);
+      const exec = getPlatform().engine.getExecution(param(req, "id"));
       if (!exec || exec.tenantId !== tenantId(req)) {
         res.status(404).json({ error: "Execution not found" });
         return;
@@ -351,7 +358,7 @@ export function createRestRouter(): Router {
   router.get(
     "/executions/:id/logs",
     asyncHandler(async (req, res) => {
-      const exec = getPlatform().engine.getExecution(req.params["id"]!);
+      const exec = getPlatform().engine.getExecution(param(req, "id"));
       if (!exec || exec.tenantId !== tenantId(req)) {
         res.status(404).json({ error: "Execution not found" });
         return;
@@ -363,7 +370,7 @@ export function createRestRouter(): Router {
   router.post(
     "/executions/:id/resume",
     asyncHandler(async (req, res) => {
-      const exec = await getPlatform().engine.resume(req.params["id"]!, {
+      const exec = await getPlatform().engine.resume(param(req, "id"), {
         nodeId: req.body.nodeId,
         output: req.body.output,
         userId: userId(req),
@@ -376,7 +383,7 @@ export function createRestRouter(): Router {
   router.post(
     "/executions/:id/cancel",
     asyncHandler(async (req, res) => {
-      const exec = await getPlatform().engine.cancel(req.params["id"]!, req.body?.reason);
+      const exec = await getPlatform().engine.cancel(param(req, "id"), req.body?.reason);
       res.json(exec);
     })
   );
@@ -384,9 +391,9 @@ export function createRestRouter(): Router {
   router.get(
     "/workflows/:id/metrics",
     asyncHandler(async (req, res) => {
-      const metrics = getPlatform().engine.getMetrics(req.params["id"]!);
+      const metrics = getPlatform().engine.getMetrics(param(req, "id"));
       res.json(metrics ?? {
-        workflowId: req.params["id"],
+        workflowId: param(req, "id"),
         tenantId: tenantId(req),
         totalExecutions: 0,
         completedExecutions: 0,
@@ -468,7 +475,7 @@ export function createRestRouter(): Router {
   router.put(
     "/rules/:id",
     asyncHandler(async (req, res) => {
-      const existing = getPlatform().ruleStore.get(req.params["id"]!);
+      const existing = getPlatform().ruleStore.get(param(req, "id"));
       if (!existing || existing.tenantId !== tenantId(req)) {
         res.status(404).json({ error: "Rule not found" });
         return;
@@ -497,12 +504,12 @@ export function createRestRouter(): Router {
   router.delete(
     "/rules/:id",
     asyncHandler(async (req, res) => {
-      const existing = getPlatform().ruleStore.get(req.params["id"]!);
+      const existing = getPlatform().ruleStore.get(param(req, "id"));
       if (!existing || existing.tenantId !== tenantId(req)) {
         res.status(404).json({ error: "Rule not found" });
         return;
       }
-      getPlatform().ruleStore.delete(req.params["id"]!);
+      getPlatform().ruleStore.delete(param(req, "id"));
       res.status(204).end();
     })
   );
