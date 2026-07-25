@@ -18,12 +18,12 @@ export function LibraryPage() {
       name: "Untitled Workflow",
       description: "Custom laboratory workflow",
     });
-    navigate(`/workflows/${wf.id}`);
+    navigate(`/app/workflows/${wf.id}`);
   };
 
   const useTemplate = (id: string, name: string) => {
     const instance = workflowService.createFromTemplate(id, `${name}`);
-    if (instance) navigate(`/workflows/${instance.id}`);
+    if (instance) navigate(`/app/workflows/${instance.id}`);
   };
 
   return (
@@ -32,8 +32,8 @@ export function LibraryPage() {
         <div>
           <h1>Workflow Library</h1>
           <p>
-            Design, simulate, and publish laboratory workflows. Every LIMS module can attach
-            configurable automation through this engine.
+            Design, simulate, and publish laboratory workflows across sample lifecycle,
+            quality, and compliance — without writing custom code.
           </p>
         </div>
         <button type="button" className="btn btn-primary" onClick={createNew}>
@@ -61,7 +61,7 @@ export function LibraryPage() {
               <h3>{wf.name}</h3>
               <p>{wf.description || "No description"}</p>
               <div className="wf-card-actions">
-                <Link className="btn btn-primary" to={`/workflows/${wf.id}`}>
+                <Link className="btn btn-primary" to={`/app/workflows/${wf.id}`}>
                   Open designer
                 </Link>
                 <button
@@ -107,7 +107,7 @@ export function LibraryPage() {
               >
                 Use template
               </button>
-              <Link className="btn" to={`/workflows/${wf.id}`}>
+              <Link className="btn" to={`/app/workflows/${wf.id}`}>
                 Preview
               </Link>
             </div>
