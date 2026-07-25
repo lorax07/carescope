@@ -299,12 +299,6 @@
 .lp-compare-pains li:nth-child(4) {
   animation-delay: 0.56s;
 }
-.lp-compare-pains li:nth-child(5) {
-  animation-delay: 0.63s;
-}
-.lp-compare-pains li:nth-child(6) {
-  animation-delay: 0.7s;
-}
 
 .lp-compare-pains li::before {
   content: "";
