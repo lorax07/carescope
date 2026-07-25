@@ -51,11 +51,14 @@ export function LandingPage() {
               CareScope
             </p>
             <h1 className="lp-hero-title">
-              Laboratory operations with the confidence of pedigree systems.
+              Your lab shouldn’t have to work around your LIMS.
             </h1>
             <p className="lp-hero-lede">
-              A modern LIMS for regulated labs — sample lifecycle, chain of custody,
-              and visual workflow automation without custom code.
+              Stop stitching together software to run your laboratory. One
+              intelligent platform connects your entire operation — from
+              accessioning and testing to quality, billing, client service, and
+              analytics — so your team can spend less time managing systems and
+              more time advancing science.
             </p>
             <div className="lp-hero-cta">
               <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">

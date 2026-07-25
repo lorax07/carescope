@@ -183,7 +183,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 34rem;
+  max-width: 38rem;
   animation: lp-rise 0.8s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -210,9 +210,9 @@
 .lp-hero-lede {
   margin: 1rem 0 0;
   font-size: 1.05rem;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--lp-muted);
-  max-width: 32rem;
+  max-width: 36rem;
 }
 
 .lp-hero-cta {
