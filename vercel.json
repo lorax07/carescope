@@ -2,5 +2,5 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install",
   "framework": "vite",
-  "outputDirectory": "apps/designer/dist"
+  "outputDirectory": "dist"
 }
