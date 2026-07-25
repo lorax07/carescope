@@ -1,5 +1,14 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
 import "./landing.css";
+
+const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
+  id: m.module,
+  label: m.label,
+  description: m.description,
+  events: m.events.slice(0, 2),
+}));
 
 export function LandingPage() {
   return (
@@ -20,7 +29,7 @@ export function LandingPage() {
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">
-            <a href="#platform">Platform</a>
+            <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
             <Link to="/app">Open LIMS</Link>
@@ -52,8 +61,8 @@ export function LandingPage() {
               <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
                 Open the LIMS
               </Link>
-              <a href="#workflows" className="lp-btn lp-btn-ghost lp-btn-lg">
-                See workflows
+              <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
+                Browse capabilities
               </a>
             </div>
           </div>
@@ -64,50 +73,35 @@ export function LandingPage() {
         </section>
       </div>
 
-      <section className="lp-section" id="platform">
-        <div className="lp-section-inner">
-          <p className="lp-eyebrow">Platform</p>
-          <h2 className="lp-h2">Built for the full laboratory continuum.</h2>
-          <p className="lp-section-lede">
-            From intake to CoA release, CareScope keeps every sample, result, and
-            signature in one governed system of record.
-          </p>
-
-          <div className="lp-split">
-            <article className="lp-feature">
-              <h3>Sample lifecycle</h3>
-              <p>
-                Receive, aliquot, assign, and release with barcode/QR custody and
-                complete audit history at every handoff.
+      <section className="lp-section" id="capabilities">
+        <div className="lp-section-inner lp-section-wide">
+          <div className="lp-section-heading-row">
+            <div>
+              <p className="lp-eyebrow">Capabilities</p>
+              <h2 className="lp-h2">Every laboratory module, one platform.</h2>
+              <p className="lp-section-lede">
+                CareScope covers the full LIMS continuum — from sample intake and
+                instruments to quality, compliance, billing, and automation.
               </p>
-            </article>
-            <article className="lp-feature">
-              <h3>Results & review</h3>
-              <p>
-                Structured entry, scientific calculations, peer review, and
-                electronic signatures aligned to laboratory practice.
-              </p>
-            </article>
-            <article className="lp-feature">
-              <h3>Quality & CAPA</h3>
-              <p>
-                Quality events, non-conformances, and CAPA chains that stay linked
-                to the samples and methods that triggered them.
-              </p>
-            </article>
+            </div>
+            <p className="lp-capability-count">
+              {CAPABILITIES.length} modules
+            </p>
           </div>
+
+          <CapabilitiesCarousel items={CAPABILITIES} />
         </div>
       </section>
 
       <section className="lp-section lp-section-tint" id="workflows">
-        <div className="lp-section-inner lp-workflow-block">
+        <div className="lp-section-inner lp-section-wide lp-workflow-block">
           <div>
             <p className="lp-eyebrow">Workflow engine</p>
             <h2 className="lp-h2">Automate laboratory process by design.</h2>
             <p className="lp-section-lede">
               A visual, no-code orchestration layer for approvals, instrument
               actions, notifications, and compliance checks — configurable for
-              every module.
+              every module above.
             </p>
             <Link to="/app/workflows" className="lp-btn lp-btn-primary">
               Open workflow designer
@@ -120,7 +114,7 @@ export function LandingPage() {
       </section>
 
       <section className="lp-section" id="compliance">
-        <div className="lp-section-inner">
+        <div className="lp-section-inner lp-section-wide">
           <p className="lp-eyebrow">Trust</p>
           <h2 className="lp-h2">Governed for regulated environments.</h2>
           <p className="lp-section-lede">
@@ -138,7 +132,7 @@ export function LandingPage() {
       </section>
 
       <section className="lp-cta-band">
-        <div className="lp-cta-band-inner">
+        <div className="lp-cta-band-inner lp-section-wide">
           <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
           <p>
             Configure CareScope around your methods, sites, and quality system —
@@ -151,7 +145,7 @@ export function LandingPage() {
       </section>
 
       <footer className="lp-footer">
-        <div className="lp-footer-inner">
+        <div className="lp-footer-inner lp-section-wide">
           <span className="lp-logo-word">CareScope</span>
           <span>Laboratory information management</span>
           <nav>
@@ -162,6 +156,139 @@ export function LandingPage() {
       </footer>
     </div>
   );
+}
+
+type Capability = {
+  id: string;
+  label: string;
+  description: string;
+  events: string[];
+};
+
+function CapabilitiesCarousel({ items }: { items: Capability[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const pageSize = usePageSize();
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+
+  const goTo = useCallback(
+    (next: number) => {
+      const clamped = ((next % pageCount) + pageCount) % pageCount;
+      setIndex(clamped);
+      const el = trackRef.current;
+      if (!el) return;
+      const pageWidth = el.clientWidth;
+      el.scrollTo({ left: clamped * pageWidth, behavior: "smooth" });
+    },
+    [pageCount]
+  );
+
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => goTo(index + 1), 4500);
+    return () => window.clearInterval(id);
+  }, [goTo, index, paused]);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const pageWidth = el.clientWidth || 1;
+      setIndex(Math.round(el.scrollLeft / pageWidth));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    goTo(0);
+  }, [goTo, pageSize]);
+
+  const pages = Array.from({ length: pageCount }, (_, page) =>
+    items.slice(page * pageSize, page * pageSize + pageSize)
+  );
+
+  return (
+    <div
+      className="lp-carousel"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div className="lp-carousel-controls">
+        <button
+          type="button"
+          className="lp-carousel-btn"
+          aria-label="Previous capabilities"
+          onClick={() => goTo(index - 1)}
+        >
+          ←
+        </button>
+        <div className="lp-carousel-dots" role="tablist" aria-label="Capability pages">
+          {pages.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === index}
+              className={`lp-carousel-dot${i === index ? " active" : ""}`}
+              aria-label={`Show capabilities page ${i + 1}`}
+              onClick={() => goTo(i)}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="lp-carousel-btn"
+          aria-label="Next capabilities"
+          onClick={() => goTo(index + 1)}
+        >
+          →
+        </button>
+      </div>
+
+      <div className="lp-carousel-viewport" ref={trackRef}>
+        {pages.map((page, pageIdx) => (
+          <div className="lp-carousel-page" key={pageIdx} aria-hidden={pageIdx !== index}>
+            {page.map((item, i) => (
+              <article className="lp-capability" key={item.id}>
+                <span className="lp-capability-index">
+                  {String(pageIdx * pageSize + i + 1).padStart(2, "0")}
+                </span>
+                <h3>{item.label}</h3>
+                <p>{item.description}</p>
+                {item.events.length > 0 ? (
+                  <div className="lp-capability-events">
+                    {item.events.map((ev) => (
+                      <span key={ev}>{ev}</span>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function usePageSize() {
+  const [size, setSize] = useState(3);
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 700) setSize(1);
+      else if (w < 1100) setSize(2);
+      else setSize(3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return size;
 }
 
 function HeroProductVisual() {
