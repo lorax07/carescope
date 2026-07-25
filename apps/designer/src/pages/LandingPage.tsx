@@ -295,10 +295,9 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Expensive",
-  "Managing IT consultants",
+  "Expensive and delayed deployments",
+  "Complex integration management",
   "Inconsistent integrations",
-  "Delayed deployments",
   "Reduced customer satisfaction",
   "Audit risk",
 ] as const;
