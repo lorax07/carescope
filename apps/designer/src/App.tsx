@@ -5,7 +5,11 @@ export function AppShell() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <NavLink to="/" className="brand" style={{ textDecoration: "none" }}>
+        <NavLink
+          to="/"
+          className="brand"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
           <span className="brand-name">CareScope</span>
           <span className="brand-product">LIMS</span>
         </NavLink>
