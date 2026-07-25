@@ -30,9 +30,9 @@ export default defineConfig({
       ),
     },
   },
+  // Emit to apps/designer/dist so Vercel Root Directory + outputDirectory "dist" match
   build: {
-    // Match vercel.json outputDirectory: "dist" at the monorepo root
-    outDir: path.resolve(__dirname, "../../dist"),
+    outDir: "dist",
     emptyOutDir: true,
   },
   server: {
