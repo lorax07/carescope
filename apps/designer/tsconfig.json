@@ -13,7 +13,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "baseUrl": ".",
+    "paths": {
+      "@carescope/workflow-core": ["../../packages/workflow-core/src/index.ts"],
+      "@carescope/workflow-core/*": ["../../packages/workflow-core/src/*"]
+    }
   },
   "include": ["src"]
 }

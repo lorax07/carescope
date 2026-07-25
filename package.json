@@ -4,7 +4,7 @@
   "private": true,
   "description": "CareScope LIMS — laboratory information management with a foundational workflow automation platform",
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "pnpm --filter @carescope/workflow-core build && pnpm --filter @carescope/workflow-api build && pnpm --filter @carescope/designer build",
     "dev": "pnpm --filter @carescope/designer dev",
     "dev:api": "pnpm --filter @carescope/workflow-api dev",
     "test": "pnpm -r run test",
