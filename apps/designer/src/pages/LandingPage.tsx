@@ -71,7 +71,7 @@ export function LandingPage() {
           </div>
 
           <div className="lp-hero-visual" aria-hidden="true">
-            <HeroProductVisual />
+            <IntegrationsComparisonVisual />
           </div>
         </section>
       </div>
@@ -294,78 +294,111 @@ function usePageSize() {
   return size;
 }
 
-function HeroProductVisual() {
+const FRAGMENTED_SYSTEMS = [
+  { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
+  { id: "emr", label: "EMR", x: 210, y: 42 },
+  { id: "inst", label: "Instruments", x: 318, y: 78 },
+  { id: "qc", label: "QC / CAPA", x: 54, y: 168 },
+  { id: "bill", label: "Billing", x: 176, y: 198 },
+  { id: "inv", label: "Inventory", x: 300, y: 176 },
+  { id: "crm", label: "Client portal", x: 112, y: 278 },
+  { id: "bi", label: "BI / Excel", x: 250, y: 288 },
+] as const;
+
+const FRAGMENTED_EDGES: Array<[number, number]> = [
+  [0, 1],
+  [0, 3],
+  [0, 4],
+  [1, 2],
+  [1, 4],
+  [2, 5],
+  [3, 4],
+  [3, 6],
+  [4, 5],
+  [4, 7],
+  [5, 7],
+  [6, 7],
+];
+
+function IntegrationsComparisonVisual() {
   return (
-    <div className="lp-product-stage">
-      <div className="lp-product-glow" />
-      <div className="lp-product-window">
-        <div className="lp-product-chrome">
-          <span />
-          <span />
-          <span />
-          <em>Sample · SCP-20491</em>
+    <div className="lp-compare">
+      <div className="lp-compare-panel lp-compare-before">
+        <div className="lp-compare-head">
+          <span className="lp-compare-label">Typical lab stack</span>
+          <strong className="lp-compare-metric">
+            12+ <em>integrations</em>
+          </strong>
         </div>
-        <div className="lp-product-body">
-          <aside className="lp-product-rail">
-            <strong>Lifecycle</strong>
-            <ol>
-              <li className="done">Received</li>
-              <li className="done">Assigned</li>
-              <li className="active">In testing</li>
-              <li>Review</li>
-              <li>CoA release</li>
-            </ol>
-          </aside>
-          <div className="lp-product-main">
-            <header>
-              <div>
-                <small>Method</small>
-                <b>HPLC Assay · USP</b>
-              </div>
-              <div>
-                <small>Priority</small>
-                <b className="stat">STAT</b>
-              </div>
-              <div>
-                <small>Site</small>
-                <b>North Lab</b>
-              </div>
-            </header>
-            <div className="lp-product-chart">
-              <svg viewBox="0 0 360 140" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1B6EF3" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#1B6EF3" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0 110 C40 104, 60 70, 90 78 C120 86, 140 40, 180 48 C220 56, 240 24, 280 32 C310 38, 330 60, 360 44 L360 140 L0 140 Z"
-                  fill="url(#chartFill)"
-                />
-                <path
-                  d="M0 110 C40 104, 60 70, 90 78 C120 86, 140 40, 180 48 C220 56, 240 24, 280 32 C310 38, 330 60, 360 44"
-                  fill="none"
-                  stroke="#1B6EF3"
-                  strokeWidth="3"
-                />
-              </svg>
-            </div>
-            <div className="lp-product-rows">
-              <div>
-                <span>Analyst</span>
-                <span>M. Chen</span>
-              </div>
-              <div>
-                <span>Instrument</span>
-                <span>Agilent 1260</span>
-              </div>
-              <div>
-                <span>Custody</span>
-                <span>Verified · QR</span>
-              </div>
-            </div>
+        <svg
+          className="lp-compare-canvas"
+          viewBox="0 0 380 340"
+          role="img"
+          aria-label="Many disconnected systems linked by integrations"
+        >
+          <defs>
+            <linearGradient id="fragLine" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#64748b" stopOpacity="0.55" />
+            </linearGradient>
+          </defs>
+          {FRAGMENTED_EDGES.map(([a, b], i) => {
+            const from = FRAGMENTED_SYSTEMS[a];
+            const to = FRAGMENTED_SYSTEMS[b];
+            const midX = (from.x + to.x) / 2 + ((i % 2 === 0 ? 1 : -1) * 18);
+            const midY = (from.y + to.y) / 2 + ((i % 3) - 1) * 14;
+            return (
+              <path
+                key={`${from.id}-${to.id}`}
+                className="lp-compare-edge"
+                style={{ animationDelay: `${0.15 + i * 0.07}s` }}
+                d={`M${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
+                fill="none"
+                stroke="url(#fragLine)"
+                strokeWidth="1.75"
+              />
+            );
+          })}
+          {FRAGMENTED_SYSTEMS.map((node, i) => (
+            <g
+              key={node.id}
+              className="lp-compare-node"
+              style={{ animationDelay: `${0.35 + i * 0.06}s` }}
+              transform={`translate(${node.x} ${node.y})`}
+            >
+              <rect x="-52" y="-18" width="104" height="36" rx="8" />
+              <text y="5">{node.label}</text>
+            </g>
+          ))}
+        </svg>
+      </div>
+
+      <div className="lp-compare-divider" aria-hidden="true">
+        <span>vs</span>
+      </div>
+
+      <div className="lp-compare-panel lp-compare-after">
+        <div className="lp-compare-head">
+          <span className="lp-compare-label">CareScope</span>
+          <strong className="lp-compare-metric lp-compare-metric-good">
+            0 <em>integrations</em>
+          </strong>
+        </div>
+        <div className="lp-compare-one">
+          <div className="lp-compare-one-glow" />
+          <div className="lp-compare-one-system">
+            <span className="lp-compare-one-brand">CareScope</span>
+            <span className="lp-compare-one-sub">One intelligent LIMS</span>
+            <ul>
+              <li>Accessioning</li>
+              <li>Testing</li>
+              <li>Quality</li>
+              <li>Billing</li>
+              <li>Client service</li>
+              <li>Analytics</li>
+            </ul>
           </div>
+          <p className="lp-compare-one-note">No middleware. No glue code. No stitching.</p>
         </div>
       </div>
     </div>
