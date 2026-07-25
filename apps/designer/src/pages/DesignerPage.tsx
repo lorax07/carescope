@@ -99,7 +99,7 @@ export function DesignerPage() {
     if (!id) return;
     const def = workflowService.get(id);
     if (!def) {
-      navigate("/");
+      navigate("/app/workflows");
       return;
     }
     setWorkflow(def);
@@ -129,7 +129,7 @@ export function DesignerPage() {
       });
       if (updated && updated.id !== workflow.id) {
         // published → new draft version
-        navigate(`/workflows/${updated.id}`, { replace: true });
+        navigate(`/app/workflows/${updated.id}`, { replace: true });
       } else if (updated) {
         setWorkflow(updated);
       }
@@ -292,7 +292,7 @@ export function DesignerPage() {
   const handleClone = () => {
     if (!workflow) return;
     const cloned = workflowService.clone(workflow.id);
-    if (cloned) navigate(`/workflows/${cloned.id}`);
+    if (cloned) navigate(`/app/workflows/${cloned.id}`);
   };
 
   if (!workflow) {
@@ -304,8 +304,8 @@ export function DesignerPage() {
       <NodePalette plugins={plugins} />
       <div className="canvas-area">
         <div className="canvas-toolbar">
-          <Link to="/" className="btn btn-ghost">
-            ← Library
+          <Link to="/app/workflows" className="btn btn-ghost">
+            ← Workflows
           </Link>
           <span className="wf-title">{workflow.name}</span>
           <span className={`badge badge-${workflow.status}`}>{workflow.status}</span>

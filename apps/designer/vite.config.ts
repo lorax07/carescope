@@ -30,6 +30,11 @@ export default defineConfig({
       ),
     },
   },
+  build: {
+    // Match vercel.json outputDirectory: "dist" at the monorepo root
+    outDir: path.resolve(__dirname, "../../dist"),
+    emptyOutDir: true,
+  },
   server: {
     host: "0.0.0.0",
     port: 5173,
