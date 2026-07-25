@@ -29,7 +29,6 @@ export function LandingPage() {
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">
-            <a href="#platform">Platform</a>
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
@@ -72,23 +71,10 @@ export function LandingPage() {
           </div>
 
           <div className="lp-hero-visual" aria-hidden="true">
-            <HeroProductVisual />
+            <IntegrationsComparisonVisual />
           </div>
         </section>
       </div>
-
-      <section className="lp-section lp-section-tint" id="platform">
-        <div className="lp-section-inner lp-section-wide">
-          <p className="lp-eyebrow">Platform</p>
-          <h2 className="lp-h2">Many integrations — or one system.</h2>
-          <p className="lp-section-lede">
-            Most labs stitch together point solutions and keep paying for the
-            glue. CareScope replaces that sprawl with a single LIMS that already
-            covers the work.
-          </p>
-          <IntegrationsComparisonVisual />
-        </div>
-      </section>
 
       <section className="lp-section" id="capabilities">
         <div className="lp-section-inner lp-section-wide">
@@ -306,84 +292,6 @@ function usePageSize() {
     return () => window.removeEventListener("resize", update);
   }, []);
   return size;
-}
-
-function HeroProductVisual() {
-  return (
-    <div className="lp-product-stage">
-      <div className="lp-product-glow" />
-      <div className="lp-product-window">
-        <div className="lp-product-chrome">
-          <span />
-          <span />
-          <span />
-          <em>Sample · SCP-20491</em>
-        </div>
-        <div className="lp-product-body">
-          <aside className="lp-product-rail">
-            <strong>Lifecycle</strong>
-            <ol>
-              <li className="done">Received</li>
-              <li className="done">Assigned</li>
-              <li className="active">In testing</li>
-              <li>Review</li>
-              <li>CoA release</li>
-            </ol>
-          </aside>
-          <div className="lp-product-main">
-            <header>
-              <div>
-                <small>Method</small>
-                <b>HPLC Assay · USP</b>
-              </div>
-              <div>
-                <small>Priority</small>
-                <b className="stat">STAT</b>
-              </div>
-              <div>
-                <small>Site</small>
-                <b>North Lab</b>
-              </div>
-            </header>
-            <div className="lp-product-chart">
-              <svg viewBox="0 0 360 140" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1B6EF3" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#1B6EF3" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0 110 C40 104, 60 70, 90 78 C120 86, 140 40, 180 48 C220 56, 240 24, 280 32 C310 38, 330 60, 360 44 L360 140 L0 140 Z"
-                  fill="url(#chartFill)"
-                />
-                <path
-                  d="M0 110 C40 104, 60 70, 90 78 C120 86, 140 40, 180 48 C220 56, 240 24, 280 32 C310 38, 330 60, 360 44"
-                  fill="none"
-                  stroke="#1B6EF3"
-                  strokeWidth="3"
-                />
-              </svg>
-            </div>
-            <div className="lp-product-rows">
-              <div>
-                <span>Analyst</span>
-                <span>M. Chen</span>
-              </div>
-              <div>
-                <span>Instrument</span>
-                <span>Agilent 1260</span>
-              </div>
-              <div>
-                <span>Custody</span>
-                <span>Verified · QR</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 const FRAGMENTED_SYSTEMS = [
