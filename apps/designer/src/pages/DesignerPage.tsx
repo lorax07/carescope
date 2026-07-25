@@ -99,7 +99,7 @@ export function DesignerPage() {
     if (!id) return;
     const def = workflowService.get(id);
     if (!def) {
-      navigate("/app");
+      navigate("/app/workflows");
       return;
     }
     setWorkflow(def);
@@ -304,8 +304,8 @@ export function DesignerPage() {
       <NodePalette plugins={plugins} />
       <div className="canvas-area">
         <div className="canvas-toolbar">
-          <Link to="/app" className="btn btn-ghost">
-            ← Library
+          <Link to="/app/workflows" className="btn btn-ghost">
+            ← Workflows
           </Link>
           <span className="wf-title">{workflow.name}</span>
           <span className={`badge badge-${workflow.status}`}>{workflow.status}</span>

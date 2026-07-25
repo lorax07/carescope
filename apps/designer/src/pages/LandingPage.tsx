@@ -23,7 +23,7 @@ export function LandingPage() {
             <a href="#platform">Platform</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app">Product</Link>
+            <Link to="/app">Open LIMS</Link>
           </nav>
 
           <div className="lp-nav-actions">
@@ -31,7 +31,7 @@ export function LandingPage() {
               Sign in
             </Link>
             <Link to="/app" className="lp-btn lp-btn-primary">
-              Get started
+              Open LIMS
             </Link>
           </div>
         </header>
@@ -50,7 +50,7 @@ export function LandingPage() {
             </p>
             <div className="lp-hero-cta">
               <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
-                Explore the platform
+                Open the LIMS
               </Link>
               <a href="#workflows" className="lp-btn lp-btn-ghost lp-btn-lg">
                 See workflows
@@ -109,7 +109,7 @@ export function LandingPage() {
               actions, notifications, and compliance checks — configurable for
               every module.
             </p>
-            <Link to="/app" className="lp-btn lp-btn-primary">
+            <Link to="/app/workflows" className="lp-btn lp-btn-primary">
               Open workflow designer
             </Link>
           </div>
@@ -145,7 +145,7 @@ export function LandingPage() {
             then automate the rest through the workflow engine.
           </p>
           <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
-            Get started
+            Open the LIMS
           </Link>
         </div>
       </section>
@@ -155,8 +155,8 @@ export function LandingPage() {
           <span className="lp-logo-word">CareScope</span>
           <span>Laboratory information management</span>
           <nav>
-            <Link to="/app">Product</Link>
-            <Link to="/app/catalog">Catalog</Link>
+            <Link to="/app">LIMS</Link>
+            <Link to="/app/samples">Samples</Link>
           </nav>
         </div>
       </footer>

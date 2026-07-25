@@ -30,10 +30,11 @@ export function LibraryPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1>Workflow Library</h1>
+          <p className="lims-eyebrow">Automation</p>
+          <h1>Laboratory workflows</h1>
           <p>
-            Design, simulate, and publish laboratory workflows across sample lifecycle,
-            quality, and compliance — without writing custom code.
+            Configure no-code automations for sample receive, testing, review, CAPA,
+            calibration, and CoA release across the LIMS.
           </p>
         </div>
         <button type="button" className="btn btn-primary" onClick={createNew}>

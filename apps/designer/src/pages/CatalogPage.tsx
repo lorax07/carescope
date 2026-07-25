@@ -8,10 +8,11 @@ export function CatalogPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <h1>Platform Catalog</h1>
+          <p className="lims-eyebrow">Integration map</p>
+          <h1>LIMS module catalog</h1>
           <p>
-            Every core module exposes events, actions, and entity types for workflow automation.
-            Node types are plugin-extensible.
+            Events, actions, and entity types exposed by each laboratory module for
+            workflow automation and system integration.
           </p>
         </div>
       </div>
