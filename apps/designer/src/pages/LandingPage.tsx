@@ -294,6 +294,15 @@ function usePageSize() {
   return size;
 }
 
+const FRAGMENTED_PAINS = [
+  "Expensive",
+  "Managing IT consultants",
+  "Inconsistent integrations",
+  "Delayed deployments",
+  "Reduced customer satisfaction",
+  "Audit risk",
+] as const;
+
 const FRAGMENTED_SYSTEMS = [
   { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
   { id: "emr", label: "EMR", x: 210, y: 42 },
@@ -329,6 +338,11 @@ function IntegrationsComparisonVisual() {
           <strong className="lp-compare-metric">
             12+ <em>integrations</em>
           </strong>
+          <ul className="lp-compare-pains">
+            {FRAGMENTED_PAINS.map((pain) => (
+              <li key={pain}>{pain}</li>
+            ))}
+          </ul>
         </div>
         <svg
           className="lp-compare-canvas"
