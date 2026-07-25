@@ -19,11 +19,16 @@ function userId(req: Request): string {
   return String(req.header("x-user-id") ?? "admin");
 }
 
-/** Express params may be string | string[]; normalize to a single string. */
+/**
+ * Normalize route params to a string.
+ * @types/express v5 types params as string | string[]; we pin v4 types to match
+ * express@4, but keep this helper for safe access either way.
+ */
 function param(req: Request, name: string): string {
-  const value = req.params[name];
-  if (Array.isArray(value)) return value[0] ?? "";
-  return value ?? "";
+  const value: unknown = req.params[name];
+  if (Array.isArray(value)) return String(value[0] ?? "");
+  if (value == null) return "";
+  return String(value);
 }
 
 function asyncHandler(

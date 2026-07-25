@@ -1,8 +1,35 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
+import fs from "node:fs";
+
+/** Resolve NodeNext .js imports in TS sources to sibling .ts files. */
+function resolveTsFromJs() {
+  return {
+    name: "resolve-ts-from-js",
+    enforce: "pre" as const,
+    resolveId(source: string, importer?: string) {
+      if (!importer || !source.endsWith(".js")) return null;
+      if (!importer.includes(`${path.sep}packages${path.sep}workflow-core${path.sep}`)) {
+        return null;
+      }
+      const candidate = path.resolve(path.dirname(importer), source.replace(/\.js$/, ".ts"));
+      if (fs.existsSync(candidate)) return candidate;
+      return null;
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [resolveTsFromJs(), react()],
+  resolve: {
+    alias: {
+      "@carescope/workflow-core": path.resolve(
+        __dirname,
+        "../../packages/workflow-core/src/index.ts"
+      ),
+    },
+  },
   server: {
     host: "0.0.0.0",
     port: 5173,
@@ -13,8 +40,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ["@carescope/workflow-core"],
-  },
-  ssr: {
-    noExternal: ["@carescope/workflow-core"],
   },
 });
