@@ -421,27 +421,38 @@ function IntegrationsComparisonVisual() {
   );
 }
 
-function OneLabUnifiedVisual() {
-  const modules = MODULE_INTEGRATIONS.map((m) => m.label);
+const ONELAB_KEY_MODULES = [
+  "Sample Lifecycle",
+  "Results & Review",
+  "Quality Events",
+  "Billing",
+  "Customer Portal",
+  "Dashboards",
+] as const;
 
+function OneLabUnifiedVisual() {
   return (
     <div
       className="lp-compare-one-system"
       aria-hidden="true"
       role="img"
-      aria-label="OneLab ships every lab capability natively with zero integrations"
+      aria-label="OneLab ships key lab capabilities natively with much more included"
     >
       <div className="lp-onelab-poster">
         <div className="lp-onelab-included">
-          <p className="lp-onelab-included-label">
-            Everything ships inside OneLab · {modules.length} native modules
-          </p>
+          <p className="lp-onelab-included-label">Everything ships inside OneLab</p>
           <ul>
-            {modules.map((item, i) => (
-              <li key={item} style={{ animationDelay: `${0.12 + i * 0.03}s` }}>
+            {ONELAB_KEY_MODULES.map((item, i) => (
+              <li key={item} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>
                 <span>{item}</span>
               </li>
             ))}
+            <li
+              className="lp-onelab-more"
+              style={{ animationDelay: `${0.15 + ONELAB_KEY_MODULES.length * 0.06}s` }}
+            >
+              <span>And much more</span>
+            </li>
           </ul>
         </div>
       </div>
