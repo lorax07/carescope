@@ -404,7 +404,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-one">
           <div className="lp-compare-one-glow" />
           <div className="lp-compare-one-system">
-            <span className="lp-compare-one-brand">CareScope</span>
+            <span className="lp-compare-one-brand lp-brand-labos">LabOs</span>
             <span className="lp-compare-one-sub">One intelligent LIMS</span>
             <ul>
               <li>Accessioning</li>

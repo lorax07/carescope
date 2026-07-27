@@ -506,7 +506,12 @@
   font-family: var(--lp-display);
   font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
+  text-transform: none;
+}
+
+.lp-compare-one-brand.lp-brand-labos {
+  color: #86efac;
 }
 
 .lp-compare-one-sub {
