@@ -347,10 +347,10 @@
 
 .lp-compare-brand-labos {
   font-family: var(--lp-display);
-  font-size: clamp(1.55rem, 2.4vw, 2rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
   font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 1.05;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   color: var(--lp-green);
   text-transform: none;
 }
@@ -501,25 +501,12 @@
   }
 }
 
-.lp-compare-one-brand {
-  display: block;
-  font-family: var(--lp-display);
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  text-transform: none;
-}
-
-.lp-compare-one-brand.lp-brand-labos {
-  color: #86efac;
-}
-
 .lp-compare-one-sub {
   display: block;
-  margin-top: 0.15rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  opacity: 0.85;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.95;
+  letter-spacing: -0.02em;
 }
 
 .lp-compare-one-system ul {
