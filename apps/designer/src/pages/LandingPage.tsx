@@ -306,6 +306,12 @@ const FRAGMENTED_PAINS = [
   "Audit risk",
 ] as const;
 
+const ONELAB_BENEFITS = [
+  "No middleware",
+  "No glue code",
+  "No stitching",
+] as const;
+
 const FRAGMENTED_SYSTEMS = [
   { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
   { id: "emr", label: "EMR", x: 210, y: 42 },
@@ -400,84 +406,103 @@ function IntegrationsComparisonVisual() {
           <strong className="lp-compare-metric lp-compare-metric-good">
             0 <em>integrations</em>
           </strong>
+          <ul className="lp-compare-benefits">
+            {ONELAB_BENEFITS.map((benefit) => (
+              <li key={benefit}>{benefit}</li>
+            ))}
+          </ul>
         </div>
         <div className="lp-compare-one">
           <div className="lp-compare-one-glow" />
           <OneLabUnifiedVisual />
-          <p className="lp-compare-one-note">No middleware. No glue code. No stitching.</p>
         </div>
       </div>
     </div>
   );
 }
 
-const ONELAB_MODULES = [
-  { label: "Accessioning", x: 160, y: 36 },
-  { label: "Testing", x: 268, y: 88 },
-  { label: "Quality", x: 268, y: 188 },
-  { label: "Billing", x: 160, y: 242 },
-  { label: "Client service", x: 52, y: 188 },
-  { label: "Analytics", x: 52, y: 88 },
+const ONELAB_NATIVE_FEATURES = [
+  { label: "Accessioning", detail: "Intake · labels · custody", col: 0, row: 0 },
+  { label: "Testing", detail: "Methods · instruments", col: 1, row: 0 },
+  { label: "Quality", detail: "QC · CAPA · audits", col: 2, row: 0 },
+  { label: "Billing", detail: "Invoices · clients", col: 0, row: 1 },
+  { label: "Client service", detail: "Orders · portals", col: 1, row: 1 },
+  { label: "Analytics", detail: "Ops · turnaround", col: 2, row: 1 },
 ] as const;
 
 function OneLabUnifiedVisual() {
-  const cx = 160;
-  const cy = 140;
+  const tileW = 96;
+  const tileH = 72;
+  const gap = 8;
+  const padX = 16;
+  const padY = 54;
+  const boardW = padX * 2 + tileW * 3 + gap * 2;
+  const boardH = padY + tileH * 2 + gap + 16;
+
   return (
     <div className="lp-compare-one-system" aria-hidden="true">
       <svg
         className="lp-compare-one-canvas"
-        viewBox="0 0 320 280"
+        viewBox={`0 0 ${boardW} ${boardH}`}
         role="img"
-        aria-label="OneLab as one unified LIMS with native modules"
+        aria-label="OneLab as one native LIMS with built-in features"
       >
         <defs>
-          <radialGradient id="oneLabCore" cx="50%" cy="45%" r="55%">
-            <stop offset="0%" stopColor="#60a5fa" />
-            <stop offset="100%" stopColor="#1b6ef3" />
-          </radialGradient>
-          <linearGradient id="oneLabSpoke" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#bfdbfe" stopOpacity="0.55" />
+          <linearGradient id="oneLabBoard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2b7cff" />
+            <stop offset="100%" stopColor="#1452c4" />
+          </linearGradient>
+          <linearGradient id="oneLabTile" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.1)" />
           </linearGradient>
         </defs>
 
-        <circle className="lp-onelab-ring" cx={cx} cy={cy} r="78" />
-        <circle className="lp-onelab-ring lp-onelab-ring-outer" cx={cx} cy={cy} r="108" />
+        <rect
+          className="lp-onelab-board"
+          x="0"
+          y="0"
+          width={boardW}
+          height={boardH}
+          rx="18"
+          fill="url(#oneLabBoard)"
+        />
 
-        {ONELAB_MODULES.map((mod, i) => (
-          <g key={mod.label}>
-            <line
-              className="lp-onelab-spoke"
-              style={{ animationDelay: `${0.2 + i * 0.08}s` }}
-              x1={cx}
-              y1={cy}
-              x2={mod.x}
-              y2={mod.y}
-              stroke="url(#oneLabSpoke)"
-              strokeWidth="2"
-            />
-            <g
-              className="lp-onelab-module"
-              style={{ animationDelay: `${0.35 + i * 0.08}s` }}
-              transform={`translate(${mod.x} ${mod.y})`}
-            >
-              <rect x="-48" y="-14" width="96" height="28" rx="14" />
-              <text y="4">{mod.label}</text>
-            </g>
-          </g>
-        ))}
-
-        <g className="lp-onelab-core" transform={`translate(${cx} ${cy})`}>
-          <circle r="46" fill="url(#oneLabCore)" />
-          <circle r="46" className="lp-onelab-core-stroke" />
-          <text className="lp-onelab-core-title" y="-4">
-            OneLab
-          </text>
-          <text className="lp-onelab-core-sub" y="14">
-            One LIMS
+        <g className="lp-onelab-chrome">
+          <circle cx="18" cy="18" r="4" />
+          <circle cx="32" cy="18" r="4" />
+          <circle cx="46" cy="18" r="4" />
+          <text x={boardW / 2} y="22">
+            OneLab · native LIMS
           </text>
         </g>
+
+        {ONELAB_NATIVE_FEATURES.map((feature, i) => {
+          const x = padX + feature.col * (tileW + gap);
+          const y = padY + feature.row * (tileH + gap);
+          return (
+            <g
+              key={feature.label}
+              className="lp-onelab-tile"
+              style={{ animationDelay: `${0.2 + i * 0.07}s` }}
+              transform={`translate(${x} ${y})`}
+            >
+              <rect width={tileW} height={tileH} rx="12" fill="url(#oneLabTile)" />
+              <rect
+                className="lp-onelab-tile-stroke"
+                width={tileW}
+                height={tileH}
+                rx="12"
+              />
+              <text className="lp-onelab-tile-label" x={tileW / 2} y="28">
+                {feature.label}
+              </text>
+              <text className="lp-onelab-tile-detail" x={tileW / 2} y="48">
+                {feature.detail}
+              </text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );

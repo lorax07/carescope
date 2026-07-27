@@ -328,6 +328,48 @@
   box-shadow: 0 0 0 2px rgba(196, 92, 92, 0.16);
 }
 
+.lp-compare-benefits {
+  list-style: none;
+  margin: 0.55rem 0 0.15rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.28rem;
+}
+
+.lp-compare-benefits li {
+  position: relative;
+  padding-left: 0.85rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #4b5563;
+  opacity: 0;
+  animation: lp-pain-in 0.4s ease forwards;
+}
+
+.lp-compare-benefits li:nth-child(1) {
+  animation-delay: 0.35s;
+}
+.lp-compare-benefits li:nth-child(2) {
+  animation-delay: 0.42s;
+}
+.lp-compare-benefits li:nth-child(3) {
+  animation-delay: 0.49s;
+}
+
+.lp-compare-benefits li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.38rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: var(--lp-green);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.16);
+}
+
 @keyframes lp-pain-in {
   from {
     opacity: 0;
@@ -454,16 +496,14 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 0.85rem;
-  padding: 0.5rem 0.35rem 0.25rem;
-  text-align: center;
+  align-items: stretch;
+  padding: 0.35rem 0.1rem 0.15rem;
 }
 
 .lp-compare-one-glow {
   position: absolute;
-  inset: 12% 8%;
-  background: radial-gradient(circle at 50% 45%, rgba(27, 110, 243, 0.22), transparent 62%);
+  inset: 8% 4%;
+  background: radial-gradient(circle at 50% 40%, rgba(27, 110, 243, 0.2), transparent 62%);
   filter: blur(10px);
   animation: lp-pulse 5.5s ease-in-out infinite;
   pointer-events: none;
@@ -483,14 +523,9 @@
 
 .lp-compare-one-system {
   position: relative;
-  width: min(100%, 280px);
-  padding: 0.55rem 0.35rem 0.35rem;
+  width: 100%;
   border-radius: 18px;
-  background:
-    radial-gradient(circle at 50% 42%, rgba(96, 165, 250, 0.35), transparent 48%),
-    linear-gradient(180deg, #1b6ef3 0%, #1357c9 100%);
-  color: #fff;
-  box-shadow: 0 16px 34px rgba(27, 110, 243, 0.28);
+  box-shadow: 0 16px 34px rgba(27, 110, 243, 0.22);
   animation: lp-one-rise 0.7s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   overflow: hidden;
 }
@@ -510,88 +545,62 @@
   display: block;
   width: 100%;
   height: auto;
-  min-height: 220px;
+  min-height: 210px;
 }
 
-.lp-onelab-ring {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.18);
-  stroke-width: 1.25;
-  stroke-dasharray: 4 6;
+.lp-onelab-board {
+  filter: drop-shadow(0 10px 18px rgba(15, 60, 140, 0.18));
 }
 
-.lp-onelab-ring-outer {
-  stroke: rgba(255, 255, 255, 0.1);
-  stroke-dasharray: 2 8;
+.lp-onelab-chrome circle {
+  fill: rgba(255, 255, 255, 0.35);
 }
 
-.lp-onelab-spoke {
-  stroke-dasharray: 120;
-  stroke-dashoffset: 120;
-  animation: lp-onelab-spoke-draw 0.7s ease forwards;
+.lp-onelab-chrome circle:nth-child(1) {
+  fill: #fca5a5;
+}
+.lp-onelab-chrome circle:nth-child(2) {
+  fill: #fde68a;
+}
+.lp-onelab-chrome circle:nth-child(3) {
+  fill: #86efac;
 }
 
-@keyframes lp-onelab-spoke-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.lp-onelab-module {
-  opacity: 0;
-  animation: lp-node-in 0.4s ease forwards;
-}
-
-.lp-onelab-module rect {
-  fill: rgba(255, 255, 255, 0.96);
-  stroke: rgba(191, 219, 254, 0.9);
-  stroke-width: 1;
-}
-
-.lp-onelab-module text {
-  fill: #1e3a8a;
+.lp-onelab-chrome text {
+  fill: rgba(255, 255, 255, 0.9);
   font-family: var(--lp-font);
   font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.02em;
   text-anchor: middle;
 }
 
-.lp-onelab-core {
-  animation: lp-one-rise 0.65s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+.lp-onelab-tile {
+  opacity: 0;
+  animation: lp-node-in 0.45s ease forwards;
 }
 
-.lp-onelab-core-stroke {
+.lp-onelab-tile-stroke {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.55);
-  stroke-width: 1.5;
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1;
 }
 
-.lp-onelab-core-title {
+.lp-onelab-tile-label {
   fill: #fff;
   font-family: var(--lp-display);
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   text-anchor: middle;
 }
 
-.lp-onelab-core-sub {
-  fill: rgba(255, 255, 255, 0.85);
+.lp-onelab-tile-detail {
+  fill: rgba(226, 239, 255, 0.88);
   font-family: var(--lp-font);
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   text-anchor: middle;
-}
-
-.lp-compare-one-note {
-  position: relative;
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--lp-muted);
-  animation: lp-rise 0.6s 0.85s both;
 }
 
 /* Sections */
