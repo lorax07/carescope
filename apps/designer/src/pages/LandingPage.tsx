@@ -7,7 +7,6 @@ const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
   id: m.module,
   label: m.label,
   description: m.description,
-  events: m.events.slice(0, 2),
 }));
 
 export function LandingPage() {
@@ -170,7 +169,6 @@ type Capability = {
   id: string;
   label: string;
   description: string;
-  events: string[];
 };
 
 function CapabilitiesCarousel({ items }: { items: Capability[] }) {
@@ -267,13 +265,6 @@ function CapabilitiesCarousel({ items }: { items: Capability[] }) {
                 </span>
                 <h3>{item.label}</h3>
                 <p>{item.description}</p>
-                {item.events.length > 0 ? (
-                  <div className="lp-capability-events">
-                    {item.events.map((ev) => (
-                      <span key={ev}>{ev}</span>
-                    ))}
-                  </div>
-                ) : null}
               </article>
             ))}
           </div>
