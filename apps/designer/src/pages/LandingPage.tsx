@@ -51,7 +51,7 @@ export function LandingPage() {
           <div className="lp-hero-copy">
             <p className="lp-brand-lockup" id="hero-brand">
               <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-labos">LabOs</span>
+              <span className="lp-brand-onelab">OneLab</span>
             </p>
             <h1 className="lp-hero-title">
               Your lab shouldn’t have to work around your LIMS.
@@ -396,7 +396,7 @@ function IntegrationsComparisonVisual() {
 
       <div className="lp-compare-panel lp-compare-after">
         <div className="lp-compare-head">
-          <span className="lp-compare-brand-labos">LabOs</span>
+          <span className="lp-compare-brand-onelab">OneLab</span>
           <strong className="lp-compare-metric lp-compare-metric-good">
             0 <em>integrations</em>
           </strong>
