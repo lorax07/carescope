@@ -421,89 +421,83 @@ function IntegrationsComparisonVisual() {
   );
 }
 
-const ONELAB_NATIVE_FEATURES = [
-  { label: "Accessioning", detail: "Intake · labels · custody", col: 0, row: 0 },
-  { label: "Testing", detail: "Methods · instruments", col: 1, row: 0 },
-  { label: "Quality", detail: "QC · CAPA · audits", col: 2, row: 0 },
-  { label: "Billing", detail: "Invoices · clients", col: 0, row: 1 },
-  { label: "Client service", detail: "Orders · portals", col: 1, row: 1 },
-  { label: "Analytics", detail: "Ops · turnaround", col: 2, row: 1 },
+const ONELAB_NATIVE_MODULES = [
+  "Accessioning",
+  "Testing",
+  "Quality",
+  "Billing",
+  "Client service",
+  "Analytics",
+] as const;
+
+const ONELAB_FLOW = [
+  { label: "Receive", state: "done" },
+  { label: "Test", state: "done" },
+  { label: "Review", state: "active" },
+  { label: "Release", state: "next" },
+  { label: "Bill", state: "next" },
 ] as const;
 
 function OneLabUnifiedVisual() {
-  const tileW = 96;
-  const tileH = 72;
-  const gap = 8;
-  const padX = 16;
-  const padY = 54;
-  const boardW = padX * 2 + tileW * 3 + gap * 2;
-  const boardH = padY + tileH * 2 + gap + 16;
-
   return (
-    <div className="lp-compare-one-system" aria-hidden="true">
-      <svg
-        className="lp-compare-one-canvas"
-        viewBox={`0 0 ${boardW} ${boardH}`}
-        role="img"
-        aria-label="OneLab as one native LIMS with built-in features"
-      >
-        <defs>
-          <linearGradient id="oneLabBoard" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2b7cff" />
-            <stop offset="100%" stopColor="#1452c4" />
-          </linearGradient>
-          <linearGradient id="oneLabTile" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.22)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0.1)" />
-          </linearGradient>
-        </defs>
+    <div
+      className="lp-compare-one-system"
+      aria-hidden="true"
+      role="img"
+      aria-label="OneLab native LIMS with built-in modules and one continuous workflow"
+    >
+      <div className="lp-onelab-app">
+        <header className="lp-onelab-app-bar">
+          <span className="lp-onelab-app-dots" />
+          <strong>OneLab</strong>
+          <em>Native modules · 0 APIs</em>
+        </header>
 
-        <rect
-          className="lp-onelab-board"
-          x="0"
-          y="0"
-          width={boardW}
-          height={boardH}
-          rx="18"
-          fill="url(#oneLabBoard)"
-        />
+        <div className="lp-onelab-app-body">
+          <aside className="lp-onelab-rail">
+            <span className="lp-onelab-rail-label">Built-in</span>
+            <ul>
+              {ONELAB_NATIVE_MODULES.map((mod, i) => (
+                <li
+                  key={mod}
+                  className={i === 2 ? "active" : undefined}
+                  style={{ animationDelay: `${0.2 + i * 0.06}s` }}
+                >
+                  {mod}
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-        <g className="lp-onelab-chrome">
-          <circle cx="18" cy="18" r="4" />
-          <circle cx="32" cy="18" r="4" />
-          <circle cx="46" cy="18" r="4" />
-          <text x={boardW / 2} y="22">
-            OneLab · native LIMS
-          </text>
-        </g>
+          <div className="lp-onelab-main">
+            <div className="lp-onelab-sample">
+              <span>Sample</span>
+              <b>SCP-20491</b>
+              <small>In one system end-to-end</small>
+            </div>
 
-        {ONELAB_NATIVE_FEATURES.map((feature, i) => {
-          const x = padX + feature.col * (tileW + gap);
-          const y = padY + feature.row * (tileH + gap);
-          return (
-            <g
-              key={feature.label}
-              className="lp-onelab-tile"
-              style={{ animationDelay: `${0.2 + i * 0.07}s` }}
-              transform={`translate(${x} ${y})`}
-            >
-              <rect width={tileW} height={tileH} rx="12" fill="url(#oneLabTile)" />
-              <rect
-                className="lp-onelab-tile-stroke"
-                width={tileW}
-                height={tileH}
-                rx="12"
-              />
-              <text className="lp-onelab-tile-label" x={tileW / 2} y="28">
-                {feature.label}
-              </text>
-              <text className="lp-onelab-tile-detail" x={tileW / 2} y="48">
-                {feature.detail}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+            <div className="lp-onelab-flow">
+              {ONELAB_FLOW.map((step, i) => (
+                <div
+                  key={step.label}
+                  className={`lp-onelab-step ${step.state}`}
+                  style={{ animationDelay: `${0.35 + i * 0.08}s` }}
+                >
+                  <i />
+                  <span>{step.label}</span>
+                  {i < ONELAB_FLOW.length - 1 ? <em /> : null}
+                </div>
+              ))}
+            </div>
+
+            <div className="lp-onelab-native-strip">
+              {ONELAB_NATIVE_MODULES.slice(0, 4).map((mod) => (
+                <span key={mod}>{mod}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
