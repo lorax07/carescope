@@ -9,6 +9,8 @@
   --lp-blue: #1b6ef3;
   --lp-blue-deep: #0f4fc0;
   --lp-blue-soft: rgba(27, 110, 243, 0.1);
+  --lp-green: #16a34a;
+  --lp-green-deep: #15803d;
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
   --lp-display: "Sora", "Source Sans 3", sans-serif;
   min-height: 100%;
@@ -73,6 +75,14 @@
   font-weight: 700;
   font-size: 1.2rem;
   letter-spacing: -0.03em;
+}
+
+.lp-brand-care {
+  color: var(--lp-blue);
+}
+
+.lp-brand-labos {
+  color: var(--lp-green);
 }
 
 .lp-nav-links {
@@ -193,8 +203,12 @@
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   font-weight: 800;
   letter-spacing: -0.05em;
-  line-height: 1;
-  color: var(--lp-blue);
+  line-height: 1.05;
+}
+
+.lp-brand-lockup .lp-brand-care,
+.lp-brand-lockup .lp-brand-labos {
+  white-space: nowrap;
 }
 
 .lp-hero-title {
@@ -937,7 +951,15 @@
 }
 
 .lp-footer .lp-logo-word {
-  color: var(--lp-ink);
+  color: inherit;
+}
+
+.lp-footer .lp-brand-care {
+  color: var(--lp-blue);
+}
+
+.lp-footer .lp-brand-labos {
+  color: var(--lp-green);
 }
 
 .lp-footer nav {
