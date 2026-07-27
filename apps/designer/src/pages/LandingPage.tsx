@@ -343,8 +343,8 @@ function IntegrationsComparisonVisual() {
     <div className="lp-compare">
       <div className="lp-compare-panel lp-compare-before">
         <div className="lp-compare-head">
-          <span className="lp-compare-label">Typical lab stack</span>
-          <strong className="lp-compare-metric lp-compare-metric-text">
+          <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
+          <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
             Multiple Custom Integrations
           </strong>
           <ul className="lp-compare-pains">
@@ -440,7 +440,9 @@ function OneLabUnifiedVisual() {
     >
       <div className="lp-onelab-poster">
         <div className="lp-onelab-included">
-          <p className="lp-onelab-included-label">Everything ships inside OneLab</p>
+          <p className="lp-onelab-included-label">
+            Everything ships inside <span className="lp-onelab-name">OneLab</span>
+          </p>
           <ul>
             {ONELAB_KEY_MODULES.map((item, i) => (
               <li key={item} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>
