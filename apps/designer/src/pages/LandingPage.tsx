@@ -403,20 +403,82 @@ function IntegrationsComparisonVisual() {
         </div>
         <div className="lp-compare-one">
           <div className="lp-compare-one-glow" />
-          <div className="lp-compare-one-system">
-            <span className="lp-compare-one-sub">One intelligent LIMS</span>
-            <ul>
-              <li>Accessioning</li>
-              <li>Testing</li>
-              <li>Quality</li>
-              <li>Billing</li>
-              <li>Client service</li>
-              <li>Analytics</li>
-            </ul>
-          </div>
+          <OneLabUnifiedVisual />
           <p className="lp-compare-one-note">No middleware. No glue code. No stitching.</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+const ONELAB_MODULES = [
+  { label: "Accessioning", x: 160, y: 36 },
+  { label: "Testing", x: 268, y: 88 },
+  { label: "Quality", x: 268, y: 188 },
+  { label: "Billing", x: 160, y: 242 },
+  { label: "Client service", x: 52, y: 188 },
+  { label: "Analytics", x: 52, y: 88 },
+] as const;
+
+function OneLabUnifiedVisual() {
+  const cx = 160;
+  const cy = 140;
+  return (
+    <div className="lp-compare-one-system" aria-hidden="true">
+      <svg
+        className="lp-compare-one-canvas"
+        viewBox="0 0 320 280"
+        role="img"
+        aria-label="OneLab as one unified LIMS with native modules"
+      >
+        <defs>
+          <radialGradient id="oneLabCore" cx="50%" cy="45%" r="55%">
+            <stop offset="0%" stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#1b6ef3" />
+          </radialGradient>
+          <linearGradient id="oneLabSpoke" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#bfdbfe" stopOpacity="0.55" />
+          </linearGradient>
+        </defs>
+
+        <circle className="lp-onelab-ring" cx={cx} cy={cy} r="78" />
+        <circle className="lp-onelab-ring lp-onelab-ring-outer" cx={cx} cy={cy} r="108" />
+
+        {ONELAB_MODULES.map((mod, i) => (
+          <g key={mod.label}>
+            <line
+              className="lp-onelab-spoke"
+              style={{ animationDelay: `${0.2 + i * 0.08}s` }}
+              x1={cx}
+              y1={cy}
+              x2={mod.x}
+              y2={mod.y}
+              stroke="url(#oneLabSpoke)"
+              strokeWidth="2"
+            />
+            <g
+              className="lp-onelab-module"
+              style={{ animationDelay: `${0.35 + i * 0.08}s` }}
+              transform={`translate(${mod.x} ${mod.y})`}
+            >
+              <rect x="-48" y="-14" width="96" height="28" rx="14" />
+              <text y="4">{mod.label}</text>
+            </g>
+          </g>
+        ))}
+
+        <g className="lp-onelab-core" transform={`translate(${cx} ${cy})`}>
+          <circle r="46" fill="url(#oneLabCore)" />
+          <circle r="46" className="lp-onelab-core-stroke" />
+          <text className="lp-onelab-core-title" y="-4">
+            OneLab
+          </text>
+          <text className="lp-onelab-core-sub" y="14">
+            One LIMS
+          </text>
+        </g>
+      </svg>
     </div>
   );
 }
