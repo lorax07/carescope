@@ -421,16 +421,9 @@ function IntegrationsComparisonVisual() {
   );
 }
 
-const ONELAB_INCLUDED = [
-  "Accessioning",
-  "Testing",
-  "Quality",
-  "Billing",
-  "Client service",
-  "Analytics",
-] as const;
-
 function OneLabUnifiedVisual() {
+  const modules = MODULE_INTEGRATIONS.map((m) => m.label);
+
   return (
     <div
       className="lp-compare-one-system"
@@ -439,18 +432,14 @@ function OneLabUnifiedVisual() {
       aria-label="OneLab ships every lab capability natively with zero integrations"
     >
       <div className="lp-onelab-poster">
-        <div className="lp-onelab-zero">
-          <span className="lp-onelab-zero-num">0</span>
-          <span className="lp-onelab-zero-label">to stitch</span>
-        </div>
-
         <div className="lp-onelab-included">
-          <p className="lp-onelab-included-label">Everything ships inside OneLab</p>
+          <p className="lp-onelab-included-label">
+            Everything ships inside OneLab · {modules.length} native modules
+          </p>
           <ul>
-            {ONELAB_INCLUDED.map((item, i) => (
-              <li key={item} style={{ animationDelay: `${0.25 + i * 0.07}s` }}>
+            {modules.map((item, i) => (
+              <li key={item} style={{ animationDelay: `${0.12 + i * 0.03}s` }}>
                 <span>{item}</span>
-                <em>native</em>
               </li>
             ))}
           </ul>
