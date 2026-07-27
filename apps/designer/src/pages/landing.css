@@ -81,9 +81,10 @@
   color: var(--lp-blue);
 }
 
-.lp-brand-labos {
+.lp-brand-onelab {
   color: var(--lp-green);
   font-weight: 400;
+  font-size: 0.68em;
 }
 
 .lp-nav-links {
@@ -208,7 +209,7 @@
 }
 
 .lp-brand-lockup .lp-brand-care,
-.lp-brand-lockup .lp-brand-labos {
+.lp-brand-lockup .lp-brand-onelab {
   white-space: nowrap;
 }
 
@@ -346,9 +347,9 @@
   color: var(--lp-muted);
 }
 
-.lp-compare-brand-labos {
+.lp-compare-brand-onelab {
   font-family: var(--lp-display);
-  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+  font-size: clamp(0.72rem, 1.05vw, 0.88rem);
   font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 1.1;
