@@ -344,8 +344,8 @@ function IntegrationsComparisonVisual() {
       <div className="lp-compare-panel lp-compare-before">
         <div className="lp-compare-head">
           <span className="lp-compare-label">Typical lab stack</span>
-          <strong className="lp-compare-metric">
-            12+ <em>integrations</em>
+          <strong className="lp-compare-metric lp-compare-metric-text">
+            Multiple Custom Integrations
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
@@ -403,8 +403,8 @@ function IntegrationsComparisonVisual() {
       <div className="lp-compare-panel lp-compare-after">
         <div className="lp-compare-head">
           <span className="lp-compare-brand-onelab">OneLab</span>
-          <strong className="lp-compare-metric lp-compare-metric-good">
-            0 <em>integrations</em>
+          <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
+            Native Integration
           </strong>
           <ul className="lp-compare-benefits">
             {ONELAB_BENEFITS.map((benefit) => (
