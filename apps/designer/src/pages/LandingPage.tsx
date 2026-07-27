@@ -421,7 +421,7 @@ function IntegrationsComparisonVisual() {
   );
 }
 
-const ONELAB_NATIVE_MODULES = [
+const ONELAB_INCLUDED = [
   "Accessioning",
   "Testing",
   "Quality",
@@ -430,72 +430,30 @@ const ONELAB_NATIVE_MODULES = [
   "Analytics",
 ] as const;
 
-const ONELAB_FLOW = [
-  { label: "Receive", state: "done" },
-  { label: "Test", state: "done" },
-  { label: "Review", state: "active" },
-  { label: "Release", state: "next" },
-  { label: "Bill", state: "next" },
-] as const;
-
 function OneLabUnifiedVisual() {
   return (
     <div
       className="lp-compare-one-system"
       aria-hidden="true"
       role="img"
-      aria-label="OneLab native LIMS with built-in modules and one continuous workflow"
+      aria-label="OneLab ships every lab capability natively with zero integrations"
     >
-      <div className="lp-onelab-app">
-        <header className="lp-onelab-app-bar">
-          <span className="lp-onelab-app-dots" />
-          <strong>OneLab</strong>
-          <em>Native modules · 0 APIs</em>
-        </header>
+      <div className="lp-onelab-poster">
+        <div className="lp-onelab-zero">
+          <span className="lp-onelab-zero-num">0</span>
+          <span className="lp-onelab-zero-label">to stitch</span>
+        </div>
 
-        <div className="lp-onelab-app-body">
-          <aside className="lp-onelab-rail">
-            <span className="lp-onelab-rail-label">Built-in</span>
-            <ul>
-              {ONELAB_NATIVE_MODULES.map((mod, i) => (
-                <li
-                  key={mod}
-                  className={i === 2 ? "active" : undefined}
-                  style={{ animationDelay: `${0.2 + i * 0.06}s` }}
-                >
-                  {mod}
-                </li>
-              ))}
-            </ul>
-          </aside>
-
-          <div className="lp-onelab-main">
-            <div className="lp-onelab-sample">
-              <span>Sample</span>
-              <b>SCP-20491</b>
-              <small>In one system end-to-end</small>
-            </div>
-
-            <div className="lp-onelab-flow">
-              {ONELAB_FLOW.map((step, i) => (
-                <div
-                  key={step.label}
-                  className={`lp-onelab-step ${step.state}`}
-                  style={{ animationDelay: `${0.35 + i * 0.08}s` }}
-                >
-                  <i />
-                  <span>{step.label}</span>
-                  {i < ONELAB_FLOW.length - 1 ? <em /> : null}
-                </div>
-              ))}
-            </div>
-
-            <div className="lp-onelab-native-strip">
-              {ONELAB_NATIVE_MODULES.slice(0, 4).map((mod) => (
-                <span key={mod}>{mod}</span>
-              ))}
-            </div>
-          </div>
+        <div className="lp-onelab-included">
+          <p className="lp-onelab-included-label">Everything ships inside OneLab</p>
+          <ul>
+            {ONELAB_INCLUDED.map((item, i) => (
+              <li key={item} style={{ animationDelay: `${0.25 + i * 0.07}s` }}>
+                <span>{item}</span>
+                <em>native</em>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
