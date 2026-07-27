@@ -68,7 +68,7 @@ export function LandingPage() {
                 Request demo
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
-                Browse module
+                Browse Modules
               </a>
             </div>
           </div>
