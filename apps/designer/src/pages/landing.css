@@ -524,10 +524,7 @@
 .lp-compare-one-system {
   position: relative;
   width: 100%;
-  border-radius: 18px;
-  box-shadow: 0 16px 34px rgba(27, 110, 243, 0.22);
-  animation: lp-one-rise 0.7s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-  overflow: hidden;
+  animation: lp-one-rise 0.7s 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes lp-one-rise {
@@ -541,66 +538,246 @@
   }
 }
 
-.lp-compare-one-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  min-height: 210px;
+.lp-onelab-app {
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(165deg, #1f74f5 0%, #134fc0 100%);
+  color: #fff;
+  box-shadow: 0 18px 36px rgba(19, 79, 192, 0.28);
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
 }
 
-.lp-onelab-board {
-  filter: drop-shadow(0 10px 18px rgba(15, 60, 140, 0.18));
+.lp-onelab-app-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.lp-onelab-chrome circle {
-  fill: rgba(255, 255, 255, 0.35);
+.lp-onelab-app-dots,
+.lp-onelab-app-dots::before,
+.lp-onelab-app-dots::after {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #86efac;
 }
 
-.lp-onelab-chrome circle:nth-child(1) {
-  fill: #fca5a5;
-}
-.lp-onelab-chrome circle:nth-child(2) {
-  fill: #fde68a;
-}
-.lp-onelab-chrome circle:nth-child(3) {
-  fill: #86efac;
+.lp-onelab-app-dots {
+  position: relative;
+  background: #fca5a5;
+  margin-right: 0.7rem;
 }
 
-.lp-onelab-chrome text {
-  fill: rgba(255, 255, 255, 0.9);
-  font-family: var(--lp-font);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-anchor: middle;
+.lp-onelab-app-dots::before,
+.lp-onelab-app-dots::after {
+  content: "";
+  position: absolute;
+  top: 0;
 }
 
-.lp-onelab-tile {
-  opacity: 0;
-  animation: lp-node-in 0.45s ease forwards;
+.lp-onelab-app-dots::before {
+  left: 11px;
+  background: #fde68a;
 }
 
-.lp-onelab-tile-stroke {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.28);
-  stroke-width: 1;
+.lp-onelab-app-dots::after {
+  left: 22px;
+  background: #86efac;
 }
 
-.lp-onelab-tile-label {
-  fill: #fff;
+.lp-onelab-app-bar strong {
   font-family: var(--lp-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  text-anchor: middle;
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
 }
 
-.lp-onelab-tile-detail {
-  fill: rgba(226, 239, 255, 0.88);
-  font-family: var(--lp-font);
-  font-size: 8.5px;
+.lp-onelab-app-bar em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(220, 240, 255, 0.88);
+}
+
+.lp-onelab-app-body {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.lp-onelab-rail {
+  padding: 0.7rem 0.55rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 40, 110, 0.22);
+}
+
+.lp-onelab-rail-label {
+  display: block;
+  margin: 0 0.25rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.8);
+}
+
+.lp-onelab-rail ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.lp-onelab-rail li {
+  opacity: 0;
+  animation: lp-node-in 0.4s ease forwards;
+  padding: 0.32rem 0.45rem;
+  border-radius: 8px;
+  font-size: 0.7rem;
   font-weight: 600;
-  text-anchor: middle;
+  color: rgba(226, 239, 255, 0.88);
+}
+
+.lp-onelab-rail li.active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.lp-onelab-main {
+  padding: 0.75rem 0.75rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.lp-onelab-sample {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.45rem;
+  row-gap: 0.1rem;
+  align-items: baseline;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.lp-onelab-sample span {
+  grid-row: 1;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.85);
+}
+
+.lp-onelab-sample b {
+  grid-row: 1;
+  font-family: var(--lp-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.lp-onelab-sample small {
+  grid-column: 1 / -1;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(226, 239, 255, 0.82);
+}
+
+.lp-onelab-flow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.15rem;
+  padding: 0.15rem 0.1rem;
+}
+
+.lp-onelab-step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0;
+  animation: lp-node-in 0.4s ease forwards;
+}
+
+.lp-onelab-step i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  z-index: 1;
+}
+
+.lp-onelab-step.done i {
+  background: #86efac;
+  border-color: #bbf7d0;
+}
+
+.lp-onelab-step.active i {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.22);
+}
+
+.lp-onelab-step span {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: rgba(226, 239, 255, 0.9);
+  text-align: center;
+}
+
+.lp-onelab-step.active span {
+  color: #fff;
+}
+
+.lp-onelab-step em {
+  position: absolute;
+  top: 5px;
+  left: calc(50% + 10px);
+  width: calc(100% - 20px);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.25));
+  border-radius: 2px;
+}
+
+.lp-onelab-step.done em {
+  background: linear-gradient(90deg, #86efac, rgba(134, 239, 172, 0.35));
+}
+
+.lp-onelab-native-strip {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.lp-onelab-native-strip span {
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: rgba(236, 245, 255, 0.92);
 }
 
 /* Sections */
@@ -1077,6 +1254,19 @@
 
   .lp-compare-one-system {
     width: 100%;
+  }
+
+  .lp-onelab-app-body {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-onelab-rail {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .lp-onelab-rail ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .lp-nav {
