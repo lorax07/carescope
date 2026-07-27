@@ -423,8 +423,8 @@ function IntegrationsComparisonVisual() {
 
 const ONELAB_KEY_MODULES = [
   "Sample Lifecycle",
-  "Results & Review",
-  "Quality Events",
+  "Data & Analytics",
+  "Lab Quality Management System",
   "Billing",
   "Customer Portal",
   "20+ Modules",
