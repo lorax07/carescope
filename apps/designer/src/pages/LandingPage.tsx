@@ -396,7 +396,7 @@ function IntegrationsComparisonVisual() {
 
       <div className="lp-compare-panel lp-compare-after">
         <div className="lp-compare-head">
-          <span className="lp-compare-label">CareScope</span>
+          <span className="lp-compare-label lp-brand-labos">LabOs</span>
           <strong className="lp-compare-metric lp-compare-metric-good">
             0 <em>integrations</em>
           </strong>
