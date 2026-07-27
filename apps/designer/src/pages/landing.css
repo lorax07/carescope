@@ -216,10 +216,10 @@
 .lp-hero-title {
   margin: 0;
   font-family: var(--lp-display);
-  font-size: clamp(1.7rem, 3.4vw, 2.55rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.7rem);
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
   color: var(--lp-ink);
 }
 
