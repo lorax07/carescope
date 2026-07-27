@@ -50,8 +50,8 @@ export function LandingPage() {
         <section className="lp-hero" aria-labelledby="hero-brand">
           <div className="lp-hero-copy">
             <p className="lp-brand-lockup" id="hero-brand">
-              <span className="lp-brand-care">CareScope</span>
-              <sup className="lp-brand-labos lp-brand-labos-sup">LabOs</sup>
+              <span className="lp-brand-care">CareScope</span>{" "}
+              <span className="lp-brand-labos">LabOs</span>
             </p>
             <h1 className="lp-hero-title">
               Your lab shouldn’t have to work around your LIMS.
