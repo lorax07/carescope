@@ -743,8 +743,9 @@
   flex: 0 0 100%;
   scroll-snap-align: start;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 200px));
+  justify-content: start;
+  gap: 0.75rem;
   min-width: 100%;
 }
 
@@ -754,6 +755,8 @@
   border-radius: 12px;
   background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
   min-height: 132px;
+  width: 100%;
+  max-width: 200px;
   display: flex;
   flex-direction: column;
   transition: border-color 0.2s, transform 0.2s;
