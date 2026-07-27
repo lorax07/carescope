@@ -211,8 +211,8 @@
 }
 
 .lp-brand-lockup .lp-brand-labos-sup {
-  font-size: 0.38em;
-  top: -0.85em;
+  font-size: 0.48em;
+  top: -0.72em;
 }
 
 .lp-hero-title {
@@ -960,10 +960,6 @@
 
 .lp-footer .lp-brand-care {
   color: var(--lp-blue);
-}
-
-.lp-footer .lp-brand-labos {
-  color: var(--lp-green);
 }
 
 .lp-brand-labos-sup {
