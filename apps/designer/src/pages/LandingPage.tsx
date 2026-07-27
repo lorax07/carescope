@@ -154,7 +154,6 @@ export function LandingPage() {
         <div className="lp-footer-inner lp-section-wide">
           <span className="lp-logo-word">
             <span className="lp-brand-care">CareScope</span>
-            <sup className="lp-brand-labos lp-brand-labos-sup">LabOs</sup>
           </span>
           <span>Laboratory information management</span>
           <nav>
