@@ -962,6 +962,17 @@
   color: var(--lp-green);
 }
 
+.lp-brand-labos-sup {
+  margin-left: 0.18em;
+  font-size: 0.55em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  vertical-align: super;
+  line-height: 0;
+  top: -0.35em;
+  position: relative;
+}
+
 .lp-footer nav {
   display: flex;
   gap: 1rem;

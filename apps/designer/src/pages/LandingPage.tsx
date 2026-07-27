@@ -15,7 +15,7 @@ export function LandingPage() {
     <div className="lp">
       <div className="lp-frame">
         <header className="lp-nav">
-          <Link to="/" className="lp-logo" aria-label="CareScope LabOs home">
+          <Link to="/" className="lp-logo" aria-label="CareScope home">
             <span className="lp-logo-mark" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
                 <circle cx="16" cy="16" r="14" fill="#1B6EF3" />
@@ -26,8 +26,7 @@ export function LandingPage() {
               </svg>
             </span>
             <span className="lp-logo-word">
-              <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-labos">LabOs</span>
+              <span className="lp-brand-care">CareScope</span>
             </span>
           </Link>
 
@@ -154,8 +153,8 @@ export function LandingPage() {
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
           <span className="lp-logo-word">
-            <span className="lp-brand-care">CareScope</span>{" "}
-            <span className="lp-brand-labos">LabOs</span>
+            <span className="lp-brand-care">CareScope</span>
+            <sup className="lp-brand-labos lp-brand-labos-sup">LabOs</sup>
           </span>
           <span>Laboratory information management</span>
           <nav>
