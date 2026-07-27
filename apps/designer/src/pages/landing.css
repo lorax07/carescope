@@ -206,13 +206,9 @@
   line-height: 1.05;
 }
 
-.lp-brand-lockup .lp-brand-care {
+.lp-brand-lockup .lp-brand-care,
+.lp-brand-lockup .lp-brand-labos {
   white-space: nowrap;
-}
-
-.lp-brand-lockup .lp-brand-labos-sup {
-  font-size: 0.48em;
-  top: -0.72em;
 }
 
 .lp-hero-title {
@@ -962,16 +958,6 @@
   color: var(--lp-blue);
 }
 
-.lp-brand-labos-sup {
-  margin-left: 0.18em;
-  font-size: 0.55em;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  vertical-align: super;
-  line-height: 0;
-  top: -0.35em;
-  position: relative;
-}
 
 .lp-footer nav {
   display: flex;
