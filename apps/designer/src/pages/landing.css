@@ -389,6 +389,10 @@
   color: var(--lp-muted);
 }
 
+.lp-compare-label-alert {
+  color: #c45c5c;
+}
+
 .lp-compare-brand-onelab {
   font-family: var(--lp-display);
   font-size: clamp(0.72rem, 1.05vw, 0.88rem);
@@ -419,6 +423,10 @@
 
 .lp-compare-metric-good {
   color: var(--lp-green);
+}
+
+.lp-compare-metric-alert {
+  color: #c45c5c;
 }
 
 .lp-compare-metric-text {
@@ -572,9 +580,15 @@
   margin: 0 0 0.55rem;
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: rgba(220, 252, 231, 0.92);
+}
+
+.lp-onelab-included-label .lp-onelab-name {
+  font-family: var(--lp-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: #fff;
 }
 
 .lp-onelab-included ul {
