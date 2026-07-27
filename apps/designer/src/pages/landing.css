@@ -421,6 +421,14 @@
   color: var(--lp-green);
 }
 
+.lp-compare-metric-text {
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  max-width: 14ch;
+}
+
 .lp-compare-canvas {
   width: 100%;
   flex: 1;
