@@ -404,7 +404,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-brand-onelab">OneLab</span>
           <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
-            Native Integration
+            One Native Integration
           </strong>
           <ul className="lp-compare-benefits">
             {ONELAB_BENEFITS.map((benefit) => (
@@ -427,7 +427,7 @@ const ONELAB_KEY_MODULES = [
   "Quality Events",
   "Billing",
   "Customer Portal",
-  "Dashboards",
+  "20+ Modules",
 ] as const;
 
 function OneLabUnifiedVisual() {
@@ -436,7 +436,7 @@ function OneLabUnifiedVisual() {
       className="lp-compare-one-system"
       aria-hidden="true"
       role="img"
-      aria-label="OneLab ships key lab capabilities natively with much more included"
+      aria-label="OneLab ships key lab capabilities as one native integration"
     >
       <div className="lp-onelab-poster">
         <div className="lp-onelab-included">
@@ -447,12 +447,6 @@ function OneLabUnifiedVisual() {
                 <span>{item}</span>
               </li>
             ))}
-            <li
-              className="lp-onelab-more"
-              style={{ animationDelay: `${0.15 + ONELAB_KEY_MODULES.length * 0.06}s` }}
-            >
-              <span>And much more</span>
-            </li>
           </ul>
         </div>
       </div>
