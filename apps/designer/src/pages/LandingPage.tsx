@@ -85,8 +85,8 @@ export function LandingPage() {
               <p className="lp-eyebrow">Capabilities</p>
               <h2 className="lp-h2">Every laboratory module, one platform.</h2>
               <p className="lp-section-lede">
-                CareScope covers the full LIMS continuum — from sample intake and
-                instruments to quality, compliance, billing, and automation.
+                Everything you need to run the business around your lab under
+                one platform
               </p>
             </div>
             <p className="lp-capability-count">
