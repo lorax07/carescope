@@ -33,9 +33,7 @@ export function LandingPage() {
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app">
-              Try <span className="lp-cta-onelab">OneLab</span>
-            </Link>
+            <Link to="/app">Try OneLab</Link>
           </nav>
 
           <div className="lp-nav-actions">
@@ -43,7 +41,7 @@ export function LandingPage() {
               Sign in
             </Link>
             <Link to="/app" className="lp-btn lp-btn-primary">
-              Try <span className="lp-cta-onelab">OneLab</span>
+              Try OneLab
             </Link>
           </div>
         </header>
@@ -66,7 +64,7 @@ export function LandingPage() {
             </p>
             <div className="lp-hero-cta">
               <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try <span className="lp-cta-onelab">OneLab</span>
+                Try OneLab
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
                 Browse Modules
@@ -145,7 +143,7 @@ export function LandingPage() {
             then automate the rest through the workflow engine.
           </p>
           <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try <span className="lp-cta-onelab">OneLab</span>
+            Try OneLab
           </Link>
         </div>
       </section>
