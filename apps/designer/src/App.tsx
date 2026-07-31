@@ -48,6 +48,16 @@ export function AppShell() {
     setDemoCarouselOpen(true);
   }
 
+  function closeDemoCarousel() {
+    setDemoCarouselOpen(false);
+    setSignupOpen(true);
+    if (searchParams.get("signup") !== "1") {
+      const next = new URLSearchParams(searchParams);
+      next.set("signup", "1");
+      setSearchParams(next, { replace: true });
+    }
+  }
+
   return (
     <div className="lims-shell">
       <aside className="lims-sidebar">
@@ -129,7 +139,7 @@ export function AppShell() {
       />
       <FeatureDemoCarousel
         open={demoCarouselOpen}
-        onClose={() => setDemoCarouselOpen(false)}
+        onClose={closeDemoCarousel}
       />
     </div>
   );
