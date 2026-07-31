@@ -3,9 +3,14 @@ import { FormEvent, useState } from "react";
 type SandboxSignupModalProps = {
   open: boolean;
   onClose: () => void;
+  onNotNow?: () => void;
 };
 
-export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
+export function SandboxSignupModal({
+  open,
+  onClose,
+  onNotNow,
+}: SandboxSignupModalProps) {
   const [submitted, setSubmitted] = useState(false);
 
   if (!open) return null;
@@ -13,6 +18,11 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
+  }
+
+  function handleNotNow() {
+    if (onNotNow) onNotNow();
+    else onClose();
   }
 
   return (
@@ -31,7 +41,8 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
       >
         <header className="signup-modal-header">
           <h2 id="signup-modal-title">
-            Signup for a 30 day Sandbox Access to LabOne
+            Signup for a 30 day Sandbox Access to{" "}
+            <span className="signup-modal-brand">OneLab</span>
           </h2>
           <button
             type="button"
@@ -45,7 +56,11 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
 
         {submitted ? (
           <div className="signup-modal-success">
-            <p>Account request received. Your LabOne sandbox will be ready shortly.</p>
+            <p>
+              Account request received. Your{" "}
+              <span className="signup-modal-brand">OneLab</span> sandbox will be
+              ready shortly.
+            </p>
             <button type="button" className="btn btn-primary" onClick={onClose}>
               Continue to app
             </button>
@@ -86,7 +101,7 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
             </label>
 
             <div className="signup-modal-actions">
-              <button type="button" className="btn" onClick={onClose}>
+              <button type="button" className="btn" onClick={handleNotNow}>
                 Not now
               </button>
               <button type="submit" className="btn btn-primary">
