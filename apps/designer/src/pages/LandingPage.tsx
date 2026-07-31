@@ -37,7 +37,7 @@ export function LandingPage() {
           </nav>
 
           <div className="lp-nav-actions">
-            <Link to="/app" className="lp-link-quiet">
+            <Link to="/app?signin=1" className="lp-link-quiet">
               Sign in
             </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-primary">

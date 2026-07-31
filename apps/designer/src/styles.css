@@ -1376,6 +1376,42 @@ a {
   line-height: 1.45;
 }
 
+.signup-modal-switch {
+  margin: 0.15rem 0 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.signup-modal-switch-btn {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+}
+
+.signup-modal-switch-btn:hover {
+  text-decoration: underline;
+}
+
+.lims-auth-btn {
+  margin-top: 0.55rem;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.lims-auth-btn:hover {
+  background: var(--bg-hover);
+}
+
 /* ——— Feature demo carousel ——— */
 .demo-carousel-root {
   position: fixed;
