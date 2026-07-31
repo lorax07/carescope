@@ -186,7 +186,7 @@ export function OurCompanyPage() {
           <span>Laboratory information management</span>
           <nav>
             <Link to="/">Home</Link>
-            <Link to="/app">LIMS</Link>
+            <Link to="/internal">Employee intrasite</Link>
           </nav>
         </div>
       </footer>
