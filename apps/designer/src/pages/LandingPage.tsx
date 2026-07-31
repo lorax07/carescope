@@ -83,11 +83,10 @@ export function LandingPage() {
           <div className="lp-section-heading-row">
             <div>
               <p className="lp-eyebrow">Capabilities</p>
-              <h2 className="lp-h2">Every laboratory module, one platform.</h2>
-              <p className="lp-section-lede">
+              <h2 className="lp-h2">
                 Everything you need to run the business around your lab under
                 one platform
-              </p>
+              </h2>
             </div>
             <p className="lp-capability-count">
               {CAPABILITIES.length} modules
