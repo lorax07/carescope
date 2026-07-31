@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { SandboxSignupModal } from "./components/SandboxSignupModal";
 
 const NAV = [
   { to: "/app", label: "Dashboard", end: true },
@@ -14,6 +16,26 @@ const NAV = [
 
 /** LIMS application shell */
 export function AppShell() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [signupOpen, setSignupOpen] = useState(
+    () => searchParams.get("signup") === "1"
+  );
+
+  useEffect(() => {
+    if (searchParams.get("signup") === "1") {
+      setSignupOpen(true);
+    }
+  }, [searchParams]);
+
+  function closeSignup() {
+    setSignupOpen(false);
+    if (searchParams.get("signup") === "1") {
+      const next = new URLSearchParams(searchParams);
+      next.delete("signup");
+      setSearchParams(next, { replace: true });
+    }
+  }
+
   return (
     <div className="lims-shell">
       <aside className="lims-sidebar">
@@ -87,6 +109,8 @@ export function AppShell() {
           <Outlet />
         </div>
       </div>
+
+      <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
     </div>
   );
 }

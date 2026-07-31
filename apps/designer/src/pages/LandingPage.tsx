@@ -33,14 +33,14 @@ export function LandingPage() {
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app">Try OneLab</Link>
+            <Link to="/app?signup=1">Try OneLab</Link>
           </nav>
 
           <div className="lp-nav-actions">
             <Link to="/app" className="lp-link-quiet">
               Sign in
             </Link>
-            <Link to="/app" className="lp-btn lp-btn-primary">
+            <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
               Try OneLab
             </Link>
           </div>
@@ -63,7 +63,7 @@ export function LandingPage() {
               more time advancing science.
             </p>
             <div className="lp-hero-cta">
-              <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
+              <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
                 Try OneLab
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
@@ -142,7 +142,7 @@ export function LandingPage() {
             Configure CareScope around your methods, sites, and quality system —
             then automate the rest through the workflow engine.
           </p>
-          <Link to="/app" className="lp-btn lp-btn-primary lp-btn-lg">
+          <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
             Try OneLab
           </Link>
         </div>

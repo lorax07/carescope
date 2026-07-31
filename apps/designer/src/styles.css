@@ -1241,3 +1241,132 @@ a {
     min-height: 420px;
   }
 }
+
+/* ——— Sandbox signup modal ——— */
+.signup-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.signup-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(15, 23, 36, 0.52);
+  cursor: pointer;
+}
+
+.signup-modal {
+  position: relative;
+  width: min(440px, 100%);
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px rgba(15, 23, 36, 0.22);
+  padding: 1.25rem 1.3rem 1.35rem;
+  animation: signup-rise 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes signup-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.signup-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.signup-modal-header h2 {
+  margin: 0;
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.signup-modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  border-radius: 8px;
+}
+
+.signup-modal-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.signup-modal-lede {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.signup-modal-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.signup-modal-form label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.signup-modal-form input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.signup-modal-form input:focus {
+  outline: none;
+  border-color: rgba(27, 110, 243, 0.55);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.signup-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.signup-modal-success {
+  display: grid;
+  gap: 1rem;
+}
+
+.signup-modal-success p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
