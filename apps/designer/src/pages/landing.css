@@ -158,6 +158,15 @@
   color: #fff;
 }
 
+.lp-cta-onelab {
+  color: var(--lp-green);
+  font-weight: 400;
+}
+
+.lp-btn-primary .lp-cta-onelab {
+  color: #86efac;
+}
+
 .lp-btn-primary:hover {
   background: var(--lp-blue-deep);
 }
@@ -957,6 +966,10 @@
 .lp-cta-band-inner .lp-btn-primary {
   background: #fff;
   color: var(--lp-blue-deep);
+}
+
+.lp-cta-band-inner .lp-btn-primary .lp-cta-onelab {
+  color: var(--lp-green);
 }
 
 .lp-cta-band-inner .lp-btn-primary:hover {
