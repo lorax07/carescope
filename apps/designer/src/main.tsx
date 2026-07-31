@@ -15,6 +15,7 @@ import {
 import { LibraryPage } from "./pages/LibraryPage";
 import { DesignerPage } from "./pages/DesignerPage";
 import { CatalogPage } from "./pages/CatalogPage";
+import { OurCompanyPage } from "./pages/OurCompanyPage";
 import "./styles.css";
 
 function WorkflowRedirect() {
@@ -27,6 +28,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="company" element={<OurCompanyPage />} />
         <Route path="app" element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="samples" element={<SamplesPage />} />
