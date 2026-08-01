@@ -15,6 +15,13 @@ import {
 import { LibraryPage } from "./pages/LibraryPage";
 import { DesignerPage } from "./pages/DesignerPage";
 import { CatalogPage } from "./pages/CatalogPage";
+import { OurCompanyPage } from "./pages/OurCompanyPage";
+import { InternalShell } from "./pages/internal/InternalShell";
+import { InternalLoginPage } from "./pages/internal/InternalLoginPage";
+import { InternalHomePage } from "./pages/internal/InternalHomePage";
+import { InternalAnnouncementsPage } from "./pages/internal/InternalAnnouncementsPage";
+import { InternalPeoplePage } from "./pages/internal/InternalPeoplePage";
+import { InternalResourcesPage } from "./pages/internal/InternalResourcesPage";
 import "./styles.css";
 
 function WorkflowRedirect() {
@@ -27,6 +34,16 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="company" element={<OurCompanyPage />} />
+
+        <Route path="internal/login" element={<InternalLoginPage />} />
+        <Route path="internal" element={<InternalShell />}>
+          <Route index element={<InternalHomePage />} />
+          <Route path="announcements" element={<InternalAnnouncementsPage />} />
+          <Route path="people" element={<InternalPeoplePage />} />
+          <Route path="resources" element={<InternalResourcesPage />} />
+        </Route>
+
         <Route path="app" element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="samples" element={<SamplesPage />} />

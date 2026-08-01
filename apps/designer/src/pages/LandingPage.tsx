@@ -33,11 +33,11 @@ export function LandingPage() {
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app?signup=1">Try OneLab</Link>
+            <Link to="/company">Our Company</Link>
           </nav>
 
           <div className="lp-nav-actions">
-            <Link to="/app" className="lp-link-quiet">
+            <Link to="/app?signin=1" className="lp-link-quiet">
               Sign in
             </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
