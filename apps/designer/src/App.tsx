@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { DemoCarousel } from "./components/DemoCarousel";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 
 const NAV = [
@@ -20,20 +21,32 @@ export function AppShell() {
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
+  const [demoOpen, setDemoOpen] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("signup") === "1") {
+    if (searchParams.get("signup") === "1" && !demoOpen) {
       setSignupOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, demoOpen]);
 
   function closeSignup() {
     setSignupOpen(false);
+    setDemoOpen(false);
     if (searchParams.get("signup") === "1") {
       const next = new URLSearchParams(searchParams);
       next.delete("signup");
       setSearchParams(next, { replace: true });
     }
+  }
+
+  function showDemos() {
+    setSignupOpen(false);
+    setDemoOpen(true);
+  }
+
+  function restoreSignup() {
+    setDemoOpen(false);
+    setSignupOpen(true);
   }
 
   return (
@@ -110,7 +123,12 @@ export function AppShell() {
         </div>
       </div>
 
-      <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
+      <SandboxSignupModal
+        open={signupOpen}
+        onClose={closeSignup}
+        onNotNow={showDemos}
+      />
+      <DemoCarousel open={demoOpen} onRequestSignup={restoreSignup} />
     </div>
   );
 }
