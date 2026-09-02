@@ -7,7 +7,7 @@ let store: IntrasiteStore | null = null;
 export function adminSeed(): { email: string; password: string; name: string } {
   return {
     email: process.env["INTRASITE_ADMIN_EMAIL"] ?? "admin@carescope.local",
-    password: process.env["INTRASITE_ADMIN_PASSWORD"] ?? "ChangeMeNow!",
+    password: process.env["INTRASITE_ADMIN_PASSWORD"] ?? "password",
     name: process.env["INTRASITE_ADMIN_NAME"] ?? "Intrasite Admin",
   };
 }

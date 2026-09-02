@@ -7,7 +7,7 @@ export function IntrasiteLoginPage() {
   const { user, loading, login } = useIntrasiteAuth();
   const location = useLocation();
   const [email, setEmail] = useState("admin@carescope.local");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("password");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 

@@ -104,4 +104,4 @@ pnpm dev          # web: http://localhost:5173
 pnpm dev:api      # API + in-memory Intrasite store: http://localhost:4000
 ```
 
-Sign in with `admin@carescope.local` / `ChangeMeNow!` unless you override `INTRASITE_ADMIN_*`.
+Sign in with `admin@carescope.local` / `password` unless you override `INTRASITE_ADMIN_*`.

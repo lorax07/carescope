@@ -5,7 +5,7 @@ import { resetIntrasiteForTests } from "../src/intrasite/store.js";
 
 const admin = {
   email: "admin@carescope.local",
-  password: "ChangeMeNow!",
+  password: "password",
 };
 
 describe("Intrasite auth and multi-tenancy", () => {
