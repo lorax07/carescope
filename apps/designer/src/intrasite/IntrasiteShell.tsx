@@ -1,9 +1,8 @@
-import { Navigate, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Navigate, NavLink, Outlet } from "react-router-dom";
 import { useIntrasiteAuth } from "./AuthContext";
 
 export function IntrasiteShell() {
   const { user, loading, logout } = useIntrasiteAuth();
-  const location = useLocation();
 
   if (loading) {
     return (
@@ -14,7 +13,7 @@ export function IntrasiteShell() {
   }
 
   if (!user) {
-    return <Navigate to="/intrasite/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/intrasite/login" replace />;
   }
 
   return (

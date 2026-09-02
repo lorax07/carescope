@@ -1,3 +1,13 @@
+import {
+  DEMO_TOKEN,
+  demoCreateClient,
+  demoCreateLab,
+  demoGetClient,
+  demoListClients,
+  demoLogin,
+  isDemoCredentials,
+} from "./demo";
+
 export type IntrasiteRole = "platform_admin" | "client_admin";
 
 export type IntrasiteUser = {
@@ -57,12 +67,17 @@ export function setStoredToken(token: string | null): void {
   else sessionStorage.removeItem(TOKEN_KEY);
 }
 
-async function parseError(res: Response): Promise<string> {
+export function isDemoSession(): boolean {
+  return getStoredToken() === DEMO_TOKEN;
+}
+
+async function readJson<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  if (!text) return undefined as T;
   try {
-    const body = (await res.json()) as { error?: string };
-    return body.error ?? res.statusText;
+    return JSON.parse(text) as T;
   } catch {
-    return res.statusText;
+    throw new ApiError("Intrasite API is unavailable", 503);
   }
 }
 
@@ -72,7 +87,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers.set("Content-Type", "application/json");
   }
   const token = getStoredToken();
-  if (token && !headers.has("Authorization")) {
+  if (token && token !== DEMO_TOKEN && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
   const res = await fetch(`${API}${path}`, {
@@ -82,42 +97,71 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   if (res.status === 204) return undefined as T;
   if (!res.ok) {
-    throw new ApiError(await parseError(res), res.status);
+    const body = await readJson<{ error?: string }>(res).catch(() => ({ error: res.statusText }));
+    throw new ApiError(body.error ?? res.statusText, res.status);
   }
-  return (await res.json()) as T;
+  return readJson<T>(res);
 }
 
-export function loginRequest(email: string, password: string) {
-  return api<{ token: string; user: IntrasiteUser }>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
+export async function loginRequest(email: string, password: string) {
+  try {
+    return await api<{ token: string; user: IntrasiteUser }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  } catch (error) {
+    if (isDemoCredentials(email, password)) {
+      return demoLogin();
+    }
+    throw error;
+  }
 }
 
-export function logoutRequest() {
-  return api<void>("/auth/logout", { method: "POST" });
+export async function logoutRequest() {
+  if (isDemoSession()) return;
+  try {
+    await api<void>("/auth/logout", { method: "POST" });
+  } catch {
+    /* local session is cleared by the caller */
+  }
 }
 
-export function meRequest() {
+export async function meRequest() {
+  if (isDemoSession()) {
+    return { user: demoLogin().user };
+  }
   return api<{ user: IntrasiteUser }>("/auth/me");
 }
 
-export function listClients() {
+export async function listClients() {
+  if (isDemoSession()) return demoListClients();
   return api<{ clients: Client[] }>("/clients");
 }
 
-export function createClient(input: { name: string; slug?: string }) {
+export async function createClient(input: { name: string; slug?: string }) {
+  if (isDemoSession()) return demoCreateClient(input);
   return api<{ client: Client; routing: ClientRouting }>("/clients", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
-export function getClient(id: string) {
+export async function getClient(id: string) {
+  if (isDemoSession()) {
+    try {
+      return demoGetClient(id);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Client not found", 404);
+    }
+  }
   return api<{ client: Client; labs: Lab[]; routing: ClientRouting }>(`/clients/${id}`);
 }
 
-export function createLab(clientId: string, input: { name: string; slug?: string; siteCode?: string }) {
+export async function createLab(
+  clientId: string,
+  input: { name: string; slug?: string; siteCode?: string }
+) {
+  if (isDemoSession()) return demoCreateLab(clientId, input);
   return api<{ lab: Lab }>(`/clients/${clientId}/labs`, {
     method: "POST",
     body: JSON.stringify(input),

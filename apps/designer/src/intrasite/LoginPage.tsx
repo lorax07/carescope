@@ -1,19 +1,17 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { ApiError } from "./api";
 import { useIntrasiteAuth } from "./AuthContext";
 
 export function IntrasiteLoginPage() {
   const { user, loading, login } = useIntrasiteAuth();
-  const location = useLocation();
   const [email, setEmail] = useState("admin@carescope.local");
   const [password, setPassword] = useState("password");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && user) {
-    const from = (location.state as { from?: string } | null)?.from;
-    return <Navigate to={from || "/intrasite"} replace />;
+    return <Navigate to="/intrasite" replace />;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -24,7 +22,7 @@ export function IntrasiteLoginPage() {
       await login(email, password);
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
-      else setError("Cannot reach the Intrasite API. Start it with pnpm dev:api or Docker Compose.");
+      else setError("Sign-in failed. Use admin@carescope.local and password.");
     } finally {
       setSubmitting(false);
     }
@@ -57,13 +55,16 @@ export function IntrasiteLoginPage() {
           Sign in to manage client accounts, isolated tenant databases, and lab
           instances.
         </p>
-        <form onSubmit={handleSubmit}>
+        <p className="is-login-hint">
+          For now use <code>admin@carescope.local</code> / <code>password</code>.
+        </p>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <label>
             Work email
             <input
               type="email"
-              name="email"
-              autoComplete="username"
+              name="intrasite-email"
+              autoComplete="off"
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -73,16 +74,15 @@ export function IntrasiteLoginPage() {
             Password
             <input
               type="password"
-              name="password"
-              autoComplete="current-password"
+              name="intrasite-password"
+              autoComplete="off"
               required
-              minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
           </label>
           {error ? <p className="is-error">{error}</p> : null}
-          <button type="submit" className="btn btn-primary" disabled={submitting || loading}>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
             {submitting ? "Signing in…" : "Sign in"}
           </button>
         </form>

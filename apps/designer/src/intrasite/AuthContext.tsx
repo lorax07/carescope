@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  ApiError,
   loginRequest,
   logoutRequest,
   meRequest,
@@ -27,10 +26,8 @@ export function IntrasiteAuthProvider({ children }: { children: ReactNode }) {
       .then((result) => {
         if (!cancelled) setUser(result.user);
       })
-      .catch((error: unknown) => {
-        if (error instanceof ApiError && error.status === 401) {
-          setStoredToken(null);
-        }
+      .catch(() => {
+        setStoredToken(null);
         if (!cancelled) setUser(null);
       })
       .finally(() => {
