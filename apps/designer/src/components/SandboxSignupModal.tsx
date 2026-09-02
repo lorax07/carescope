@@ -3,9 +3,14 @@ import { FormEvent, useState } from "react";
 type SandboxSignupModalProps = {
   open: boolean;
   onClose: () => void;
+  onNotNow: () => void;
 };
 
-export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
+export function SandboxSignupModal({
+  open,
+  onClose,
+  onNotNow,
+}: SandboxSignupModalProps) {
   const [submitted, setSubmitted] = useState(false);
 
   if (!open) return null;
@@ -86,7 +91,7 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
             </label>
 
             <div className="signup-modal-actions">
-              <button type="button" className="btn" onClick={onClose}>
+              <button type="button" className="btn" onClick={onNotNow}>
                 Not now
               </button>
               <button type="submit" className="btn btn-primary">
