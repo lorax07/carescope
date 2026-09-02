@@ -31,7 +31,7 @@ export function SandboxSignupModal({ open, onClose }: SandboxSignupModalProps) {
       >
         <header className="signup-modal-header">
           <h2 id="signup-modal-title">
-            Signup for a 30 day Sandbox Access to LabOne
+            OneLab Sandbox
           </h2>
           <button
             type="button"
