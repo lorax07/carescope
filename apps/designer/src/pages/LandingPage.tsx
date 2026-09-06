@@ -301,26 +301,17 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const VENDOR_BOXES = [
-  { id: "lis", label: "Vendor A LIS", tag: "on-prem v7", x: 18, y: 18, rotate: -7, fill: "#1e3a5f", text: "#e8eef7" },
-  { id: "emr", label: "Hospital EMR", tag: "HL7 feed", x: 148, y: 8, rotate: 4, fill: "#0f766e", text: "#ecfdf8" },
-  { id: "inst", label: "Analyzer OEM", tag: "driver wait", x: 268, y: 28, rotate: 8, fill: "#9a3412", text: "#fff7ed" },
-  { id: "qc", label: "QC SaaS", tag: "separate login", x: 8, y: 118, rotate: -5, fill: "#5b21b6", text: "#f5f3ff" },
-  { id: "bill", label: "Billing vendor", tag: "CSV drop", x: 270, y: 132, rotate: 6, fill: "#3f6212", text: "#f7fee7" },
-  { id: "inv", label: "Inventory app", tag: "no API", x: 12, y: 228, rotate: 5, fill: "#7c2d12", text: "#fff7ed" },
-  { id: "crm", label: "Client portal", tag: "another contract", x: 258, y: 236, rotate: -6, fill: "#1e40af", text: "#eff6ff" },
-  { id: "bi", label: "Excel / BI", tag: "shadow system", x: 148, y: 292, rotate: 3, fill: "#854d0e", text: "#fffbeb" },
-] as const;
-
-const VENDOR_CABLES: Array<{ d: string; color: string; protocol: string; broken?: boolean }> = [
-  { d: "M70 42 C 90 90, 140 110, 176 148", color: "#1e3a5f", protocol: "HL7" },
-  { d: "M200 36 C 210 80, 200 120, 188 150", color: "#0f766e", protocol: "ADT" },
-  { d: "M310 56 C 280 90, 250 130, 204 158", color: "#9a3412", protocol: "driver" },
-  { d: "M60 140 C 100 150, 130 160, 168 168", color: "#5b21b6", protocol: "REST" },
-  { d: "M300 154 C 260 170, 230 180, 208 176", color: "#3f6212", protocol: "SFTP" },
-  { d: "M70 250 C 110 230, 140 200, 170 184", color: "#7c2d12", protocol: "CSV", broken: true },
-  { d: "M290 258 C 250 230, 220 200, 200 186", color: "#1e40af", protocol: "nightly" },
-  { d: "M190 278 C 190 240, 188 210, 186 188", color: "#854d0e", protocol: "email" },
+const VENDOR_CABLES: Array<{ d: string; color: string; broken?: boolean }> = [
+  { d: "M64 52 C 110 80, 140 130, 176 168", color: "#1e3a5f" },
+  { d: "M196 48 C 200 90, 188 130, 184 166", color: "#0f766e" },
+  { d: "M318 62 C 280 100, 240 140, 198 170", color: "#c2410c" },
+  { d: "M58 148 C 100 160, 140 168, 168 176", color: "#6d28d9" },
+  { d: "M322 156 C 270 168, 230 176, 202 180", color: "#3f6212" },
+  { d: "M70 248 C 120 220, 150 200, 172 184", color: "#9a3412", broken: true },
+  { d: "M312 250 C 260 220, 230 200, 200 186", color: "#1d4ed8" },
+  { d: "M188 292 C 186 250, 184 220, 184 190", color: "#a16207" },
+  { d: "M40 200 C 90 210, 130 190, 168 182", color: "#be123c" },
+  { d: "M340 200 C 290 210, 240 190, 204 182", color: "#0e7490" },
 ];
 
 function TypicalLabStackVisual() {
@@ -329,114 +320,128 @@ function TypicalLabStackVisual() {
       className="lp-compare-canvas lp-stack-mess"
       viewBox="0 0 380 340"
       role="img"
-      aria-label="A lab operator tangled in one-off vendor integrations, protocols, and failed interfaces"
+      aria-label="A lab scientist wrapped in incompatible vendor cables, holding plugs that do not fit, with failed interfaces and delayed go-lives"
     >
       <defs>
         <filter id="stackShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" floodColor="#0f172a" floodOpacity="0.16" />
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" floodColor="#0f172a" floodOpacity="0.18" />
         </filter>
       </defs>
 
       {VENDOR_CABLES.map((cable, index) => (
-        <g key={cable.protocol + index} className="lp-stack-cable" style={{ animationDelay: `${0.12 + index * 0.06}s` }}>
-          <path
-            d={cable.d}
-            fill="none"
-            stroke={cable.color}
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeDasharray={cable.broken ? "5 4" : undefined}
-            opacity="0.88"
-          />
-          {cable.broken ? (
-            <g transform="translate(128 214)" className="lp-stack-break">
-              <circle r="8" fill="#fef2f2" stroke="#dc2626" strokeWidth="1.2" />
-              <path d="M-3.2 -3.2 3.2 3.2M3.2 -3.2 -3.2 3.2" stroke="#dc2626" strokeWidth="1.5" />
-            </g>
-          ) : null}
-        </g>
-      ))}
-
-      <g className="lp-stack-knot" transform="translate(188 168)">
-        <ellipse rx="36" ry="20" fill="#fff7ed" stroke="#c2410c" strokeWidth="1.4" />
         <path
-          d="M-22 0 C -10 -12, 10 12, 22 0 M-16 7 C -2 -9, 8 10, 18 -3"
+          key={cable.d}
+          className="lp-stack-cable-line"
+          style={{ animationDelay: `${0.1 + index * 0.05}s` }}
+          d={cable.d}
           fill="none"
-          stroke="#9a3412"
-          strokeWidth="1.6"
+          stroke={cable.color}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeDasharray={cable.broken ? "6 5" : undefined}
+          opacity="0.9"
         />
-        <text y="-2" className="lp-stack-knot-title">
-          custom middleware
-        </text>
-        <text y="11" className="lp-stack-knot-sub">
-          8 vendor contracts
-        </text>
-      </g>
-
-      <g className="lp-stack-person" transform="translate(188 214)">
-        <circle cy="-28" r="10" fill="#f3d2b5" />
-        <circle cx="-3.2" cy="-29.4" r="1.05" fill="#1f2937" />
-        <circle cx="3.2" cy="-29.4" r="1.05" fill="#1f2937" />
-        <path d="M-3.4 -24.6 Q 0 -22.6 3.4 -24.6" fill="none" stroke="#7c2d12" strokeWidth="1.1" />
-        <path d="M-11 -19 h22 l5 24 h-32 z" fill="#f8fafc" stroke="#64748b" strokeWidth="1.2" />
-        <path d="M-3.5 -17 h7 v7 h-7z" fill="#e2e8f0" />
-        <circle cx="11" cy="-37" r="2.1" fill="#fca5a5" />
-        <text y="22" className="lp-stack-person-label">
-          Integration owner
-        </text>
-        <text y="34" className="lp-stack-person-sub">
-          still mapping last night’s feed
-        </text>
-      </g>
-
-      {VENDOR_BOXES.map((vendor, index) => (
-        <g
-          key={vendor.id}
-          className="lp-stack-vendor"
-          style={{ animationDelay: `${0.2 + index * 0.05}s` }}
-          transform={`translate(${vendor.x} ${vendor.y}) rotate(${vendor.rotate})`}
-          filter="url(#stackShadow)"
-        >
-          <rect width="104" height="40" rx="7" fill={vendor.fill} />
-          <text x="52" y="17" fill={vendor.text} className="lp-stack-vendor-name">
-            {vendor.label}
-          </text>
-          <text x="52" y="31" fill={vendor.text} className="lp-stack-vendor-tag">
-            {vendor.tag}
-          </text>
-        </g>
       ))}
 
-      {[
-        { x: 92, y: 78, label: "HL7" },
-        { x: 214, y: 72, label: "ADT" },
-        { x: 268, y: 98, label: "driver" },
-        { x: 88, y: 156, label: "REST" },
-        { x: 256, y: 168, label: "SFTP" },
-      ].map((mark) => (
-        <g key={mark.label} className="lp-stack-proto" transform={`translate(${mark.x} ${mark.y})`}>
-          <rect x="-16" y="-7" width="32" height="14" rx="3" />
-          <text y="3.5">{mark.label}</text>
-        </g>
-      ))}
-
-      <g className="lp-stack-note" transform="translate(286 188) rotate(7)">
-        <rect width="78" height="34" rx="3" />
-        <text x="6" y="14">
-          go-live slipped
+      <g className="lp-stack-person" transform="translate(190 176)">
+        <path d="M-28 8 C -36 28, -18 46, 0 46 C 18 46, 36 28, 28 8" fill="#e2e8f0" stroke="#64748b" strokeWidth="1.2" />
+        <path d="M-18 -8 h36 l8 38 h-52 z" fill="#f8fafc" stroke="#475569" strokeWidth="1.3" />
+        <path d="M-6 -4 h12 v10 h-12z" fill="#cbd5e1" />
+        <circle cy="-28" r="13" fill="#f0c9a8" />
+        <path d="M-11 -36 C -8 -44, 8 -44, 11 -36 L 9 -28 H -9 Z" fill="#1f2937" />
+        <circle cx="-4.2" cy="-29" r="1.2" fill="#111827" />
+        <circle cx="4.2" cy="-29" r="1.2" fill="#111827" />
+        <path d="M-5 -23.5 Q 0 -20.8 5 -23.5" fill="none" stroke="#7c2d12" strokeWidth="1.3" />
+        <path d="M-16 -6 L -46 10" stroke="#1e3a5f" strokeWidth="3" strokeLinecap="round" />
+        <path d="M16 -6 L 46 8" stroke="#9a3412" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="-48" cy="12" r="6" fill="#1e3a5f" />
+        <rect x="41" y="3" width="12" height="10" rx="1.5" fill="#9a3412" />
+        <path d="M-48 12 h4 M47 8 v-4" stroke="#f8fafc" strokeWidth="1.2" />
+        <circle cx="14" cy="-40" r="2.4" fill="#f87171" />
+        <text y="64" className="lp-stack-person-label">
+          Bench lead · 2:14 AM
         </text>
-        <text x="6" y="26">
-          waiting on vendor
+        <text y="76" className="lp-stack-person-sub">
+          three plugs. none of them fit.
         </text>
       </g>
-      <g className="lp-stack-note lp-stack-note-warn" transform="translate(8 176) rotate(-6)">
-        <rect width="86" height="34" rx="3" />
-        <text x="6" y="14">
-          who owns mapping?
+
+      <g className="lp-stack-tape" transform="translate(190 148) rotate(-8)">
+        <rect x="-44" y="-12" width="88" height="22" rx="3" fill="#fbbf24" />
+        <text y="3" className="lp-stack-tape-label">
+          DUCT-TAPED MIDDLEWARE
         </text>
-        <text x="6" y="26">
-          3 teams, 2 tickets
-        </text>
+      </g>
+
+      <g className="lp-stack-vendor" transform="translate(10 10) rotate(-8)" filter="url(#stackShadow)">
+        <rect width="108" height="48" rx="4" fill="#1e3a5f" />
+        <text x="54" y="20" className="lp-stack-vendor-name" fill="#e8eef7">Vendor A LIS</text>
+        <text x="54" y="36" className="lp-stack-vendor-tag" fill="#93c5fd">on-prem v7 · HL7 only</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(142 4) rotate(3)" filter="url(#stackShadow)">
+        <rect width="100" height="44" rx="16" fill="#0f766e" />
+        <text x="50" y="18" className="lp-stack-vendor-name" fill="#ecfdf8">Hospital EMR</text>
+        <text x="50" y="33" className="lp-stack-vendor-tag" fill="#99f6e4">ADT feed · their window</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(268 22) rotate(9)" filter="url(#stackShadow)">
+        <rect width="102" height="46" rx="6" fill="#9a3412" />
+        <rect x="8" y="8" width="18" height="30" rx="2" fill="#fdba74" />
+        <text x="64" y="20" className="lp-stack-vendor-name" fill="#fff7ed">Analyzer OEM</text>
+        <text x="64" y="35" className="lp-stack-vendor-tag" fill="#fed7aa">driver still in QA</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(4 116) rotate(-5)" filter="url(#stackShadow)">
+        <ellipse cx="48" cy="22" rx="48" ry="22" fill="#5b21b6" />
+        <text x="48" y="18" className="lp-stack-vendor-name" fill="#f5f3ff">QC SaaS</text>
+        <text x="48" y="32" className="lp-stack-vendor-tag" fill="#ddd6fe">separate login</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(274 128) rotate(6)" filter="url(#stackShadow)">
+        <path d="M8 6 h88 l-8 40 H16 Z" fill="#3f6212" />
+        <text x="50" y="22" className="lp-stack-vendor-name" fill="#f7fee7">Billing vendor</text>
+        <text x="50" y="36" className="lp-stack-vendor-tag" fill="#d9f99d">CSV drop Fridays</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(6 226) rotate(5)" filter="url(#stackShadow)">
+        <rect width="104" height="44" rx="2" fill="#7c2d12" />
+        <text x="52" y="18" className="lp-stack-vendor-name" fill="#fff7ed">Inventory app</text>
+        <text x="52" y="33" className="lp-stack-vendor-tag" fill="#fed7aa">no API · rekey it</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(262 232) rotate(-7)" filter="url(#stackShadow)">
+        <rect width="108" height="46" rx="8" fill="#1e40af" />
+        <text x="54" y="19" className="lp-stack-vendor-name" fill="#eff6ff">Client portal</text>
+        <text x="54" y="34" className="lp-stack-vendor-tag" fill="#bfdbfe">another contract</text>
+      </g>
+      <g className="lp-stack-vendor" transform="translate(136 286) rotate(2)" filter="url(#stackShadow)">
+        <rect width="112" height="42" rx="3" fill="#854d0e" />
+        <text x="56" y="17" className="lp-stack-vendor-name" fill="#fffbeb">Excel / shadow LIS</text>
+        <text x="56" y="32" className="lp-stack-vendor-tag" fill="#fde68a">the real system of record</text>
+      </g>
+
+      <g className="lp-stack-break" transform="translate(118 216)">
+        <circle r="9" fill="#fef2f2" stroke="#dc2626" strokeWidth="1.4" />
+        <path d="M-3.6 -3.6 3.6 3.6M3.6 -3.6 -3.6 3.6" stroke="#dc2626" strokeWidth="1.6" />
+      </g>
+      <g className="lp-stack-spark" transform="translate(118 200)">
+        <path d="M0 0 L 4 -10 L 1 -10 L 6 -20" fill="none" stroke="#f59e0b" strokeWidth="1.4" />
+      </g>
+
+      <g className="lp-stack-badge" transform="translate(118 92)">
+        <rect width="148" height="28" rx="14" />
+        <text x="74" y="18">8 vendors · 11 interfaces · 1 person</text>
+      </g>
+
+      <g className="lp-stack-note" transform="translate(286 78) rotate(8)">
+        <rect width="84" height="36" rx="3" />
+        <text x="7" y="15">go-live slipped again</text>
+        <text x="7" y="28">waiting on Vendor A</text>
+      </g>
+      <g className="lp-stack-note lp-stack-note-warn" transform="translate(8 174) rotate(-7)">
+        <rect width="90" height="36" rx="3" />
+        <text x="7" y="15">who owns this map?</text>
+        <text x="7" y="28">3 teams · 2 tickets</text>
+      </g>
+      <g className="lp-stack-pager" transform="translate(292 176) rotate(4)">
+        <rect width="78" height="28" rx="6" />
+        <text x="39" y="12">INTERFACE DOWN</text>
+        <text x="39" y="22">pager · STAT queue</text>
       </g>
     </svg>
   );
@@ -449,7 +454,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Multiple Custom Integrations
+            Every vendor is another interface
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
