@@ -1,11 +1,14 @@
 import { hashPassword } from "./auth.js";
+import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
 import type {
   Client,
+  ClientDossier,
   CreateClientInput,
   CreateLabInput,
   IntrasiteStore,
   IntrasiteUserRecord,
   Lab,
+  ModuleChangeRequest,
 } from "./types.js";
 import {
   assertSlug,
@@ -26,6 +29,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
   private users = new Map<string, IntrasiteUserRecord>();
   private clients = new Map<string, Omit<Client, "labCount">>();
   private databases = new Map<string, TenantDatabase>();
+  private requests = new Map<string, ModuleChangeRequest>();
 
   async seed(admin: { email: string; password: string; name: string }): Promise<void> {
     if (this.users.size === 0) {
@@ -46,10 +50,27 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
 
   private async seedDemo(): Promise<void> {
     const apex = await this.createClient({ name: "Apex Diagnostics", slug: "apex-diagnostics" });
-    await this.createLab(apex.id, { name: "North Lab", slug: "north-lab", siteCode: "NL-01" });
-    await this.createLab(apex.id, { name: "Harbor Lab", slug: "harbor-lab", siteCode: "HL-02" });
+    const north = await this.createLab(apex.id, { name: "North Lab", slug: "north-lab", siteCode: "NL-01" });
+    const harborLab = await this.createLab(apex.id, {
+      name: "Harbor Lab",
+      slug: "harbor-lab",
+      siteCode: "HL-02",
+    });
+    this.patchLab(apex.id, north.id, {
+      modules: ["sample_lifecycle", "instrument_integration", "results_entry", "coa_generation"],
+    });
+    this.patchLab(apex.id, harborLab.id, {
+      modules: ["sample_lifecycle", "quality_events", "capa"],
+    });
     const harbor = await this.createClient({ name: "Harbor Clinical", slug: "harbor-clinical" });
-    await this.createLab(harbor.id, { name: "Main Campus", slug: "main-campus", siteCode: "MC-01" });
+    const main = await this.createLab(harbor.id, {
+      name: "Main Campus",
+      slug: "main-campus",
+      siteCode: "MC-01",
+    });
+    this.patchLab(harbor.id, main.id, {
+      modules: ["sample_lifecycle", "billing", "customer_portal"],
+    });
   }
 
   async getUserByEmail(email: string): Promise<IntrasiteUserRecord | null> {
@@ -141,9 +162,120 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       slug,
       siteCode: input.siteCode?.trim() || siteCodeForName(name, db.labs.size),
       status: "active",
+      modules: [...DEFAULT_LAB_MODULES],
       createdAt: nowIso(),
     };
     db.labs.set(id, lab);
+    return lab;
+  }
+
+  async getDossier(clientId: string): Promise<ClientDossier> {
+    const client = await this.getClient(clientId);
+    if (!client) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    return buildDossier(client, await this.listLabs(clientId));
+  }
+
+  async listModuleRequests(clientId: string, labId?: string): Promise<ModuleChangeRequest[]> {
+    return [...this.requests.values()]
+      .filter((item) => item.clientId === clientId && (!labId || item.labId === labId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async createModuleRequest(
+    clientId: string,
+    labId: string,
+    input: { moduleId: string; action: "add" | "remove"; requestedBy: string }
+  ): Promise<ModuleChangeRequest> {
+    const lab = this.requireLab(clientId, labId);
+    if (!LAB_MODULE_CATALOG.some((item) => item.id === input.moduleId)) {
+      throw Object.assign(new Error("Unknown module"), { status: 400 });
+    }
+    if (input.action === "add" && lab.modules.includes(input.moduleId)) {
+      throw Object.assign(new Error("That module is already installed"), { status: 409 });
+    }
+    if (input.action === "remove" && !lab.modules.includes(input.moduleId)) {
+      throw Object.assign(new Error("That module is not installed"), { status: 404 });
+    }
+    const pending = [...this.requests.values()].find(
+      (item) =>
+        item.labId === labId &&
+        item.moduleId === input.moduleId &&
+        item.action === input.action &&
+        item.step !== "provisioned"
+    );
+    if (pending) {
+      throw Object.assign(new Error("A matching module change is already in review"), {
+        status: 409,
+      });
+    }
+    const request: ModuleChangeRequest = {
+      id: newId(),
+      clientId,
+      labId,
+      labName: lab.name,
+      moduleId: input.moduleId,
+      moduleLabel: moduleLabel(input.moduleId),
+      action: input.action,
+      step: "requested",
+      requestedBy: input.requestedBy,
+      createdAt: nowIso(),
+    };
+    this.requests.set(request.id, request);
+    return request;
+  }
+
+  async approveModuleRequest(
+    clientId: string,
+    requestId: string,
+    step: "secondary" | "business"
+  ): Promise<ModuleChangeRequest> {
+    const request = this.requests.get(requestId);
+    if (!request || request.clientId !== clientId) {
+      throw Object.assign(new Error("Module request not found"), { status: 404 });
+    }
+    if (step === "secondary" && request.step !== "requested") {
+      throw Object.assign(new Error("Secondary approval is not pending"), { status: 409 });
+    }
+    if (step === "business" && request.step !== "secondary") {
+      throw Object.assign(new Error("Business contact approval is not pending"), { status: 409 });
+    }
+    request.step = step === "secondary" ? "secondary" : "business";
+    if (request.step === "business") {
+      const lab = this.requireLab(clientId, request.labId);
+      if (request.action === "add" && !lab.modules.includes(request.moduleId)) {
+        lab.modules = [...lab.modules, request.moduleId];
+      }
+      if (request.action === "remove") {
+        lab.modules = lab.modules.filter((id) => id !== request.moduleId);
+      }
+      request.step = "provisioned";
+    }
+    this.requests.set(request.id, request);
+    return request;
+  }
+
+  async removeLabModule(clientId: string, labId: string, moduleId: string): Promise<Lab> {
+    const lab = this.requireLab(clientId, labId);
+    if (!lab.modules.includes(moduleId)) {
+      throw Object.assign(new Error("That module is not installed"), { status: 404 });
+    }
+    lab.modules = lab.modules.filter((id) => id !== moduleId);
+    return lab;
+  }
+
+  private patchLab(clientId: string, labId: string, patch: Partial<Pick<Lab, "modules">>): Lab {
+    const lab = this.requireLab(clientId, labId);
+    if (patch.modules) lab.modules = patch.modules;
+    return lab;
+  }
+
+  private requireLab(clientId: string, labId: string): Lab {
+    const lab = this.isolated(clientId).labs.get(labId);
+    if (!lab) {
+      throw Object.assign(new Error("Lab not found"), { status: 404 });
+    }
     return lab;
   }
 

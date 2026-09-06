@@ -34,7 +34,72 @@ export type Lab = {
   slug: string;
   siteCode: string;
   status: LabStatus;
+  modules: string[];
   createdAt: string;
+};
+
+export type ApprovalStep = "requested" | "secondary" | "business" | "provisioned";
+
+export type ModuleChangeRequest = {
+  id: string;
+  clientId: string;
+  labId: string;
+  labName: string;
+  moduleId: string;
+  moduleLabel: string;
+  action: "add" | "remove";
+  step: ApprovalStep;
+  requestedBy: string;
+  createdAt: string;
+};
+
+export type BusinessContact = {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+};
+
+export type SupportTicket = {
+  id: string;
+  title: string;
+  labId: string | null;
+  labName: string | null;
+  staff: string;
+  openedAt: string;
+  status: "open" | "resolved";
+  summary: string;
+};
+
+export type InstallationNode = {
+  id: string;
+  label: string;
+  kind: "hq" | "network" | "lab" | "instrument";
+  x: number;
+  y: number;
+  connectsTo: string[];
+};
+
+export type BackendInfra = {
+  databaseName: string;
+  engine: string;
+  host: string;
+  region: string;
+  isolation: string;
+  tables: Array<{ name: string; rows: number }>;
+};
+
+export type ClientDossier = {
+  infrastructure: BackendInfra;
+  architecture: InstallationNode[];
+  contacts: BusinessContact[];
+  support: SupportTicket[];
+};
+
+export type QueryResult = {
+  columns: string[];
+  rows: Array<Record<string, string | number>>;
 };
 
 export type SessionUser = Pick<IntrasiteUser, "id" | "email" | "name" | "role">;
@@ -71,4 +136,17 @@ export interface IntrasiteStore {
   ): Promise<Client | null>;
   listLabs(clientId: string): Promise<Lab[]>;
   createLab(clientId: string, input: CreateLabInput): Promise<Lab>;
+  getDossier(clientId: string): Promise<ClientDossier>;
+  listModuleRequests(clientId: string, labId?: string): Promise<ModuleChangeRequest[]>;
+  createModuleRequest(
+    clientId: string,
+    labId: string,
+    input: { moduleId: string; action: "add" | "remove"; requestedBy: string }
+  ): Promise<ModuleChangeRequest>;
+  approveModuleRequest(
+    clientId: string,
+    requestId: string,
+    step: "secondary" | "business"
+  ): Promise<ModuleChangeRequest>;
+  removeLabModule(clientId: string, labId: string, moduleId: string): Promise<Lab>;
 }

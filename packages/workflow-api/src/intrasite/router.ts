@@ -9,6 +9,7 @@ import {
   verifyPassword,
   verifyToken,
 } from "./auth.js";
+import { LAB_MODULE_CATALOG, runInfraQuery } from "./catalog.js";
 import {
   getIntrasiteStore,
   instanceHostPattern,
@@ -162,8 +163,18 @@ export function createIntrasiteRouter(): Router {
         res.status(404).json({ error: "Client not found" });
         return;
       }
-      const labs = await getIntrasiteStore().listLabs(client.id);
-      res.json({ client, labs, routing: routingFor(client) });
+      const store = getIntrasiteStore();
+      const labs = await store.listLabs(client.id);
+      const dossier = await store.getDossier(client.id);
+      const requests = await store.listModuleRequests(client.id);
+      res.json({
+        client,
+        labs,
+        routing: routingFor(client),
+        dossier,
+        requests,
+        moduleCatalog: LAB_MODULE_CATALOG,
+      });
     })
   );
 
@@ -211,6 +222,113 @@ export function createIntrasiteRouter(): Router {
           siteCode: req.body?.siteCode ? String(req.body.siteCode) : undefined,
         });
         res.status(201).json({ lab });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.get(
+    "/clients/:id/dossier",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const dossier = await getIntrasiteStore().getDossier(String(req.params["id"] ?? ""));
+        res.json({ dossier, moduleCatalog: LAB_MODULE_CATALOG });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.post(
+    "/clients/:id/query",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const clientId = String(req.params["id"] ?? "");
+        const store = getIntrasiteStore();
+        const client = await store.getClient(clientId);
+        if (!client) {
+          res.status(404).json({ error: "Client not found" });
+          return;
+        }
+        const labs = await store.listLabs(clientId);
+        const dossier = await store.getDossier(clientId);
+        res.json(runInfraQuery(String(req.body?.sql ?? ""), labs, dossier));
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.get(
+    "/clients/:id/module-requests",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const labId = typeof req.query.labId === "string" ? req.query.labId : undefined;
+        const requests = await getIntrasiteStore().listModuleRequests(
+          String(req.params["id"] ?? ""),
+          labId
+        );
+        res.json({ requests });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.post(
+    "/clients/:id/labs/:labId/module-requests",
+    requireAuth,
+    asyncHandler(async (req: AuthedRequest, res) => {
+      try {
+        const request = await getIntrasiteStore().createModuleRequest(
+          String(req.params["id"] ?? ""),
+          String(req.params["labId"] ?? ""),
+          {
+            moduleId: String(req.body?.moduleId ?? ""),
+            action: req.body?.action === "remove" ? "remove" : "add",
+            requestedBy: req.intrasiteUser?.name ?? "Intrasite operator",
+          }
+        );
+        res.status(201).json({ request });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.post(
+    "/clients/:id/module-requests/:requestId/approve",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const step = req.body?.step === "business" ? "business" : "secondary";
+        const request = await getIntrasiteStore().approveModuleRequest(
+          String(req.params["id"] ?? ""),
+          String(req.params["requestId"] ?? ""),
+          step
+        );
+        res.json({ request });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.delete(
+    "/clients/:id/labs/:labId/modules/:moduleId",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const lab = await getIntrasiteStore().removeLabModule(
+          String(req.params["id"] ?? ""),
+          String(req.params["labId"] ?? ""),
+          String(req.params["moduleId"] ?? "")
+        );
+        res.json({ lab });
       } catch (error) {
         httpError(error, res);
       }

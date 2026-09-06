@@ -1,10 +1,14 @@
 import {
   DEMO_TOKEN,
+  demoApproveModuleRequest,
   demoCreateClient,
   demoCreateLab,
+  demoCreateModuleRequest,
   demoGetClient,
   demoListClients,
   demoLogin,
+  demoQuery,
+  demoRemoveLabModule,
   isDemoCredentials,
 } from "./demo";
 
@@ -35,6 +39,7 @@ export type Lab = {
   slug: string;
   siteCode: string;
   status: "active" | "suspended";
+  modules: string[];
   createdAt: string;
 };
 
@@ -45,6 +50,84 @@ export type ClientRouting = {
   host: string;
   databaseName: string;
   isolation: string;
+};
+
+export type ApprovalStep = "requested" | "secondary" | "business" | "provisioned";
+
+export type ModuleChangeRequest = {
+  id: string;
+  clientId: string;
+  labId: string;
+  labName: string;
+  moduleId: string;
+  moduleLabel: string;
+  action: "add" | "remove";
+  step: ApprovalStep;
+  requestedBy: string;
+  createdAt: string;
+};
+
+export type BusinessContact = {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+};
+
+export type SupportTicket = {
+  id: string;
+  title: string;
+  labId: string | null;
+  labName: string | null;
+  staff: string;
+  openedAt: string;
+  status: "open" | "resolved";
+  summary: string;
+};
+
+export type InstallationNode = {
+  id: string;
+  label: string;
+  kind: "hq" | "network" | "lab" | "instrument";
+  x: number;
+  y: number;
+  connectsTo: string[];
+};
+
+export type BackendInfra = {
+  databaseName: string;
+  engine: string;
+  host: string;
+  region: string;
+  isolation: string;
+  tables: Array<{ name: string; rows: number }>;
+};
+
+export type ClientDossier = {
+  infrastructure: BackendInfra;
+  architecture: InstallationNode[];
+  contacts: BusinessContact[];
+  support: SupportTicket[];
+};
+
+export type QueryResult = {
+  columns: string[];
+  rows: Array<Record<string, string | number>>;
+};
+
+export type ModuleCatalogItem = {
+  id: string;
+  label: string;
+};
+
+export type ClientDetail = {
+  client: Client;
+  labs: Lab[];
+  routing: ClientRouting;
+  dossier: ClientDossier;
+  requests: ModuleChangeRequest[];
+  moduleCatalog: ModuleCatalogItem[];
 };
 
 export class ApiError extends Error {
@@ -154,7 +237,7 @@ export async function getClient(id: string) {
       throw new ApiError(error instanceof Error ? error.message : "Client not found", 404);
     }
   }
-  return api<{ client: Client; labs: Lab[]; routing: ClientRouting }>(`/clients/${id}`);
+  return api<ClientDetail>(`/clients/${id}`);
 }
 
 export async function createLab(
@@ -165,5 +248,74 @@ export async function createLab(
   return api<{ lab: Lab }>(`/clients/${clientId}/labs`, {
     method: "POST",
     body: JSON.stringify(input),
+  });
+}
+
+export async function queryClientDatabase(clientId: string, sql: string) {
+  if (isDemoSession()) {
+    try {
+      return demoQuery(clientId, sql);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Query failed", 400);
+    }
+  }
+  return api<QueryResult>(`/clients/${clientId}/query`, {
+    method: "POST",
+    body: JSON.stringify({ sql }),
+  });
+}
+
+export async function createModuleRequest(
+  clientId: string,
+  labId: string,
+  input: { moduleId: string; action: "add" | "remove" }
+) {
+  if (isDemoSession()) {
+    try {
+      return demoCreateModuleRequest(clientId, labId, input);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Unable to create request", 409);
+    }
+  }
+  return api<{ request: ModuleChangeRequest }>(
+    `/clients/${clientId}/labs/${labId}/module-requests`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    }
+  );
+}
+
+export async function approveModuleRequest(
+  clientId: string,
+  requestId: string,
+  step: "secondary" | "business"
+) {
+  if (isDemoSession()) {
+    try {
+      return demoApproveModuleRequest(clientId, requestId, step);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Unable to approve request", 409);
+    }
+  }
+  return api<{ request: ModuleChangeRequest }>(
+    `/clients/${clientId}/module-requests/${requestId}/approve`,
+    {
+      method: "POST",
+      body: JSON.stringify({ step }),
+    }
+  );
+}
+
+export async function removeLabModule(clientId: string, labId: string, moduleId: string) {
+  if (isDemoSession()) {
+    try {
+      return demoRemoveLabModule(clientId, labId, moduleId);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Unable to remove module", 404);
+    }
+  }
+  return api<{ lab: Lab }>(`/clients/${clientId}/labs/${labId}/modules/${moduleId}`, {
+    method: "DELETE",
   });
 }

@@ -1,12 +1,15 @@
 import { Pool } from "pg";
 import { hashPassword } from "./auth.js";
+import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
 import type {
   Client,
+  ClientDossier,
   CreateClientInput,
   CreateLabInput,
   IntrasiteStore,
   IntrasiteUserRecord,
   Lab,
+  ModuleChangeRequest,
 } from "./types.js";
 import {
   assertSlug,
@@ -45,8 +48,10 @@ CREATE TABLE IF NOT EXISTS labs (
   slug TEXT NOT NULL UNIQUE,
   site_code TEXT NOT NULL,
   status TEXT NOT NULL,
+  modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]';
 `;
 
 function adminUrl(databaseUrl: string): string {
@@ -61,11 +66,27 @@ function tenantUrl(databaseUrl: string, databaseName: string): string {
   return url.toString();
 }
 
+function parseModules(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === "string");
+      }
+    } catch {
+      /* use default */
+    }
+  }
+  return [...DEFAULT_LAB_MODULES];
+}
+
 export class PostgresIntrasiteStore implements IntrasiteStore {
   readonly kind = "postgres" as const;
   private control: Pool;
   private tenantPools = new Map<string, Pool>();
   private databaseUrl: string;
+  private requests = new Map<string, ModuleChangeRequest>();
 
   constructor(databaseUrl: string) {
     this.databaseUrl = databaseUrl;
@@ -86,14 +107,38 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       const clients = await this.control.query("SELECT id FROM clients LIMIT 1");
       if (clients.rowCount === 0) {
         const apex = await this.createClient({ name: "Apex Diagnostics", slug: "apex-diagnostics" });
-        await this.createLab(apex.id, { name: "North Lab", slug: "north-lab", siteCode: "NL-01" });
-        await this.createLab(apex.id, { name: "Harbor Lab", slug: "harbor-lab", siteCode: "HL-02" });
+        const north = await this.createLab(apex.id, {
+          name: "North Lab",
+          slug: "north-lab",
+          siteCode: "NL-01",
+        });
+        const harborLab = await this.createLab(apex.id, {
+          name: "Harbor Lab",
+          slug: "harbor-lab",
+          siteCode: "HL-02",
+        });
+        await this.writeModules(apex.id, north.id, [
+          "sample_lifecycle",
+          "instrument_integration",
+          "results_entry",
+          "coa_generation",
+        ]);
+        await this.writeModules(apex.id, harborLab.id, [
+          "sample_lifecycle",
+          "quality_events",
+          "capa",
+        ]);
         const harbor = await this.createClient({ name: "Harbor Clinical", slug: "harbor-clinical" });
-        await this.createLab(harbor.id, {
+        const main = await this.createLab(harbor.id, {
           name: "Main Campus",
           slug: "main-campus",
           siteCode: "MC-01",
         });
+        await this.writeModules(harbor.id, main.id, [
+          "sample_lifecycle",
+          "billing",
+          "customer_portal",
+        ]);
       }
     }
   }
@@ -178,7 +223,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     const client = await this.requireClient(clientId);
     const pool = await this.tenantPool(client.databaseName);
     const result = await pool.query(
-      `SELECT id, client_id, name, slug, site_code, status, created_at FROM labs ORDER BY name`
+      `SELECT id, client_id, name, slug, site_code, status, modules, created_at FROM labs ORDER BY name`
     );
     return result.rows.map((row) => this.mapLab(row));
   }
@@ -201,13 +246,23 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       slug,
       siteCode: input.siteCode?.trim() || siteCodeForName(name, Number(count.rows[0]?.n ?? 0)),
       status: "active",
+      modules: [...DEFAULT_LAB_MODULES],
       createdAt: nowIso(),
     };
     try {
       await pool.query(
-        `INSERT INTO labs (id, client_id, name, slug, site_code, status, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [lab.id, lab.clientId, lab.name, lab.slug, lab.siteCode, lab.status, lab.createdAt]
+        `INSERT INTO labs (id, client_id, name, slug, site_code, status, modules, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [
+          lab.id,
+          lab.clientId,
+          lab.name,
+          lab.slug,
+          lab.siteCode,
+          lab.status,
+          JSON.stringify(lab.modules),
+          lab.createdAt,
+        ]
       );
     } catch (error) {
       const code = (error as { code?: string }).code;
@@ -303,7 +358,124 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       slug: String(row["slug"]),
       siteCode: String(row["site_code"]),
       status: row["status"] as Lab["status"],
+      modules: parseModules(row["modules"]),
       createdAt: new Date(String(row["created_at"])).toISOString(),
     };
+  }
+
+  async getDossier(clientId: string): Promise<ClientDossier> {
+    const client = await this.requireClient(clientId);
+    return buildDossier(client, await this.listLabs(clientId));
+  }
+
+  async listModuleRequests(clientId: string, labId?: string): Promise<ModuleChangeRequest[]> {
+    await this.requireClient(clientId);
+    return [...this.requests.values()]
+      .filter((item) => item.clientId === clientId && (!labId || item.labId === labId))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async createModuleRequest(
+    clientId: string,
+    labId: string,
+    input: { moduleId: string; action: "add" | "remove"; requestedBy: string }
+  ): Promise<ModuleChangeRequest> {
+    const lab = await this.requireLab(clientId, labId);
+    if (!LAB_MODULE_CATALOG.some((item) => item.id === input.moduleId)) {
+      throw Object.assign(new Error("Unknown module"), { status: 400 });
+    }
+    if (input.action === "add" && lab.modules.includes(input.moduleId)) {
+      throw Object.assign(new Error("That module is already installed"), { status: 409 });
+    }
+    if (input.action === "remove" && !lab.modules.includes(input.moduleId)) {
+      throw Object.assign(new Error("That module is not installed"), { status: 404 });
+    }
+    const pending = [...this.requests.values()].find(
+      (item) =>
+        item.labId === labId &&
+        item.moduleId === input.moduleId &&
+        item.action === input.action &&
+        item.step !== "provisioned"
+    );
+    if (pending) {
+      throw Object.assign(new Error("A matching module change is already in review"), {
+        status: 409,
+      });
+    }
+    const request: ModuleChangeRequest = {
+      id: newId(),
+      clientId,
+      labId,
+      labName: lab.name,
+      moduleId: input.moduleId,
+      moduleLabel: moduleLabel(input.moduleId),
+      action: input.action,
+      step: "requested",
+      requestedBy: input.requestedBy,
+      createdAt: nowIso(),
+    };
+    this.requests.set(request.id, request);
+    return request;
+  }
+
+  async approveModuleRequest(
+    clientId: string,
+    requestId: string,
+    step: "secondary" | "business"
+  ): Promise<ModuleChangeRequest> {
+    const request = this.requests.get(requestId);
+    if (!request || request.clientId !== clientId) {
+      throw Object.assign(new Error("Module request not found"), { status: 404 });
+    }
+    if (step === "secondary" && request.step !== "requested") {
+      throw Object.assign(new Error("Secondary approval is not pending"), { status: 409 });
+    }
+    if (step === "business" && request.step !== "secondary") {
+      throw Object.assign(new Error("Business contact approval is not pending"), { status: 409 });
+    }
+    request.step = step === "secondary" ? "secondary" : "business";
+    if (request.step === "business") {
+      const lab = await this.requireLab(clientId, request.labId);
+      if (request.action === "add" && !lab.modules.includes(request.moduleId)) {
+        await this.writeModules(clientId, lab.id, [...lab.modules, request.moduleId]);
+      }
+      if (request.action === "remove") {
+        await this.writeModules(
+          clientId,
+          lab.id,
+          lab.modules.filter((id) => id !== request.moduleId)
+        );
+      }
+      request.step = "provisioned";
+    }
+    this.requests.set(request.id, request);
+    return request;
+  }
+
+  async removeLabModule(clientId: string, labId: string, moduleId: string): Promise<Lab> {
+    const lab = await this.requireLab(clientId, labId);
+    if (!lab.modules.includes(moduleId)) {
+      throw Object.assign(new Error("That module is not installed"), { status: 404 });
+    }
+    return this.writeModules(
+      clientId,
+      labId,
+      lab.modules.filter((id) => id !== moduleId)
+    );
+  }
+
+  private async requireLab(clientId: string, labId: string): Promise<Lab> {
+    const lab = (await this.listLabs(clientId)).find((item) => item.id === labId);
+    if (!lab) {
+      throw Object.assign(new Error("Lab not found"), { status: 404 });
+    }
+    return lab;
+  }
+
+  private async writeModules(clientId: string, labId: string, modules: string[]): Promise<Lab> {
+    const client = await this.requireClient(clientId);
+    const pool = await this.tenantPool(client.databaseName);
+    await pool.query(`UPDATE labs SET modules = $1 WHERE id = $2`, [JSON.stringify(modules), labId]);
+    return this.requireLab(clientId, labId);
   }
 }
