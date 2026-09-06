@@ -44,7 +44,7 @@ export function IntrasiteShell() {
             end
             className={({ isActive }) => `is-nav-item${isActive ? " active" : ""}`}
           >
-            Clients
+            Accounts
           </NavLink>
         </nav>
         <div className="is-sidebar-foot">

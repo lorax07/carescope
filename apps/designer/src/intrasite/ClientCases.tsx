@@ -242,15 +242,25 @@ function InfrastructureCase({
   );
 }
 
-function SupportCase({ dossier, labs }: { dossier: ClientDossier; labs: Lab[] }) {
-  const [labId, setLabId] = useState("all");
+export function AccountHistoryPanel({
+  dossier,
+  labs,
+  lockedLabId,
+}: {
+  dossier: ClientDossier;
+  labs: Lab[];
+  lockedLabId?: string;
+}) {
+  const [labId, setLabId] = useState(lockedLabId ?? "all");
   const [staff, setStaff] = useState("all");
   const staffNames = useMemo(
     () => [...new Set(dossier.support.map((ticket) => ticket.staff))],
     [dossier.support]
   );
   const tickets = dossier.support.filter((ticket) => {
-    const labOk = labId === "all" || ticket.labId === labId || (labId === "account" && !ticket.labId);
+    const labOk = lockedLabId
+      ? ticket.labId === lockedLabId
+      : labId === "all" || ticket.labId === labId || (labId === "account" && !ticket.labId);
     const staffOk = staff === "all" || ticket.staff === staff;
     return labOk && staffOk;
   });
@@ -258,6 +268,7 @@ function SupportCase({ dossier, labs }: { dossier: ClientDossier; labs: Lab[] })
   return (
     <div className="is-case-body">
       <div className="is-filter-row">
+        {lockedLabId ? null : (
         <label>
           Lab
           <select value={labId} onChange={(event) => setLabId(event.target.value)}>
@@ -270,6 +281,7 @@ function SupportCase({ dossier, labs }: { dossier: ClientDossier; labs: Lab[] })
             ))}
           </select>
         </label>
+        )}
         <label>
           Staff who helped
           <select value={staff} onChange={(event) => setStaff(event.target.value)}>
@@ -283,7 +295,7 @@ function SupportCase({ dossier, labs }: { dossier: ClientDossier; labs: Lab[] })
         </label>
       </div>
       {tickets.length === 0 ? (
-        <p className="is-muted">No support history matches those filters.</p>
+        <p className="is-muted">No account history matches those filters.</p>
       ) : (
         <table className="is-table">
           <thead>
@@ -388,7 +400,7 @@ export function ClientCases({
       {active && open === "support" ? (
         <section className="is-panel is-case-panel">
           <h2>{active.label}</h2>
-          <SupportCase dossier={dossier} labs={labs} />
+          <AccountHistoryPanel dossier={dossier} labs={labs} />
         </section>
       ) : null}
     </section>

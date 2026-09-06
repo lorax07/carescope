@@ -9,6 +9,7 @@ import {
   type ModuleCatalogItem,
   type ModuleChangeRequest,
 } from "./api";
+import { AccountHistoryPanel } from "./ClientCases";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
 import { ModuleCase } from "./ModuleCase";
 
@@ -115,7 +116,7 @@ export function IntrasiteLabDetailPage() {
 
           <section className="is-panel">
             <h2>Installations</h2>
-            <p className="is-muted">This lab instance is mapped onto each account environment.</p>
+            <p className="is-muted">This lab instance is mapped onto Dev1, Dev2, and QA.</p>
             <div className="is-contact-grid">
               {(dossier?.infrastructure.environments ?? []).map((env) => (
                 <article key={env.id} className="is-contact-card">
@@ -129,6 +130,13 @@ export function IntrasiteLabDetailPage() {
               ))}
             </div>
           </section>
+
+          {dossier ? (
+            <section className="is-panel">
+              <h2>Account History</h2>
+              <AccountHistoryPanel dossier={dossier} labs={[lab]} lockedLabId={lab.id} />
+            </section>
+          ) : null}
         </>
       ) : (
         <p className="is-error">Lab instance not found.</p>

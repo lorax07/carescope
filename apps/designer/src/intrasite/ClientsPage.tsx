@@ -18,7 +18,7 @@ export function IntrasiteClientsPage() {
   useEffect(() => {
     refresh()
       .catch((err: unknown) => {
-        setError(err instanceof ApiError ? err.message : "Unable to load clients");
+        setError(err instanceof ApiError ? err.message : "Unable to load accounts");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -33,7 +33,7 @@ export function IntrasiteClientsPage() {
       setSlug("");
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to create client");
+      setError(err instanceof ApiError ? err.message : "Unable to create account");
     } finally {
       setSaving(false);
     }
@@ -44,19 +44,19 @@ export function IntrasiteClientsPage() {
       <header className="is-page-header">
         <div>
           <p className="is-eyebrow">Multi-tenancy</p>
-          <h1>Client accounts</h1>
+          <h1>Accounts</h1>
           <p>
-            Each client is provisioned with an isolated database. Labs live inside that
-            tenant database as instances of the main account.
+            Each account is provisioned with its own installations. Labs live inside that
+            account as instances of the main tenant.
           </p>
         </div>
       </header>
 
       <section className="is-panel">
-        <h2>Provision client</h2>
+        <h2>Provision account</h2>
         <form className="is-inline-form" onSubmit={handleCreate}>
           <label>
-            Client name
+            Name
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -73,7 +73,7 @@ export function IntrasiteClientsPage() {
             />
           </label>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Provisioning…" : "Create client"}
+            {saving ? "Provisioning…" : "Create account"}
           </button>
         </form>
       </section>
@@ -83,9 +83,9 @@ export function IntrasiteClientsPage() {
       <section className="is-panel">
         <h2>Accounts</h2>
         {loading ? (
-          <p className="is-muted">Loading clients…</p>
+          <p className="is-muted">Loading accounts…</p>
         ) : clients.length === 0 ? (
-          <p className="is-muted">No clients yet. Provision the first tenant above.</p>
+          <p className="is-muted">No accounts yet. Provision the first tenant above.</p>
         ) : (
           <table className="is-table">
             <thead>
