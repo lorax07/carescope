@@ -475,6 +475,99 @@
   text-anchor: middle;
 }
 
+.lp-stack-mess {
+  overflow: visible;
+}
+
+.lp-stack-cable path {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: lp-edge-draw 1.15s ease forwards;
+}
+
+.lp-stack-vendor {
+  opacity: 0;
+  animation: lp-node-in 0.45s ease forwards;
+}
+
+.lp-stack-vendor-name,
+.lp-stack-vendor-tag,
+.lp-stack-knot-title,
+.lp-stack-knot-sub,
+.lp-stack-person-label,
+.lp-stack-person-sub,
+.lp-stack-proto text,
+.lp-stack-note text {
+  font-family: var(--lp-font);
+  text-anchor: middle;
+}
+
+.lp-stack-vendor-name {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lp-stack-vendor-tag {
+  font-size: 8px;
+  font-weight: 600;
+  opacity: 0.82;
+}
+
+.lp-stack-knot-title,
+.lp-stack-person-label {
+  font-size: 8.5px;
+  font-weight: 800;
+  fill: #9a3412;
+  text-anchor: middle;
+}
+
+.lp-stack-knot-sub,
+.lp-stack-person-sub {
+  font-size: 7.5px;
+  font-weight: 600;
+  fill: #7c2d12;
+  text-anchor: middle;
+}
+
+.lp-stack-person-label {
+  fill: #334155;
+}
+
+.lp-stack-person-sub {
+  fill: #64748b;
+}
+
+.lp-stack-proto rect {
+  fill: #fff;
+  stroke: #cbd5e1;
+  stroke-width: 1;
+}
+
+.lp-stack-proto text {
+  font-size: 7.5px;
+  font-weight: 800;
+  fill: #475569;
+}
+
+.lp-stack-note rect {
+  fill: #fef08a;
+  stroke: #ca8a04;
+  stroke-width: 0.8;
+}
+
+.lp-stack-note text {
+  font-size: 7.5px;
+  font-weight: 700;
+  fill: #713f12;
+  text-anchor: start;
+}
+
+.lp-stack-note-warn rect {
+  fill: #ffedd5;
+  stroke: #ea580c;
+}
+
 @keyframes lp-node-in {
   from {
     opacity: 0;

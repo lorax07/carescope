@@ -301,31 +301,146 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const FRAGMENTED_SYSTEMS = [
-  { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
-  { id: "emr", label: "EMR", x: 210, y: 42 },
-  { id: "inst", label: "Instruments", x: 318, y: 78 },
-  { id: "qc", label: "QC / CAPA", x: 54, y: 168 },
-  { id: "bill", label: "Billing", x: 176, y: 198 },
-  { id: "inv", label: "Inventory", x: 300, y: 176 },
-  { id: "crm", label: "Client portal", x: 112, y: 278 },
-  { id: "bi", label: "BI / Excel", x: 250, y: 288 },
+const VENDOR_BOXES = [
+  { id: "lis", label: "Vendor A LIS", tag: "on-prem v7", x: 18, y: 18, rotate: -7, fill: "#1e3a5f", text: "#e8eef7" },
+  { id: "emr", label: "Hospital EMR", tag: "HL7 feed", x: 148, y: 8, rotate: 4, fill: "#0f766e", text: "#ecfdf8" },
+  { id: "inst", label: "Analyzer OEM", tag: "driver wait", x: 268, y: 28, rotate: 8, fill: "#9a3412", text: "#fff7ed" },
+  { id: "qc", label: "QC SaaS", tag: "separate login", x: 8, y: 118, rotate: -5, fill: "#5b21b6", text: "#f5f3ff" },
+  { id: "bill", label: "Billing vendor", tag: "CSV drop", x: 270, y: 132, rotate: 6, fill: "#3f6212", text: "#f7fee7" },
+  { id: "inv", label: "Inventory app", tag: "no API", x: 12, y: 228, rotate: 5, fill: "#7c2d12", text: "#fff7ed" },
+  { id: "crm", label: "Client portal", tag: "another contract", x: 258, y: 236, rotate: -6, fill: "#1e40af", text: "#eff6ff" },
+  { id: "bi", label: "Excel / BI", tag: "shadow system", x: 148, y: 292, rotate: 3, fill: "#854d0e", text: "#fffbeb" },
 ] as const;
 
-const FRAGMENTED_EDGES: Array<[number, number]> = [
-  [0, 1],
-  [0, 3],
-  [0, 4],
-  [1, 2],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-  [3, 6],
-  [4, 5],
-  [4, 7],
-  [5, 7],
-  [6, 7],
+const VENDOR_CABLES: Array<{ d: string; color: string; protocol: string; broken?: boolean }> = [
+  { d: "M70 42 C 90 90, 140 110, 176 148", color: "#1e3a5f", protocol: "HL7" },
+  { d: "M200 36 C 210 80, 200 120, 188 150", color: "#0f766e", protocol: "ADT" },
+  { d: "M310 56 C 280 90, 250 130, 204 158", color: "#9a3412", protocol: "driver" },
+  { d: "M60 140 C 100 150, 130 160, 168 168", color: "#5b21b6", protocol: "REST" },
+  { d: "M300 154 C 260 170, 230 180, 208 176", color: "#3f6212", protocol: "SFTP" },
+  { d: "M70 250 C 110 230, 140 200, 170 184", color: "#7c2d12", protocol: "CSV", broken: true },
+  { d: "M290 258 C 250 230, 220 200, 200 186", color: "#1e40af", protocol: "nightly" },
+  { d: "M190 278 C 190 240, 188 210, 186 188", color: "#854d0e", protocol: "email" },
 ];
+
+function TypicalLabStackVisual() {
+  return (
+    <svg
+      className="lp-compare-canvas lp-stack-mess"
+      viewBox="0 0 380 340"
+      role="img"
+      aria-label="A lab operator tangled in one-off vendor integrations, protocols, and failed interfaces"
+    >
+      <defs>
+        <filter id="stackShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" floodColor="#0f172a" floodOpacity="0.16" />
+        </filter>
+      </defs>
+
+      {VENDOR_CABLES.map((cable, index) => (
+        <g key={cable.protocol + index} className="lp-stack-cable" style={{ animationDelay: `${0.12 + index * 0.06}s` }}>
+          <path
+            d={cable.d}
+            fill="none"
+            stroke={cable.color}
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeDasharray={cable.broken ? "5 4" : undefined}
+            opacity="0.88"
+          />
+          {cable.broken ? (
+            <g transform="translate(128 214)" className="lp-stack-break">
+              <circle r="8" fill="#fef2f2" stroke="#dc2626" strokeWidth="1.2" />
+              <path d="M-3.2 -3.2 3.2 3.2M3.2 -3.2 -3.2 3.2" stroke="#dc2626" strokeWidth="1.5" />
+            </g>
+          ) : null}
+        </g>
+      ))}
+
+      <g className="lp-stack-knot" transform="translate(188 168)">
+        <ellipse rx="36" ry="20" fill="#fff7ed" stroke="#c2410c" strokeWidth="1.4" />
+        <path
+          d="M-22 0 C -10 -12, 10 12, 22 0 M-16 7 C -2 -9, 8 10, 18 -3"
+          fill="none"
+          stroke="#9a3412"
+          strokeWidth="1.6"
+        />
+        <text y="-2" className="lp-stack-knot-title">
+          custom middleware
+        </text>
+        <text y="11" className="lp-stack-knot-sub">
+          8 vendor contracts
+        </text>
+      </g>
+
+      <g className="lp-stack-person" transform="translate(188 214)">
+        <circle cy="-28" r="10" fill="#f3d2b5" />
+        <circle cx="-3.2" cy="-29.4" r="1.05" fill="#1f2937" />
+        <circle cx="3.2" cy="-29.4" r="1.05" fill="#1f2937" />
+        <path d="M-3.4 -24.6 Q 0 -22.6 3.4 -24.6" fill="none" stroke="#7c2d12" strokeWidth="1.1" />
+        <path d="M-11 -19 h22 l5 24 h-32 z" fill="#f8fafc" stroke="#64748b" strokeWidth="1.2" />
+        <path d="M-3.5 -17 h7 v7 h-7z" fill="#e2e8f0" />
+        <circle cx="11" cy="-37" r="2.1" fill="#fca5a5" />
+        <text y="22" className="lp-stack-person-label">
+          Integration owner
+        </text>
+        <text y="34" className="lp-stack-person-sub">
+          still mapping last night’s feed
+        </text>
+      </g>
+
+      {VENDOR_BOXES.map((vendor, index) => (
+        <g
+          key={vendor.id}
+          className="lp-stack-vendor"
+          style={{ animationDelay: `${0.2 + index * 0.05}s` }}
+          transform={`translate(${vendor.x} ${vendor.y}) rotate(${vendor.rotate})`}
+          filter="url(#stackShadow)"
+        >
+          <rect width="104" height="40" rx="7" fill={vendor.fill} />
+          <text x="52" y="17" fill={vendor.text} className="lp-stack-vendor-name">
+            {vendor.label}
+          </text>
+          <text x="52" y="31" fill={vendor.text} className="lp-stack-vendor-tag">
+            {vendor.tag}
+          </text>
+        </g>
+      ))}
+
+      {[
+        { x: 92, y: 78, label: "HL7" },
+        { x: 214, y: 72, label: "ADT" },
+        { x: 268, y: 98, label: "driver" },
+        { x: 88, y: 156, label: "REST" },
+        { x: 256, y: 168, label: "SFTP" },
+      ].map((mark) => (
+        <g key={mark.label} className="lp-stack-proto" transform={`translate(${mark.x} ${mark.y})`}>
+          <rect x="-16" y="-7" width="32" height="14" rx="3" />
+          <text y="3.5">{mark.label}</text>
+        </g>
+      ))}
+
+      <g className="lp-stack-note" transform="translate(286 188) rotate(7)">
+        <rect width="78" height="34" rx="3" />
+        <text x="6" y="14">
+          go-live slipped
+        </text>
+        <text x="6" y="26">
+          waiting on vendor
+        </text>
+      </g>
+      <g className="lp-stack-note lp-stack-note-warn" transform="translate(8 176) rotate(-6)">
+        <rect width="86" height="34" rx="3" />
+        <text x="6" y="14">
+          who owns mapping?
+        </text>
+        <text x="6" y="26">
+          3 teams, 2 tickets
+        </text>
+      </g>
+    </svg>
+  );
+}
 
 function IntegrationsComparisonVisual() {
   return (
@@ -342,47 +457,7 @@ function IntegrationsComparisonVisual() {
             ))}
           </ul>
         </div>
-        <svg
-          className="lp-compare-canvas"
-          viewBox="0 0 380 340"
-          role="img"
-          aria-label="Many disconnected systems linked by integrations"
-        >
-          <defs>
-            <linearGradient id="fragLine" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#64748b" stopOpacity="0.55" />
-            </linearGradient>
-          </defs>
-          {FRAGMENTED_EDGES.map(([a, b], i) => {
-            const from = FRAGMENTED_SYSTEMS[a];
-            const to = FRAGMENTED_SYSTEMS[b];
-            const midX = (from.x + to.x) / 2 + ((i % 2 === 0 ? 1 : -1) * 18);
-            const midY = (from.y + to.y) / 2 + ((i % 3) - 1) * 14;
-            return (
-              <path
-                key={`${from.id}-${to.id}`}
-                className="lp-compare-edge"
-                style={{ animationDelay: `${0.15 + i * 0.07}s` }}
-                d={`M${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-                fill="none"
-                stroke="url(#fragLine)"
-                strokeWidth="1.75"
-              />
-            );
-          })}
-          {FRAGMENTED_SYSTEMS.map((node, i) => (
-            <g
-              key={node.id}
-              className="lp-compare-node"
-              style={{ animationDelay: `${0.35 + i * 0.06}s` }}
-              transform={`translate(${node.x} ${node.y})`}
-            >
-              <rect x="-52" y="-18" width="104" height="36" rx="8" />
-              <text y="5">{node.label}</text>
-            </g>
-          ))}
-        </svg>
+        <TypicalLabStackVisual />
       </div>
 
       <div className="lp-compare-divider" aria-hidden="true">
