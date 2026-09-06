@@ -2,14 +2,18 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ApiError,
+  approveCloseRequest,
+  createCloseRequest,
   createLab,
   getClient,
+  type AccountCloseRequest,
   type Client,
   type ClientDossier,
   type Lab,
   type ModuleCatalogItem,
   type ModuleChangeRequest,
 } from "./api";
+import { ApprovalMap } from "./ApprovalMap";
 import { ClientCases } from "./ClientCases";
 import { ModuleCase } from "./ModuleCase";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
@@ -25,6 +29,9 @@ export function IntrasiteClientDetailPage() {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [moduleLab, setModuleLab] = useState<Lab | null>(null);
+  const [closeRequest, setCloseRequest] = useState<AccountCloseRequest | null>(null);
+  const [closing, setClosing] = useState(false);
+  const [closeOpen, setCloseOpen] = useState(false);
 
   async function refresh() {
     const result = await getClient(id);
@@ -32,6 +39,7 @@ export function IntrasiteClientDetailPage() {
     setLabs(result.labs);
     setDossier(result.dossier);
     setRequests(result.requests);
+    setCloseRequest(result.closeRequest);
     if (result.moduleCatalog?.length) setCatalog(result.moduleCatalog);
     setModuleLab((current) => current ? result.labs.find((lab) => lab.id === current.id) ?? null : null);
   }
@@ -67,17 +75,24 @@ export function IntrasiteClientDetailPage() {
 
   return (
     <div className="is-page">
-      <header className="is-page-header">
+      <header className="is-page-header is-page-header-split">
         <div>
           <p className="is-eyebrow">
-            <Link to="/intrasite">Clients</Link> / account
+            <Link to="/intrasite">Accounts</Link> / {client?.name ?? "Name"}
           </p>
-          <h1>{client?.name ?? "Client"}</h1>
+          <h1>{client?.name ?? "Name"}</h1>
           <p>
-            Open a case for infrastructure, installation mapping, business contacts, or support.
-            Each lab lists its modules and can request additions through dual approval.
+            Open a case for infrastructure, installation mapping, business contacts, or account
+            history. Each lab lists its modules and can request additions through dual approval.
           </p>
         </div>
+        {client && client.status !== "closed" ? (
+          <button type="button" className="btn" onClick={() => setCloseOpen(true)}>
+            Close account
+          </button>
+        ) : (
+          <span className="is-pill closed">closed</span>
+        )}
       </header>
 
       {error ? <p className="is-error">{error}</p> : null}
@@ -96,7 +111,7 @@ export function IntrasiteClientDetailPage() {
               placeholder="North Lab"
             />
           </label>
-          <button type="submit" className="btn btn-primary" disabled={saving || !client}>
+          <button type="submit" className="btn btn-primary" disabled={saving || !client || client.status === "closed"}>
             {saving ? "Creating…" : "Create lab"}
           </button>
         </form>
@@ -121,7 +136,9 @@ export function IntrasiteClientDetailPage() {
               {labs.map((lab) => (
                 <tr key={lab.id}>
                   <td>
-                    <strong>{lab.name}</strong>
+                    <Link to={`/intrasite/clients/${id}/labs/${lab.id}`}>
+                      <strong>{lab.name}</strong>
+                    </Link>
                     <div className="is-muted">
                       <code>{lab.slug}</code>
                     </div>
@@ -166,6 +183,80 @@ export function IntrasiteClientDetailPage() {
           onClose={() => setModuleLab(null)}
           onChanged={refresh}
         />
+      ) : null}
+
+      {closeOpen && client ? (
+        <div className="is-case-overlay" role="presentation" onClick={() => setCloseOpen(false)}>
+          <div className="is-case" role="dialog" aria-labelledby="close-case-title" onClick={(event) => event.stopPropagation()}>
+            <header className="is-case-head">
+              <div>
+                <p className="is-eyebrow">Account</p>
+                <h2 id="close-case-title">Close account</h2>
+                <p>{client.name}</p>
+              </div>
+              <button type="button" className="btn" onClick={() => setCloseOpen(false)}>
+                Close
+              </button>
+            </header>
+            <ApprovalMap
+              variant="close"
+              step={closeRequest?.step ?? null}
+              moduleLabel={closeRequest ? "Account close" : undefined}
+            />
+            {client.status === "closed" ? (
+              <p>This account is closed.</p>
+            ) : (
+              <div className="is-approval-actions">
+                {!closeRequest || closeRequest.step === "provisioned" ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={closing}
+                    onClick={() => {
+                      setClosing(true);
+                      createCloseRequest(id)
+                        .then(() => refresh())
+                        .catch((err) => setError(err instanceof ApiError ? err.message : "Unable to close account"))
+                        .finally(() => setClosing(false));
+                    }}
+                  >
+                    {closing ? "Requesting…" : "Request account close"}
+                  </button>
+                ) : closeRequest.step === "requested" ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={closing}
+                    onClick={() => {
+                      setClosing(true);
+                      approveCloseRequest(id, closeRequest.id, "secondary")
+                        .then(() => refresh())
+                        .catch((err) => setError(err instanceof ApiError ? err.message : "Unable to approve"))
+                        .finally(() => setClosing(false));
+                    }}
+                  >
+                    {closing ? "Recording…" : "Record secondary approval"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={closing}
+                    onClick={() => {
+                      setClosing(true);
+                      approveCloseRequest(id, closeRequest.id, "business")
+                        .then(() => refresh())
+                        .catch((err) => setError(err instanceof ApiError ? err.message : "Unable to approve"))
+                        .finally(() => setClosing(false));
+                    }}
+                  >
+                    {closing ? "Recording…" : "Record business contact approval"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       ) : null}
     </div>
   );

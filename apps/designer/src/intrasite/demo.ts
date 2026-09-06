@@ -1,10 +1,12 @@
 import type {
+  AccountCloseRequest,
   Client,
   ClientDetail,
   ClientRouting,
   IntrasiteUser,
   Lab,
   ModuleChangeRequest,
+  QueryEnvironment,
   QueryResult,
 } from "./api";
 import {
@@ -95,6 +97,7 @@ const labsByClient = new Map<string, Lab[]>([
 ]);
 
 const requests: ModuleChangeRequest[] = [];
+const closeRequests: AccountCloseRequest[] = [];
 
 export function isDemoCredentials(email: string, password: string): boolean {
   return email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD;
@@ -167,6 +170,10 @@ export function demoGetClient(id: string): ClientDetail {
     requests: requests
       .filter((item) => item.clientId === id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    closeRequest:
+      closeRequests
+        .filter((item) => item.clientId === id)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
     moduleCatalog: LAB_MODULE_CATALOG,
   };
 }
@@ -217,9 +224,55 @@ export function demoCreateLab(
   return { lab };
 }
 
-export function demoQuery(clientId: string, sql: string): QueryResult {
+export function demoQuery(
+  clientId: string,
+  sql: string,
+  environment?: QueryEnvironment["id"]
+): QueryResult {
   const detail = demoGetClient(clientId);
-  return runInfraQuery(sql, detail.labs, detail.dossier);
+  return runInfraQuery(sql, detail.labs, detail.dossier, environment);
+}
+
+export function demoCreateCloseRequest(clientId: string): { request: AccountCloseRequest } {
+  const client = requireClient(clientId);
+  if (client.status === "closed") {
+    throw Object.assign(new Error("This account is already closed"), { status: 409 });
+  }
+  const pending = closeRequests.find((item) => item.clientId === clientId && item.step !== "provisioned");
+  if (pending) {
+    throw Object.assign(new Error("An account close request is already in review"), { status: 409 });
+  }
+  const request: AccountCloseRequest = {
+    id: crypto.randomUUID(),
+    clientId,
+    step: "requested",
+    requestedBy: DEMO_USER.name,
+    createdAt: new Date().toISOString(),
+  };
+  closeRequests.push(request);
+  return { request };
+}
+
+export function demoApproveCloseRequest(
+  clientId: string,
+  requestId: string,
+  step: "secondary" | "business"
+): { request: AccountCloseRequest } {
+  const request = closeRequests.find((item) => item.id === requestId && item.clientId === clientId);
+  if (!request) {
+    throw Object.assign(new Error("Close request not found"), { status: 404 });
+  }
+  if (step === "secondary" && request.step !== "requested") {
+    throw Object.assign(new Error("Secondary approval is not pending"), { status: 409 });
+  }
+  if (step === "business" && request.step !== "secondary") {
+    throw Object.assign(new Error("Business contact approval is not pending"), { status: 409 });
+  }
+  request.step = step === "secondary" ? "secondary" : "provisioned";
+  if (request.step === "provisioned") {
+    requireClient(clientId).status = "closed";
+  }
+  return { request };
 }
 
 export function demoCreateModuleRequest(

@@ -1,6 +1,6 @@
 export type IntrasiteRole = "platform_admin" | "client_admin";
 
-export type ClientStatus = "active" | "suspended" | "provisioning";
+export type ClientStatus = "active" | "suspended" | "provisioning" | "closed";
 
 export type LabStatus = "active" | "suspended";
 
@@ -75,10 +75,21 @@ export type SupportTicket = {
 export type InstallationNode = {
   id: string;
   label: string;
-  kind: "hq" | "network" | "lab" | "instrument";
+  kind: "hq" | "network" | "lab" | "instrument" | "environment";
   x: number;
   y: number;
   connectsTo: string[];
+};
+
+export type QueryEnvironmentId = "dev1" | "dev2" | "qa";
+
+export type QueryEnvironment = {
+  id: QueryEnvironmentId;
+  label: string;
+  databaseName: string;
+  host: string;
+  region: string;
+  purpose: string;
 };
 
 export type BackendInfra = {
@@ -88,6 +99,7 @@ export type BackendInfra = {
   region: string;
   isolation: string;
   tables: Array<{ name: string; rows: number }>;
+  environments: QueryEnvironment[];
 };
 
 export type ClientDossier = {
@@ -95,6 +107,14 @@ export type ClientDossier = {
   architecture: InstallationNode[];
   contacts: BusinessContact[];
   support: SupportTicket[];
+};
+
+export type AccountCloseRequest = {
+  id: string;
+  clientId: string;
+  step: ApprovalStep;
+  requestedBy: string;
+  createdAt: string;
 };
 
 export type QueryResult = {
@@ -149,4 +169,11 @@ export interface IntrasiteStore {
     step: "secondary" | "business"
   ): Promise<ModuleChangeRequest>;
   removeLabModule(clientId: string, labId: string, moduleId: string): Promise<Lab>;
+  getCloseRequest(clientId: string): Promise<AccountCloseRequest | null>;
+  createCloseRequest(clientId: string, requestedBy: string): Promise<AccountCloseRequest>;
+  approveCloseRequest(
+    clientId: string,
+    requestId: string,
+    step: "secondary" | "business"
+  ): Promise<AccountCloseRequest>;
 }

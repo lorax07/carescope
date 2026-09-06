@@ -1,10 +1,17 @@
 import type { ApprovalStep } from "./api";
 
-const STEPS: Array<{ key: ApprovalStep; label: string; detail: string }> = [
+const MODULE_STEPS: Array<{ key: ApprovalStep; label: string; detail: string }> = [
   { key: "requested", label: "Requested", detail: "Operator opens the add-module case" },
   { key: "secondary", label: "Secondary approval", detail: "Internal reviewer signs off" },
   { key: "business", label: "Business contact approval", detail: "Client business contact confirms" },
   { key: "provisioned", label: "Provisioned", detail: "Module is installed on the lab" },
+];
+
+const CLOSE_STEPS: Array<{ key: ApprovalStep; label: string; detail: string }> = [
+  { key: "requested", label: "Requested", detail: "Operator opens the close-account case" },
+  { key: "secondary", label: "Secondary approval", detail: "Internal reviewer signs off" },
+  { key: "business", label: "Business contact approval", detail: "Client business contact confirms" },
+  { key: "provisioned", label: "Closed", detail: "The account is closed" },
 ];
 
 function stepStatus(
@@ -28,17 +35,21 @@ function stepStatus(
 export function ApprovalMap({
   step,
   moduleLabel,
+  variant = "module",
 }: {
   step: ApprovalStep | null;
   moduleLabel?: string;
+  variant?: "module" | "close";
 }) {
+  const steps = variant === "close" ? CLOSE_STEPS : MODULE_STEPS;
   return (
-    <section className="is-approval" aria-label="Module addition approval process">
+    <section className="is-approval" aria-label="Approval process">
       <div className="is-approval-copy">
         <h3>Approval process</h3>
         <p>
-          Adding a module requires secondary approval and business contact approval before it is
-          provisioned.
+          {variant === "close"
+            ? "Closing an account requires secondary approval and business contact approval."
+            : "Adding a module requires secondary approval and business contact approval before it is provisioned."}
           {moduleLabel ? (
             <>
               {" "}
@@ -48,7 +59,7 @@ export function ApprovalMap({
         </p>
       </div>
       <ol className="is-approval-map">
-        {STEPS.map((item, index) => {
+        {steps.map((item, index) => {
           const status = stepStatus(step, item.key);
           return (
             <li key={item.key} className={`is-approval-step ${status}`}>

@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from "react
 import { AppShell } from "./App";
 import { IntrasiteAuthProvider } from "./intrasite/AuthContext";
 import { IntrasiteClientDetailPage } from "./intrasite/ClientDetailPage";
+import { IntrasiteLabDetailPage } from "./intrasite/LabDetailPage";
 import { IntrasiteClientsPage } from "./intrasite/ClientsPage";
 import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
@@ -46,6 +47,7 @@ createRoot(document.getElementById("root")!).render(
           <Route element={<IntrasiteShell />}>
             <Route index element={<IntrasiteClientsPage />} />
             <Route path="clients/:id" element={<IntrasiteClientDetailPage />} />
+            <Route path="clients/:id/labs/:labId" element={<IntrasiteLabDetailPage />} />
           </Route>
         </Route>
         <Route path="app" element={<AppShell />}>

@@ -1,7 +1,9 @@
 import {
   DEMO_TOKEN,
+  demoApproveCloseRequest,
   demoApproveModuleRequest,
   demoCreateClient,
+  demoCreateCloseRequest,
   demoCreateLab,
   demoCreateModuleRequest,
   demoGetClient,
@@ -25,7 +27,7 @@ export type Client = {
   id: string;
   name: string;
   slug: string;
-  status: "active" | "suspended" | "provisioning";
+  status: "active" | "suspended" | "provisioning" | "closed";
   databaseName: string;
   isolation: "dedicated_database";
   labCount: number;
@@ -89,10 +91,19 @@ export type SupportTicket = {
 export type InstallationNode = {
   id: string;
   label: string;
-  kind: "hq" | "network" | "lab" | "instrument";
+  kind: "hq" | "network" | "lab" | "instrument" | "environment";
   x: number;
   y: number;
   connectsTo: string[];
+};
+
+export type QueryEnvironment = {
+  id: "dev1" | "dev2" | "qa";
+  label: string;
+  databaseName: string;
+  host: string;
+  region: string;
+  purpose: string;
 };
 
 export type BackendInfra = {
@@ -102,6 +113,15 @@ export type BackendInfra = {
   region: string;
   isolation: string;
   tables: Array<{ name: string; rows: number }>;
+  environments: QueryEnvironment[];
+};
+
+export type AccountCloseRequest = {
+  id: string;
+  clientId: string;
+  step: ApprovalStep;
+  requestedBy: string;
+  createdAt: string;
 };
 
 export type ClientDossier = {
@@ -127,6 +147,7 @@ export type ClientDetail = {
   routing: ClientRouting;
   dossier: ClientDossier;
   requests: ModuleChangeRequest[];
+  closeRequest: AccountCloseRequest | null;
   moduleCatalog: ModuleCatalogItem[];
 };
 
@@ -251,18 +272,56 @@ export async function createLab(
   });
 }
 
-export async function queryClientDatabase(clientId: string, sql: string) {
+export async function queryClientDatabase(
+  clientId: string,
+  sql: string,
+  environment?: QueryEnvironment["id"]
+) {
   if (isDemoSession()) {
     try {
-      return demoQuery(clientId, sql);
+      return demoQuery(clientId, sql, environment);
     } catch (error) {
       throw new ApiError(error instanceof Error ? error.message : "Query failed", 400);
     }
   }
   return api<QueryResult>(`/clients/${clientId}/query`, {
     method: "POST",
-    body: JSON.stringify({ sql }),
+    body: JSON.stringify({ sql, environment }),
   });
+}
+
+export async function createCloseRequest(clientId: string) {
+  if (isDemoSession()) {
+    try {
+      return demoCreateCloseRequest(clientId);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Unable to close account", 409);
+    }
+  }
+  return api<{ request: AccountCloseRequest }>(`/clients/${clientId}/close-requests`, {
+    method: "POST",
+  });
+}
+
+export async function approveCloseRequest(
+  clientId: string,
+  requestId: string,
+  step: "secondary" | "business"
+) {
+  if (isDemoSession()) {
+    try {
+      return demoApproveCloseRequest(clientId, requestId, step);
+    } catch (error) {
+      throw new ApiError(error instanceof Error ? error.message : "Unable to approve close", 409);
+    }
+  }
+  return api<{ request: AccountCloseRequest }>(
+    `/clients/${clientId}/close-requests/${requestId}/approve`,
+    {
+      method: "POST",
+      body: JSON.stringify({ step }),
+    }
+  );
 }
 
 export async function createModuleRequest(

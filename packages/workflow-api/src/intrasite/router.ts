@@ -167,12 +167,14 @@ export function createIntrasiteRouter(): Router {
       const labs = await store.listLabs(client.id);
       const dossier = await store.getDossier(client.id);
       const requests = await store.listModuleRequests(client.id);
+      const closeRequest = await store.getCloseRequest(client.id);
       res.json({
         client,
         labs,
         routing: routingFor(client),
         dossier,
         requests,
+        closeRequest,
         moduleCatalog: LAB_MODULE_CATALOG,
       });
     })
@@ -255,7 +257,13 @@ export function createIntrasiteRouter(): Router {
         }
         const labs = await store.listLabs(clientId);
         const dossier = await store.getDossier(clientId);
-        res.json(runInfraQuery(String(req.body?.sql ?? ""), labs, dossier));
+        const environment =
+          req.body?.environment === "dev1" ||
+          req.body?.environment === "dev2" ||
+          req.body?.environment === "qa"
+            ? String(req.body.environment)
+            : undefined;
+        res.json(runInfraQuery(String(req.body?.sql ?? ""), labs, dossier, environment));
       } catch (error) {
         httpError(error, res);
       }
@@ -307,6 +315,40 @@ export function createIntrasiteRouter(): Router {
       try {
         const step = req.body?.step === "business" ? "business" : "secondary";
         const request = await getIntrasiteStore().approveModuleRequest(
+          String(req.params["id"] ?? ""),
+          String(req.params["requestId"] ?? ""),
+          step
+        );
+        res.json({ request });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.post(
+    "/clients/:id/close-requests",
+    requireAuth,
+    asyncHandler(async (req: AuthedRequest, res) => {
+      try {
+        const request = await getIntrasiteStore().createCloseRequest(
+          String(req.params["id"] ?? ""),
+          req.intrasiteUser?.name ?? "Intrasite operator"
+        );
+        res.status(201).json({ request });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.post(
+    "/clients/:id/close-requests/:requestId/approve",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const step = req.body?.step === "business" ? "business" : "secondary";
+        const request = await getIntrasiteStore().approveCloseRequest(
           String(req.params["id"] ?? ""),
           String(req.params["requestId"] ?? ""),
           step

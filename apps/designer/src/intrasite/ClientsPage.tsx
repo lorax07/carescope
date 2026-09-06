@@ -90,7 +90,7 @@ export function IntrasiteClientsPage() {
           <table className="is-table">
             <thead>
               <tr>
-                <th>Client</th>
+                <th>Name</th>
                 <th>Slug</th>
                 <th>Isolated database</th>
                 <th>Labs</th>

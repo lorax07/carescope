@@ -166,6 +166,56 @@ describe("Intrasite auth and multi-tenancy", () => {
     expect(removed.body.lab.modules).toEqual([]);
   });
 
+  it("requires secondary and business approval before closing an account", async () => {
+    const app = createApp();
+    const login = await request(app).post("/api/v1/intrasite/auth/login").send(admin);
+    const auth = { Authorization: `Bearer ${login.body.token as string}` };
+    const client = await request(app)
+      .post("/api/v1/intrasite/clients")
+      .set(auth)
+      .send({ name: "Harbor Clinical", slug: "harbor-close" });
+
+    const created = await request(app)
+      .post(`/api/v1/intrasite/clients/${client.body.client.id}/close-requests`)
+      .set(auth)
+      .send();
+    expect(created.status).toBe(201);
+    expect(created.body.request.step).toBe("requested");
+
+    const skip = await request(app)
+      .post(
+        `/api/v1/intrasite/clients/${client.body.client.id}/close-requests/${created.body.request.id}/approve`
+      )
+      .set(auth)
+      .send({ step: "business" });
+    expect(skip.status).toBe(409);
+
+    await request(app)
+      .post(
+        `/api/v1/intrasite/clients/${client.body.client.id}/close-requests/${created.body.request.id}/approve`
+      )
+      .set(auth)
+      .send({ step: "secondary" });
+    const business = await request(app)
+      .post(
+        `/api/v1/intrasite/clients/${client.body.client.id}/close-requests/${created.body.request.id}/approve`
+      )
+      .set(auth)
+      .send({ step: "business" });
+    expect(business.status).toBe(200);
+    expect(business.body.request.step).toBe("provisioned");
+
+    const after = await request(app)
+      .get(`/api/v1/intrasite/clients/${client.body.client.id}`)
+      .set(auth);
+    expect(after.body.client.status).toBe("closed");
+    expect(after.body.dossier.infrastructure.environments.map((env: { id: string }) => env.id)).toEqual([
+      "dev1",
+      "dev2",
+      "qa",
+    ]);
+  });
+
   it("sets an httpOnly session cookie on login", async () => {
     const app = createApp();
     const login = await request(app).post("/api/v1/intrasite/auth/login").send(admin);

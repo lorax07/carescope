@@ -3,6 +3,7 @@ import type {
   ClientDossier,
   InstallationNode,
   Lab,
+  QueryEnvironment,
   QueryResult,
 } from "./api";
 
@@ -46,38 +47,62 @@ export function moduleLabel(id: string): string {
   return LAB_MODULE_CATALOG.find((item) => item.id === id)?.label ?? id;
 }
 
+const ENV_META: Array<{ id: QueryEnvironment["id"]; label: string; purpose: string; scale: number }> = [
+  { id: "dev1", label: "Dev1", purpose: "Developer sandbox", scale: 0.25 },
+  { id: "dev2", label: "Dev2", purpose: "Integration / vendor dry-run", scale: 0.4 },
+  { id: "qa", label: "QA", purpose: "Validation and change-control", scale: 0.7 },
+];
+
+export function environmentsFor(client: Client): QueryEnvironment[] {
+  return ENV_META.map((env) => ({
+    id: env.id,
+    label: env.label,
+    purpose: env.purpose,
+    databaseName: `${client.databaseName}_${env.id}`,
+    host: `${env.id}.db.${client.slug}.intrasite.internal`,
+    region: "us-east-1",
+  }));
+}
+
 export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
+  const environments = environmentsFor(client);
   const architecture: InstallationNode[] = [
-    { id: "hq", label: `${client.name} HQ`, kind: "hq", x: 220, y: 36, connectsTo: ["net"] },
     {
-      id: "net",
-      label: "Site network",
-      kind: "network",
-      x: 220,
-      y: 118,
-      connectsTo: labs.map((lab) => lab.id),
+      id: "hq",
+      label: `${client.name} HQ`,
+      kind: "hq",
+      x: 280,
+      y: 24,
+      connectsTo: environments.map((env) => env.id),
     },
-    ...labs.flatMap((lab, index) => {
-      const x = 70 + index * 180;
-      return [
-        {
-          id: lab.id,
-          label: lab.name,
-          kind: "lab" as const,
-          x,
-          y: 210,
-          connectsTo: [`${lab.id}-inst`],
-        },
-        {
-          id: `${lab.id}-inst`,
-          label: `${lab.siteCode} instruments`,
-          kind: "instrument" as const,
-          x,
-          y: 300,
-          connectsTo: [],
-        },
-      ];
-    }),
+    ...environments.map((env, envIndex) => ({
+      id: env.id,
+      label: env.label,
+      kind: "environment" as const,
+      x: 70 + envIndex * 210,
+      y: 112,
+      connectsTo: labs.map((lab) => `${env.id}-${lab.id}`),
+    })),
+    ...environments.flatMap((env, envIndex) =>
+      labs.map((lab, labIndex) => ({
+        id: `${env.id}-${lab.id}`,
+        label: `${lab.name} · ${env.label}`,
+        kind: "lab" as const,
+        x: 30 + envIndex * 210 + labIndex * 95,
+        y: 210,
+        connectsTo: [`${env.id}-${lab.id}-inst`],
+      }))
+    ),
+    ...environments.flatMap((env, envIndex) =>
+      labs.map((lab, labIndex) => ({
+        id: `${env.id}-${lab.id}-inst`,
+        label: `${lab.siteCode} ${env.label}`,
+        kind: "instrument" as const,
+        x: 30 + envIndex * 210 + labIndex * 95,
+        y: 300,
+        connectsTo: [],
+      }))
+    ),
   ];
 
   return {
@@ -93,6 +118,7 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
         { name: "instruments", rows: labs.length * 4 },
         { name: "contacts", rows: 4 },
       ],
+      environments,
     },
     architecture,
     contacts: [
@@ -170,7 +196,16 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
   };
 }
 
-export function runInfraQuery(sql: string, labs: Lab[], dossier: ClientDossier): QueryResult {
+function environmentScale(envId?: string): number {
+  return ENV_META.find((item) => item.id === envId)?.scale ?? 1;
+}
+
+export function runInfraQuery(
+  sql: string,
+  labs: Lab[],
+  dossier: ClientDossier,
+  environmentId?: string
+): QueryResult {
   const normalized = sql.trim().replace(/;+\s*$/, "").replace(/\s+/g, " ");
   if (!normalized) {
     throw new Error("SQL is required");
@@ -217,7 +252,7 @@ export function runInfraQuery(sql: string, labs: Lab[], dossier: ClientDossier):
   }
   if (table === "samples") {
     const count = dossier.infrastructure.tables.find((item) => item.name === "samples")?.rows ?? 8;
-    const preview = Math.min(12, count);
+    const preview = Math.min(12, Math.max(3, Math.round(count * environmentScale(environmentId))));
     return {
       columns: ["id", "accession", "lab_id", "status"],
       rows: Array.from({ length: preview }, (_, index) => ({

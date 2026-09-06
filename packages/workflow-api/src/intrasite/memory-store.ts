@@ -1,6 +1,7 @@
 import { hashPassword } from "./auth.js";
 import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
 import type {
+  AccountCloseRequest,
   Client,
   ClientDossier,
   CreateClientInput,
@@ -30,6 +31,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
   private clients = new Map<string, Omit<Client, "labCount">>();
   private databases = new Map<string, TenantDatabase>();
   private requests = new Map<string, ModuleChangeRequest>();
+  private closeRequests = new Map<string, AccountCloseRequest>();
 
   async seed(admin: { email: string; password: string; name: string }): Promise<void> {
     if (this.users.size === 0) {
@@ -263,6 +265,63 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
     }
     lab.modules = lab.modules.filter((id) => id !== moduleId);
     return lab;
+  }
+
+  async getCloseRequest(clientId: string): Promise<AccountCloseRequest | null> {
+    return (
+      [...this.closeRequests.values()]
+        .filter((item) => item.clientId === clientId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null
+    );
+  }
+
+  async createCloseRequest(clientId: string, requestedBy: string): Promise<AccountCloseRequest> {
+    const client = this.clients.get(clientId);
+    if (!client) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    if (client.status === "closed") {
+      throw Object.assign(new Error("This account is already closed"), { status: 409 });
+    }
+    const pending = [...this.closeRequests.values()].find(
+      (item) => item.clientId === clientId && item.step !== "provisioned"
+    );
+    if (pending) {
+      throw Object.assign(new Error("An account close request is already in review"), { status: 409 });
+    }
+    const request: AccountCloseRequest = {
+      id: newId(),
+      clientId,
+      step: "requested",
+      requestedBy,
+      createdAt: nowIso(),
+    };
+    this.closeRequests.set(request.id, request);
+    return request;
+  }
+
+  async approveCloseRequest(
+    clientId: string,
+    requestId: string,
+    step: "secondary" | "business"
+  ): Promise<AccountCloseRequest> {
+    const request = this.closeRequests.get(requestId);
+    if (!request || request.clientId !== clientId) {
+      throw Object.assign(new Error("Close request not found"), { status: 404 });
+    }
+    if (step === "secondary" && request.step !== "requested") {
+      throw Object.assign(new Error("Secondary approval is not pending"), { status: 409 });
+    }
+    if (step === "business" && request.step !== "secondary") {
+      throw Object.assign(new Error("Business contact approval is not pending"), { status: 409 });
+    }
+    request.step = step === "secondary" ? "secondary" : "provisioned";
+    if (request.step === "provisioned") {
+      const client = this.clients.get(clientId);
+      if (client) client.status = "closed";
+    }
+    this.closeRequests.set(request.id, request);
+    return request;
   }
 
   private patchLab(clientId: string, labId: string, patch: Partial<Pick<Lab, "modules">>): Lab {

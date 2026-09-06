@@ -5,6 +5,7 @@ import {
   type ClientDossier,
   type InstallationNode,
   type Lab,
+  type QueryEnvironment,
   type QueryResult,
 } from "./api";
 
@@ -36,8 +37,8 @@ const CASES: Array<{
   },
   {
     id: "support",
-    label: "Support History",
-    blurb: "Client support history, filterable by lab or staff",
+    label: "Account History",
+    blurb: "Overall account history, filterable by lab or staff",
   },
 ];
 
@@ -126,14 +127,17 @@ function InfrastructureCase({
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+  const [environment, setEnvironment] = useState<QueryEnvironment["id"]>("dev1");
   const infra = dossier.infrastructure;
+  const environments = infra.environments ?? [];
+  const selected = environments.find((item) => item.id === environment) ?? environments[0];
 
   async function run(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setRunning(true);
     setError(null);
     try {
-      setResult(await queryClientDatabase(client.id, sql));
+      setResult(await queryClientDatabase(client.id, sql, environment));
     } catch (err) {
       setResult(null);
       setError(err instanceof Error ? err.message : "Query failed");
@@ -143,7 +147,28 @@ function InfrastructureCase({
   }
 
   return (
-    <div className="is-case-body">
+    <div className="is-case-body is-infra-layout">
+      <aside className="is-env-picker">
+        <h3>Environment</h3>
+        <p className="is-muted">Choose which installation to query.</p>
+        <div className="is-env-list">
+          {environments.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`is-env-btn${environment === item.id ? " active" : ""}`}
+              onClick={() => {
+                setEnvironment(item.id);
+                setResult(null);
+              }}
+            >
+              <strong>{item.label}</strong>
+              <span>{item.purpose}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <div>
       <div className="is-infra-meta">
         <article>
           <span>Engine</span>
@@ -152,13 +177,13 @@ function InfrastructureCase({
         <article>
           <span>Database</span>
           <strong>
-            <code>{infra.databaseName}</code>
+            <code>{selected?.databaseName ?? infra.databaseName}</code>
           </strong>
         </article>
         <article>
           <span>Host</span>
           <strong>
-            <code>{infra.host}</code>
+            <code>{selected?.host ?? infra.host}</code>
           </strong>
         </article>
         <article>
@@ -210,8 +235,9 @@ function InfrastructureCase({
           </tbody>
         </table>
       ) : (
-        <p className="is-muted">Run SHOW TABLES or SELECT * FROM a known table to inspect this client database.</p>
+        <p className="is-muted">Run SHOW TABLES or SELECT * FROM a known table to inspect this environment.</p>
       )}
+      </div>
     </div>
   );
 }
@@ -336,7 +362,9 @@ export function ClientCases({
       {active && open === "architecture" ? (
         <section className="is-panel is-case-panel">
           <h2>{active.label}</h2>
-          <p className="is-muted">How this client’s labs and instruments attach to the installation.</p>
+          <p className="is-muted">
+            How this account’s labs map across the Dev1, Dev2, and QA installations.
+          </p>
           <ArchitectureMap nodes={dossier.architecture} />
         </section>
       ) : null}
