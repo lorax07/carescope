@@ -155,7 +155,7 @@ export function LandingPage() {
           </span>
           <span>Laboratory information management</span>
           <nav>
-            <Link to="/app">Intrasite</Link>
+            <Link to="/intrasite">Intrasite</Link>
           </nav>
         </div>
       </footer>
