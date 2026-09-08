@@ -37,6 +37,9 @@ export function LandingPage() {
           </nav>
 
           <div className="lp-nav-actions">
+            <a href="/intrasite" className="lp-link-quiet">
+              Intrasite
+            </a>
             <Link to="/app" className="lp-link-quiet">
               Sign in
             </Link>
@@ -155,7 +158,9 @@ export function LandingPage() {
           </span>
           <span>Laboratory information management</span>
           <nav>
-            <Link to="/intrasite">Intrasite</Link>
+            <a href="/intrasite" className="lp-footer-intrasite">
+              Intrasite
+            </a>
           </nav>
         </div>
       </footer>

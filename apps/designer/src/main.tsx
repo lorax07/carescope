@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { AppShell } from "./App";
 import { IntrasiteAuthProvider } from "./intrasite/AuthContext";
 import { IntrasiteClientDetailPage } from "./intrasite/ClientDetailPage";
@@ -37,6 +37,14 @@ function IntrasiteRoot() {
   );
 }
 
+function UnmatchedRoute() {
+  const path = useLocation().pathname.toLowerCase();
+  if (path.includes("intrasite") || path.includes("instrasite")) {
+    return <Navigate to="/intrasite" replace />;
+  }
+  return <Navigate to="/" replace />;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
@@ -50,6 +58,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="clients/:id/labs/:labId" element={<IntrasiteLabDetailPage />} />
           </Route>
         </Route>
+        <Route path="*" element={<UnmatchedRoute />} />
         <Route path="app" element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           <Route path="samples" element={<SamplesPage />} />

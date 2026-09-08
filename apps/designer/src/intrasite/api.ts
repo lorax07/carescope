@@ -234,6 +234,9 @@ export async function meRequest() {
   if (isDemoSession()) {
     return { user: demoLogin().user };
   }
+  if (!getStoredToken()) {
+    throw new ApiError("Authentication required", 401);
+  }
   return api<{ user: IntrasiteUser }>("/auth/me");
 }
 
