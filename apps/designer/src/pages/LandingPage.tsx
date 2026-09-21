@@ -355,16 +355,12 @@ function TypicalLabStackVisual() {
       aria-label="A night-shift lab desktop buried in mismatched vendor apps, failed logins, an Excel shadow LIS, and a STAT pager while the first sample waits"
     >
       <div className="lp-stack-scene-sky" />
-      <p className="lp-stack-clock">Bench · 2:14 AM</p>
-      <p className="lp-stack-chip">8 logins · 0 samples out</p>
-      <aside className="lp-stack-sticky">
-        <b>Who owns ADT?</b>
-        <span>3 teams · 2 tickets</span>
-      </aside>
-      <aside className="lp-stack-pager">
-        <b>INTERFACE DOWN</b>
-        <span>pager · STAT hold</span>
-      </aside>
+      <div className="lp-stack-topline">
+        <p className="lp-stack-clock">Bench · 2:14 AM</p>
+        <p className="lp-stack-sticky">Who owns ADT?</p>
+        <p className="lp-stack-pager">INTERFACE DOWN</p>
+        <p className="lp-stack-chip">8 logins · 0 samples</p>
+      </div>
 
       <div className="lp-stack-desktop">
         {STACK_WINDOWS.map((win, index) => (
