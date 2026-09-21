@@ -294,10 +294,10 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Expensive and delayed deployments",
-  "Complex integration management",
-  "Reduced customer satisfaction",
-  "Audit risk",
+  "Each vendor is a paid integration project",
+  "Interfaces rebuilt and revalidated",
+  "Contracts and cutovers on the critical path",
+  "Cost sits in dependencies, not the LIMS license",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -307,59 +307,76 @@ const ONELAB_BENEFITS = [
 ] as const;
 
 const LIMS_DEPENDENCIES = [
-  { id: "emr", label: "Hospital EMR", cost: "Re-interface", x: 190, y: 28 },
-  { id: "billing", label: "Billing", cost: "Remap claims", x: 318, y: 88 },
-  { id: "portal", label: "Client portal", cost: "Re-validate", x: 310, y: 198 },
-  { id: "analyzers", label: "Analyzers", cost: "OEM drivers", x: 190, y: 256 },
-  { id: "qc", label: "QC / QMS", cost: "New contract", x: 70, y: 198 },
-  { id: "legacy", label: "Legacy LIS", cost: "Cutover", x: 62, y: 88 },
+  { id: "emr", label: "Hospital EMR", cost: "Re-interface", x: 190, y: 36 },
+  { id: "billing", label: "Billing", cost: "Remap claims", x: 322, y: 96 },
+  { id: "portal", label: "Client portal", cost: "Re-validate", x: 314, y: 196 },
+  { id: "analyzers", label: "Analyzers", cost: "OEM drivers", x: 190, y: 254 },
+  { id: "qc", label: "QC / QMS", cost: "New contract", x: 66, y: 196 },
+  { id: "legacy", label: "Legacy LIS", cost: "Cutover", x: 58, y: 96 },
 ] as const;
 
-const LIMS_CENTER = { x: 190, y: 142 };
+const LIMS_CENTER = { x: 190, y: 146 };
 
 function TypicalLabStackVisual() {
   return (
     <div
       className="lp-stack-board"
       role="img"
-      aria-label="Board diagram of a typical LIMS change: replacing the core LIMS reopens six surrounding vendor systems, each a paid re-interface, remapping, or revalidation project over a 14 to 18 month critical path"
+      aria-label="Board diagram of a typical LIMS replacement: changing the core LIMS reopens six surrounding vendor systems. Each connection is a paid integration project, for eight vendors, eleven interfaces, and a 14 to 18 month critical path."
     >
-      <svg className="lp-stack-board-svg" viewBox="0 0 380 284" aria-hidden="true">
-        {LIMS_DEPENDENCIES.map((node) => (
-          <line
-            key={`${node.id}-line`}
-            className="lp-stack-board-edge"
-            x1={LIMS_CENTER.x}
-            y1={LIMS_CENTER.y}
-            x2={node.x}
-            y2={node.y}
-          />
-        ))}
+      <svg className="lp-stack-board-svg" viewBox="0 0 380 292" aria-hidden="true">
+        {LIMS_DEPENDENCIES.map((node) => {
+          const midX = (LIMS_CENTER.x + node.x) / 2;
+          const midY = (LIMS_CENTER.y + node.y) / 2;
+          return (
+            <g key={`${node.id}-edge`}>
+              <line
+                className="lp-stack-board-edge"
+                x1={LIMS_CENTER.x}
+                y1={LIMS_CENTER.y}
+                x2={node.x}
+                y2={node.y}
+              />
+              <circle className="lp-stack-board-joint" cx={midX} cy={midY} r="3.2" />
+            </g>
+          );
+        })}
         {LIMS_DEPENDENCIES.map((node) => (
           <g key={node.id} className="lp-stack-board-node" transform={`translate(${node.x} ${node.y})`}>
-            <rect x="-50" y="-20" width="100" height="40" rx="8" />
+            <rect x="-54" y="-22" width="108" height="44" rx="8" />
             <text className="lp-stack-board-name" y="-2">
               {node.label}
             </text>
-            <text className="lp-stack-board-cost" y="12">
+            <text className="lp-stack-board-cost" y="13">
               {node.cost}
             </text>
           </g>
         ))}
         <g className="lp-stack-board-core" transform={`translate(${LIMS_CENTER.x} ${LIMS_CENTER.y})`}>
-          <rect x="-62" y="-28" width="124" height="56" rx="10" />
+          <rect x="-66" y="-30" width="132" height="60" rx="10" />
           <text className="lp-stack-board-core-kicker" y="-8">
             Change this
           </text>
-          <text className="lp-stack-board-core-name" y="10">
+          <text className="lp-stack-board-core-name" y="12">
             Core LIMS
           </text>
         </g>
       </svg>
-      <p className="lp-stack-board-caption">
-        <strong>8 vendors · 11 interfaces</strong>
-        <span>14–18 month critical path</span>
-      </p>
+      <p className="lp-stack-board-legend">Each line is a paid integration project</p>
+      <ul className="lp-stack-board-kpis">
+        <li>
+          <strong>8</strong>
+          <span>vendor contracts</span>
+        </li>
+        <li>
+          <strong>11</strong>
+          <span>interfaces to rebuild</span>
+        </li>
+        <li>
+          <strong>14–18</strong>
+          <span>month critical path</span>
+        </li>
+      </ul>
     </div>
   );
 }
@@ -371,7 +388,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            A LIMS change reopens every integration
+            A LIMS change is a multi-vendor program
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (

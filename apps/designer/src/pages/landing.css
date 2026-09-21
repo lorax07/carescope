@@ -513,15 +513,21 @@
   text-anchor: middle;
 }
 
+.lp-stack-board-joint {
+  fill: #fff;
+  stroke: #b45309;
+  stroke-width: 1.5;
+}
+
 .lp-stack-board-name {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
   fill: #0f1724;
   letter-spacing: -0.02em;
 }
 
 .lp-stack-board-cost {
-  font-size: 8px;
+  font-size: 8.5px;
   font-weight: 700;
   fill: #b45309;
 }
@@ -541,35 +547,58 @@
 }
 
 .lp-stack-board-core-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   fill: #fff;
   letter-spacing: -0.03em;
 }
 
-.lp-stack-board-caption {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
+.lp-stack-board-legend {
   margin: 0;
-  padding: 0.45rem 0.7rem 0.55rem;
+  padding: 0.28rem 0.7rem 0;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.lp-stack-board-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
   border-top: 1px solid #e2e8f0;
   background: #fff;
 }
 
-.lp-stack-board-caption strong,
-.lp-stack-board-caption span {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+.lp-stack-board-kpis li {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.5rem 0.45rem 0.55rem;
+  text-align: center;
 }
 
-.lp-stack-board-caption strong {
+.lp-stack-board-kpis li + li {
+  border-left: 1px solid #e2e8f0;
+}
+
+.lp-stack-board-kpis strong {
+  font-family: var(--lp-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color: #9f1239;
 }
 
-.lp-stack-board-caption span {
-  color: #475569;
+.lp-stack-board-kpis span {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #64748b;
 }
 
 @keyframes lp-node-in {
@@ -1179,9 +1208,8 @@
     border-radius: 20px;
   }
 
-  .lp-stack-board-caption {
-    flex-direction: column;
-    gap: 0.15rem;
+  .lp-stack-board-kpis strong {
+    font-size: 0.85rem;
   }
 
   .lp-compare-panel {
