@@ -1,13 +1,15 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ApiError, createClient, listClients, type Client } from "./api";
+import { IntrasiteFormDialog } from "./FormDialog";
 
 export function IntrasiteClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [dialogError, setDialogError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [saving, setSaving] = useState(false);
 
   async function refresh() {
@@ -23,17 +25,22 @@ export function IntrasiteClientsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function openCreate() {
+    setName("");
+    setDialogError(null);
+    setCreateOpen(true);
+  }
+
+  async function handleCreate() {
     setSaving(true);
-    setError(null);
+    setDialogError(null);
     try {
-      await createClient({ name, slug: slug || undefined });
+      await createClient({ name });
       setName("");
-      setSlug("");
+      setCreateOpen(false);
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to create account");
+      setDialogError(err instanceof ApiError ? err.message : "Unable to create account");
     } finally {
       setSaving(false);
     }
@@ -53,29 +60,17 @@ export function IntrasiteClientsPage() {
       </header>
 
       <section className="is-panel">
-        <h2>Provision account</h2>
-        <form className="is-inline-form" onSubmit={handleCreate}>
-          <label>
-            Name
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-              placeholder="Apex Diagnostics"
-            />
-          </label>
-          <label>
-            Slug
-            <input
-              value={slug}
-              onChange={(event) => setSlug(event.target.value)}
-              placeholder="apex-diagnostics"
-            />
-          </label>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Provisioning…" : "Create account"}
+        <div className="is-panel-head">
+          <div>
+            <h2>Provision account</h2>
+            <p className="is-muted">
+              Use the create-account menu to open a dialog and provision a new tenant.
+            </p>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            Create new account
           </button>
-        </form>
+        </div>
       </section>
 
       {error ? <p className="is-error">{error}</p> : null}
@@ -85,7 +80,7 @@ export function IntrasiteClientsPage() {
         {loading ? (
           <p className="is-muted">Loading accounts…</p>
         ) : clients.length === 0 ? (
-          <p className="is-muted">No accounts yet. Provision the first tenant above.</p>
+          <p className="is-muted">No accounts yet. Use Create new account to provision the first tenant.</p>
         ) : (
           <table className="is-table">
             <thead>
@@ -119,6 +114,31 @@ export function IntrasiteClientsPage() {
           </table>
         )}
       </section>
+
+      {createOpen ? (
+        <IntrasiteFormDialog
+          eyebrow="Accounts"
+          title="Create new account"
+          description="Name the tenant. Intrasite assigns the slug and isolated database from that name."
+          submitLabel="Create account"
+          savingLabel="Provisioning…"
+          saving={saving}
+          error={dialogError}
+          onClose={() => setCreateOpen(false)}
+          onSubmit={handleCreate}
+        >
+          <label>
+            Account name
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              autoFocus
+              placeholder="Apex Diagnostics"
+            />
+          </label>
+        </IntrasiteFormDialog>
+      ) : null}
     </div>
   );
 }

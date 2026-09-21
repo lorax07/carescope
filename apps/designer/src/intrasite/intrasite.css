@@ -74,13 +74,15 @@
 }
 
 .is-login-card form,
-.is-inline-form {
+.is-inline-form,
+.is-dialog-form {
   display: grid;
   gap: 0.75rem;
 }
 
 .is-login-card label,
-.is-inline-form label {
+.is-inline-form label,
+.is-dialog-form label {
   display: grid;
   gap: 0.3rem;
   font-size: 0.78rem;
@@ -90,7 +92,8 @@
 }
 
 .is-login-card input,
-.is-inline-form input {
+.is-inline-form input,
+.is-dialog-form input {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.65rem 0.75rem;
@@ -200,6 +203,22 @@
 .is-panel h2 {
   margin: 0 0 0.85rem;
   font-size: 0.95rem;
+}
+
+.is-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.is-panel-head h2 {
+  margin-bottom: 0.35rem;
+}
+
+.is-panel-head .is-muted {
+  margin: 0;
+  max-width: 42rem;
 }
 
 .is-inline-form {
@@ -551,6 +570,23 @@
   box-shadow: var(--shadow);
 }
 
+.is-form-dialog {
+  width: min(440px, 100%);
+  max-height: min(92vh, 900px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.2rem 1.3rem 1.4rem;
+  box-shadow: var(--shadow);
+}
+
+.is-form-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
 .is-case-head {
   display: flex;
   justify-content: space-between;
@@ -637,6 +673,7 @@
   }
 
   .is-inline-form,
+  .is-panel-head,
   .is-icon-grid,
   .is-infra-meta,
   .is-contact-grid,

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ApiError,
@@ -15,6 +15,7 @@ import {
 } from "./api";
 import { ApprovalMap } from "./ApprovalMap";
 import { ClientCases } from "./ClientCases";
+import { IntrasiteFormDialog } from "./FormDialog";
 import { ModuleCase } from "./ModuleCase";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
 
@@ -26,12 +27,14 @@ export function IntrasiteClientDetailPage() {
   const [requests, setRequests] = useState<ModuleChangeRequest[]>([]);
   const [catalog, setCatalog] = useState<ModuleCatalogItem[]>(LAB_MODULE_CATALOG);
   const [error, setError] = useState<string | null>(null);
+  const [dialogError, setDialogError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [moduleLab, setModuleLab] = useState<Lab | null>(null);
   const [closeRequest, setCloseRequest] = useState<AccountCloseRequest | null>(null);
   const [closing, setClosing] = useState(false);
   const [closeOpen, setCloseOpen] = useState(false);
+  const [createLabOpen, setCreateLabOpen] = useState(false);
 
   async function refresh() {
     const result = await getClient(id);
@@ -50,16 +53,22 @@ export function IntrasiteClientDetailPage() {
     });
   }, [id]);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function openCreateLab() {
+    setName("");
+    setDialogError(null);
+    setCreateLabOpen(true);
+  }
+
+  async function handleCreate() {
     setSaving(true);
-    setError(null);
+    setDialogError(null);
     try {
       await createLab(id, { name });
       setName("");
+      setCreateLabOpen(false);
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Unable to create lab");
+      setDialogError(err instanceof ApiError ? err.message : "Unable to create lab");
     } finally {
       setSaving(false);
     }
@@ -100,21 +109,22 @@ export function IntrasiteClientDetailPage() {
       {client && dossier ? <ClientCases client={client} labs={labs} dossier={dossier} /> : null}
 
       <section className="is-panel">
-        <h2>Add lab instance</h2>
-        <form className="is-inline-form is-lab-form" onSubmit={handleCreate}>
-          <label>
-            Lab name
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-              placeholder="North Lab"
-            />
-          </label>
-          <button type="submit" className="btn btn-primary" disabled={saving || !client || client.status === "closed"}>
-            {saving ? "Creating…" : "Create lab"}
+        <div className="is-panel-head">
+          <div>
+            <h2>Add lab instance</h2>
+            <p className="is-muted">
+              Use the create-lab menu to open a dialog and add a lab to this account.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!client || client.status === "closed"}
+            onClick={openCreateLab}
+          >
+            Create lab
           </button>
-        </form>
+        </div>
       </section>
 
       <section className="is-panel">
@@ -183,6 +193,32 @@ export function IntrasiteClientDetailPage() {
           onClose={() => setModuleLab(null)}
           onChanged={refresh}
         />
+      ) : null}
+
+      {createLabOpen && client ? (
+        <IntrasiteFormDialog
+          eyebrow="Lab instance"
+          title="Create lab"
+          description={`Add a lab to ${client.name}. The site code and slug are assigned from the lab name.`}
+          submitLabel="Create lab"
+          savingLabel="Creating…"
+          saving={saving}
+          disabled={client.status === "closed"}
+          error={dialogError}
+          onClose={() => setCreateLabOpen(false)}
+          onSubmit={handleCreate}
+        >
+          <label>
+            Lab name
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              autoFocus
+              placeholder="North Lab"
+            />
+          </label>
+        </IntrasiteFormDialog>
       ) : null}
 
       {closeOpen && client ? (
