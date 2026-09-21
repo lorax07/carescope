@@ -294,8 +294,8 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Consultants to develop each custom interface",
-  "The same interfaces stay on a troubleshooting bill",
+  "Consultants develop each custom interface",
+  "The same process loops when an interface breaks",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -304,64 +304,72 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const CONSULTANT_BUILD = [
-  "EMR / ADT map",
-  "Analyzer drivers",
-  "Billing claims feed",
-  "QC, portal, and LIS",
-] as const;
-
-const INTEGRATION_TROUBLE = [
-  "Interface down / HL7 NAK",
-  "Vendor patch breaks a map",
-  "Night pages on STAT work",
-  "Re-test after every change",
+const CHANGE_FLOW = [
+  {
+    id: "change",
+    n: "01",
+    title: "Change the LIMS",
+    detail: "Replace or upgrade the core system",
+    tone: "neutral",
+  },
+  {
+    id: "hire",
+    n: "02",
+    title: "Hire consultants",
+    detail: "An SI owns every vendor interface",
+    tone: "build",
+  },
+  {
+    id: "build",
+    n: "03",
+    title: "Develop the maps",
+    detail: "EMR, analyzers, billing, QC, portal",
+    tone: "build",
+  },
+  {
+    id: "live",
+    n: "04",
+    title: "Go-live",
+    detail: "Cut over the custom glue",
+    tone: "neutral",
+  },
+  {
+    id: "break",
+    n: "05",
+    title: "An interface fails",
+    detail: "Vendor patch, HL7 NAK, STAT page",
+    tone: "run",
+  },
+  {
+    id: "fix",
+    n: "06",
+    title: "Troubleshoot",
+    detail: "Pay the SI again to keep maps alive",
+    tone: "run",
+  },
 ] as const;
 
 function TypicalLabStackVisual() {
   return (
     <div
-      className="lp-stack-cost"
+      className="lp-stack-flow"
       role="img"
-      aria-label="Board exhibit of typical lab change cost. A LIMS change pays systems-integrator consultants to develop custom interfaces, then pays again every year to troubleshoot those same integrations."
+      aria-label="Process flow of a typical LIMS change. The lab changes the LIMS, hires consultants to develop custom interfaces, goes live, then loops through interface failures and troubleshooting for the life of the stack."
     >
-      <div className="lp-stack-cost-acts">
-        <article className="lp-stack-act lp-stack-act-build">
-          <p className="lp-stack-act-kicker">To change the LIMS</p>
-          <h3>Consultant development</h3>
-          <p className="lp-stack-act-lede">
-            Each vendor line becomes a custom interface, written by a systems integrator.
-          </p>
-          <ul>
-            {CONSULTANT_BUILD.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p className="lp-stack-act-metric">
-            <strong>11 interfaces</strong>
-            <span>SI project to rebuild</span>
-          </p>
-        </article>
-        <p className="lp-stack-cost-then">then</p>
-        <article className="lp-stack-act lp-stack-act-run">
-          <p className="lp-stack-act-kicker">Every year after</p>
-          <h3>Troubleshooting</h3>
-          <p className="lp-stack-act-lede">
-            The same custom maps fail when any vendor changes. That is a standing cost.
-          </p>
-          <ul>
-            {INTEGRATION_TROUBLE.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p className="lp-stack-act-metric">
-            <strong>Open tickets</strong>
-            <span>retainer + lab IT time</span>
-          </p>
-        </article>
-      </div>
-      <p className="lp-stack-cost-foot">
-        Change cost is not the LIMS license. It is building the glue, then keeping the glue alive.
+      <ol className="lp-stack-flow-steps">
+        {CHANGE_FLOW.map((step) => (
+          <li key={step.id} className={`lp-stack-flow-step lp-stack-flow-${step.tone}`}>
+            <span className="lp-stack-flow-n">{step.n}</span>
+            <span className="lp-stack-flow-copy">
+              <strong>{step.title}</strong>
+              <em>{step.detail}</em>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p className="lp-stack-flow-loop">
+        <span>Loop</span>
+        05–06 repeat after every vendor change. That is the standing troubleshooting bill.
       </p>
     </div>
   );
@@ -374,7 +382,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Build the interfaces. Then keep paying to fix them.
+            A LIMS change is a consultant process that loops
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
