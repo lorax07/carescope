@@ -294,8 +294,8 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Replacing the LIMS reopens every vendor contract",
-  "Most of the time and money sit in the integrations",
+  "Consultants to develop each custom interface",
+  "The same interfaces stay on a troubleshooting bill",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -304,99 +304,65 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const LIMS_DEPENDENCIES = [
-  { id: "emr", label: "Hospital EMR", cost: "4–6 mo", x: 200, y: 38 },
-  { id: "billing", label: "Billing", cost: "3–5 mo", x: 328, y: 100 },
-  { id: "portal", label: "Client portal", cost: "3–4 mo", x: 320, y: 200 },
-  { id: "analyzers", label: "Analyzers", cost: "5–7 mo", x: 200, y: 258 },
-  { id: "qc", label: "QC / QMS", cost: "3–4 mo", x: 80, y: 200 },
-  { id: "legacy", label: "Legacy LIS", cost: "4–6 mo", x: 72, y: 100 },
+const CONSULTANT_BUILD = [
+  "EMR / ADT map",
+  "Analyzer drivers",
+  "Billing claims feed",
+  "QC, portal, and LIS",
 ] as const;
 
-const LIMS_CENTER = { x: 200, y: 148 };
-
-const PROGRAM_COST = [
-  { id: "license", label: "LIMS license", share: "15%" },
-  { id: "integrations", label: "Vendor integrations", share: "55%" },
-  { id: "validation", label: "Validation & cutover", share: "30%" },
+const INTEGRATION_TROUBLE = [
+  "Interface down / HL7 NAK",
+  "Vendor patch breaks a map",
+  "Night pages on STAT work",
+  "Re-test after every change",
 ] as const;
 
 function TypicalLabStackVisual() {
   return (
     <div
-      className="lp-stack-board"
+      className="lp-stack-cost"
       role="img"
-      aria-label="Board diagram of a typical LIMS replacement. Changing the core LIMS starts six surrounding vendor projects, each three to seven months. About 15 percent of program cost is the LIMS license; 55 percent is vendor integrations; 30 percent is validation and cutover. Eight vendor contracts, eleven interfaces, 14 to 18 month critical path."
+      aria-label="Board exhibit of typical lab change cost. A LIMS change pays systems-integrator consultants to develop custom interfaces, then pays again every year to troubleshoot those same integrations."
     >
-      <svg className="lp-stack-board-svg" viewBox="0 0 400 296" aria-hidden="true">
-        {LIMS_DEPENDENCIES.map((node) => {
-          const midX = (LIMS_CENTER.x + node.x) / 2;
-          const midY = (LIMS_CENTER.y + node.y) / 2;
-          return (
-            <g key={`${node.id}-edge`}>
-              <line
-                className="lp-stack-board-edge"
-                x1={LIMS_CENTER.x}
-                y1={LIMS_CENTER.y}
-                x2={node.x}
-                y2={node.y}
-              />
-              <circle className="lp-stack-board-joint" cx={midX} cy={midY} r="3.4" />
-            </g>
-          );
-        })}
-        {LIMS_DEPENDENCIES.map((node) => (
-          <g key={node.id} className="lp-stack-board-node" transform={`translate(${node.x} ${node.y})`}>
-            <rect x="-56" y="-22" width="112" height="44" rx="8" />
-            <text className="lp-stack-board-name" y="-2">
-              {node.label}
-            </text>
-            <text className="lp-stack-board-cost" y="13">
-              {node.cost}
-            </text>
-          </g>
-        ))}
-        <g className="lp-stack-board-core" transform={`translate(${LIMS_CENTER.x} ${LIMS_CENTER.y})`}>
-          <rect x="-64" y="-30" width="128" height="60" rx="10" />
-          <text className="lp-stack-board-core-kicker" y="-8">
-            The small part
-          </text>
-          <text className="lp-stack-board-core-name" y="12">
-            Core LIMS
-          </text>
-        </g>
-      </svg>
-      <div className="lp-stack-board-mix">
-        <p>Where the program dollar sits</p>
-        <div className="lp-stack-board-bar" aria-hidden="true">
-          {PROGRAM_COST.map((slice) => (
-            <span key={slice.id} className={`lp-stack-board-bar-${slice.id}`}>
-              {slice.share}
-            </span>
-          ))}
-        </div>
-        <ul>
-          {PROGRAM_COST.map((slice) => (
-            <li key={slice.id} className={`lp-stack-board-key-${slice.id}`}>
-              {slice.label}
-            </li>
-          ))}
-        </ul>
+      <div className="lp-stack-cost-acts">
+        <article className="lp-stack-act lp-stack-act-build">
+          <p className="lp-stack-act-kicker">To change the LIMS</p>
+          <h3>Consultant development</h3>
+          <p className="lp-stack-act-lede">
+            Each vendor line becomes a custom interface, written by a systems integrator.
+          </p>
+          <ul>
+            {CONSULTANT_BUILD.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="lp-stack-act-metric">
+            <strong>11 interfaces</strong>
+            <span>SI project to rebuild</span>
+          </p>
+        </article>
+        <p className="lp-stack-cost-then">then</p>
+        <article className="lp-stack-act lp-stack-act-run">
+          <p className="lp-stack-act-kicker">Every year after</p>
+          <h3>Troubleshooting</h3>
+          <p className="lp-stack-act-lede">
+            The same custom maps fail when any vendor changes. That is a standing cost.
+          </p>
+          <ul>
+            {INTEGRATION_TROUBLE.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="lp-stack-act-metric">
+            <strong>Open tickets</strong>
+            <span>retainer + lab IT time</span>
+          </p>
+        </article>
       </div>
-      <ul className="lp-stack-board-kpis">
-        <li>
-          <strong>8</strong>
-          <span>vendor contracts</span>
-        </li>
-        <li>
-          <strong>11</strong>
-          <span>interfaces to rebuild</span>
-        </li>
-        <li>
-          <strong>14–18</strong>
-          <span>month critical path</span>
-        </li>
-      </ul>
+      <p className="lp-stack-cost-foot">
+        Change cost is not the LIMS license. It is building the glue, then keeping the glue alive.
+      </p>
     </div>
   );
 }
@@ -408,7 +374,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            A LIMS change is a multi-vendor program
+            You pay consultants to build the glue — then to keep it up
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
