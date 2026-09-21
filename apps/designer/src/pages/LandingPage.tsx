@@ -350,6 +350,9 @@ const CHANGE_FLOW = [
 ] as const;
 
 function TypicalLabStackVisual() {
+  const program = CHANGE_FLOW.slice(0, 4);
+  const cycle = CHANGE_FLOW.slice(4);
+
   return (
     <div
       className="lp-stack-flow"
@@ -357,7 +360,7 @@ function TypicalLabStackVisual() {
       aria-label="Process flow of a typical LIMS change. The lab changes the LIMS, hires consultants to develop custom interfaces, goes live, then loops through interface failures and troubleshooting for the life of the stack."
     >
       <ol className="lp-stack-flow-steps">
-        {CHANGE_FLOW.map((step) => (
+        {program.map((step) => (
           <li key={step.id} className={`lp-stack-flow-step lp-stack-flow-${step.tone}`}>
             <span className="lp-stack-flow-n">{step.n}</span>
             <span className="lp-stack-flow-copy">
@@ -366,11 +369,24 @@ function TypicalLabStackVisual() {
             </span>
           </li>
         ))}
+        <li className="lp-stack-flow-cycle">
+          <ol>
+            {cycle.map((step) => (
+              <li key={step.id} className={`lp-stack-flow-step lp-stack-flow-${step.tone}`}>
+                <span className="lp-stack-flow-n">{step.n}</span>
+                <span className="lp-stack-flow-copy">
+                  <strong>{step.title}</strong>
+                  <em>{step.detail}</em>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="lp-stack-flow-loop">
+            <span>Loop</span>
+            05–06 after every vendor change
+          </p>
+        </li>
       </ol>
-      <p className="lp-stack-flow-loop">
-        <span>Loop</span>
-        05–06 repeat after every vendor change. That is the standing troubleshooting bill.
-      </p>
     </div>
   );
 }
