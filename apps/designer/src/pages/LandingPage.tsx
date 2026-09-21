@@ -306,94 +306,60 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const STACK_WINDOWS = [
-  {
-    id: "lis",
-    app: "Vendor A LIS",
-    chrome: "on-prem v7",
-    alert: "HL7 NAK · interface down",
-    lines: ["ADT 8821 dropped", "Retry 14 · waiting on Vendor A"],
-  },
-  {
-    id: "emr",
-    app: "Hospital EMR",
-    chrome: "their window",
-    alert: "ADT feed paused",
-    lines: ["SSO not supported", "Open a ticket with Vendor A"],
-  },
-  {
-    id: "qc",
-    app: "QC SaaS",
-    chrome: "separate login",
-    alert: "Password expired",
-    lines: ["New complexity rules", "MFA app on the other phone"],
-  },
-  {
-    id: "excel",
-    app: "RESULTS_FINAL_v18.xlsx",
-    chrome: "Excel",
-    alert: "The real system of record",
-    lines: ["=VLOOKUP across 6 vendors", "Do not close · unsaved"],
-  },
+const LIMS_DEPENDENCIES = [
+  { id: "emr", label: "Hospital EMR", cost: "Re-interface", x: 190, y: 28 },
+  { id: "billing", label: "Billing", cost: "Remap claims", x: 318, y: 88 },
+  { id: "portal", label: "Client portal", cost: "Re-validate", x: 310, y: 198 },
+  { id: "analyzers", label: "Analyzers", cost: "OEM drivers", x: 190, y: 256 },
+  { id: "qc", label: "QC / QMS", cost: "New contract", x: 70, y: 198 },
+  { id: "legacy", label: "Legacy LIS", cost: "Cutover", x: 62, y: 88 },
 ] as const;
 
-const TASKBAR_APPS = [
-  "LIS",
-  "EMR",
-  "QC",
-  "Billing",
-  "OEM",
-  "Portal",
-  "Excel",
-] as const;
+const LIMS_CENTER = { x: 190, y: 142 };
 
 function TypicalLabStackVisual() {
   return (
     <div
-      className="lp-stack-scene"
+      className="lp-stack-board"
       role="img"
-      aria-label="A night-shift lab desktop buried in mismatched vendor apps, failed logins, an Excel shadow LIS, and a STAT pager while the first sample waits"
+      aria-label="Board diagram of a typical LIMS change: replacing the core LIMS reopens six surrounding vendor systems, each a paid re-interface, remapping, or revalidation project over a 14 to 18 month critical path"
     >
-      <div className="lp-stack-scene-sky" />
-      <div className="lp-stack-topline">
-        <p className="lp-stack-clock">Bench · 2:14 AM</p>
-        <p className="lp-stack-sticky">Who owns ADT?</p>
-        <p className="lp-stack-pager">INTERFACE DOWN</p>
-        <p className="lp-stack-chip">8 logins · 0 samples</p>
-      </div>
-
-      <div className="lp-stack-desktop">
-        {STACK_WINDOWS.map((win, index) => (
-          <article
-            key={win.id}
-            className={`lp-stack-window lp-stack-window-${win.id}`}
-            style={{ animationDelay: `${0.12 + index * 0.08}s` }}
-          >
-            <header className="lp-stack-window-bar">
-              <span className="lp-stack-dots" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </span>
-              <strong>{win.app}</strong>
-              <em>{win.chrome}</em>
-            </header>
-            <p className="lp-stack-window-alert">{win.alert}</p>
-            <ul>
-              {win.lines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          </article>
+      <svg className="lp-stack-board-svg" viewBox="0 0 380 284" aria-hidden="true">
+        {LIMS_DEPENDENCIES.map((node) => (
+          <line
+            key={`${node.id}-line`}
+            className="lp-stack-board-edge"
+            x1={LIMS_CENTER.x}
+            y1={LIMS_CENTER.y}
+            x2={node.x}
+            y2={node.y}
+          />
         ))}
-      </div>
-
-      <div className="lp-stack-taskbar">
-        {TASKBAR_APPS.map((app) => (
-          <span key={app}>{app}</span>
+        {LIMS_DEPENDENCIES.map((node) => (
+          <g key={node.id} className="lp-stack-board-node" transform={`translate(${node.x} ${node.y})`}>
+            <rect x="-50" y="-20" width="100" height="40" rx="8" />
+            <text className="lp-stack-board-name" y="-2">
+              {node.label}
+            </text>
+            <text className="lp-stack-board-cost" y="12">
+              {node.cost}
+            </text>
+          </g>
         ))}
-        <small>7 apps open</small>
-      </div>
+        <g className="lp-stack-board-core" transform={`translate(${LIMS_CENTER.x} ${LIMS_CENTER.y})`}>
+          <rect x="-62" y="-28" width="124" height="56" rx="10" />
+          <text className="lp-stack-board-core-kicker" y="-8">
+            Change this
+          </text>
+          <text className="lp-stack-board-core-name" y="10">
+            Core LIMS
+          </text>
+        </g>
+      </svg>
+      <p className="lp-stack-board-caption">
+        <strong>8 vendors · 11 interfaces</strong>
+        <span>14–18 month critical path</span>
+      </p>
     </div>
   );
 }
@@ -405,7 +371,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Every vendor is another interface
+            A LIMS change reopens every integration
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
