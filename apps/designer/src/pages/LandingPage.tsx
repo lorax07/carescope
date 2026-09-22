@@ -294,8 +294,8 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Consultants develop each custom interface",
-  "The same process loops when an interface breaks",
+  "Heavy PM to manage outside vendors and consultants",
+  "Leaders cut lab-ops decisions to fund the cost",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -306,45 +306,45 @@ const ONELAB_BENEFITS = [
 
 const CHANGE_FLOW = [
   {
-    id: "change",
+    id: "enhance",
     n: "01",
-    title: "Change the LIMS",
-    detail: "Replace or upgrade the core system",
+    title: "Enhancement",
+    detail: "Any new interface, upgrade, or map",
     tone: "neutral",
   },
   {
-    id: "hire",
+    id: "pm",
     n: "02",
-    title: "Hire consultants",
-    detail: "An SI owns every vendor interface",
+    title: "Heavy PM",
+    detail: "A project office to run the outside work",
     tone: "build",
   },
   {
-    id: "build",
+    id: "vendors",
     n: "03",
-    title: "Develop maps",
-    detail: "EMR, analyzers, billing, QC, portal",
+    title: "Vendors",
+    detail: "Coordinate EMR, analyzer, billing, LIS owners",
     tone: "build",
   },
   {
-    id: "live",
+    id: "consultants",
     n: "04",
-    title: "Go-live",
-    detail: "Cut over the custom glue",
-    tone: "neutral",
+    title: "Consultants",
+    detail: "An SI writes and keeps the glue",
+    tone: "build",
   },
   {
-    id: "break",
+    id: "cost",
     n: "05",
-    title: "An interface fails",
-    detail: "Vendor patch, HL7 NAK, STAT page",
+    title: "The cost",
+    detail: "Hours, retainers, and change orders",
     tone: "run",
   },
   {
-    id: "fix",
+    id: "cut",
     n: "06",
-    title: "Troubleshoot",
-    detail: "Pay the SI again to keep maps alive",
+    title: "Cut ops",
+    detail: "Leaders trade lab operations for cost",
     tone: "run",
   },
 ] as const;
@@ -366,7 +366,7 @@ function TypicalLabStackVisual() {
     <div
       className="lp-stack-orbit"
       role="img"
-      aria-label="Circular process of a typical LIMS change. The lab changes the LIMS, hires consultants, develops custom maps, goes live, then loops through interface failures and troubleshooting."
+      aria-label="Circular enhancement loop of a typical lab stack. Any enhancement requires heavy project management of outside vendors and consultants. Leaders then sacrifice lab-operation decisions to cover the cost."
     >
       <div className="lp-stack-orbit-stage">
         <svg className="lp-stack-orbit-svg" viewBox="0 0 320 320" aria-hidden="true">
@@ -400,8 +400,8 @@ function TypicalLabStackVisual() {
           })}
         </svg>
         <p className="lp-stack-orbit-hub">
-          <span>Loop</span>
-          Never exits
+          <span>Heavy PM</span>
+          Vendors + consultants
         </p>
         <ol className="lp-stack-orbit-steps">
           {CHANGE_FLOW.map((step, i) => {
@@ -432,6 +432,10 @@ function TypicalLabStackVisual() {
           })}
         </ol>
       </div>
+      <p className="lp-stack-orbit-tax">
+        <span>Cost</span>
+        Leaders sacrifice lab-ops decisions to keep the vendor and consultant loop in motion.
+      </p>
     </div>
   );
 }
@@ -443,7 +447,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            A LIMS change is a consultant process that loops
+            Every enhancement is a heavy-PM loop that cuts ops decisions
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (

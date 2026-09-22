@@ -478,9 +478,12 @@
 .lp-stack-orbit {
   flex: 1;
   min-height: 0;
-  display: grid;
-  place-items: center;
-  margin-top: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
 }
 
 .lp-stack-orbit-stage {
@@ -537,8 +540,8 @@
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 5.6rem;
-  height: 5.6rem;
+  width: 6.4rem;
+  height: 6.4rem;
   margin: 0;
   display: grid;
   place-content: center;
@@ -550,7 +553,7 @@
   box-shadow: 0 10px 24px rgba(15, 23, 36, 0.06);
   transform: translate(-50%, -50%);
   text-align: center;
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 700;
   line-height: 1.2;
   color: #475569;
@@ -611,7 +614,7 @@
 }
 
 .lp-stack-orbit-step strong {
-  width: 5.7rem;
+  width: 5.4rem;
   text-align: center;
   font-family: var(--lp-display);
   font-size: 0.68rem;
@@ -619,6 +622,33 @@
   letter-spacing: -0.03em;
   line-height: 1.2;
   color: #0f1724;
+}
+
+.lp-stack-orbit-tax {
+  margin: 0;
+  width: min(100%, 20rem);
+  padding: 0.32rem 0.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  border-radius: 8px;
+  background: #0f1724;
+  color: #e2e8f0;
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.lp-stack-orbit-tax span {
+  flex: none;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: #be123c;
+  color: #fff;
+  font-size: 0.54rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @keyframes lp-node-in {
