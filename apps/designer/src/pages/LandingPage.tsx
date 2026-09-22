@@ -349,44 +349,69 @@ const CHANGE_FLOW = [
   },
 ] as const;
 
-function TypicalLabStackVisual() {
-  const program = CHANGE_FLOW.slice(0, 4);
-  const cycle = CHANGE_FLOW.slice(4);
+const ORBIT_CX = 160;
+const ORBIT_CY = 160;
+const ORBIT_R = 100;
 
+function orbitPoint(angleDeg: number, radius = ORBIT_R) {
+  const rad = (angleDeg * Math.PI) / 180;
+  return {
+    x: ORBIT_CX + radius * Math.cos(rad),
+    y: ORBIT_CY + radius * Math.sin(rad),
+  };
+}
+
+function TypicalLabStackVisual() {
   return (
     <div
-      className="lp-stack-flow"
+      className="lp-stack-orbit"
       role="img"
-      aria-label="Process flow of a typical LIMS change. The lab changes the LIMS, hires consultants to develop custom interfaces, goes live, then loops through interface failures and troubleshooting for the life of the stack."
+      aria-label="Circular process of a typical LIMS change. The lab changes the LIMS, hires consultants, develops custom maps, goes live, then loops through interface failures and troubleshooting."
     >
-      <ol className="lp-stack-flow-steps">
-        {program.map((step) => (
-          <li key={step.id} className={`lp-stack-flow-step lp-stack-flow-${step.tone}`}>
-            <span className="lp-stack-flow-n">{step.n}</span>
-            <span className="lp-stack-flow-copy">
-              <strong>{step.title}</strong>
-              <em>{step.detail}</em>
-            </span>
-          </li>
-        ))}
-        <li className="lp-stack-flow-cycle">
-          <ol>
-            {cycle.map((step) => (
-              <li key={step.id} className={`lp-stack-flow-step lp-stack-flow-${step.tone}`}>
-                <span className="lp-stack-flow-n">{step.n}</span>
-                <span className="lp-stack-flow-copy">
-                  <strong>{step.title}</strong>
-                  <em>{step.detail}</em>
-                </span>
-              </li>
+      <div className="lp-stack-orbit-stage">
+        <svg className="lp-stack-orbit-svg" viewBox="0 0 320 320" aria-hidden="true">
+          <defs>
+            {(["neutral", "build", "run"] as const).map((tone) => (
+              <marker
+                key={tone}
+                id={`lp-orbit-arrow-${tone}`}
+                markerWidth="8"
+                markerHeight="8"
+                refX="6"
+                refY="4"
+                orient="auto"
+              >
+                <path d="M0 1.2 L7.2 4 L0 6.8 Z" />
+              </marker>
             ))}
-          </ol>
-          <p className="lp-stack-flow-loop">
-            <span>Loop</span>
-            05–06 after every vendor change
-          </p>
-        </li>
-      </ol>
+          </defs>
+          <circle className="lp-stack-orbit-track" cx={ORBIT_CX} cy={ORBIT_CY} r={ORBIT_R} />
+          {CHANGE_FLOW.map((step, i) => {
+            const start = orbitPoint(-90 + i * 60 + 16);
+            const end = orbitPoint(-90 + (i + 1) * 60 - 16);
+            return (
+              <path
+                key={step.id}
+                className={`lp-stack-orbit-arc lp-stack-orbit-arc-${step.tone}`}
+                d={`M ${start.x.toFixed(1)} ${start.y.toFixed(1)} A ${ORBIT_R} ${ORBIT_R} 0 0 1 ${end.x.toFixed(1)} ${end.y.toFixed(1)}`}
+                markerEnd={`url(#lp-orbit-arrow-${step.tone})`}
+              />
+            );
+          })}
+        </svg>
+        <p className="lp-stack-orbit-hub">
+          <span>Loop</span>
+          Never exits
+        </p>
+        <ol className="lp-stack-orbit-steps">
+          {CHANGE_FLOW.map((step) => (
+            <li key={step.id} className={`lp-stack-orbit-step lp-stack-orbit-${step.tone}`}>
+              <span className="lp-stack-orbit-bead">{step.n}</span>
+              <strong>{step.title}</strong>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }

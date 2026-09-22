@@ -475,166 +475,91 @@
   text-anchor: middle;
 }
 
-.lp-stack-flow {
+.lp-stack-orbit {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  margin-top: 0.35rem;
-}
-
-.lp-stack-flow-steps,
-.lp-stack-flow-cycle ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.lp-stack-flow-step {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1.55rem minmax(0, 1fr);
-  gap: 0.55rem;
-  align-items: start;
-  padding: 0.28rem 0.15rem 0.72rem;
-}
-
-.lp-stack-flow-step::before {
-  content: "";
-  position: absolute;
-  left: 0.72rem;
-  top: 1.55rem;
-  bottom: 0.02rem;
-  width: 2px;
-  background: #94a3b8;
-}
-
-.lp-stack-flow-step::after {
-  content: "";
-  position: absolute;
-  left: 0.5rem;
-  bottom: -0.02rem;
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid #94a3b8;
-  z-index: 1;
-}
-
-.lp-stack-flow-steps > .lp-stack-flow-step:nth-child(4)::before {
-  bottom: -0.45rem;
-}
-
-.lp-stack-flow-steps > .lp-stack-flow-step:nth-child(4)::after {
-  bottom: -0.5rem;
-}
-
-.lp-stack-flow-n {
-  width: 1.5rem;
-  height: 1.5rem;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  box-shadow: 0 0 0 3px #f8fafc;
-  z-index: 1;
+  margin-top: 0.2rem;
 }
 
-.lp-stack-flow-build .lp-stack-flow-n {
-  background: #ffedd5;
-  color: #9a3412;
-}
-
-.lp-stack-flow-run .lp-stack-flow-n {
-  background: #ffe4e6;
-  color: #9f1239;
-}
-
-.lp-stack-flow-copy {
-  min-width: 0;
-  padding: 0.12rem 0.55rem 0.28rem;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #d7dee8;
-}
-
-.lp-stack-flow-build .lp-stack-flow-copy {
-  border-color: #fdba74;
-  background: linear-gradient(180deg, #fff7ed 0%, #fff 70%);
-}
-
-.lp-stack-flow-run .lp-stack-flow-copy {
-  border-color: #f1a0a8;
-  background: linear-gradient(180deg, #fff1f2 0%, #fff 70%);
-}
-
-.lp-stack-flow-copy strong {
-  display: block;
-  font-family: var(--lp-display);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  color: #0f1724;
-}
-
-.lp-stack-flow-copy em {
-  display: block;
-  margin-top: 0.08rem;
-  font-style: normal;
-  font-size: 0.62rem;
-  font-weight: 650;
-  line-height: 1.3;
-  color: #64748b;
-}
-
-.lp-stack-flow-cycle {
+.lp-stack-orbit-stage {
+  --orbit-r: 31.25%;
+  --label-r: 43.5%;
   position: relative;
-  margin-top: 0.05rem;
-  padding: 0.35rem 0.4rem 0.4rem;
-  border-radius: 12px;
-  border: 1px dashed #f1a0a8;
-  background: rgba(255, 241, 242, 0.55);
+  width: min(100%, 340px);
+  aspect-ratio: 1;
 }
 
-.lp-stack-flow-cycle .lp-stack-flow-step {
-  padding-bottom: 0.55rem;
+.lp-stack-orbit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.lp-stack-flow-cycle .lp-stack-flow-step:last-child {
-  padding-bottom: 0.2rem;
+.lp-stack-orbit-track {
+  fill: none;
+  stroke: #d7dee8;
+  stroke-width: 2;
 }
 
-.lp-stack-flow-cycle .lp-stack-flow-step:last-child::before,
-.lp-stack-flow-cycle .lp-stack-flow-step:last-child::after {
-  display: none;
+.lp-stack-orbit-arc {
+  fill: none;
+  stroke-width: 2.25;
+  stroke-linecap: round;
 }
 
-.lp-stack-flow-loop {
-  margin: 0.15rem 0 0;
-  padding: 0.28rem 0.45rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  border-radius: 8px;
-  background: #0f1724;
-  color: #e2e8f0;
+.lp-stack-orbit-arc-neutral {
+  stroke: #94a3b8;
+}
+
+.lp-stack-orbit-arc-build {
+  stroke: #ea580c;
+}
+
+.lp-stack-orbit-arc-run {
+  stroke: #be123c;
+}
+
+#lp-orbit-arrow-neutral path {
+  fill: #94a3b8;
+}
+
+#lp-orbit-arrow-build path {
+  fill: #ea580c;
+}
+
+#lp-orbit-arrow-run path {
+  fill: #be123c;
+}
+
+.lp-stack-orbit-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 5.6rem;
+  height: 5.6rem;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.18rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.06);
+  transform: translate(-50%, -50%);
+  text-align: center;
   font-size: 0.62rem;
-  font-weight: 650;
-  line-height: 1.3;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #475569;
 }
 
-.lp-stack-flow-loop span {
-  flex: none;
-  padding: 0.1rem 0.35rem;
+.lp-stack-orbit-hub span {
+  padding: 0.1rem 0.4rem;
   border-radius: 999px;
   background: #be123c;
   color: #fff;
@@ -642,6 +567,72 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.lp-stack-orbit-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lp-stack-orbit-step {
+  --i: 0;
+  --angle: calc(var(--i) * 60deg - 90deg);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.lp-stack-orbit-step:nth-child(1) { --i: 0; }
+.lp-stack-orbit-step:nth-child(2) { --i: 1; }
+.lp-stack-orbit-step:nth-child(3) { --i: 2; }
+.lp-stack-orbit-step:nth-child(4) { --i: 3; }
+.lp-stack-orbit-step:nth-child(5) { --i: 4; }
+.lp-stack-orbit-step:nth-child(6) { --i: 5; }
+
+.lp-stack-orbit-bead,
+.lp-stack-orbit-step strong {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: auto;
+}
+
+.lp-stack-orbit-bead {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 0 3px #f8fafc;
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--orbit-r) * -1)) rotate(calc(var(--angle) * -1));
+}
+
+.lp-stack-orbit-build .lp-stack-orbit-bead {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.lp-stack-orbit-run .lp-stack-orbit-bead {
+  background: #ffe4e6;
+  color: #9f1239;
+}
+
+.lp-stack-orbit-step strong {
+  width: 5.7rem;
+  text-align: center;
+  font-family: var(--lp-display);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: #0f1724;
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--label-r) * -1)) rotate(calc(var(--angle) * -1));
 }
 
 @keyframes lp-node-in {
@@ -1219,8 +1210,12 @@
   }
 
   .lp-compare-canvas,
-  .lp-stack-flow {
+  .lp-stack-orbit {
     min-height: 0;
+  }
+
+  .lp-stack-orbit-stage {
+    width: min(100%, 300px);
   }
 
   .lp-compare-pains {
