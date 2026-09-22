@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
+import sequenceLogo from "../assets/carescope-sequence-logo.png";
 import "./landing.css";
 
 const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
@@ -14,34 +15,32 @@ export function LandingPage() {
     <div className="lp">
       <div className="lp-frame">
         <header className="lp-nav">
-          <Link to="/" className="lp-logo" aria-label="CareScope home">
-            <span className="lp-logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <circle cx="16" cy="16" r="14" fill="#1B6EF3" />
-                <path
-                  d="M16 7.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.2a2.4 2.4 0 0 1 2.4 2.4v1.1l1.8.9a1 1 0 0 1 .05 1.75l-1.85.9v1.85a2.4 2.4 0 1 1-4.8 0v-1.85l-1.85-.9a1 1 0 0 1 .05-1.75l1.8-.9V13.1A2.4 2.4 0 0 1 16 10.7Z"
-                  fill="#fff"
-                />
-              </svg>
-            </span>
-            <span className="lp-logo-word">
-              <span className="lp-brand-care">CareScope</span>
-            </span>
+          <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
+            <img
+              className="lp-logo-img"
+              src={sequenceLogo}
+              alt="CareScope Sequence. The laboratory platform that keeps you moving."
+            />
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app?signup=1">Try OneLab</Link>
+            <Link to="/app?signup=1">
+              Try <span className="lp-seq">Sequence</span>
+            </Link>
           </nav>
 
           <div className="lp-nav-actions">
+            <a href="/intrasite" className="lp-link-quiet">
+              Intrasite
+            </a>
             <Link to="/app" className="lp-link-quiet">
               Sign in
             </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
-              Try OneLab
+              Try <span className="lp-seq">Sequence</span>
             </Link>
           </div>
         </header>
@@ -49,8 +48,7 @@ export function LandingPage() {
         <section className="lp-hero" aria-labelledby="hero-brand">
           <div className="lp-hero-copy">
             <p className="lp-brand-lockup" id="hero-brand">
-              <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-onelab">OneLab</span>
+              <span className="lp-brand-sequence">Sequence</span>
             </p>
             <h1 className="lp-hero-title">
               Your lab shouldn’t have to work around your LIMS.
@@ -64,7 +62,7 @@ export function LandingPage() {
             </p>
             <div className="lp-hero-cta">
               <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try OneLab
+                Try <span className="lp-seq">Sequence</span>
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
                 Browse Modules
@@ -139,11 +137,12 @@ export function LandingPage() {
         <div className="lp-cta-band-inner lp-section-wide">
           <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
           <p>
-            Configure CareScope around your methods, sites, and quality system —
-            then automate the rest through the workflow engine.
+            Configure <span className="lp-seq">Sequence</span> around your
+            methods, sites, and quality system — then automate the rest through
+            the workflow engine.
           </p>
           <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try OneLab
+            Try <span className="lp-seq">Sequence</span>
           </Link>
         </div>
       </section>
@@ -155,8 +154,9 @@ export function LandingPage() {
           </span>
           <span>Laboratory information management</span>
           <nav>
-            <Link to="/app">LIMS</Link>
-            <Link to="/app/samples">Samples</Link>
+            <a href="/intrasite" className="lp-footer-intrasite">
+              Intrasite
+            </a>
           </nav>
         </div>
       </footer>
@@ -290,10 +290,8 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Expensive and delayed deployments",
-  "Complex integration management",
-  "Reduced customer satisfaction",
-  "Audit risk",
+  "Integrations are the largest function cost",
+  "Industry average to PROD is 6–9 months",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -302,31 +300,70 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const FRAGMENTED_SYSTEMS = [
-  { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
-  { id: "emr", label: "EMR", x: 210, y: 42 },
-  { id: "inst", label: "Instruments", x: 318, y: 78 },
-  { id: "qc", label: "QC / CAPA", x: 54, y: 168 },
-  { id: "bill", label: "Billing", x: 176, y: 198 },
-  { id: "inv", label: "Inventory", x: 300, y: 176 },
-  { id: "crm", label: "Client portal", x: 112, y: 278 },
-  { id: "bi", label: "BI / Excel", x: 250, y: 288 },
+/**
+ * Typical professional-services mix for a LIMS change at a mid-market
+ * organization (50–5,000 employees). Dollars are midpoints of published
+ * vendor and consultant ranges, not a single census:
+ * integrations (Lifepoint $10–50k per interface; mid labs 5–15 plus EHR/billing),
+ * configuration (major services block in Lifepoint / Scispot),
+ * migration (Lifepoint $25–150k; CrelioHealth $10–75k),
+ * training (Lifepoint $20–100k),
+ * validation and PM (CrelioHealth dedicated PM + validation on enterprise work).
+ * Time to PROD: Lab Software Guide 3–6 / 6–9 months; LabLynx 4–9 months;
+ * CrelioHealth mid 2–5 months / enterprise 6–12 months; Scispot mid 12–20 weeks.
+ */
+const CHANGE_FUNCTIONS = [
+  { id: "discovery", label: "Discovery", cost: 25, peak: false },
+  { id: "pm", label: "PM", cost: 40, peak: false },
+  { id: "config", label: "Config", cost: 75, peak: false },
+  { id: "integrations", label: "Integrations", cost: 120, peak: true },
+  { id: "migration", label: "Migration", cost: 50, peak: false },
+  { id: "validation", label: "Validation", cost: 60, peak: false },
+  { id: "training", label: "Training", cost: 35, peak: false },
 ] as const;
 
-const FRAGMENTED_EDGES: Array<[number, number]> = [
-  [0, 1],
-  [0, 3],
-  [0, 4],
-  [1, 2],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-  [3, 6],
-  [4, 5],
-  [4, 7],
-  [5, 7],
-  [6, 7],
-];
+const COST_MAX_K = 140;
+
+function TypicalLabStackVisual() {
+  return (
+    <div
+      className="lp-stack-chart"
+      role="img"
+      aria-label="Bar chart of typical professional-services cost by function for a LIMS change at a mid-market company with 50 to 5,000 employees. Integrations are the largest cost. Average time to production is 6 to 9 months."
+    >
+      <p className="lp-stack-chart-time">
+        <span>Avg time to PROD</span>
+        6-9 months
+      </p>
+      <div className="lp-stack-chart-plot">
+        <div className="lp-stack-chart-y" aria-hidden="true">
+          <span>$k</span>
+          <span>120</span>
+          <span>80</span>
+          <span>40</span>
+          <span>0</span>
+        </div>
+        <ol className="lp-stack-chart-bars">
+          {CHANGE_FUNCTIONS.map((fn) => (
+            <li key={fn.id} className={fn.peak ? "is-peak" : undefined}>
+              <span className="lp-stack-chart-track">
+                <em>${fn.cost}k</em>
+                <span
+                  className="lp-stack-chart-col"
+                  style={{ height: `${(fn.cost / COST_MAX_K) * 100}%` }}
+                />
+              </span>
+              <strong>{fn.label}</strong>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <p className="lp-stack-chart-note">
+        Typical services mix · 50-5,000 employee labs · industry published ranges
+      </p>
+    </div>
+  );
+}
 
 function IntegrationsComparisonVisual() {
   return (
@@ -335,7 +372,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Multiple Custom Integrations
+            A mid-market LIMS change is a 6–9 month cost stack
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
@@ -343,47 +380,7 @@ function IntegrationsComparisonVisual() {
             ))}
           </ul>
         </div>
-        <svg
-          className="lp-compare-canvas"
-          viewBox="0 0 380 340"
-          role="img"
-          aria-label="Many disconnected systems linked by integrations"
-        >
-          <defs>
-            <linearGradient id="fragLine" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#64748b" stopOpacity="0.55" />
-            </linearGradient>
-          </defs>
-          {FRAGMENTED_EDGES.map(([a, b], i) => {
-            const from = FRAGMENTED_SYSTEMS[a];
-            const to = FRAGMENTED_SYSTEMS[b];
-            const midX = (from.x + to.x) / 2 + ((i % 2 === 0 ? 1 : -1) * 18);
-            const midY = (from.y + to.y) / 2 + ((i % 3) - 1) * 14;
-            return (
-              <path
-                key={`${from.id}-${to.id}`}
-                className="lp-compare-edge"
-                style={{ animationDelay: `${0.15 + i * 0.07}s` }}
-                d={`M${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-                fill="none"
-                stroke="url(#fragLine)"
-                strokeWidth="1.75"
-              />
-            );
-          })}
-          {FRAGMENTED_SYSTEMS.map((node, i) => (
-            <g
-              key={node.id}
-              className="lp-compare-node"
-              style={{ animationDelay: `${0.35 + i * 0.06}s` }}
-              transform={`translate(${node.x} ${node.y})`}
-            >
-              <rect x="-52" y="-18" width="104" height="36" rx="8" />
-              <text y="5">{node.label}</text>
-            </g>
-          ))}
-        </svg>
+        <TypicalLabStackVisual />
       </div>
 
       <div className="lp-compare-divider" aria-hidden="true">
@@ -392,7 +389,7 @@ function IntegrationsComparisonVisual() {
 
       <div className="lp-compare-panel lp-compare-after">
         <div className="lp-compare-head">
-          <span className="lp-compare-brand-onelab">OneLab</span>
+          <span className="lp-compare-brand-onelab">Sequence</span>
           <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
             One Native Integration
           </strong>
@@ -426,12 +423,12 @@ function OneLabUnifiedVisual() {
       className="lp-compare-one-system"
       aria-hidden="true"
       role="img"
-      aria-label="OneLab ships key lab capabilities as one native integration"
+      aria-label="Sequence ships key lab capabilities as one native integration"
     >
       <div className="lp-onelab-poster">
         <div className="lp-onelab-included">
           <p className="lp-onelab-included-label">
-            Everything ships inside <span className="lp-onelab-name">OneLab</span>
+            Everything ships inside <span className="lp-onelab-name">Sequence</span>
           </p>
           <ul>
             {ONELAB_KEY_MODULES.map((item, i) => (
