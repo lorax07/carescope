@@ -475,180 +475,78 @@
   text-anchor: middle;
 }
 
-.lp-stack-orbit {
+.lp-stack-chart {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  margin-top: 0.15rem;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
 }
 
-.lp-stack-orbit-stage {
-  position: relative;
-  width: min(100%, 340px);
-  aspect-ratio: 1;
-}
-
-.lp-stack-orbit-svg {
-  position: absolute;
-  inset: 0;
+.lp-stack-chart-svg {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
 }
 
-.lp-stack-orbit-track {
-  fill: none;
+.lp-stack-chart-time {
+  fill: #0f1724;
+}
+
+.lp-stack-chart-time-label {
+  fill: #f8fafc;
+  font-family: var(--lp-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lp-stack-chart-grid {
   stroke: #d7dee8;
-  stroke-width: 2;
+  stroke-width: 1;
 }
 
-.lp-stack-orbit-arc {
-  fill: none;
-  stroke-width: 2.25;
-  stroke-linecap: round;
+.lp-stack-chart-tick,
+.lp-stack-chart-axis,
+.lp-stack-chart-value,
+.lp-stack-chart-x {
+  font-family: var(--lp-font);
+  fill: #64748b;
 }
 
-.lp-stack-orbit-arc-neutral {
-  stroke: #94a3b8;
+.lp-stack-chart-tick,
+.lp-stack-chart-axis {
+  font-size: 9px;
+  font-weight: 700;
 }
 
-.lp-stack-orbit-arc-build {
-  stroke: #ea580c;
+.lp-stack-chart-value {
+  font-size: 9px;
+  font-weight: 800;
+  fill: #334155;
 }
 
-.lp-stack-orbit-arc-run {
-  stroke: #be123c;
+.lp-stack-chart-x {
+  font-size: 8.5px;
+  font-weight: 700;
 }
 
-#lp-orbit-arrow-neutral path {
+.lp-stack-chart-bar {
   fill: #94a3b8;
 }
 
-#lp-orbit-arrow-build path {
-  fill: #ea580c;
+.lp-stack-chart-bar.is-peak {
+  fill: #c45c5c;
 }
 
-#lp-orbit-arrow-run path {
-  fill: #be123c;
-}
-
-.lp-stack-orbit-hub {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 1;
-  width: 6.4rem;
-  height: 6.4rem;
+.lp-stack-chart-note {
   margin: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.18rem;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 24px rgba(15, 23, 36, 0.06);
-  transform: translate(-50%, -50%);
-  text-align: center;
   font-size: 0.58rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: #475569;
-}
-
-.lp-stack-orbit-hub span {
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  background: #be123c;
-  color: #fff;
-  font-size: 0.54rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lp-stack-orbit-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.lp-stack-orbit-step {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.lp-stack-orbit-bead,
-.lp-stack-orbit-step strong {
-  position: absolute;
-  pointer-events: auto;
-  transform: translate(-50%, -50%);
-}
-
-.lp-stack-orbit-bead {
-  width: 1.55rem;
-  height: 1.55rem;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
-  font-size: 0.56rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  box-shadow: 0 0 0 3px #f8fafc;
-}
-
-.lp-stack-orbit-build .lp-stack-orbit-bead {
-  background: #ffedd5;
-  color: #9a3412;
-}
-
-.lp-stack-orbit-run .lp-stack-orbit-bead {
-  background: #ffe4e6;
-  color: #9f1239;
-}
-
-.lp-stack-orbit-step strong {
-  width: 5.4rem;
-  text-align: center;
-  font-family: var(--lp-display);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-  color: #0f1724;
-}
-
-.lp-stack-orbit-tax {
-  margin: 0;
-  width: min(100%, 20rem);
-  padding: 0.32rem 0.5rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  border-radius: 8px;
-  background: #0f1724;
-  color: #e2e8f0;
-  font-size: 0.62rem;
   font-weight: 650;
   line-height: 1.3;
-}
-
-.lp-stack-orbit-tax span {
-  flex: none;
-  padding: 0.1rem 0.35rem;
-  border-radius: 999px;
-  background: #be123c;
-  color: #fff;
-  font-size: 0.54rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: #64748b;
 }
 
 @keyframes lp-node-in {
@@ -1226,12 +1124,8 @@
   }
 
   .lp-compare-canvas,
-  .lp-stack-orbit {
+  .lp-stack-chart {
     min-height: 0;
-  }
-
-  .lp-stack-orbit-stage {
-    width: min(100%, 300px);
   }
 
   .lp-compare-pains {

@@ -294,8 +294,8 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Heavy PM to manage outside vendors and consultants",
-  "Leaders cut lab-ops decisions to fund the cost",
+  "Integrations are the largest function cost",
+  "Industry average to PROD is 6–9 months",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -304,137 +304,119 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const CHANGE_FLOW = [
-  {
-    id: "enhance",
-    n: "01",
-    title: "Enhancement",
-    detail: "Any new interface, upgrade, or map",
-    tone: "neutral",
-  },
-  {
-    id: "pm",
-    n: "02",
-    title: "Heavy PM",
-    detail: "A project office to run the outside work",
-    tone: "build",
-  },
-  {
-    id: "vendors",
-    n: "03",
-    title: "Vendors",
-    detail: "Coordinate EMR, analyzer, billing, LIS owners",
-    tone: "build",
-  },
-  {
-    id: "consultants",
-    n: "04",
-    title: "Consultants",
-    detail: "An SI writes and keeps the glue",
-    tone: "build",
-  },
-  {
-    id: "cost",
-    n: "05",
-    title: "The cost",
-    detail: "Hours, retainers, and change orders",
-    tone: "run",
-  },
-  {
-    id: "cut",
-    n: "06",
-    title: "Cut ops",
-    detail: "Leaders trade lab operations for cost",
-    tone: "run",
-  },
+/**
+ * Typical professional-services mix for a LIMS change at a mid-market
+ * organization (50–5,000 employees). Dollars are midpoints of published
+ * vendor and consultant ranges, not a single census:
+ * integrations (Lifepoint $10–50k per interface; mid labs 5–15 plus EHR/billing),
+ * configuration (major services block in Lifepoint / Scispot),
+ * migration (Lifepoint $25–150k; CrelioHealth $10–75k),
+ * training (Lifepoint $20–100k),
+ * validation and PM (CrelioHealth dedicated PM + validation on enterprise work).
+ * Time to PROD: Lab Software Guide 3–6 / 6–9 months; LabLynx 4–9 months;
+ * CrelioHealth mid 2–5 months / enterprise 6–12 months; Scispot mid 12–20 weeks.
+ */
+const CHANGE_FUNCTIONS = [
+  { id: "discovery", label: "Discovery", cost: 25, peak: false },
+  { id: "pm", label: "PM", cost: 40, peak: false },
+  { id: "config", label: "Config", cost: 75, peak: false },
+  { id: "integrations", label: "Integrations", cost: 120, peak: true },
+  { id: "migration", label: "Migration", cost: 50, peak: false },
+  { id: "validation", label: "Validation", cost: 60, peak: false },
+  { id: "training", label: "Training", cost: 35, peak: false },
 ] as const;
 
-const ORBIT_CX = 160;
-const ORBIT_CY = 160;
-const ORBIT_R = 100;
-
-function orbitPoint(angleDeg: number, radius = ORBIT_R) {
-  const rad = (angleDeg * Math.PI) / 180;
-  return {
-    x: ORBIT_CX + radius * Math.cos(rad),
-    y: ORBIT_CY + radius * Math.sin(rad),
-  };
-}
+const COST_MAX_K = 140;
+const TIME_TO_PROD = "6–9 mo";
 
 function TypicalLabStackVisual() {
+  const W = 360;
+  const H = 236;
+  const pad = { l: 30, r: 10, t: 38, b: 52 };
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+  const n = CHANGE_FUNCTIONS.length;
+  const slot = innerW / n;
+  const barW = slot * 0.62;
+  const ticks = [0, 40, 80, 120];
+
   return (
     <div
-      className="lp-stack-orbit"
+      className="lp-stack-chart"
       role="img"
-      aria-label="Circular enhancement loop of a typical lab stack. Any enhancement requires heavy project management of outside vendors and consultants. Leaders then sacrifice lab-operation decisions to cover the cost."
+      aria-label="Bar chart of typical professional-services cost by function for a LIMS change at a mid-market company with 50 to 5,000 employees. Integrations are the largest cost. Average time to production is 6 to 9 months."
     >
-      <div className="lp-stack-orbit-stage">
-        <svg className="lp-stack-orbit-svg" viewBox="0 0 320 320" aria-hidden="true">
-          <defs>
-            {(["neutral", "build", "run"] as const).map((tone) => (
-              <marker
-                key={tone}
-                id={`lp-orbit-arrow-${tone}`}
-                markerWidth="8"
-                markerHeight="8"
-                refX="6"
-                refY="4"
-                orient="auto"
-              >
-                <path d="M0 1.2 L7.2 4 L0 6.8 Z" />
-              </marker>
-            ))}
-          </defs>
-          <circle className="lp-stack-orbit-track" cx={ORBIT_CX} cy={ORBIT_CY} r={ORBIT_R} />
-          {CHANGE_FLOW.map((step, i) => {
-            const start = orbitPoint(-90 + i * 60 + 16);
-            const end = orbitPoint(-90 + (i + 1) * 60 - 16);
-            return (
-              <path
-                key={step.id}
-                className={`lp-stack-orbit-arc lp-stack-orbit-arc-${step.tone}`}
-                d={`M ${start.x.toFixed(1)} ${start.y.toFixed(1)} A ${ORBIT_R} ${ORBIT_R} 0 0 1 ${end.x.toFixed(1)} ${end.y.toFixed(1)}`}
-                markerEnd={`url(#lp-orbit-arrow-${step.tone})`}
+      <svg className="lp-stack-chart-svg" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <rect
+          className="lp-stack-chart-time"
+          x={pad.l}
+          y={8}
+          width={innerW}
+          height={22}
+          rx="11"
+        />
+        <text
+          className="lp-stack-chart-time-label"
+          x={W / 2}
+          y={23}
+          textAnchor="middle"
+        >
+          Avg time to PROD  ·  {TIME_TO_PROD}
+        </text>
+
+        {ticks.map((tick) => {
+          const y = pad.t + innerH - (tick / COST_MAX_K) * innerH;
+          return (
+            <g key={tick}>
+              <line
+                className="lp-stack-chart-grid"
+                x1={pad.l}
+                x2={W - pad.r}
+                y1={y}
+                y2={y}
               />
-            );
-          })}
-        </svg>
-        <p className="lp-stack-orbit-hub">
-          <span>Heavy PM</span>
-          Vendors + consultants
-        </p>
-        <ol className="lp-stack-orbit-steps">
-          {CHANGE_FLOW.map((step, i) => {
-            const angle = -90 + i * 60;
-            const bead = orbitPoint(angle, ORBIT_R);
-            const label = orbitPoint(angle, 139);
-            return (
-              <li key={step.id} className={`lp-stack-orbit-step lp-stack-orbit-${step.tone}`}>
-                <span
-                  className="lp-stack-orbit-bead"
-                  style={{
-                    left: `${(bead.x / 320) * 100}%`,
-                    top: `${(bead.y / 320) * 100}%`,
-                  }}
-                >
-                  {step.n}
-                </span>
-                <strong
-                  style={{
-                    left: `${(label.x / 320) * 100}%`,
-                    top: `${(label.y / 320) * 100}%`,
-                  }}
-                >
-                  {step.title}
-                </strong>
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-      <p className="lp-stack-orbit-tax">
-        <span>Cost</span>
-        Leaders sacrifice lab-ops decisions to keep the vendor and consultant loop in motion.
+              <text className="lp-stack-chart-tick" x={pad.l - 6} y={y + 3} textAnchor="end">
+                {tick}
+              </text>
+            </g>
+          );
+        })}
+        <text className="lp-stack-chart-axis" x={12} y={pad.t - 8}>
+          $k
+        </text>
+
+        {CHANGE_FUNCTIONS.map((fn, i) => {
+          const h = (fn.cost / COST_MAX_K) * innerH;
+          const x = pad.l + slot * i + (slot - barW) / 2;
+          const y = pad.t + innerH - h;
+          return (
+            <g key={fn.id}>
+              <rect
+                className={`lp-stack-chart-bar${fn.peak ? " is-peak" : ""}`}
+                x={x}
+                y={y}
+                width={barW}
+                height={h}
+                rx="4"
+              />
+              <text className="lp-stack-chart-value" x={x + barW / 2} y={y - 5} textAnchor="middle">
+                {fn.cost}
+              </text>
+              <text
+                className="lp-stack-chart-x"
+                x={x + barW / 2}
+                y={H - 8}
+                textAnchor="end"
+                transform={`rotate(-34 ${x + barW / 2} ${H - 8})`}
+              >
+                {fn.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <p className="lp-stack-chart-note">
+        Typical services mix · 50–5,000 employee labs · industry published ranges
       </p>
     </div>
   );
@@ -447,7 +429,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Enhancements take heavy PM. Ops decisions get cut.
+            A mid-market LIMS change is a 6–9 month cost stack
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
