@@ -28,9 +28,26 @@
   text-decoration: none;
 }
 
+.lp-banner {
+  background: #fff;
+  border-bottom: 1px solid var(--lp-line);
+}
+
+.lp-banner-inner {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2.25rem 0 1.75rem;
+}
+
+.lp-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .lp-frame {
   width: min(1520px, calc(100% - 2rem));
-  margin: 1rem auto 0;
+  margin: 1.25rem auto 0;
   background: var(--lp-surface);
   border: 1px solid rgba(15, 23, 36, 0.06);
   border-radius: 28px;
@@ -1223,6 +1240,11 @@
 }
 
 @media (max-width: 560px) {
+  .lp-banner-inner {
+    width: calc(100% - 1rem);
+    padding: 1.25rem 0 1rem;
+  }
+
   .lp-frame {
     width: calc(100% - 1rem);
     margin-top: 0.5rem;

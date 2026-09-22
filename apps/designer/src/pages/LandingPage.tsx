@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
+import sequenceBanner from "../assets/sequence-banner.png";
 import "./landing.css";
 
 const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
@@ -12,6 +13,15 @@ const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
 export function LandingPage() {
   return (
     <div className="lp">
+      <section className="lp-banner" aria-label="CareScope Sequence">
+        <div className="lp-banner-inner">
+          <img
+            src={sequenceBanner}
+            alt="CareScope Sequence. The laboratory platform that keeps you moving. CareScope Sequence brings your lab's workflows, data, and systems together so you can make changes faster, reduce integrations, and run a more efficient laboratory. Capabilities include LIMS, workflow, integrations, quality, analytics, and client services."
+          />
+        </div>
+      </section>
+
       <div className="lp-frame">
         <header className="lp-nav">
           <Link to="/" className="lp-logo" aria-label="CareScope home">
