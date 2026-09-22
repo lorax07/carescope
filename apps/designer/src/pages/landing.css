@@ -63,6 +63,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  min-width: 0;
+}
+
+.lp-logo-img {
+  display: block;
+  height: 52px;
+  width: auto;
+  max-width: min(320px, 36vw);
+  object-fit: contain;
 }
 
 .lp-logo-mark {
@@ -1247,6 +1256,11 @@
 
   .lp-nav {
     padding: 0.9rem 1rem;
+  }
+
+  .lp-logo-img {
+    height: 40px;
+    max-width: min(220px, 52vw);
   }
 
   .lp-hero {

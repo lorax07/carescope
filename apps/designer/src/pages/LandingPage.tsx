@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
+import sequenceLogo from "../assets/carescope-sequence-logo.png";
 import "./landing.css";
 
 const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
@@ -14,19 +15,12 @@ export function LandingPage() {
     <div className="lp">
       <div className="lp-frame">
         <header className="lp-nav">
-          <Link to="/" className="lp-logo" aria-label="CareScope home">
-            <span className="lp-logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <circle cx="16" cy="16" r="14" fill="#1B6EF3" />
-                <path
-                  d="M16 7.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.2a2.4 2.4 0 0 1 2.4 2.4v1.1l1.8.9a1 1 0 0 1 .05 1.75l-1.85.9v1.85a2.4 2.4 0 1 1-4.8 0v-1.85l-1.85-.9a1 1 0 0 1 .05-1.75l1.8-.9V13.1A2.4 2.4 0 0 1 16 10.7Z"
-                  fill="#fff"
-                />
-              </svg>
-            </span>
-            <span className="lp-logo-word">
-              <span className="lp-brand-care">CareScope</span>
-            </span>
+          <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
+            <img
+              className="lp-logo-img"
+              src={sequenceLogo}
+              alt="CareScope Sequence. The laboratory platform that keeps you moving."
+            />
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">
