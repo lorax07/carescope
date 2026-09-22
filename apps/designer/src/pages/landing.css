@@ -68,9 +68,9 @@
 
 .lp-logo-img {
   display: block;
-  height: 52px;
+  height: 64px;
   width: auto;
-  max-width: min(320px, 36vw);
+  max-width: min(380px, 40vw);
   object-fit: contain;
 }
 
@@ -1259,8 +1259,8 @@
   }
 
   .lp-logo-img {
-    height: 40px;
-    max-width: min(220px, 52vw);
+    height: 46px;
+    max-width: min(240px, 56vw);
   }
 
   .lp-hero {
