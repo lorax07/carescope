@@ -327,96 +327,43 @@ const CHANGE_FUNCTIONS = [
 ] as const;
 
 const COST_MAX_K = 140;
-const TIME_TO_PROD = "6–9 mo";
 
 function TypicalLabStackVisual() {
-  const W = 360;
-  const H = 236;
-  const pad = { l: 30, r: 10, t: 38, b: 52 };
-  const innerW = W - pad.l - pad.r;
-  const innerH = H - pad.t - pad.b;
-  const n = CHANGE_FUNCTIONS.length;
-  const slot = innerW / n;
-  const barW = slot * 0.62;
-  const ticks = [0, 40, 80, 120];
-
   return (
     <div
       className="lp-stack-chart"
       role="img"
       aria-label="Bar chart of typical professional-services cost by function for a LIMS change at a mid-market company with 50 to 5,000 employees. Integrations are the largest cost. Average time to production is 6 to 9 months."
     >
-      <svg className="lp-stack-chart-svg" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
-        <rect
-          className="lp-stack-chart-time"
-          x={pad.l}
-          y={8}
-          width={innerW}
-          height={22}
-          rx="11"
-        />
-        <text
-          className="lp-stack-chart-time-label"
-          x={W / 2}
-          y={23}
-          textAnchor="middle"
-        >
-          Avg time to PROD  ·  {TIME_TO_PROD}
-        </text>
-
-        {ticks.map((tick) => {
-          const y = pad.t + innerH - (tick / COST_MAX_K) * innerH;
-          return (
-            <g key={tick}>
-              <line
-                className="lp-stack-chart-grid"
-                x1={pad.l}
-                x2={W - pad.r}
-                y1={y}
-                y2={y}
-              />
-              <text className="lp-stack-chart-tick" x={pad.l - 6} y={y + 3} textAnchor="end">
-                {tick}
-              </text>
-            </g>
-          );
-        })}
-        <text className="lp-stack-chart-axis" x={12} y={pad.t - 8}>
-          $k
-        </text>
-
-        {CHANGE_FUNCTIONS.map((fn, i) => {
-          const h = (fn.cost / COST_MAX_K) * innerH;
-          const x = pad.l + slot * i + (slot - barW) / 2;
-          const y = pad.t + innerH - h;
-          return (
-            <g key={fn.id}>
-              <rect
-                className={`lp-stack-chart-bar${fn.peak ? " is-peak" : ""}`}
-                x={x}
-                y={y}
-                width={barW}
-                height={h}
-                rx="4"
-              />
-              <text className="lp-stack-chart-value" x={x + barW / 2} y={y - 5} textAnchor="middle">
-                {fn.cost}
-              </text>
-              <text
-                className="lp-stack-chart-x"
-                x={x + barW / 2}
-                y={H - 8}
-                textAnchor="end"
-                transform={`rotate(-34 ${x + barW / 2} ${H - 8})`}
-              >
-                {fn.label}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      <p className="lp-stack-chart-time">
+        <span>Avg time to PROD</span>
+        6-9 months
+      </p>
+      <div className="lp-stack-chart-plot">
+        <div className="lp-stack-chart-y" aria-hidden="true">
+          <span>$k</span>
+          <span>120</span>
+          <span>80</span>
+          <span>40</span>
+          <span>0</span>
+        </div>
+        <ol className="lp-stack-chart-bars">
+          {CHANGE_FUNCTIONS.map((fn) => (
+            <li key={fn.id} className={fn.peak ? "is-peak" : undefined}>
+              <span className="lp-stack-chart-track">
+                <em>${fn.cost}k</em>
+                <span
+                  className="lp-stack-chart-col"
+                  style={{ height: `${(fn.cost / COST_MAX_K) * 100}%` }}
+                />
+              </span>
+              <strong>{fn.label}</strong>
+            </li>
+          ))}
+        </ol>
+      </div>
       <p className="lp-stack-chart-note">
-        Typical services mix · 50–5,000 employee labs · industry published ranges
+        Typical services mix · 50-5,000 employee labs · industry published ranges
       </p>
     </div>
   );
