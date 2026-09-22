@@ -322,7 +322,7 @@ const CHANGE_FLOW = [
   {
     id: "build",
     n: "03",
-    title: "Develop the maps",
+    title: "Develop maps",
     detail: "EMR, analyzers, billing, QC, portal",
     tone: "build",
   },
@@ -404,12 +404,32 @@ function TypicalLabStackVisual() {
           Never exits
         </p>
         <ol className="lp-stack-orbit-steps">
-          {CHANGE_FLOW.map((step) => (
-            <li key={step.id} className={`lp-stack-orbit-step lp-stack-orbit-${step.tone}`}>
-              <span className="lp-stack-orbit-bead">{step.n}</span>
-              <strong>{step.title}</strong>
-            </li>
-          ))}
+          {CHANGE_FLOW.map((step, i) => {
+            const angle = -90 + i * 60;
+            const bead = orbitPoint(angle, ORBIT_R);
+            const label = orbitPoint(angle, 139);
+            return (
+              <li key={step.id} className={`lp-stack-orbit-step lp-stack-orbit-${step.tone}`}>
+                <span
+                  className="lp-stack-orbit-bead"
+                  style={{
+                    left: `${(bead.x / 320) * 100}%`,
+                    top: `${(bead.y / 320) * 100}%`,
+                  }}
+                >
+                  {step.n}
+                </span>
+                <strong
+                  style={{
+                    left: `${(label.x / 320) * 100}%`,
+                    top: `${(label.y / 320) * 100}%`,
+                  }}
+                >
+                  {step.title}
+                </strong>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </div>

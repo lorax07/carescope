@@ -484,8 +484,6 @@
 }
 
 .lp-stack-orbit-stage {
-  --orbit-r: 31.25%;
-  --label-r: 43.5%;
   position: relative;
   width: min(100%, 340px);
   aspect-ratio: 1;
@@ -576,26 +574,16 @@
 }
 
 .lp-stack-orbit-step {
-  --i: 0;
-  --angle: calc(var(--i) * 60deg - 90deg);
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.lp-stack-orbit-step:nth-child(1) { --i: 0; }
-.lp-stack-orbit-step:nth-child(2) { --i: 1; }
-.lp-stack-orbit-step:nth-child(3) { --i: 2; }
-.lp-stack-orbit-step:nth-child(4) { --i: 3; }
-.lp-stack-orbit-step:nth-child(5) { --i: 4; }
-.lp-stack-orbit-step:nth-child(6) { --i: 5; }
-
 .lp-stack-orbit-bead,
 .lp-stack-orbit-step strong {
   position: absolute;
-  left: 50%;
-  top: 50%;
   pointer-events: auto;
+  transform: translate(-50%, -50%);
 }
 
 .lp-stack-orbit-bead {
@@ -610,7 +598,6 @@
   font-weight: 800;
   letter-spacing: 0.02em;
   box-shadow: 0 0 0 3px #f8fafc;
-  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--orbit-r) * -1)) rotate(calc(var(--angle) * -1));
 }
 
 .lp-stack-orbit-build .lp-stack-orbit-bead {
@@ -632,7 +619,6 @@
   letter-spacing: -0.03em;
   line-height: 1.2;
   color: #0f1724;
-  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--label-r) * -1)) rotate(calc(var(--angle) * -1));
 }
 
 @keyframes lp-node-in {
