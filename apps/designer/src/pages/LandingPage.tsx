@@ -447,7 +447,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Every enhancement is a heavy-PM loop that cuts ops decisions
+            Enhancements take heavy PM. Ops decisions get cut.
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
