@@ -81,10 +81,23 @@
   color: var(--lp-blue);
 }
 
-.lp-brand-onelab {
+.lp-brand-onelab,
+.lp-brand-sequence {
   color: var(--lp-green);
   font-weight: 400;
   font-size: 0.68em;
+}
+
+.lp-brand-lockup .lp-brand-sequence {
+  font-weight: 800;
+  font-size: 1em;
+}
+
+.lp-brand-by {
+  font-weight: 500;
+  font-size: 0.42em;
+  letter-spacing: -0.03em;
+  color: var(--lp-muted);
 }
 
 .lp-nav-links {
@@ -209,7 +222,9 @@
 }
 
 .lp-brand-lockup .lp-brand-care,
-.lp-brand-lockup .lp-brand-onelab {
+.lp-brand-lockup .lp-brand-onelab,
+.lp-brand-lockup .lp-brand-sequence,
+.lp-brand-lockup .lp-brand-by {
   white-space: nowrap;
 }
 

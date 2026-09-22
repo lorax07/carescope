@@ -33,7 +33,7 @@ export function LandingPage() {
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app?signup=1">Try OneLab</Link>
+            <Link to="/app?signup=1">Try Sequence</Link>
           </nav>
 
           <div className="lp-nav-actions">
@@ -44,7 +44,7 @@ export function LandingPage() {
               Sign in
             </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
-              Try OneLab
+              Try Sequence
             </Link>
           </div>
         </header>
@@ -52,8 +52,11 @@ export function LandingPage() {
         <section className="lp-hero" aria-labelledby="hero-brand">
           <div className="lp-hero-copy">
             <p className="lp-brand-lockup" id="hero-brand">
-              <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-onelab">OneLab</span>
+              <span className="lp-brand-sequence">Sequence</span>
+              <span className="lp-brand-by">
+                {" "}
+                by <span className="lp-brand-care">CareScope</span>
+              </span>
             </p>
             <h1 className="lp-hero-title">
               Your lab shouldn’t have to work around your LIMS.
@@ -67,7 +70,7 @@ export function LandingPage() {
             </p>
             <div className="lp-hero-cta">
               <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try OneLab
+                Try Sequence
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
                 Browse Modules
@@ -142,11 +145,11 @@ export function LandingPage() {
         <div className="lp-cta-band-inner lp-section-wide">
           <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
           <p>
-            Configure CareScope around your methods, sites, and quality system —
+            Configure Sequence around your methods, sites, and quality system —
             then automate the rest through the workflow engine.
           </p>
           <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try OneLab
+            Try Sequence
           </Link>
         </div>
       </section>
@@ -393,7 +396,7 @@ function IntegrationsComparisonVisual() {
 
       <div className="lp-compare-panel lp-compare-after">
         <div className="lp-compare-head">
-          <span className="lp-compare-brand-onelab">OneLab</span>
+          <span className="lp-compare-brand-onelab">Sequence</span>
           <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
             One Native Integration
           </strong>
@@ -427,12 +430,12 @@ function OneLabUnifiedVisual() {
       className="lp-compare-one-system"
       aria-hidden="true"
       role="img"
-      aria-label="OneLab ships key lab capabilities as one native integration"
+      aria-label="Sequence ships key lab capabilities as one native integration"
     >
       <div className="lp-onelab-poster">
         <div className="lp-onelab-included">
           <p className="lp-onelab-included-label">
-            Everything ships inside <span className="lp-onelab-name">OneLab</span>
+            Everything ships inside <span className="lp-onelab-name">Sequence</span>
           </p>
           <ul>
             {ONELAB_KEY_MODULES.map((item, i) => (
