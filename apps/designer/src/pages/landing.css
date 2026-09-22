@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap");
+
 /* CareScope marketing landing — pedigree B2B LIMS */
 
 .lp {
@@ -13,6 +15,7 @@
   --lp-green-deep: #15803d;
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
   --lp-display: "Sora", "Source Sans 3", sans-serif;
+  --lp-sequence: "Montserrat", "Sora", sans-serif;
   min-height: 100%;
   background:
     radial-gradient(ellipse 70% 45% at 80% -10%, rgba(27, 110, 243, 0.14), transparent 55%),
@@ -90,11 +93,19 @@
   color: var(--lp-blue);
 }
 
+.lp-seq,
+.lp-brand-onelab,
+.lp-brand-sequence,
+.lp-compare-brand-onelab,
+.lp-onelab-name {
+  font-family: var(--lp-sequence);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
 .lp-brand-onelab,
 .lp-brand-sequence {
   color: var(--lp-green);
-  font-weight: 400;
-  font-size: 0.68em;
 }
 
 .lp-brand-lockup .lp-brand-sequence {
@@ -223,10 +234,10 @@
 
 .lp-brand-lockup {
   margin: 0 0 0.85rem;
-  font-family: var(--lp-display);
+  font-family: var(--lp-sequence);
   font-size: clamp(2.4rem, 5vw, 3.6rem);
   font-weight: 800;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
   line-height: 1.05;
 }
 
@@ -418,10 +429,10 @@
 }
 
 .lp-compare-brand-onelab {
-  font-family: var(--lp-display);
+  font-family: var(--lp-sequence);
   font-size: clamp(0.72rem, 1.05vw, 0.88rem);
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--lp-green);
   text-transform: none;
@@ -741,8 +752,8 @@
 }
 
 .lp-onelab-included-label .lp-onelab-name {
-  font-family: var(--lp-display);
-  font-weight: 400;
+  font-family: var(--lp-sequence);
+  font-weight: 800;
   letter-spacing: -0.02em;
   color: #fff;
 }

@@ -27,7 +27,9 @@ export function LandingPage() {
             <a href="#capabilities">Capabilities</a>
             <a href="#workflows">Workflows</a>
             <a href="#compliance">Compliance</a>
-            <Link to="/app?signup=1">Try Sequence</Link>
+            <Link to="/app?signup=1">
+              Try <span className="lp-seq">Sequence</span>
+            </Link>
           </nav>
 
           <div className="lp-nav-actions">
@@ -38,7 +40,7 @@ export function LandingPage() {
               Sign in
             </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
-              Try Sequence
+              Try <span className="lp-seq">Sequence</span>
             </Link>
           </div>
         </header>
@@ -47,10 +49,6 @@ export function LandingPage() {
           <div className="lp-hero-copy">
             <p className="lp-brand-lockup" id="hero-brand">
               <span className="lp-brand-sequence">Sequence</span>
-              <span className="lp-brand-by">
-                {" "}
-                by <span className="lp-brand-care">CareScope</span>
-              </span>
             </p>
             <h1 className="lp-hero-title">
               Your lab shouldn’t have to work around your LIMS.
@@ -64,7 +62,7 @@ export function LandingPage() {
             </p>
             <div className="lp-hero-cta">
               <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try Sequence
+                Try <span className="lp-seq">Sequence</span>
               </Link>
               <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
                 Browse Modules
@@ -139,11 +137,12 @@ export function LandingPage() {
         <div className="lp-cta-band-inner lp-section-wide">
           <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
           <p>
-            Configure Sequence around your methods, sites, and quality system —
-            then automate the rest through the workflow engine.
+            Configure <span className="lp-seq">Sequence</span> around your
+            methods, sites, and quality system — then automate the rest through
+            the workflow engine.
           </p>
           <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try Sequence
+            Try <span className="lp-seq">Sequence</span>
           </Link>
         </div>
       </section>
