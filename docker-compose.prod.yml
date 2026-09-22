@@ -1,0 +1,70 @@
+name: carescope-intrasite
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - intrasite_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - intrasite
+
+  api:
+    image: carescope/intrasite-api:${CARESCOPE_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      INTRASITE_STORE: postgres
+      INTRASITE_SEED_DEMO: ${INTRASITE_SEED_DEMO}
+      INTRASITE_JWT_SECRET: ${INTRASITE_JWT_SECRET}
+      INTRASITE_JWT_EXPIRES_IN: ${INTRASITE_JWT_EXPIRES_IN}
+      INTRASITE_COOKIE_NAME: ${INTRASITE_COOKIE_NAME}
+      INTRASITE_COOKIE_SECURE: ${INTRASITE_COOKIE_SECURE}
+      INTRASITE_TRUST_PROXY: ${INTRASITE_TRUST_PROXY}
+      INTRASITE_ADMIN_EMAIL: ${INTRASITE_ADMIN_EMAIL}
+      INTRASITE_ADMIN_PASSWORD: ${INTRASITE_ADMIN_PASSWORD}
+      INTRASITE_ADMIN_NAME: ${INTRASITE_ADMIN_NAME}
+      INTRASITE_TENANT_HEADER: ${INTRASITE_TENANT_HEADER}
+      INTRASITE_LAB_HEADER: ${INTRASITE_LAB_HEADER}
+      INTRASITE_INSTANCE_HOST_PATTERN: ${INTRASITE_INSTANCE_HOST_PATTERN}
+      CARESCOPE_TENANT_ID: ${CARESCOPE_TENANT_ID}
+      CARESCOPE_SYSTEM_USER: ${CARESCOPE_SYSTEM_USER}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - intrasite
+
+  web:
+    image: carescope/intrasite-web:${CARESCOPE_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.web
+    restart: unless-stopped
+    ports:
+      - "${INTRASITE_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - intrasite
+
+volumes:
+  intrasite_pgdata:
+
+networks:
+  intrasite:

@@ -37,6 +37,9 @@ export function LandingPage() {
           </nav>
 
           <div className="lp-nav-actions">
+            <a href="/intrasite" className="lp-link-quiet">
+              Intrasite
+            </a>
             <Link to="/app" className="lp-link-quiet">
               Sign in
             </Link>
@@ -155,8 +158,9 @@ export function LandingPage() {
           </span>
           <span>Laboratory information management</span>
           <nav>
-            <Link to="/app">LIMS</Link>
-            <Link to="/app/samples">Samples</Link>
+            <a href="/intrasite" className="lp-footer-intrasite">
+              Intrasite
+            </a>
           </nav>
         </div>
       </footer>
@@ -290,10 +294,10 @@ function usePageSize() {
 }
 
 const FRAGMENTED_PAINS = [
-  "Expensive and delayed deployments",
-  "Complex integration management",
-  "Reduced customer satisfaction",
-  "Audit risk",
+  "Each vendor is a paid integration project",
+  "Interfaces rebuilt and revalidated",
+  "Contracts and cutovers on the critical path",
+  "Cost sits in dependencies, not the LIMS license",
 ] as const;
 
 const ONELAB_BENEFITS = [
@@ -302,31 +306,80 @@ const ONELAB_BENEFITS = [
   "No stitching",
 ] as const;
 
-const FRAGMENTED_SYSTEMS = [
-  { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
-  { id: "emr", label: "EMR", x: 210, y: 42 },
-  { id: "inst", label: "Instruments", x: 318, y: 78 },
-  { id: "qc", label: "QC / CAPA", x: 54, y: 168 },
-  { id: "bill", label: "Billing", x: 176, y: 198 },
-  { id: "inv", label: "Inventory", x: 300, y: 176 },
-  { id: "crm", label: "Client portal", x: 112, y: 278 },
-  { id: "bi", label: "BI / Excel", x: 250, y: 288 },
+const LIMS_DEPENDENCIES = [
+  { id: "emr", label: "Hospital EMR", cost: "Re-interface", x: 190, y: 36 },
+  { id: "billing", label: "Billing", cost: "Remap claims", x: 322, y: 96 },
+  { id: "portal", label: "Client portal", cost: "Re-validate", x: 314, y: 196 },
+  { id: "analyzers", label: "Analyzers", cost: "OEM drivers", x: 190, y: 254 },
+  { id: "qc", label: "QC / QMS", cost: "New contract", x: 66, y: 196 },
+  { id: "legacy", label: "Legacy LIS", cost: "Cutover", x: 58, y: 96 },
 ] as const;
 
-const FRAGMENTED_EDGES: Array<[number, number]> = [
-  [0, 1],
-  [0, 3],
-  [0, 4],
-  [1, 2],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-  [3, 6],
-  [4, 5],
-  [4, 7],
-  [5, 7],
-  [6, 7],
-];
+const LIMS_CENTER = { x: 190, y: 146 };
+
+function TypicalLabStackVisual() {
+  return (
+    <div
+      className="lp-stack-board"
+      role="img"
+      aria-label="Board diagram of a typical LIMS replacement: changing the core LIMS reopens six surrounding vendor systems. Each connection is a paid integration project, for eight vendors, eleven interfaces, and a 14 to 18 month critical path."
+    >
+      <svg className="lp-stack-board-svg" viewBox="0 0 380 292" aria-hidden="true">
+        {LIMS_DEPENDENCIES.map((node) => {
+          const midX = (LIMS_CENTER.x + node.x) / 2;
+          const midY = (LIMS_CENTER.y + node.y) / 2;
+          return (
+            <g key={`${node.id}-edge`}>
+              <line
+                className="lp-stack-board-edge"
+                x1={LIMS_CENTER.x}
+                y1={LIMS_CENTER.y}
+                x2={node.x}
+                y2={node.y}
+              />
+              <circle className="lp-stack-board-joint" cx={midX} cy={midY} r="3.2" />
+            </g>
+          );
+        })}
+        {LIMS_DEPENDENCIES.map((node) => (
+          <g key={node.id} className="lp-stack-board-node" transform={`translate(${node.x} ${node.y})`}>
+            <rect x="-54" y="-22" width="108" height="44" rx="8" />
+            <text className="lp-stack-board-name" y="-2">
+              {node.label}
+            </text>
+            <text className="lp-stack-board-cost" y="13">
+              {node.cost}
+            </text>
+          </g>
+        ))}
+        <g className="lp-stack-board-core" transform={`translate(${LIMS_CENTER.x} ${LIMS_CENTER.y})`}>
+          <rect x="-66" y="-30" width="132" height="60" rx="10" />
+          <text className="lp-stack-board-core-kicker" y="-8">
+            Change this
+          </text>
+          <text className="lp-stack-board-core-name" y="12">
+            Core LIMS
+          </text>
+        </g>
+      </svg>
+      <p className="lp-stack-board-legend">Each line is a paid integration project</p>
+      <ul className="lp-stack-board-kpis">
+        <li>
+          <strong>8</strong>
+          <span>vendor contracts</span>
+        </li>
+        <li>
+          <strong>11</strong>
+          <span>interfaces to rebuild</span>
+        </li>
+        <li>
+          <strong>14–18</strong>
+          <span>month critical path</span>
+        </li>
+      </ul>
+    </div>
+  );
+}
 
 function IntegrationsComparisonVisual() {
   return (
@@ -335,7 +388,7 @@ function IntegrationsComparisonVisual() {
         <div className="lp-compare-head">
           <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
           <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Multiple Custom Integrations
+            A LIMS change is a multi-vendor program
           </strong>
           <ul className="lp-compare-pains">
             {FRAGMENTED_PAINS.map((pain) => (
@@ -343,47 +396,7 @@ function IntegrationsComparisonVisual() {
             ))}
           </ul>
         </div>
-        <svg
-          className="lp-compare-canvas"
-          viewBox="0 0 380 340"
-          role="img"
-          aria-label="Many disconnected systems linked by integrations"
-        >
-          <defs>
-            <linearGradient id="fragLine" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#64748b" stopOpacity="0.55" />
-            </linearGradient>
-          </defs>
-          {FRAGMENTED_EDGES.map(([a, b], i) => {
-            const from = FRAGMENTED_SYSTEMS[a];
-            const to = FRAGMENTED_SYSTEMS[b];
-            const midX = (from.x + to.x) / 2 + ((i % 2 === 0 ? 1 : -1) * 18);
-            const midY = (from.y + to.y) / 2 + ((i % 3) - 1) * 14;
-            return (
-              <path
-                key={`${from.id}-${to.id}`}
-                className="lp-compare-edge"
-                style={{ animationDelay: `${0.15 + i * 0.07}s` }}
-                d={`M${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-                fill="none"
-                stroke="url(#fragLine)"
-                strokeWidth="1.75"
-              />
-            );
-          })}
-          {FRAGMENTED_SYSTEMS.map((node, i) => (
-            <g
-              key={node.id}
-              className="lp-compare-node"
-              style={{ animationDelay: `${0.35 + i * 0.06}s` }}
-              transform={`translate(${node.x} ${node.y})`}
-            >
-              <rect x="-52" y="-18" width="104" height="36" rx="8" />
-              <text y="5">{node.label}</text>
-            </g>
-          ))}
-        </svg>
+        <TypicalLabStackVisual />
       </div>
 
       <div className="lp-compare-divider" aria-hidden="true">
