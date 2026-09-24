@@ -73,15 +73,17 @@ export function LandingPage() {
         </div>
       </section>
 
-      <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
+      <p className="lp-brand-lockup">
+        <img
+          className="lp-footer-logo"
+          src="/carescope-parent-logo.png"
+          alt="CareScope. Building Better Healthcare for Everyone."
+        />
+      </p>
 
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
-          <img
-            className="lp-footer-logo"
-            src="/carescope-parent-logo.png"
-            alt="CareScope. Building Better Healthcare for Everyone."
-          />
+          <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
           <nav>
             <a href="/intrasite" className="lp-footer-intrasite">
               Sequence Intrasite Access
