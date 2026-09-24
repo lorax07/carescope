@@ -166,7 +166,7 @@ function PlatformBand() {
           that keeps you moving.
         </h2>
         <p>
-          CareScope Sequence brings your lab’s workflows, data and systems
+          CareScope Sequence brings your lab workflows, data and systems
           together — so you can make changes faster, reduce integrations, and
           run a more efficient laboratory.
         </p>
