@@ -1839,27 +1839,6 @@ body:has(.lp) {
   color: #615d59;
 }
 
-.lp-demo {
-  margin: 2.5rem 0 0;
-}
-
-.lp-demo-frame {
-  height: 640px;
-  overflow: hidden;
-  border: 1px solid #e7e5e4;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 24px 60px rgba(25, 25, 24, 0.08);
-}
-
-.lp-demo-frame iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: #fff;
-}
-
-
 .lp-solve-chart,
 .lp-solve-sequence {
   background: #fff;
