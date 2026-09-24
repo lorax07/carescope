@@ -3,8 +3,9 @@ import "./landing.css";
 
 export function LandingPage() {
   return (
-    <div className="lp">
+    <div className="lp-page">
         <header className="lp-nav">
+          <div className="lp-nav-bar">
           <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
             <img
               className="lp-header-logo"
@@ -26,8 +27,10 @@ export function LandingPage() {
               Request a Demo
             </Link>
           </div>
+          </div>
         </header>
 
+        <div className="lp">
         <PlatformBand />
       <WhatWeSolve />
       <WorkflowSection />
@@ -51,6 +54,7 @@ export function LandingPage() {
           </nav>
         </div>
       </footer>
+        </div>
     </div>
   );
 }
