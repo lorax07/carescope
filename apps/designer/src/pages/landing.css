@@ -1574,9 +1574,9 @@ body:has(.lp) {
   width: 100%;
   margin: 0;
   box-sizing: border-box;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1.25rem;
   padding: 0.7rem 1.5rem;
 }
@@ -1594,16 +1594,19 @@ body:has(.lp) {
 .lp-logo-sequence {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #111;
+  color: #1b6ef3;
 }
 
 .lp-nav-links {
-  justify-self: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 1.65rem;
-  color: #2a2a2a;
+  color: #000;
   font-size: 0.95rem;
   font-weight: 500;
+}
+
+.lp-nav-links a {
+  color: #000;
 }
 
 .lp-nav-text {
@@ -1647,7 +1650,7 @@ body:has(.lp) {
 }
 
 .lp-logo-sequence {
-  color: #111;
+  color: #1b6ef3;
   font-weight: 600;
 }
 
@@ -1656,8 +1659,9 @@ body:has(.lp) {
   height: 1.7rem;
 }
 
-.lp-nav-links {
-  color: #37352f;
+.lp-nav-links,
+.lp-nav-links a {
+  color: #000;
   font-size: 0.95rem;
   font-weight: 500;
 }

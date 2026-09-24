@@ -16,13 +16,12 @@ export function LandingPage() {
             <span className="lp-logo-sequence">Sequence</span>
           </Link>
 
-          <nav className="lp-nav-links" aria-label="Primary">
-            <a href="#capabilities">What we solve</a>
-            <a href="#workflows">Resources</a>
-            <a href="#compliance">About</a>
-          </nav>
-
           <div className="lp-nav-actions">
+            <nav className="lp-nav-links" aria-label="Primary">
+              <a href="#capabilities">What we solve</a>
+              <a href="#modules">Modules</a>
+              <a href="#compliance">About</a>
+            </nav>
             <span className="lp-nav-divider" aria-hidden="true" />
             <Link to="/intrasite" className="lp-nav-text">
               Sign in
@@ -167,7 +166,7 @@ function WhatWeSolve() {
 
 function PlatformBand() {
   return (
-    <section className="lp-section lp-platform" aria-labelledby="platform-heading">
+    <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
       <div className="lp-section-inner">
         <div className="lp-section-head">
         <h2 id="platform-heading">
