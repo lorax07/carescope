@@ -25,15 +25,9 @@ export function LandingPage() {
                 />
               </svg>
             </span>
-            <span className="lp-logo-word">
-              CareScope
-              <sup>®</sup>
-            </span>
+            <span className="lp-logo-word">CareScope</span>
             <span className="lp-logo-rule" aria-hidden="true" />
-            <span className="lp-logo-sequence">
-              Sequence
-              <sup>®</sup>
-            </span>
+            <span className="lp-logo-sequence">Sequence</span>
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">

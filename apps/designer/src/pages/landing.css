@@ -98,12 +98,6 @@
   color: #243056;
 }
 
-.lp-logo-word sup,
-.lp-logo-sequence sup {
-  font-size: 0.45em;
-  margin-left: 0.05em;
-}
-
 .lp-logo-rule {
   width: 1px;
   height: 1.35rem;
