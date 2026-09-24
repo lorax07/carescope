@@ -4,7 +4,6 @@ import "./landing.css";
 export function LandingPage() {
   return (
     <div className="lp">
-      <div className="lp-frame">
         <header className="lp-nav">
           <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
             <img
@@ -31,47 +30,9 @@ export function LandingPage() {
         </header>
 
         <PlatformBand />
-      </div>
-
       <WhatWeSolve />
-
-      <section className="lp-section lp-section-tint" id="workflows">
-        <div className="lp-section-inner lp-section-wide lp-workflow-block">
-          <div>
-            <p className="lp-eyebrow">Workflow engine</p>
-            <h2 className="lp-h2">Automate laboratory process by design.</h2>
-            <p className="lp-section-lede">
-              A visual, no-code orchestration layer for approvals, instrument
-              actions, notifications, and compliance checks — configurable for
-              every module above.
-            </p>
-            <Link to="/app/workflows" className="lp-btn lp-btn-primary">
-              Open workflow designer
-            </Link>
-          </div>
-          <div className="lp-workflow-panel" aria-hidden="true">
-            <WorkflowMiniCanvas />
-          </div>
-        </div>
-      </section>
-
-      <section className="lp-section" id="compliance">
-        <div className="lp-section-inner lp-section-wide">
-          <p className="lp-eyebrow">Trust</p>
-          <h2 className="lp-h2">Governed for regulated environments.</h2>
-          <p className="lp-section-lede">
-            Immutable execution logs, e-signatures, document control, and
-            multi-site isolation so audits are prepared continuously — not
-            reconstructed later.
-          </p>
-          <ul className="lp-trust-list">
-            <li>21 CFR Part 11–ready electronic signatures</li>
-            <li>Chain of custody with scan-verified transfers</li>
-            <li>Versioned workflows with publish, rollback, and simulation</li>
-            <li>Tenant-isolated operations across laboratory sites</li>
-          </ul>
-        </div>
-      </section>
+      <WorkflowSection />
+      <ComplianceSection />
 
       <p className="lp-brand-lockup">
         <img
@@ -138,13 +99,14 @@ function staffYears(value: number): string {
 function WhatWeSolve() {
   return (
     <section className="lp-section" id="capabilities">
-      <div className="lp-section-inner lp-section-wide">
-        <p className="lp-eyebrow">What we solve</p>
-        <h2 className="lp-h2">A traditional LIMS change is a project. Sequence is a configuration.</h2>
-        <p className="lp-section-lede">
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+        <h2>A traditional LIMS change is a project. Sequence is a configuration.</h2>
+        <p>
           Laboratories of about 50 to 2,000 people still have to fund every function below when the
           LIMS itself cannot absorb the change. Sequence keeps those functions in the platform.
         </p>
+        </div>
 
         <div className="lp-solve">
           <figure className="lp-solve-chart">
@@ -246,15 +208,6 @@ function WhatWeSolve() {
           </div>
         </div>
 
-        <div className="lp-solve-functions">
-          <h3>Functions a traditional LIMS change has to staff</h3>
-          <ul>
-            {LIMS_FUNCTIONS.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
         <footer className="lp-solve-sources">
           <p>
             Cost ranges are one-time professional-services estimates by LIMS user count, not a quote
@@ -324,8 +277,9 @@ function RangeBar({
 
 function PlatformBand() {
   return (
-    <section className="lp-platform" aria-labelledby="platform-heading">
-      <div className="lp-platform-inner">
+    <section className="lp-section lp-platform" aria-labelledby="platform-heading">
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
         <h2 id="platform-heading">
           The laboratory platform
           <br />
@@ -336,7 +290,8 @@ function PlatformBand() {
           together — so you can make changes faster, reduce integrations, and
           run a more efficient laboratory.
         </p>
-        <ul>
+        </div>
+        <ul className="lp-cols">
           {PLATFORM_PILLARS.map((pillar) => (
             <li key={pillar.title}>
               <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
@@ -344,6 +299,74 @@ function PlatformBand() {
               </span>
               <strong>{pillar.title}</strong>
               <span>{pillar.detail}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const WORKFLOW_STEPS = [
+  { title: "Start", detail: "A sample, order, or schedule opens the path" },
+  { title: "Receive", detail: "Accession the work into the laboratory" },
+  { title: "Route", detail: "Send STAT and routine work to the right queue" },
+  { title: "Approve", detail: "Collect the review the method requires" },
+  { title: "Release", detail: "Publish the result, report, or certificate" },
+] as const;
+
+function WorkflowSection() {
+  return (
+    <section className="lp-section" id="workflows">
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+          <h2>Automate laboratory process by design.</h2>
+          <p>
+            A visual, no-code orchestration layer for approvals, instrument actions, notifications,
+            and compliance checks — configurable for every module above.
+          </p>
+        </div>
+        <ul className="lp-cols lp-cols-5">
+          {WORKFLOW_STEPS.map((step) => (
+            <li key={step.title}>
+              <strong>{step.title}</strong>
+              <span>{step.detail}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="lp-section-action">
+          <Link to="/app/workflows" className="lp-btn lp-btn-demo">
+            Open workflow designer
+          </Link>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+const TRUST_POINTS = [
+  { title: "Signatures", detail: "21 CFR Part 11–ready electronic signatures" },
+  { title: "Custody", detail: "Chain of custody with scan-verified transfers" },
+  { title: "Versions", detail: "Publish, roll back, and simulate every workflow" },
+  { title: "Sites", detail: "Tenant-isolated operations across laboratory sites" },
+] as const;
+
+function ComplianceSection() {
+  return (
+    <section className="lp-section" id="compliance">
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+          <h2>Governed for regulated environments.</h2>
+          <p>
+            Immutable execution logs, e-signatures, document control, and multi-site isolation so
+            audits are prepared continuously — not reconstructed later.
+          </p>
+        </div>
+        <ul className="lp-cols lp-cols-4">
+          {TRUST_POINTS.map((point) => (
+            <li key={point.title}>
+              <strong>{point.title}</strong>
+              <span>{point.detail}</span>
             </li>
           ))}
         </ul>
@@ -466,18 +489,3 @@ const PLATFORM_PILLARS = [
   },
 ] as const;
 
-function WorkflowMiniCanvas() {
-  return (
-    <div className="lp-mini-flow">
-      <div className="node start">Start</div>
-      <span className="edge" />
-      <div className="node">Receive</div>
-      <span className="edge" />
-      <div className="node decision">STAT?</div>
-      <span className="edge" />
-      <div className="node">Approve</div>
-      <span className="edge" />
-      <div className="node end">CoA</div>
-    </div>
-  );
-}
