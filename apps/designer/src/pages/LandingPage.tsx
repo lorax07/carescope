@@ -58,35 +58,8 @@ export function LandingPage() {
           <span className="lp-nav-wave" aria-hidden="true" />
         </header>
 
-        <section className="lp-hero" aria-labelledby="hero-brand">
-          <div className="lp-hero-copy">
-            <p className="lp-brand-lockup" id="hero-brand">
-              <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-onelab">OneLab</span>
-            </p>
-            <h1 className="lp-hero-title">
-              Your lab shouldn’t have to work around your LIMS.
-            </h1>
-            <p className="lp-hero-lede">
-              Stop stitching together software to run your laboratory. One
-              intelligent platform connects your entire operation — from
-              accessioning and testing to quality, billing, client service, and
-              analytics — so your team can spend less time managing systems and
-              more time advancing science.
-            </p>
-            <div className="lp-hero-cta">
-              <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try OneLab
-              </Link>
-              <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
-                Browse Modules
-              </a>
-            </div>
-          </div>
-        </section>
+        <PlatformBand />
       </div>
-
-      <PlatformBand />
 
       <section className="lp-section" id="capabilities">
         <div className="lp-section-inner lp-section-wide">
