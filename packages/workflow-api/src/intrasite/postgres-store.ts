@@ -62,11 +62,11 @@ CREATE TABLE IF NOT EXISTS labs (
   slug TEXT NOT NULL UNIQUE,
   site_code TEXT NOT NULL,
   status TEXT NOT NULL,
-  modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]',
+  modules TEXT NOT NULL DEFAULT '["lab_operations"]',
   administrator TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]';
+ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["lab_operations"]';
 ALTER TABLE labs ADD COLUMN IF NOT EXISTS administrator TEXT NOT NULL DEFAULT '';
 `;
 
@@ -160,17 +160,8 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           siteCode: "HL-02",
           administrator: "Priya Shah",
         });
-        await this.writeModules(apex.id, north.id, [
-          "sample_lifecycle",
-          "instrument_integration",
-          "results_entry",
-          "coa_generation",
-        ]);
-        await this.writeModules(apex.id, harborLab.id, [
-          "sample_lifecycle",
-          "quality_events",
-          "capa",
-        ]);
+        await this.writeModules(apex.id, north.id, ["lab_operations", "instrument_integration"]);
+        await this.writeModules(apex.id, harborLab.id, ["lab_operations", "quality_compliance"]);
         const harbor = await this.createClient({ name: "Harbor Clinical", slug: "harbor-clinical" });
         const main = await this.createLab(harbor.id, {
           name: "Main Campus",
@@ -178,11 +169,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           siteCode: "MC-01",
           administrator: "Elena Voss",
         });
-        await this.writeModules(harbor.id, main.id, [
-          "sample_lifecycle",
-          "billing",
-          "customer_portal",
-        ]);
+        await this.writeModules(harbor.id, main.id, ["lab_operations", "connectivity"]);
         await this.assignAccountPerson(apex.id, "internal_resource", "ir-ruiz");
         await this.assignAccountPerson(apex.id, "internal_resource", "ir-chen");
         await this.assignAccountPerson(apex.id, "business_contact", "bc-shah");

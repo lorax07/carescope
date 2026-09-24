@@ -15,21 +15,42 @@ import type {
 } from "./types.js";
 
 export const LAB_MODULE_CATALOG = [
-  { id: "sample_lifecycle", label: "Sample Lifecycle" },
-  { id: "instrument_integration", label: "Instrument Integration" },
-  { id: "results_entry", label: "Results Entry" },
-  { id: "coa_generation", label: "CoA Generation" },
-  { id: "quality_events", label: "Quality Events" },
-  { id: "capa", label: "CAPA" },
-  { id: "inventory", label: "Inventory" },
-  { id: "billing", label: "Billing" },
-  { id: "customer_portal", label: "Customer Portal" },
-  { id: "workflow_automation", label: "Workflow Automation" },
-  { id: "document_control", label: "Document Control" },
-  { id: "electronic_signatures", label: "E-Signatures" },
+  {
+    id: "lab_operations",
+    label: "Lab Operations",
+    positioning: "The core LIMS",
+    capabilities:
+      "Orders, accessioning, specimens, tests, analyses, results, QC, workflows, queues, batching, TAT, reports, inventory, storage",
+  },
+  {
+    id: "instrument_integration",
+    label: "Instrument Integration",
+    positioning: "Connect your instruments to Sequence",
+    capabilities:
+      "Instrument interfaces, bidirectional communication, result ingestion, worklists, instrument mapping, interface monitoring",
+  },
+  {
+    id: "connectivity",
+    label: "Connectivity",
+    positioning: "Connect Sequence to the outside world",
+    capabilities: "HL7, FHIR, APIs, EMRs/EHRs, client systems, file exchange",
+  },
+  {
+    id: "quality_compliance",
+    label: "Quality & Compliance",
+    positioning: "Keep the laboratory controlled and traceable",
+    capabilities:
+      "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
+  },
+  {
+    id: "insights",
+    label: "Insights",
+    positioning: "Turn laboratory data into operational intelligence",
+    capabilities: "Dashboards, TAT analytics, productivity, quality metrics, custom reporting",
+  },
 ] as const;
 
-export const DEFAULT_LAB_MODULES = ["sample_lifecycle"];
+export const DEFAULT_LAB_MODULES = ["lab_operations"];
 
 export const INTERNAL_RESOURCES: AccountPerson[] = [
   { id: "ir-ruiz", name: "A. Ruiz", roles: ["Customer success", "Implementation"] },

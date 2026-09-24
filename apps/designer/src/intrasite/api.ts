@@ -164,6 +164,8 @@ export type QueryResult = {
 export type ModuleCatalogItem = {
   id: string;
   label: string;
+  positioning?: string;
+  capabilities?: string;
 };
 
 export type ClientDetail = {

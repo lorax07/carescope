@@ -85,10 +85,10 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       administrator: "Priya Shah",
     });
     this.patchLab(apex.id, north.id, {
-      modules: ["sample_lifecycle", "instrument_integration", "results_entry", "coa_generation"],
+      modules: ["lab_operations", "instrument_integration"],
     });
     this.patchLab(apex.id, harborLab.id, {
-      modules: ["sample_lifecycle", "quality_events", "capa"],
+      modules: ["lab_operations", "quality_compliance"],
     });
     const harbor = await this.createClient({ name: "Harbor Clinical", slug: "harbor-clinical" });
     const main = await this.createLab(harbor.id, {
@@ -98,7 +98,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       administrator: "Elena Voss",
     });
     this.patchLab(harbor.id, main.id, {
-      modules: ["sample_lifecycle", "billing", "customer_portal"],
+      modules: ["lab_operations", "connectivity"],
     });
     await this.assignAccountPerson(apex.id, "internal_resource", "ir-ruiz");
     await this.assignAccountPerson(apex.id, "internal_resource", "ir-chen");
