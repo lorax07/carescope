@@ -15,6 +15,25 @@ const NAV = [
   { to: "/app/catalog", label: "Catalog" },
 ] as const;
 
+function useLocalClock(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now;
+}
+
+function utcOffsetLabel(date: Date): string {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "+" : "−";
+  const abs = Math.abs(offsetMinutes);
+  const hours = Math.floor(abs / 60);
+  const minutes = abs % 60;
+  if (minutes === 0) return `UTC${sign}${hours}`;
+  return `UTC${sign}${hours}:${String(minutes).padStart(2, "0")}`;
+}
+
 /** LIMS application shell */
 export function AppShell() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,6 +42,8 @@ export function AppShell() {
   );
   const lims = readLimsSession();
   const [infraOpen, setInfraOpen] = useState(false);
+  const now = useLocalClock();
+  const signedInName = lims?.username ?? "M. Chen";
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -153,9 +174,10 @@ export function AppShell() {
             />
           </div>
           <div className="lims-topbar-meta">
-            <span className="lims-chip warn">3 STAT</span>
-            <span className="lims-chip">Shift B</span>
-            <span className="lims-chip muted">UTC−5</span>
+            <time className="lims-chip" dateTime={now.toISOString()}>
+              {signedInName} · {now.toLocaleString()}
+            </time>
+            <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
         <div className="lims-content">
