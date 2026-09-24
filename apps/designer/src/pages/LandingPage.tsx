@@ -57,43 +57,39 @@ export function LandingPage() {
 }
 
 const LIMS_FUNCTIONS = [
-  "System setup and workflow configuration",
-  "Instrument connectivity",
-  "EHR, billing, and other interfaces",
-  "Data migration",
-  "Reporting and output",
-  "Training and go-live support",
+  "A new report template",
+  "A new laboratory department",
+  "A minor workflow tweak",
 ] as const;
 
-const COST_SCALE = 1_000_000;
+const COST_SCALE = 5_000;
 
-const COST_BANDS = [
+const CHANGE_CYCLES = [
   {
-    id: "fifty",
-    label: "About 50 people",
-    note: "11–50 LIMS users",
-    cloud: [20_000, 100_000] as const,
-    onPrem: [75_000, 200_000] as const,
+    id: "report",
+    label: "New report",
+    note: "2–3 weeks",
+    cost: 2_000,
+    source: "CleverLAB",
   },
   {
-    id: "large",
-    label: "Toward 2,000 people",
-    note: "50+ LIMS users",
-    cloud: [100_000, 500_000] as const,
-    onPrem: [300_000, 1_000_000] as const,
+    id: "department",
+    label: "New department",
+    note: "3–4 weeks",
+    cost: 3_600,
+    source: "CleverLAB",
+  },
+  {
+    id: "tweak",
+    label: "Minor tweak",
+    note: "About 4 weeks",
+    cost: 4_000,
+    source: "QBench",
   },
 ] as const;
-
-const STAFF_WAGE = 61_890;
 
 function money(value: number): string {
-  if (value >= 1_000_000) return "$1M+";
-  if (value >= 1000) return `$${Math.round(value / 1000)}k`;
-  return `$${value}`;
-}
-
-function staffYears(value: number): string {
-  return (value / STAFF_WAGE).toFixed(1);
+  return `$${value.toLocaleString("en-US")}`;
 }
 
 function WhatWeSolve() {
@@ -107,78 +103,53 @@ function WhatWeSolve() {
         <div className="lp-solve">
           <figure className="lp-solve-chart">
             <figcaption>
-              <strong>Traditional LIMS change</strong>
-              <span>One-time implementation cost, published ranges</span>
+              <strong>Average change cycle cost</strong>
+              <span>One change after go-live. Not the initial LIMS implementation.</span>
             </figcaption>
-            <div className="lp-solve-plot" role="img" aria-label="Traditional LIMS implementation cost by laboratory size">
+            <div className="lp-solve-plot" role="img" aria-label="Published cost of one traditional LIMS change cycle">
               <div className="lp-solve-yaxis" aria-hidden="true">
-                <span>$1M</span>
-                <span>$750k</span>
-                <span>$500k</span>
-                <span>$250k</span>
+                <span>$5k</span>
+                <span>$3.75k</span>
+                <span>$2.5k</span>
+                <span>$1.25k</span>
                 <span>$0</span>
               </div>
               <div className="lp-solve-canvas">
                 <div className="lp-solve-grid" aria-hidden="true" />
-                {COST_BANDS.map((band) => (
-                  <div className="lp-solve-group" key={band.id}>
+                {CHANGE_CYCLES.map((cycle) => (
+                  <div className="lp-solve-group" key={cycle.id}>
                     <div className="lp-solve-bars">
-                      <RangeBar label="Cloud" low={band.cloud[0]} high={band.cloud[1]} tone="cloud" />
-                      <RangeBar
-                        label="On-premises"
-                        low={band.onPrem[0]}
-                        high={band.onPrem[1]}
-                        tone="onprem"
-                      />
+                      <RangeBar label={money(cycle.cost)} low={0} high={cycle.cost} tone="cloud" />
                     </div>
                     <p>
-                      <strong>{band.label}</strong>
-                      <span>{band.note}</span>
+                      <strong>{cycle.label}</strong>
+                      <span>{cycle.note}</span>
                     </p>
                   </div>
                 ))}
               </div>
-              <div className="lp-solve-staff" aria-hidden="true">
-                <span>16</span>
-                <span>12</span>
-                <span>8</span>
-                <span>4</span>
-                <span>0</span>
-                <small>Staff-years</small>
-              </div>
             </div>
             <ul className="lp-solve-legend">
-              <li><i className="cloud" /> Cloud SaaS</li>
-              <li><i className="onprem" /> On-premises</li>
-              <li>Right axis: cost ÷ ${STAFF_WAGE.toLocaleString()} median wage</li>
+              <li><i className="cloud" /> Published cost of that change</li>
+              <li>Calendar time is the vendor’s stated wait, not staff-years</li>
             </ul>
             <table className="lp-solve-table">
-              <caption>Same ranges, read as median staff-years</caption>
+              <caption>Published examples of a single change cycle</caption>
               <thead>
                 <tr>
-                  <th>Laboratory</th>
-                  <th>Cloud implementation</th>
-                  <th>On-premises implementation</th>
-                  <th>Median staff-years</th>
+                  <th>Change</th>
+                  <th>Published cost</th>
+                  <th>Calendar time</th>
+                  <th>Source</th>
                 </tr>
               </thead>
               <tbody>
-                {COST_BANDS.map((band) => (
-                  <tr key={band.id}>
-                    <td>
-                      {band.label}
-                      <span>{band.note}</span>
-                    </td>
-                    <td>
-                      {money(band.cloud[0])}–{money(band.cloud[1])}
-                      {band.cloud[1] >= 500_000 ? "+" : ""}
-                    </td>
-                    <td>
-                      {money(band.onPrem[0])}–{band.onPrem[1] >= 1_000_000 ? "$1M+" : `${money(band.onPrem[1])}+`}
-                    </td>
-                    <td>
-                      {staffYears(band.cloud[0])}–{staffYears(band.onPrem[1])}
-                    </td>
+                {CHANGE_CYCLES.map((cycle) => (
+                  <tr key={cycle.id}>
+                    <td>{cycle.label}</td>
+                    <td>{money(cycle.cost)}</td>
+                    <td>{cycle.note}</td>
+                    <td>{cycle.source}</td>
                   </tr>
                 ))}
               </tbody>
@@ -187,7 +158,7 @@ function WhatWeSolve() {
 
           <div className="lp-solve-sequence">
             <p className="lp-eyebrow">Sequence</p>
-            <h3>The same functions, without a services project</h3>
+            <h3>The same change, without a services project</h3>
             <ol>
               {LIMS_FUNCTIONS.map((item) => (
                 <li key={item}>
@@ -197,45 +168,33 @@ function WhatWeSolve() {
               ))}
             </ol>
             <p>
-              A traditional change prices each of these as professional services. In Sequence they
-              stay in the product, so the laboratory changes the workflow instead of opening an
-              implementation.
+              A traditional change cycle bills the laboratory for the programmer and the wait. In
+              Sequence the same change stays in the product, so the laboratory configures it.
             </p>
           </div>
         </div>
 
         <footer className="lp-solve-sources">
           <p>
-            Cost ranges are one-time professional-services estimates by LIMS user count, not a quote
-            for a 50-person or 2,000-person laboratory. The 11–50 user band is the published segment
-            nearest a laboratory of about 50 people. The 50+ user band is the published segment for
-            larger and multi-site laboratories, including organizations that employ up to the
-            thousands. Upper ends marked “+” continue above the plotted cap.
+            These figures are the published cost of one change after the LIMS is already live. They
+            are not the cost of the first implementation, and they are not a surveyed average for
+            laboratories of 50 to 2,000 people. No source publishes that average.
           </p>
           <ol>
             <li>
-              CrelioHealth, “LIMS Implementation Cost By Lab Size Across 3 Deployment Types,” 4 Sep
-              2026. Cloud and on-premises implementation ranges, go-live scope, and the function
-              list (system setup, instrument connectivity, interoperability, data migration,
-              reporting, training).{" "}
-              <a href="https://blog.creliohealth.com/lims-implementation-cost/">
-                blog.creliohealth.com/lims-implementation-cost
+              CleverLAB, “How We Reduced LIMS Costs by 90%.” A traditional new report template is
+              cited at $2,000 and 2–3 weeks. Adding a laboratory department is cited at $3,600 and
+              3–4 weeks.{" "}
+              <a href="https://cleverlab.pl/lims_cost_reduction_en.html">
+                cleverlab.pl/lims_cost_reduction_en.html
               </a>
             </li>
             <li>
-              U.S. Bureau of Labor Statistics, Occupational Outlook Handbook, “Clinical Laboratory
-              Technologists and Technicians.” Median annual wage $61,890 in May 2024. Staff-years on
-              the chart equal the published cost divided by that median wage.{" "}
-              <a href="https://www.bls.gov/ooh/healthcare/clinical-laboratory-technologists-and-technicians.htm">
-                bls.gov/ooh/healthcare/clinical-laboratory-technologists-and-technicians.htm
+              QBench, “The Hidden Costs of a LIMS.” Describes legacy vendors billing about $4,000
+              and about four weeks for a minor tweak.{" "}
+              <a href="https://qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy">
+                qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy
               </a>
-            </li>
-            <li>
-              College of American Pathologists Q-Probes studies of technical staffing find wide
-              variation across laboratories and do not publish one average headcount for labs of 50
-              to 2,000 people. Valenstein, Souers, and colleagues, Archives of Pathology &amp;
-              Laboratory Medicine.{" "}
-              <a href="https://doi.org/10.5858/arpa.2020-0760-cp">doi.org/10.5858/arpa.2020-0760-cp</a>
             </li>
           </ol>
         </footer>
