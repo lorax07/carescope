@@ -1,7 +1,15 @@
 import { hashPassword } from "./auth.js";
-import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
+import {
+  DEFAULT_LAB_MODULES,
+  LAB_MODULE_CATALOG,
+  accountPeopleCatalog,
+  buildDossier,
+  moduleLabel,
+  resolveAccountPeople,
+} from "./catalog.js";
 import type {
   AccountCloseRequest,
+  AccountPersonKind,
   Client,
   ClientDossier,
   CreateClientInput,
@@ -28,10 +36,12 @@ type TenantDatabase = {
 export class MemoryIntrasiteStore implements IntrasiteStore {
   readonly kind = "memory" as const;
   private users = new Map<string, IntrasiteUserRecord>();
-  private clients = new Map<string, Omit<Client, "labCount">>();
+  private clients = new Map<string, Omit<Client, "labCount" | "internalResources" | "businessContacts">>();
   private databases = new Map<string, TenantDatabase>();
   private requests = new Map<string, ModuleChangeRequest>();
   private closeRequests = new Map<string, AccountCloseRequest>();
+  private internalResourceIds = new Map<string, string[]>();
+  private businessContactIds = new Map<string, string[]>();
 
   async seed(admin: { email: string; password: string; name: string }): Promise<void> {
     if (this.users.size === 0) {
@@ -73,6 +83,14 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
     this.patchLab(harbor.id, main.id, {
       modules: ["sample_lifecycle", "billing", "customer_portal"],
     });
+    await this.assignAccountPerson(apex.id, "internal_resource", "ir-ruiz");
+    await this.assignAccountPerson(apex.id, "internal_resource", "ir-chen");
+    await this.assignAccountPerson(apex.id, "business_contact", "bc-shah");
+    await this.assignAccountPerson(apex.id, "business_contact", "bc-hale");
+    await this.assignAccountPerson(harbor.id, "internal_resource", "ir-patel");
+    await this.assignAccountPerson(harbor.id, "internal_resource", "ir-okonkwo");
+    await this.assignAccountPerson(harbor.id, "business_contact", "bc-voss");
+    await this.assignAccountPerson(harbor.id, "business_contact", "bc-park");
   }
 
   async getUserByEmail(email: string): Promise<IntrasiteUserRecord | null> {
@@ -106,7 +124,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
     if ([...this.clients.values()].some((c) => c.slug === slug)) {
       throw Object.assign(new Error("A client with that slug already exists"), { status: 409 });
     }
-    const record: Omit<Client, "labCount"> = {
+    const record: Omit<Client, "labCount" | "internalResources" | "businessContacts"> = {
       id,
       name,
       slug,
@@ -117,7 +135,47 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
     };
     this.clients.set(id, record);
     this.databases.set(id, { labs: new Map() });
+    this.internalResourceIds.set(id, []);
+    this.businessContactIds.set(id, []);
     return this.withCount(record);
+  }
+
+  async assignAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = this.clients.get(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    if (!accountPeopleCatalog(kind).some((person) => person.id === personId)) {
+      throw Object.assign(new Error("Unknown person"), { status: 400 });
+    }
+    const ids = this.personIds(clientId, kind);
+    if (ids.includes(personId)) {
+      throw Object.assign(new Error("That person is already assigned"), { status: 409 });
+    }
+    ids.push(personId);
+    return this.withCount(existing);
+  }
+
+  async removeAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = this.clients.get(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    const ids = this.personIds(clientId, kind);
+    const next = ids.filter((id) => id !== personId);
+    if (next.length === ids.length) {
+      throw Object.assign(new Error("That person is not assigned"), { status: 404 });
+    }
+    this.setPersonIds(clientId, kind, next);
+    return this.withCount(existing);
   }
 
   async updateClient(
@@ -346,10 +404,26 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
     return db;
   }
 
-  private withCount(client: Omit<Client, "labCount">): Client {
+  private withCount(client: Omit<Client, "labCount" | "internalResources" | "businessContacts">): Client {
     return {
       ...client,
       labCount: this.databases.get(client.id)?.labs.size ?? 0,
+      internalResources: resolveAccountPeople(this.personIds(client.id, "internal_resource"), "internal_resource"),
+      businessContacts: resolveAccountPeople(this.personIds(client.id, "business_contact"), "business_contact"),
     };
+  }
+
+  private personIds(clientId: string, kind: AccountPersonKind): string[] {
+    const map = kind === "internal_resource" ? this.internalResourceIds : this.businessContactIds;
+    const ids = map.get(clientId);
+    if (ids) return ids;
+    const created: string[] = [];
+    map.set(clientId, created);
+    return created;
+  }
+
+  private setPersonIds(clientId: string, kind: AccountPersonKind, ids: string[]): void {
+    const map = kind === "internal_resource" ? this.internalResourceIds : this.businessContactIds;
+    map.set(clientId, ids);
   }
 }

@@ -16,6 +16,14 @@ export type IntrasiteUserRecord = IntrasiteUser & {
   passwordHash: string;
 };
 
+export type AccountPerson = {
+  id: string;
+  name: string;
+  roles: string[];
+};
+
+export type AccountPersonKind = "internal_resource" | "business_contact";
+
 export type Client = {
   id: string;
   name: string;
@@ -24,6 +32,8 @@ export type Client = {
   databaseName: string;
   isolation: "dedicated_database";
   labCount: number;
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
   createdAt: string;
 };
 
@@ -150,6 +160,16 @@ export interface IntrasiteStore {
   listClients(): Promise<Client[]>;
   getClient(id: string): Promise<Client | null>;
   createClient(input: CreateClientInput): Promise<Client>;
+  assignAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client>;
+  removeAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client>;
   updateClient(
     id: string,
     patch: Partial<Pick<Client, "name" | "status">>

@@ -1,5 +1,7 @@
 import type {
   AccountCloseRequest,
+  AccountPerson,
+  AccountPersonKind,
   Client,
   ClientDetail,
   ClientRouting,
@@ -10,8 +12,11 @@ import type {
   QueryResult,
 } from "./api";
 import {
+  BUSINESS_CONTACTS,
   DEFAULT_LAB_MODULES,
+  INTERNAL_RESOURCES,
   LAB_MODULE_CATALOG,
+  accountPeopleCatalog,
   buildDossier,
   moduleLabel,
   runInfraQuery,
@@ -39,6 +44,8 @@ const clients: Client[] = [
     databaseName: "cs_apex_diagnostics",
     isolation: "dedicated_database",
     labCount: 2,
+    internalResources: peopleById(INTERNAL_RESOURCES, ["ir-ruiz", "ir-chen"]),
+    businessContacts: peopleById(BUSINESS_CONTACTS, ["bc-shah", "bc-hale"]),
     createdAt,
   },
   {
@@ -49,9 +56,18 @@ const clients: Client[] = [
     databaseName: "cs_harbor_clinical",
     isolation: "dedicated_database",
     labCount: 1,
+    internalResources: peopleById(INTERNAL_RESOURCES, ["ir-patel", "ir-okonkwo"]),
+    businessContacts: peopleById(BUSINESS_CONTACTS, ["bc-voss", "bc-park"]),
     createdAt,
   },
 ];
+
+function peopleById(catalog: AccountPerson[], ids: string[]): AccountPerson[] {
+  return ids.flatMap((id) => {
+    const person = catalog.find((item) => item.id === id);
+    return person ? [person] : [];
+  });
+}
 
 const labsByClient = new Map<string, Lab[]>([
   [
@@ -158,6 +174,56 @@ export function demoListClients(): { clients: Client[] } {
   return { clients: [...clients].sort((a, b) => a.name.localeCompare(b.name)) };
 }
 
+export function demoListAccountPeople(): {
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
+} {
+  return { internalResources: INTERNAL_RESOURCES, businessContacts: BUSINESS_CONTACTS };
+}
+
+function assignedList(client: Client, kind: AccountPersonKind): AccountPerson[] {
+  return kind === "internal_resource" ? client.internalResources : client.businessContacts;
+}
+
+export function demoAssignAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+): { client: Client } {
+  const client = requireClient(clientId);
+  const person = accountPeopleCatalog(kind).find((item) => item.id === personId);
+  if (!person) {
+    const error = new Error("Unknown person") as Error & { status: number };
+    error.status = 400;
+    throw error;
+  }
+  const list = assignedList(client, kind);
+  if (list.some((item) => item.id === personId)) {
+    const error = new Error("That person is already assigned") as Error & { status: number };
+    error.status = 409;
+    throw error;
+  }
+  list.push(person);
+  return { client };
+}
+
+export function demoRemoveAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+): { client: Client } {
+  const client = requireClient(clientId);
+  const list = assignedList(client, kind);
+  const index = list.findIndex((item) => item.id === personId);
+  if (index < 0) {
+    const error = new Error("That person is not assigned") as Error & { status: number };
+    error.status = 404;
+    throw error;
+  }
+  list.splice(index, 1);
+  return { client };
+}
+
 export function demoGetClient(id: string): ClientDetail {
   const client = requireClient(id);
   syncLabCount(client);
@@ -193,6 +259,8 @@ export function demoCreateClient(input: { name: string; slug?: string }): {
     databaseName: `cs_${slug.replace(/-/g, "_")}`.slice(0, 63),
     isolation: "dedicated_database",
     labCount: 0,
+    internalResources: [],
+    businessContacts: [],
     createdAt: new Date().toISOString(),
   };
   clients.push(client);

@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ApiError, createClient, listClients, type Client } from "./api";
+import { AccountPeopleDialog } from "./AccountPeopleDialog";
+import {
+  ApiError,
+  createClient,
+  listAccountPeople,
+  listClients,
+  type AccountPerson,
+  type AccountPersonKind,
+  type Client,
+} from "./api";
 import { IntrasiteFormDialog } from "./FormDialog";
 
 export function IntrasiteClientsPage() {
@@ -11,6 +20,14 @@ export function IntrasiteClientsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [directory, setDirectory] = useState<{
+    internalResources: AccountPerson[];
+    businessContacts: AccountPerson[];
+  }>({ internalResources: [], businessContacts: [] });
+  const [peopleDialog, setPeopleDialog] = useState<{
+    clientId: string;
+    kind: AccountPersonKind;
+  } | null>(null);
 
   async function refresh() {
     const result = await listClients();
@@ -18,12 +35,16 @@ export function IntrasiteClientsPage() {
   }
 
   useEffect(() => {
-    refresh()
+    Promise.all([refresh(), listAccountPeople().then(setDirectory)])
       .catch((err: unknown) => {
         setError(err instanceof ApiError ? err.message : "Unable to load accounts");
       })
       .finally(() => setLoading(false));
   }, []);
+
+  function replaceClient(next: Client) {
+    setClients((current) => current.map((client) => (client.id === next.id ? next : client)));
+  }
 
   function openCreate() {
     setName("");
@@ -86,8 +107,8 @@ export function IntrasiteClientsPage() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Slug</th>
-                <th>Isolated database</th>
+                <th>Internal Resources</th>
+                <th>Business Account Contact</th>
                 <th>Labs</th>
                 <th>Status</th>
               </tr>
@@ -99,10 +120,18 @@ export function IntrasiteClientsPage() {
                     <Link to={`/intrasite/clients/${client.id}`}>{client.name}</Link>
                   </td>
                   <td>
-                    <code>{client.slug}</code>
+                    <PeopleCell
+                      people={client.internalResources}
+                      label="Internal resources"
+                      onOpen={() => setPeopleDialog({ clientId: client.id, kind: "internal_resource" })}
+                    />
                   </td>
                   <td>
-                    <code>{client.databaseName}</code>
+                    <PeopleCell
+                      people={client.businessContacts}
+                      label="Business account contacts"
+                      onOpen={() => setPeopleDialog({ clientId: client.id, kind: "business_contact" })}
+                    />
                   </td>
                   <td>{client.labCount}</td>
                   <td>
@@ -114,6 +143,20 @@ export function IntrasiteClientsPage() {
           </table>
         )}
       </section>
+
+      {peopleDialog ? (
+        <AccountPeopleDialog
+          client={clients.find((client) => client.id === peopleDialog.clientId)!}
+          kind={peopleDialog.kind}
+          directory={
+            peopleDialog.kind === "internal_resource"
+              ? directory.internalResources
+              : directory.businessContacts
+          }
+          onClose={() => setPeopleDialog(null)}
+          onUpdated={replaceClient}
+        />
+      ) : null}
 
       {createOpen ? (
         <IntrasiteFormDialog
@@ -140,5 +183,22 @@ export function IntrasiteClientsPage() {
         </IntrasiteFormDialog>
       ) : null}
     </div>
+  );
+}
+
+function PeopleCell({
+  people,
+  label,
+  onOpen,
+}: {
+  people: AccountPerson[];
+  label: string;
+  onOpen: () => void;
+}) {
+  const names = people.map((person) => person.name).join(", ");
+  return (
+    <button type="button" className="is-people-link" onClick={onOpen} aria-label={label}>
+      {names || "Assign"}
+    </button>
   );
 }

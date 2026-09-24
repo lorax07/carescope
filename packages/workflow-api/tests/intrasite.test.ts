@@ -216,6 +216,57 @@ describe("Intrasite auth and multi-tenancy", () => {
     ]);
   });
 
+  it("assigns and removes internal resources and business contacts", async () => {
+    const app = createApp();
+    const login = await request(app).post("/api/v1/intrasite/auth/login").send(admin);
+    const auth = { Authorization: `Bearer ${login.body.token as string}` };
+
+    const created = await request(app)
+      .post("/api/v1/intrasite/clients")
+      .set(auth)
+      .send({ name: "Northwind Labs" });
+    expect(created.status).toBe(201);
+    expect(created.body.client.internalResources).toEqual([]);
+    expect(created.body.client.businessContacts).toEqual([]);
+
+    const directory = await request(app).get("/api/v1/intrasite/account-people").set(auth);
+    expect(directory.status).toBe(200);
+    expect(directory.body.internalResources.map((person: { name: string }) => person.name)).toContain(
+      "A. Ruiz"
+    );
+
+    const clientId = created.body.client.id as string;
+    const assigned = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "internal_resource", personId: "ir-ruiz" });
+    expect(assigned.status).toBe(201);
+    expect(assigned.body.client.internalResources).toEqual([
+      { id: "ir-ruiz", name: "A. Ruiz", roles: ["Customer success", "Implementation"] },
+    ]);
+
+    const duplicate = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "internal_resource", personId: "ir-ruiz" });
+    expect(duplicate.status).toBe(409);
+
+    const contact = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "business_contact", personId: "bc-shah" });
+    expect(contact.status).toBe(201);
+    expect(contact.body.client.businessContacts[0].name).toBe("Priya Shah");
+    expect(contact.body.client.businessContacts[0].roles).toEqual(["Executive sponsor"]);
+
+    const removed = await request(app)
+      .delete(`/api/v1/intrasite/clients/${clientId}/assignments/internal_resource/ir-ruiz`)
+      .set(auth);
+    expect(removed.status).toBe(200);
+    expect(removed.body.client.internalResources).toEqual([]);
+    expect(removed.body.client.businessContacts).toHaveLength(1);
+  });
+
   it("sets an httpOnly session cookie on login", async () => {
     const app = createApp();
     const login = await request(app).post("/api/v1/intrasite/auth/login").send(admin);

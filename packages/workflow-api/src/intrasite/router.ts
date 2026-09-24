@@ -9,14 +9,19 @@ import {
   verifyPassword,
   verifyToken,
 } from "./auth.js";
-import { LAB_MODULE_CATALOG, runInfraQuery } from "./catalog.js";
+import {
+  BUSINESS_CONTACTS,
+  INTERNAL_RESOURCES,
+  LAB_MODULE_CATALOG,
+  runInfraQuery,
+} from "./catalog.js";
 import {
   getIntrasiteStore,
   instanceHostPattern,
   labHeader,
   tenantHeader,
 } from "./store.js";
-import type { Client, SessionUser } from "./types.js";
+import type { AccountPersonKind, Client, SessionUser } from "./types.js";
 import { normalizeEmail } from "./util.js";
 
 type AuthedRequest = Request & { intrasiteUser?: SessionUser };
@@ -130,6 +135,13 @@ export function createIntrasiteRouter(): Router {
     res.json({ user: publicUser(req.intrasiteUser!) });
   });
 
+  router.get("/account-people", requireAuth, (_req, res) => {
+    res.json({
+      internalResources: INTERNAL_RESOURCES,
+      businessContacts: BUSINESS_CONTACTS,
+    });
+  });
+
   router.get(
     "/clients",
     requireAuth,
@@ -177,6 +189,50 @@ export function createIntrasiteRouter(): Router {
         closeRequest,
         moduleCatalog: LAB_MODULE_CATALOG,
       });
+    })
+  );
+
+  router.post(
+    "/clients/:id/assignments",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const kind = readPersonKind(req.body?.kind);
+        if (!kind) {
+          res.status(400).json({ error: "Assignment kind is required" });
+          return;
+        }
+        const client = await getIntrasiteStore().assignAccountPerson(
+          String(req.params["id"] ?? ""),
+          kind,
+          String(req.body?.personId ?? "")
+        );
+        res.status(201).json({ client });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.delete(
+    "/clients/:id/assignments/:kind/:personId",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const kind = readPersonKind(req.params["kind"]);
+        if (!kind) {
+          res.status(400).json({ error: "Assignment kind is required" });
+          return;
+        }
+        const client = await getIntrasiteStore().removeAccountPerson(
+          String(req.params["id"] ?? ""),
+          kind,
+          String(req.params["personId"] ?? "")
+        );
+        res.json({ client });
+      } catch (error) {
+        httpError(error, res);
+      }
     })
   );
 
@@ -378,6 +434,11 @@ export function createIntrasiteRouter(): Router {
   );
 
   return router;
+}
+
+function readPersonKind(value: unknown): AccountPersonKind | null {
+  if (value === "internal_resource" || value === "business_contact") return value;
+  return null;
 }
 
 function routingFor(client: Client) {

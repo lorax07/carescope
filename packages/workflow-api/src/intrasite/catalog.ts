@@ -9,6 +9,8 @@ import type {
   QueryEnvironmentId,
   QueryResult,
   SupportTicket,
+  AccountPerson,
+  AccountPersonKind,
 } from "./types.js";
 
 export const LAB_MODULE_CATALOG = [
@@ -27,6 +29,34 @@ export const LAB_MODULE_CATALOG = [
 ] as const;
 
 export const DEFAULT_LAB_MODULES = ["sample_lifecycle"];
+
+export const INTERNAL_RESOURCES: AccountPerson[] = [
+  { id: "ir-ruiz", name: "A. Ruiz", roles: ["Customer success", "Implementation"] },
+  { id: "ir-patel", name: "S. Patel", roles: ["Support engineer"] },
+  { id: "ir-okonkwo", name: "L. Okonkwo", roles: ["Solutions architect"] },
+  { id: "ir-chen", name: "M. Chen", roles: ["Technical account manager"] },
+  { id: "ir-ellis", name: "Jordan Ellis", roles: ["Onboarding specialist"] },
+];
+
+export const BUSINESS_CONTACTS: AccountPerson[] = [
+  { id: "bc-shah", name: "Priya Shah", roles: ["Executive sponsor"] },
+  { id: "bc-hale", name: "Marcus Hale", roles: ["Lab operations lead"] },
+  { id: "bc-voss", name: "Elena Voss", roles: ["IT", "Validation"] },
+  { id: "bc-park", name: "Jonah Park", roles: ["Quality business contact"] },
+  { id: "bc-nguyen", name: "Amira Nguyen", roles: ["Procurement", "Billing"] },
+];
+
+export function accountPeopleCatalog(kind: AccountPersonKind): AccountPerson[] {
+  return kind === "internal_resource" ? INTERNAL_RESOURCES : BUSINESS_CONTACTS;
+}
+
+export function resolveAccountPeople(ids: string[], kind: AccountPersonKind): AccountPerson[] {
+  const catalog = accountPeopleCatalog(kind);
+  return ids.flatMap((id) => {
+    const person = catalog.find((item) => item.id === id);
+    return person ? [person] : [];
+  });
+}
 
 export function moduleLabel(id: string): string {
   return LAB_MODULE_CATALOG.find((item) => item.id === id)?.label ?? id;

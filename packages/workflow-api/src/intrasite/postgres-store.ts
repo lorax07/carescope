@@ -1,8 +1,16 @@
 import { Pool } from "pg";
 import { hashPassword } from "./auth.js";
-import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
+import {
+  DEFAULT_LAB_MODULES,
+  LAB_MODULE_CATALOG,
+  accountPeopleCatalog,
+  buildDossier,
+  moduleLabel,
+  resolveAccountPeople,
+} from "./catalog.js";
 import type {
   AccountCloseRequest,
+  AccountPersonKind,
   Client,
   ClientDossier,
   CreateClientInput,
@@ -37,8 +45,12 @@ CREATE TABLE IF NOT EXISTS clients (
   slug TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL,
   database_name TEXT NOT NULL UNIQUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  internal_resource_ids TEXT NOT NULL DEFAULT '[]',
+  business_contact_ids TEXT NOT NULL DEFAULT '[]'
 );
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS internal_resource_ids TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS business_contact_ids TEXT NOT NULL DEFAULT '[]';
 `;
 
 const TENANT_SCHEMA = `
@@ -65,6 +77,21 @@ function tenantUrl(databaseUrl: string, databaseName: string): string {
   const url = new URL(databaseUrl);
   url.pathname = `/${databaseName}`;
   return url.toString();
+}
+
+function parseIdList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === "string");
+      }
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 function parseModules(value: unknown): string[] {
@@ -141,6 +168,14 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           "billing",
           "customer_portal",
         ]);
+        await this.assignAccountPerson(apex.id, "internal_resource", "ir-ruiz");
+        await this.assignAccountPerson(apex.id, "internal_resource", "ir-chen");
+        await this.assignAccountPerson(apex.id, "business_contact", "bc-shah");
+        await this.assignAccountPerson(apex.id, "business_contact", "bc-hale");
+        await this.assignAccountPerson(harbor.id, "internal_resource", "ir-patel");
+        await this.assignAccountPerson(harbor.id, "internal_resource", "ir-okonkwo");
+        await this.assignAccountPerson(harbor.id, "business_contact", "bc-voss");
+        await this.assignAccountPerson(harbor.id, "business_contact", "bc-park");
       }
     }
   }
@@ -163,7 +198,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
 
   async listClients(): Promise<Client[]> {
     const result = await this.control.query(
-      `SELECT id, name, slug, status, database_name, created_at FROM clients ORDER BY name`
+      `SELECT id, name, slug, status, database_name, created_at, internal_resource_ids, business_contact_ids FROM clients ORDER BY name`
     );
     const clients = [];
     for (const row of result.rows) {
@@ -174,7 +209,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
 
   async getClient(id: string): Promise<Client | null> {
     const result = await this.control.query(
-      `SELECT id, name, slug, status, database_name, created_at FROM clients WHERE id = $1`,
+      `SELECT id, name, slug, status, database_name, created_at, internal_resource_ids, business_contact_ids FROM clients WHERE id = $1`,
       [id]
     );
     return result.rows[0] ? this.mapClient(result.rows[0]) : null;
@@ -205,6 +240,53 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       throw error;
     }
     return (await this.getClient(id))!;
+  }
+
+  async assignAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = await this.getClient(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    if (!accountPeopleCatalog(kind).some((person) => person.id === personId)) {
+      throw Object.assign(new Error("Unknown person"), { status: 400 });
+    }
+    const current = kind === "internal_resource" ? existing.internalResources : existing.businessContacts;
+    if (current.some((person) => person.id === personId)) {
+      throw Object.assign(new Error("That person is already assigned"), { status: 409 });
+    }
+    const column = kind === "internal_resource" ? "internal_resource_ids" : "business_contact_ids";
+    const ids = [...current.map((person) => person.id), personId];
+    await this.control.query(`UPDATE clients SET ${column} = $2 WHERE id = $1`, [
+      clientId,
+      JSON.stringify(ids),
+    ]);
+    return (await this.getClient(clientId))!;
+  }
+
+  async removeAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = await this.getClient(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    const current = kind === "internal_resource" ? existing.internalResources : existing.businessContacts;
+    if (!current.some((person) => person.id === personId)) {
+      throw Object.assign(new Error("That person is not assigned"), { status: 404 });
+    }
+    const column = kind === "internal_resource" ? "internal_resource_ids" : "business_contact_ids";
+    const ids = current.map((person) => person.id).filter((id) => id !== personId);
+    await this.control.query(`UPDATE clients SET ${column} = $2 WHERE id = $1`, [
+      clientId,
+      JSON.stringify(ids),
+    ]);
+    return (await this.getClient(clientId))!;
   }
 
   async updateClient(
@@ -348,6 +430,14 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       databaseName,
       isolation: "dedicated_database",
       labCount,
+      internalResources: resolveAccountPeople(
+        parseIdList(row["internal_resource_ids"]),
+        "internal_resource"
+      ),
+      businessContacts: resolveAccountPeople(
+        parseIdList(row["business_contact_ids"]),
+        "business_contact"
+      ),
       createdAt: new Date(String(row["created_at"])).toISOString(),
     };
   }

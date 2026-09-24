@@ -1,4 +1,6 @@
 import type {
+  AccountPerson,
+  AccountPersonKind,
   Client,
   ClientDossier,
   InstallationNode,
@@ -42,6 +44,26 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
 ];
 
 export const DEFAULT_LAB_MODULES: LabModuleId[] = ["sample_lifecycle"];
+
+export const INTERNAL_RESOURCES: AccountPerson[] = [
+  { id: "ir-ruiz", name: "A. Ruiz", roles: ["Customer success", "Implementation"] },
+  { id: "ir-patel", name: "S. Patel", roles: ["Support engineer"] },
+  { id: "ir-okonkwo", name: "L. Okonkwo", roles: ["Solutions architect"] },
+  { id: "ir-chen", name: "M. Chen", roles: ["Technical account manager"] },
+  { id: "ir-ellis", name: "Jordan Ellis", roles: ["Onboarding specialist"] },
+];
+
+export const BUSINESS_CONTACTS: AccountPerson[] = [
+  { id: "bc-shah", name: "Priya Shah", roles: ["Executive sponsor"] },
+  { id: "bc-hale", name: "Marcus Hale", roles: ["Lab operations lead"] },
+  { id: "bc-voss", name: "Elena Voss", roles: ["IT", "Validation"] },
+  { id: "bc-park", name: "Jonah Park", roles: ["Quality business contact"] },
+  { id: "bc-nguyen", name: "Amira Nguyen", roles: ["Procurement", "Billing"] },
+];
+
+export function accountPeopleCatalog(kind: AccountPersonKind): AccountPerson[] {
+  return kind === "internal_resource" ? INTERNAL_RESOURCES : BUSINESS_CONTACTS;
+}
 
 export function moduleLabel(id: string): string {
   return LAB_MODULE_CATALOG.find((item) => item.id === id)?.label ?? id;

@@ -2,14 +2,17 @@ import {
   DEMO_TOKEN,
   demoApproveCloseRequest,
   demoApproveModuleRequest,
+  demoAssignAccountPerson,
   demoCreateClient,
   demoCreateCloseRequest,
   demoCreateLab,
   demoCreateModuleRequest,
   demoGetClient,
+  demoListAccountPeople,
   demoListClients,
   demoLogin,
   demoQuery,
+  demoRemoveAccountPerson,
   demoRemoveLabModule,
   isDemoCredentials,
 } from "./demo";
@@ -23,6 +26,14 @@ export type IntrasiteUser = {
   role: IntrasiteRole;
 };
 
+export type AccountPerson = {
+  id: string;
+  name: string;
+  roles: string[];
+};
+
+export type AccountPersonKind = "internal_resource" | "business_contact";
+
 export type Client = {
   id: string;
   name: string;
@@ -31,6 +42,8 @@ export type Client = {
   databaseName: string;
   isolation: "dedicated_database";
   labCount: number;
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
   createdAt: string;
 };
 
@@ -243,6 +256,36 @@ export async function meRequest() {
 export async function listClients() {
   if (isDemoSession()) return demoListClients();
   return api<{ clients: Client[] }>("/clients");
+}
+
+export async function listAccountPeople() {
+  if (isDemoSession()) return demoListAccountPeople();
+  return api<{ internalResources: AccountPerson[]; businessContacts: AccountPerson[] }>(
+    "/account-people"
+  );
+}
+
+export async function assignAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+) {
+  if (isDemoSession()) return demoAssignAccountPerson(clientId, kind, personId);
+  return api<{ client: Client }>(`/clients/${clientId}/assignments`, {
+    method: "POST",
+    body: JSON.stringify({ kind, personId }),
+  });
+}
+
+export async function removeAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+) {
+  if (isDemoSession()) return demoRemoveAccountPerson(clientId, kind, personId);
+  return api<{ client: Client }>(`/clients/${clientId}/assignments/${kind}/${personId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function createClient(input: { name: string; slug?: string }) {
