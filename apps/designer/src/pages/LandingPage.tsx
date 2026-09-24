@@ -7,25 +7,11 @@ export function LandingPage() {
       <div className="lp-frame">
         <header className="lp-nav">
           <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
-            <span className="lp-logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 40 40" width="34" height="34">
-                <defs>
-                  <linearGradient id="cs-mark" x1="0" y1="1" x2="1" y2="0">
-                    <stop offset="0" stopColor="#5b46f5" />
-                    <stop offset="1" stopColor="#3b8cff" />
-                  </linearGradient>
-                </defs>
-                <path
-                  fill="url(#cs-mark)"
-                  d="M9 20c0-7.2 5.2-13 12.2-13 1.6 0 3.1.3 4.5.8C21.4 9.6 17.6 14 17.6 20c0 6.2 4.2 11 9.4 12.2-1.4.5-2.9.8-4.5.8C14.2 33 9 27.2 9 20Z"
-                />
-                <path
-                  fill="#7c6bff"
-                  d="M20.2 15.2c1.6-3.6 5.2-5.6 8.8-4.6 3.8.9 6.5 4.4 6.5 8.8 0 5.6-4.4 10.2-10 10.2-1.6 0-3.1-.3-4.5-1 3.6-.8 6.4-4 6.4-7.8 0-2.2-.8-4.2-2.2-5.6-1.6 0-3.4.2-5 0Z"
-                />
-              </svg>
-            </span>
-            <span className="lp-logo-word">CareScope</span>
+            <img
+              className="lp-header-logo"
+              src="/carescope-parent-logo.png"
+              alt="CareScope. Building Better Healthcare for Everyone."
+            />
             <span className="lp-logo-rule" aria-hidden="true" />
             <span className="lp-logo-sequence">Sequence</span>
           </Link>
