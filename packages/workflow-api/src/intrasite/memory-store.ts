@@ -34,6 +34,15 @@ type TenantDatabase = {
   labs: Map<string, Lab>;
 };
 
+function administratorName(personId: string | null): string {
+  if (!personId) return "";
+  const person = accountPeopleCatalog("business_contact").find((item) => item.id === personId);
+  if (!person) {
+    throw Object.assign(new Error("Business contact not found"), { status: 400 });
+  }
+  return person.name;
+}
+
 export class MemoryIntrasiteStore implements IntrasiteStore {
   readonly kind = "memory" as const;
   private users = new Map<string, IntrasiteUserRecord>();
@@ -236,6 +245,12 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       createdAt: nowIso(),
     };
     db.labs.set(id, lab);
+    return lab;
+  }
+
+  async setLabAdministrator(clientId: string, labId: string, personId: string | null): Promise<Lab> {
+    const lab = this.requireLab(clientId, labId);
+    lab.administrator = administratorName(personId);
     return lab;
   }
 

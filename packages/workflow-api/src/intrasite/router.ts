@@ -287,6 +287,40 @@ export function createIntrasiteRouter(): Router {
     })
   );
 
+  router.post(
+    "/clients/:id/labs/:labId/administrator",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const lab = await getIntrasiteStore().setLabAdministrator(
+          String(req.params["id"] ?? ""),
+          String(req.params["labId"] ?? ""),
+          String(req.body?.personId ?? "") || null
+        );
+        res.json({ lab });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
+  router.delete(
+    "/clients/:id/labs/:labId/administrator",
+    requireAuth,
+    asyncHandler(async (req, res) => {
+      try {
+        const lab = await getIntrasiteStore().setLabAdministrator(
+          String(req.params["id"] ?? ""),
+          String(req.params["labId"] ?? ""),
+          null
+        );
+        res.json({ lab });
+      } catch (error) {
+        httpError(error, res);
+      }
+    })
+  );
+
   router.get(
     "/clients/:id/dossier",
     requireAuth,

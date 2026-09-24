@@ -6,7 +6,9 @@ import {
   createCloseRequest,
   createLab,
   getClient,
+  listAccountPeople,
   type AccountCloseRequest,
+  type AccountPerson,
   type Client,
   type ClientDossier,
   type Lab,
@@ -16,6 +18,7 @@ import {
 import { ApprovalMap } from "./ApprovalMap";
 import { ClientCases } from "./ClientCases";
 import { IntrasiteFormDialog } from "./FormDialog";
+import { LabAdministratorDialog } from "./LabAdministratorDialog";
 import { ModuleCase } from "./ModuleCase";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
 
@@ -35,6 +38,8 @@ export function IntrasiteClientDetailPage() {
   const [closing, setClosing] = useState(false);
   const [closeOpen, setCloseOpen] = useState(false);
   const [createLabOpen, setCreateLabOpen] = useState(false);
+  const [adminLab, setAdminLab] = useState<Lab | null>(null);
+  const [businessContacts, setBusinessContacts] = useState<AccountPerson[]>([]);
 
   async function refresh() {
     const result = await getClient(id);
@@ -45,12 +50,16 @@ export function IntrasiteClientDetailPage() {
     setCloseRequest(result.closeRequest);
     if (result.moduleCatalog?.length) setCatalog(result.moduleCatalog);
     setModuleLab((current) => current ? result.labs.find((lab) => lab.id === current.id) ?? null : null);
+    setAdminLab((current) => current ? result.labs.find((lab) => lab.id === current.id) ?? null : null);
   }
 
   useEffect(() => {
     refresh().catch((err: unknown) => {
       setError(err instanceof ApiError ? err.message : "Unable to load client");
     });
+    listAccountPeople()
+      .then((directory) => setBusinessContacts(directory.businessContacts))
+      .catch(() => setBusinessContacts([]));
   }, [id]);
 
   function openCreateLab() {
@@ -157,7 +166,16 @@ export function IntrasiteClientDetailPage() {
                   <td>
                     <code>{lab.siteCode}</code>
                   </td>
-                  <td>{lab.administrator}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="is-people-link"
+                      onClick={() => setAdminLab(lab)}
+                      aria-label={`Lab administrator for ${lab.name}`}
+                    >
+                      {lab.administrator && lab.administrator !== "Unassigned" ? lab.administrator : "Assign"}
+                    </button>
+                  </td>
                   <td>
                     <span className={`is-pill ${lab.status}`}>{lab.status}</span>
                   </td>
@@ -185,6 +203,22 @@ export function IntrasiteClientDetailPage() {
           </table>
         )}
       </section>
+
+      {adminLab ? (
+        <LabAdministratorDialog
+          clientId={id}
+          lab={adminLab}
+          directory={businessContacts}
+          onClose={() => setAdminLab(null)}
+          onUpdated={(lab) => {
+            setAdminLab(lab);
+            setLabs((current) => current.map((item) => (item.id === lab.id ? lab : item)));
+            refresh().catch((err: unknown) => {
+              setError(err instanceof ApiError ? err.message : "Unable to load client");
+            });
+          }}
+        />
+      ) : null}
 
       {moduleLab ? (
         <ModuleCase
