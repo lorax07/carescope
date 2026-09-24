@@ -1688,6 +1688,19 @@ body:has(.lp) {
   padding-top: 5.5rem;
 }
 
+.lp-lims-film {
+  margin: 0.5rem 0 0;
+  padding: 0 var(--lp-gutter);
+}
+
+.lp-lims-film video {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid #e7e5e4;
+  background: #0f1c2e;
+}
+
 .lp-section-head h2,
 .lp-platform h2,
 .lp-h2 {

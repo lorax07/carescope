@@ -17,7 +17,9 @@ import {
   ResultsPage,
   InventoryPage,
 } from "./pages/ModulePages";
+import { InsightsChatPage } from "./pages/InsightsChatPage";
 import { LibraryPage } from "./pages/LibraryPage";
+import { WorkflowDesignPage } from "./pages/WorkflowDesignPage";
 import { DesignerPage } from "./pages/DesignerPage";
 import { CatalogPage } from "./pages/CatalogPage";
 import "./styles.css";
@@ -68,7 +70,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="connectivity" element={<LimsModulePage id="connectivity" />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="quality" element={<LimsModulePage id="quality_compliance" />} />
-          <Route path="insights" element={<LimsModulePage id="insights" />} />
+          <Route path="insights" element={<InsightsChatPage />} />
+          <Route path="design" element={<WorkflowDesignPage />} />
           <Route path="workflows" element={<LibraryPage />} />
           <Route path="workflows/:id" element={<DesignerPage />} />
           <Route path="catalog" element={<CatalogPage />} />

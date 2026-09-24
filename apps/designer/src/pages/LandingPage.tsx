@@ -36,6 +36,16 @@ export function LandingPage() {
 
         <div className="lp">
         <PlatformBand />
+      <figure className="lp-lims-film">
+        <video
+          src="/lims-in-action.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-label="Sequence LIMS: workflow design, instrument integration, and an Insights metrics question, each opened from the left menu"
+        />
+      </figure>
       <WhatWeSolve />
       <WorkflowSection />
       <ComplianceSection />
