@@ -232,13 +232,9 @@ function RangeBar({
 function LimsDemo() {
   return (
     <figure className="lp-demo">
-      <figcaption>Sequence LIMS</figcaption>
       <div className="lp-demo-frame">
         <iframe title="CareScope Sequence LIMS demo" src="/app" />
       </div>
-      <p>
-        <Link to="/app">Open the LIMS</Link>
-      </p>
     </figure>
   );
 }
