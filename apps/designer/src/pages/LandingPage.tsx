@@ -100,12 +100,8 @@ function WhatWeSolve() {
   return (
     <section className="lp-section" id="capabilities">
       <div className="lp-section-inner">
-        <div className="lp-section-head">
-        <h2>A traditional LIMS change is a project. Sequence is a configuration.</h2>
-        <p>
-          Laboratories of about 50 to 2,000 people still have to fund every function below when the
-          LIMS itself cannot absorb the change. Sequence keeps those functions in the platform.
-        </p>
+        <div className="lp-section-head lp-section-head-left">
+          <h2>What we solve</h2>
         </div>
 
         <div className="lp-solve">

@@ -296,6 +296,12 @@
   text-align: center;
 }
 
+.lp-section-head-left {
+  max-width: none;
+  margin: 0 0 2rem;
+  text-align: left;
+}
+
 .lp-section-head h2,
 .lp-platform h2,
 .lp-h2 {
