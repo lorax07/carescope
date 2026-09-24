@@ -1,13 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
 import "./landing.css";
-
-const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
-  id: m.module,
-  label: m.label,
-  description: m.description,
-}));
 
 export function LandingPage() {
   return (
@@ -61,24 +53,7 @@ export function LandingPage() {
         <PlatformBand />
       </div>
 
-      <section className="lp-section" id="capabilities">
-        <div className="lp-section-inner lp-section-wide">
-          <div className="lp-section-heading-row">
-            <div>
-              <p className="lp-eyebrow">Capabilities</p>
-              <h2 className="lp-h2">
-                Everything you need to run the business around your lab under
-                one platform
-              </h2>
-            </div>
-            <p className="lp-capability-count">
-              {CAPABILITIES.length} modules
-            </p>
-          </div>
-
-          <CapabilitiesCarousel items={CAPABILITIES} />
-        </div>
-      </section>
+      <WhatWeSolve />
 
       <section className="lp-section lp-section-tint" id="workflows">
         <div className="lp-section-inner lp-section-wide lp-workflow-block">
@@ -149,129 +124,231 @@ export function LandingPage() {
   );
 }
 
-type Capability = {
-  id: string;
-  label: string;
-  description: string;
-};
+const LIMS_FUNCTIONS = [
+  "System setup and workflow configuration",
+  "Instrument connectivity",
+  "EHR, billing, and other interfaces",
+  "Data migration",
+  "Reporting and output",
+  "Training and go-live support",
+] as const;
 
-function CapabilitiesCarousel({ items }: { items: Capability[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const pageSize = usePageSize();
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+const COST_SCALE = 1_000_000;
 
-  const goTo = useCallback(
-    (next: number) => {
-      const clamped = ((next % pageCount) + pageCount) % pageCount;
-      setIndex(clamped);
-      const el = trackRef.current;
-      if (!el) return;
-      const pageWidth = el.clientWidth;
-      el.scrollTo({ left: clamped * pageWidth, behavior: "smooth" });
-    },
-    [pageCount]
-  );
+const COST_BANDS = [
+  {
+    id: "fifty",
+    label: "About 50 people",
+    note: "11–50 LIMS users",
+    cloud: [20_000, 100_000] as const,
+    onPrem: [75_000, 200_000] as const,
+  },
+  {
+    id: "large",
+    label: "Toward 2,000 people",
+    note: "50+ LIMS users",
+    cloud: [100_000, 500_000] as const,
+    onPrem: [300_000, 1_000_000] as const,
+  },
+] as const;
 
-  useEffect(() => {
-    if (paused) return;
-    const id = window.setInterval(() => goTo(index + 1), 4500);
-    return () => window.clearInterval(id);
-  }, [goTo, index, paused]);
+const STAFF_WAGE = 61_890;
 
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const pageWidth = el.clientWidth || 1;
-      setIndex(Math.round(el.scrollLeft / pageWidth));
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+function money(value: number): string {
+  if (value >= 1_000_000) return "$1M+";
+  if (value >= 1000) return `$${Math.round(value / 1000)}k`;
+  return `$${value}`;
+}
 
-  useEffect(() => {
-    goTo(0);
-  }, [goTo, pageSize]);
+function staffYears(value: number): string {
+  return (value / STAFF_WAGE).toFixed(1);
+}
 
-  const pages = Array.from({ length: pageCount }, (_, page) =>
-    items.slice(page * pageSize, page * pageSize + pageSize)
-  );
-
+function WhatWeSolve() {
   return (
-    <div
-      className="lp-carousel"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <div className="lp-carousel-controls">
-        <button
-          type="button"
-          className="lp-carousel-btn"
-          aria-label="Previous capabilities"
-          onClick={() => goTo(index - 1)}
-        >
-          ←
-        </button>
-        <div className="lp-carousel-dots" role="tablist" aria-label="Capability pages">
-          {pages.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={i === index}
-              className={`lp-carousel-dot${i === index ? " active" : ""}`}
-              aria-label={`Show capabilities page ${i + 1}`}
-              onClick={() => goTo(i)}
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          className="lp-carousel-btn"
-          aria-label="Next capabilities"
-          onClick={() => goTo(index + 1)}
-        >
-          →
-        </button>
-      </div>
+    <section className="lp-section" id="capabilities">
+      <div className="lp-section-inner lp-section-wide">
+        <p className="lp-eyebrow">What we solve</p>
+        <h2 className="lp-h2">A traditional LIMS change is a project. Sequence is a configuration.</h2>
+        <p className="lp-section-lede">
+          Laboratories of about 50 to 2,000 people still have to fund every function below when the
+          LIMS itself cannot absorb the change. Sequence keeps those functions in the platform.
+        </p>
 
-      <div className="lp-carousel-viewport" ref={trackRef}>
-        {pages.map((page, pageIdx) => (
-          <div className="lp-carousel-page" key={pageIdx} aria-hidden={pageIdx !== index}>
-            {page.map((item, i) => (
-              <article className="lp-capability" key={item.id}>
-                <span className="lp-capability-index">
-                  {String(pageIdx * pageSize + i + 1).padStart(2, "0")}
-                </span>
-                <h3>{item.label}</h3>
-                <p>{item.description}</p>
-              </article>
-            ))}
+        <div className="lp-solve">
+          <figure className="lp-solve-chart">
+            <figcaption>
+              <strong>Traditional LIMS change</strong>
+              <span>One-time implementation cost, published ranges</span>
+            </figcaption>
+            <div className="lp-solve-plot" role="img" aria-label="Traditional LIMS implementation cost by laboratory size">
+              <div className="lp-solve-yaxis" aria-hidden="true">
+                <span>$1M</span>
+                <span>$750k</span>
+                <span>$500k</span>
+                <span>$250k</span>
+                <span>$0</span>
+              </div>
+              <div className="lp-solve-canvas">
+                <div className="lp-solve-grid" aria-hidden="true" />
+                {COST_BANDS.map((band) => (
+                  <div className="lp-solve-group" key={band.id}>
+                    <div className="lp-solve-bars">
+                      <RangeBar label="Cloud" low={band.cloud[0]} high={band.cloud[1]} tone="cloud" />
+                      <RangeBar
+                        label="On-premises"
+                        low={band.onPrem[0]}
+                        high={band.onPrem[1]}
+                        tone="onprem"
+                      />
+                    </div>
+                    <p>
+                      <strong>{band.label}</strong>
+                      <span>{band.note}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="lp-solve-staff" aria-hidden="true">
+                <span>16</span>
+                <span>12</span>
+                <span>8</span>
+                <span>4</span>
+                <span>0</span>
+                <small>Staff-years</small>
+              </div>
+            </div>
+            <ul className="lp-solve-legend">
+              <li><i className="cloud" /> Cloud SaaS</li>
+              <li><i className="onprem" /> On-premises</li>
+              <li>Right axis: cost ÷ ${STAFF_WAGE.toLocaleString()} median wage</li>
+            </ul>
+            <table className="lp-solve-table">
+              <caption>Same ranges, read as median staff-years</caption>
+              <thead>
+                <tr>
+                  <th>Laboratory</th>
+                  <th>Cloud implementation</th>
+                  <th>On-premises implementation</th>
+                  <th>Median staff-years</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COST_BANDS.map((band) => (
+                  <tr key={band.id}>
+                    <td>
+                      {band.label}
+                      <span>{band.note}</span>
+                    </td>
+                    <td>
+                      {money(band.cloud[0])}–{money(band.cloud[1])}
+                      {band.cloud[1] >= 500_000 ? "+" : ""}
+                    </td>
+                    <td>
+                      {money(band.onPrem[0])}–{band.onPrem[1] >= 1_000_000 ? "$1M+" : `${money(band.onPrem[1])}+`}
+                    </td>
+                    <td>
+                      {staffYears(band.cloud[0])}–{staffYears(band.onPrem[1])}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </figure>
+
+          <div className="lp-solve-sequence">
+            <p className="lp-eyebrow">Sequence</p>
+            <h3>The same functions, without a services project</h3>
+            <ol>
+              {LIMS_FUNCTIONS.map((item) => (
+                <li key={item}>
+                  <span>{item}</span>
+                  <strong>Configured</strong>
+                </li>
+              ))}
+            </ol>
+            <p>
+              A traditional change prices each of these as professional services. In Sequence they
+              stay in the product, so the laboratory changes the workflow instead of opening an
+              implementation.
+            </p>
           </div>
-        ))}
+        </div>
+
+        <div className="lp-solve-functions">
+          <h3>Functions a traditional LIMS change has to staff</h3>
+          <ul>
+            {LIMS_FUNCTIONS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        <footer className="lp-solve-sources">
+          <p>
+            Cost ranges are one-time professional-services estimates by LIMS user count, not a quote
+            for a 50-person or 2,000-person laboratory. The 11–50 user band is the published segment
+            nearest a laboratory of about 50 people. The 50+ user band is the published segment for
+            larger and multi-site laboratories, including organizations that employ up to the
+            thousands. Upper ends marked “+” continue above the plotted cap.
+          </p>
+          <ol>
+            <li>
+              CrelioHealth, “LIMS Implementation Cost By Lab Size Across 3 Deployment Types,” 4 Sep
+              2026. Cloud and on-premises implementation ranges, go-live scope, and the function
+              list (system setup, instrument connectivity, interoperability, data migration,
+              reporting, training).{" "}
+              <a href="https://blog.creliohealth.com/lims-implementation-cost/">
+                blog.creliohealth.com/lims-implementation-cost
+              </a>
+            </li>
+            <li>
+              U.S. Bureau of Labor Statistics, Occupational Outlook Handbook, “Clinical Laboratory
+              Technologists and Technicians.” Median annual wage $61,890 in May 2024. Staff-years on
+              the chart equal the published cost divided by that median wage.{" "}
+              <a href="https://www.bls.gov/ooh/healthcare/clinical-laboratory-technologists-and-technicians.htm">
+                bls.gov/ooh/healthcare/clinical-laboratory-technologists-and-technicians.htm
+              </a>
+            </li>
+            <li>
+              College of American Pathologists Q-Probes studies of technical staffing find wide
+              variation across laboratories and do not publish one average headcount for labs of 50
+              to 2,000 people. Valenstein, Souers, and colleagues, Archives of Pathology &amp;
+              Laboratory Medicine.{" "}
+              <a href="https://doi.org/10.5858/arpa.2020-0760-cp">doi.org/10.5858/arpa.2020-0760-cp</a>
+            </li>
+          </ol>
+        </footer>
       </div>
-    </div>
+    </section>
   );
 }
 
-function usePageSize() {
-  const [size, setSize] = useState(3);
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 700) setSize(1);
-      else if (w < 1100) setSize(2);
-      else setSize(3);
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  return size;
+function RangeBar({
+  label,
+  low,
+  high,
+  tone,
+}: {
+  label: string;
+  low: number;
+  high: number;
+  tone: "cloud" | "onprem";
+}) {
+  const start = (low / COST_SCALE) * 100;
+  const end = (Math.min(high, COST_SCALE) / COST_SCALE) * 100;
+  return (
+    <div className="lp-solve-col">
+      <div className="lp-solve-track">
+        <span
+          className={`lp-solve-range ${tone}`}
+          style={{ bottom: `${start}%`, height: `${Math.max(end - start, 2)}%` }}
+          title={`${label}: ${money(low)} to ${money(high)}`}
+        />
+      </div>
+      <span>{label}</span>
+    </div>
+  );
 }
 
 function PlatformBand() {
