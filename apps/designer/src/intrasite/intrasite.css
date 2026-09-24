@@ -580,6 +580,18 @@
   gap: 0.45rem;
 }
 
+.is-module-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.is-module-copy small {
+  color: var(--muted, #5c6570);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .is-module-list li {
   display: flex;
   justify-content: space-between;

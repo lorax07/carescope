@@ -81,7 +81,7 @@ describe("Intrasite auth and multi-tenancy", () => {
 
     expect(apexLabs.body.labs).toHaveLength(1);
     expect(apexLabs.body.labs[0].name).toBe("North Lab");
-    expect(apexLabs.body.labs[0].modules).toEqual(["sample_lifecycle"]);
+    expect(apexLabs.body.labs[0].modules).toEqual(["lab_operations"]);
     expect(apexLabs.body.labs[0].administrator).toBe("Unassigned");
     expect(harborLabs.body.labs).toHaveLength(0);
   });
@@ -103,7 +103,7 @@ describe("Intrasite auth and multi-tenancy", () => {
     const created = await request(app)
       .post(`/api/v1/intrasite/clients/${client.body.client.id}/labs/${lab.body.lab.id}/module-requests`)
       .set(auth)
-      .send({ moduleId: "billing", action: "add" });
+      .send({ moduleId: "connectivity", action: "add" });
     expect(created.status).toBe(201);
     expect(created.body.request.step).toBe("requested");
 
@@ -127,7 +127,7 @@ describe("Intrasite auth and multi-tenancy", () => {
     const before = await request(app)
       .get(`/api/v1/intrasite/clients/${client.body.client.id}/labs`)
       .set(auth);
-    expect(before.body.labs[0].modules).not.toContain("billing");
+    expect(before.body.labs[0].modules).not.toContain("connectivity");
 
     const business = await request(app)
       .post(
@@ -141,7 +141,7 @@ describe("Intrasite auth and multi-tenancy", () => {
     const after = await request(app)
       .get(`/api/v1/intrasite/clients/${client.body.client.id}`)
       .set(auth);
-    expect(after.body.labs[0].modules).toContain("billing");
+    expect(after.body.labs[0].modules).toContain("connectivity");
     expect(after.body.dossier.contacts.length).toBeGreaterThan(0);
   });
 
@@ -160,7 +160,7 @@ describe("Intrasite auth and multi-tenancy", () => {
 
     const removed = await request(app)
       .delete(
-        `/api/v1/intrasite/clients/${client.body.client.id}/labs/${lab.body.lab.id}/modules/sample_lifecycle`
+        `/api/v1/intrasite/clients/${client.body.client.id}/labs/${lab.body.lab.id}/modules/lab_operations`
       )
       .set(auth);
     expect(removed.status).toBe(200);

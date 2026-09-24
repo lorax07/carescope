@@ -122,9 +122,14 @@ export function ModuleCase({
             <p className="is-muted">This lab has no modules installed.</p>
           ) : (
             <ul className="is-module-list">
-              {lab.modules.map((id) => (
+              {lab.modules.map((id) => {
+                const item = catalog.find((entry) => entry.id === id);
+                return (
                 <li key={id}>
-                  <span>{moduleLabel(id)}</span>
+                  <span className="is-module-copy">
+                    <strong>{item?.label ?? moduleLabel(id)}</strong>
+                    {item?.positioning ? <small>{item.positioning}</small> : null}
+                  </span>
                   <button
                     type="button"
                     className="btn"
@@ -138,7 +143,8 @@ export function ModuleCase({
                     {busy === `remove-${id}` ? "Removing…" : "Remove"}
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </section>
@@ -153,7 +159,11 @@ export function ModuleCase({
                 const pending = pendingIds.has(item.id);
                 return (
                   <li key={item.id}>
-                    <span>{item.label}</span>
+                    <span className="is-module-copy">
+                      <strong>{item.label}</strong>
+                      {item.positioning ? <small>{item.positioning}</small> : null}
+                      {item.capabilities ? <small>{item.capabilities}</small> : null}
+                    </span>
                     <button
                       type="button"
                       className="btn btn-primary"

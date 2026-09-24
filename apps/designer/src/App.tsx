@@ -4,15 +4,11 @@ import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { readLimsSession } from "./limsSession";
 
 const NAV = [
-  { to: "/app", label: "Dashboard", end: true },
-  { to: "/app/samples", label: "Samples" },
-  { to: "/app/tests", label: "Tests" },
-  { to: "/app/results", label: "Results" },
-  { to: "/app/instruments", label: "Instruments" },
-  { to: "/app/inventory", label: "Inventory" },
-  { to: "/app/quality", label: "Quality" },
-  { to: "/app/workflows", label: "Workflows" },
-  { to: "/app/catalog", label: "Catalog" },
+  { to: "/app", label: "Lab Operations", end: true },
+  { to: "/app/instruments", label: "Instrument Integration" },
+  { to: "/app/connectivity", label: "Connectivity" },
+  { to: "/app/quality", label: "Quality & Compliance" },
+  { to: "/app/insights", label: "Insights" },
 ] as const;
 
 function useLocalClock(): Date {

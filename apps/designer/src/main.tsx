@@ -10,14 +10,12 @@ import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
 import { LandingPage } from "./pages/LandingPage";
 import { LimsEnvironmentPage } from "./pages/LimsEnvironmentPage";
-import { DashboardPage } from "./pages/DashboardPage";
 import { SamplesPage } from "./pages/SamplesPage";
 import {
+  LimsModulePage,
   TestsPage,
   ResultsPage,
-  InstrumentsPage,
   InventoryPage,
-  QualityPage,
 } from "./pages/ModulePages";
 import { LibraryPage } from "./pages/LibraryPage";
 import { DesignerPage } from "./pages/DesignerPage";
@@ -62,13 +60,15 @@ createRoot(document.getElementById("root")!).render(
         <Route path="lims/:clientId/:labId/:envId" element={<LimsEnvironmentPage />} />
         <Route path="*" element={<UnmatchedRoute />} />
         <Route path="app" element={<AppShell />}>
-          <Route index element={<DashboardPage />} />
+          <Route index element={<LimsModulePage id="lab_operations" />} />
           <Route path="samples" element={<SamplesPage />} />
           <Route path="tests" element={<TestsPage />} />
           <Route path="results" element={<ResultsPage />} />
-          <Route path="instruments" element={<InstrumentsPage />} />
+          <Route path="instruments" element={<LimsModulePage id="instrument_integration" />} />
+          <Route path="connectivity" element={<LimsModulePage id="connectivity" />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="quality" element={<QualityPage />} />
+          <Route path="quality" element={<LimsModulePage id="quality_compliance" />} />
+          <Route path="insights" element={<LimsModulePage id="insights" />} />
           <Route path="workflows" element={<LibraryPage />} />
           <Route path="workflows/:id" element={<DesignerPage />} />
           <Route path="catalog" element={<CatalogPage />} />
