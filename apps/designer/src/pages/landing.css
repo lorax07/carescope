@@ -14,7 +14,7 @@
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
   --lp-display: "Sora", "Source Sans 3", sans-serif;
   --lp-gutter: 2.25rem;
-  --lp-measure: 1080px;
+  --lp-measure: 1250px;
   max-width: var(--lp-measure);
   margin: 0 auto;
   min-height: 100%;
