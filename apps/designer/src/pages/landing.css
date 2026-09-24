@@ -55,7 +55,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1.5rem;
-  padding: 0.95rem 1.75rem;
+  padding: 0.35rem 1.5rem;
   position: relative;
   overflow: hidden;
   background:
@@ -85,7 +85,12 @@
   z-index: 1;
 }
 
-.lp-header-logo,
+.lp-header-logo {
+  display: block;
+  height: 2.65rem;
+  width: auto;
+}
+
 .lp-footer-logo {
   display: block;
   height: 6.5rem;
