@@ -64,14 +64,6 @@ export function LandingPage() {
   );
 }
 
-const LIMS_FUNCTIONS = [
-  "A new report template",
-  "A new laboratory department",
-  "A minor workflow tweak",
-] as const;
-
-const COST_SCALE = 5_000;
-
 const CHANGE_CYCLES = [
   {
     id: "report",
@@ -108,79 +100,32 @@ function WhatWeSolve() {
           <h2>What we solve</h2>
         </div>
 
-        <div className="lp-solve">
-          <figure className="lp-solve-chart">
-            <figcaption>
-              <strong>Average change cycle cost</strong>
-              <span>One change after go-live. Not the initial LIMS implementation.</span>
-            </figcaption>
-            <div className="lp-solve-plot" role="img" aria-label="Published cost of one traditional LIMS change cycle">
-              <div className="lp-solve-yaxis" aria-hidden="true">
-                <span>$5k</span>
-                <span>$3.75k</span>
-                <span>$2.5k</span>
-                <span>$1.25k</span>
-                <span>$0</span>
-              </div>
-              <div className="lp-solve-canvas">
-                <div className="lp-solve-grid" aria-hidden="true" />
-                {CHANGE_CYCLES.map((cycle) => (
-                  <div className="lp-solve-group" key={cycle.id}>
-                    <div className="lp-solve-bars">
-                      <RangeBar label={money(cycle.cost)} low={0} high={cycle.cost} tone="cloud" />
+        <ul className="lp-solve-cards">
+          {CHANGE_CYCLES.map((cycle) => (
+            <li key={cycle.id}>
+              <article className="lp-cycle-card" tabIndex={0}>
+                <div className="lp-cycle-face">
+                  <p>One change after go-live</p>
+                  <h3>{cycle.label}</h3>
+                  <span>Hover for the published cost</span>
+                </div>
+                <div className="lp-cycle-data">
+                  <p className="lp-cycle-cost">{money(cycle.cost)}</p>
+                  <dl>
+                    <div>
+                      <dt>Calendar time</dt>
+                      <dd>{cycle.note}</dd>
                     </div>
-                    <p>
-                      <strong>{cycle.label}</strong>
-                      <span>{cycle.note}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <ul className="lp-solve-legend">
-              <li><i className="cloud" /> Published cost of that change</li>
-              <li>Calendar time is the vendor’s stated wait, not staff-years</li>
-            </ul>
-            <table className="lp-solve-table">
-              <caption>Published examples of a single change cycle</caption>
-              <thead>
-                <tr>
-                  <th>Change</th>
-                  <th>Published cost</th>
-                  <th>Calendar time</th>
-                  <th>Source</th>
-                </tr>
-              </thead>
-              <tbody>
-                {CHANGE_CYCLES.map((cycle) => (
-                  <tr key={cycle.id}>
-                    <td>{cycle.label}</td>
-                    <td>{money(cycle.cost)}</td>
-                    <td>{cycle.note}</td>
-                    <td>{cycle.source}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </figure>
-
-          <div className="lp-solve-sequence">
-            <p className="lp-eyebrow">Sequence</p>
-            <h3>The same change, without a services project</h3>
-            <ol>
-              {LIMS_FUNCTIONS.map((item) => (
-                <li key={item}>
-                  <span>{item}</span>
-                  <strong>Configured</strong>
-                </li>
-              ))}
-            </ol>
-            <p>
-              A traditional change cycle bills the laboratory for the programmer and the wait. In
-              Sequence the same change stays in the product, so the laboratory configures it.
-            </p>
-          </div>
-        </div>
+                    <div>
+                      <dt>Source</dt>
+                      <dd>{cycle.source}</dd>
+                    </div>
+                  </dl>
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
 
         <footer className="lp-solve-sources">
           <p>
@@ -208,33 +153,6 @@ function WhatWeSolve() {
         </footer>
       </div>
     </section>
-  );
-}
-
-function RangeBar({
-  label,
-  low,
-  high,
-  tone,
-}: {
-  label: string;
-  low: number;
-  high: number;
-  tone: "cloud" | "onprem";
-}) {
-  const start = (low / COST_SCALE) * 100;
-  const end = (Math.min(high, COST_SCALE) / COST_SCALE) * 100;
-  return (
-    <div className="lp-solve-col">
-      <div className="lp-solve-track">
-        <span
-          className={`lp-solve-range ${tone}`}
-          style={{ bottom: `${start}%`, height: `${Math.max(end - start, 2)}%` }}
-          title={`${label}: ${money(low)} to ${money(high)}`}
-        />
-      </div>
-      <span>{label}</span>
-    </div>
   );
 }
 
