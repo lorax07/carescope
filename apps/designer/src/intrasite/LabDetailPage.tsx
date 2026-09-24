@@ -63,11 +63,6 @@ export function IntrasiteLabDetailPage() {
             installations it is mapped to.
           </p>
         </div>
-        {lab ? (
-          <button type="button" className="btn btn-primary" onClick={() => setModuleOpen(true)}>
-            Add or remove modules
-          </button>
-        ) : null}
       </header>
 
       {error ? <p className="is-error">{error}</p> : null}
@@ -75,18 +70,6 @@ export function IntrasiteLabDetailPage() {
       {lab ? (
         <>
           <section className="is-infra-meta">
-            <article>
-              <span>Site</span>
-              <strong>
-                <code>{lab.siteCode}</code>
-              </strong>
-            </article>
-            <article>
-              <span>Slug</span>
-              <strong>
-                <code>{lab.slug}</code>
-              </strong>
-            </article>
             <article>
               <span>Status</span>
               <strong>
@@ -100,7 +83,12 @@ export function IntrasiteLabDetailPage() {
           </section>
 
           <section className="is-panel">
-            <h2>Modules</h2>
+            <div className="is-panel-head">
+              <h2>Modules</h2>
+              <button type="button" className="btn btn-primary" onClick={() => setModuleOpen(true)}>
+                Add Or Remove Module
+              </button>
+            </div>
             <div className="is-module-chips">
               {lab.modules.length === 0 ? (
                 <span className="is-muted">None</span>
