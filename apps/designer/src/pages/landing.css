@@ -1567,51 +1567,47 @@ body:has(.lp) {
 .lp-nav {
   display: block;
   background: #fff;
-  border-bottom: 1px solid #eceae8;
+  border-bottom: 1px solid #e6e6e6;
 }
 
 .lp-nav-bar {
   width: 100%;
   margin: 0;
   box-sizing: border-box;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 0.55rem 1.35rem;
-}
-
-.lp-nav-start {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-  min-width: 0;
-}
-
-.lp-header-logo {
-  height: 2.15rem;
+  gap: 1.25rem;
+  padding: 0.7rem 1.5rem;
 }
 
 .lp-logo {
-  gap: 0.55rem;
+  justify-self: start;
+  gap: 0.7rem;
+}
+
+.lp-header-logo {
+  height: 3.45rem;
+  width: auto;
 }
 
 .lp-logo-sequence {
-  font-size: 1.05rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #111;
 }
 
 .lp-nav-links {
-  justify-content: flex-start;
-  gap: 1.35rem;
-  color: #1c1c1c;
+  justify-self: center;
+  justify-content: center;
+  gap: 1.65rem;
+  color: #2a2a2a;
   font-size: 0.95rem;
   font-weight: 500;
 }
 
 .lp-nav-text {
-  color: #1c1c1c;
+  color: #2a2a2a;
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -1621,21 +1617,29 @@ body:has(.lp) {
 }
 
 .lp-nav-actions {
-  gap: 1.15rem;
+  justify-self: end;
+  gap: 0.95rem;
+}
+
+.lp-nav-divider {
+  width: 1px;
+  height: 1.15rem;
+  background: #d4d4d4;
+  margin-right: 0.15rem;
 }
 
 .lp-btn-demo {
-  background: #ff5a1f;
+  background: #111;
   color: #fff;
   border-radius: 999px;
-  padding: 0.55rem 1rem;
-  font-size: 0.95rem;
-  font-weight: 650;
+  padding: 0.48rem 0.95rem;
+  font-size: 0.92rem;
+  font-weight: 600;
   box-shadow: none;
 }
 
 .lp-btn-demo:hover {
-  background: #f04d12;
+  background: #000;
 }
 
 .lp-nav-wave {
@@ -1643,11 +1647,13 @@ body:has(.lp) {
 }
 
 .lp-logo-sequence {
-  color: #191918;
+  color: #111;
+  font-weight: 600;
 }
 
 .lp-logo-rule {
-  background: #d6d3d1;
+  background: #d0d0d0;
+  height: 1.7rem;
 }
 
 .lp-nav-links {
@@ -1661,7 +1667,7 @@ body:has(.lp) {
 }
 
 .lp-btn-demo {
-  background: #ff5a1f;
+  background: #111;
   color: #fff;
   border-radius: 999px;
   box-shadow: none;
@@ -1669,7 +1675,7 @@ body:has(.lp) {
 }
 
 .lp-btn-demo:hover {
-  background: #f04d12;
+  background: #000;
 }
 
 .lp-section {
