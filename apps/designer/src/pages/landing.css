@@ -55,14 +55,34 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.1rem 2.25rem;
-  border-bottom: 1px solid var(--lp-line);
+  padding: 0.95rem 1.75rem;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 42% 140% at 100% 40%, rgba(167, 139, 250, 0.45), transparent 62%),
+    linear-gradient(90deg, #f8f7ff 0%, #f4f2ff 62%, #ece8ff 100%);
+  border-bottom: 0;
+}
+
+.lp-nav-wave {
+  position: absolute;
+  right: -2rem;
+  top: -1.5rem;
+  width: 16rem;
+  height: 8rem;
+  background:
+    radial-gradient(60% 80% at 70% 40%, rgba(255, 255, 255, 0.55), transparent 70%),
+    radial-gradient(50% 70% at 90% 80%, rgba(124, 107, 255, 0.28), transparent 72%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .lp-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
+  position: relative;
+  z-index: 1;
 }
 
 .lp-logo-mark {
@@ -73,8 +93,30 @@
 .lp-logo-word {
   font-family: var(--lp-display);
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   letter-spacing: -0.03em;
+  color: #243056;
+}
+
+.lp-logo-word sup,
+.lp-logo-sequence sup {
+  font-size: 0.45em;
+  margin-left: 0.05em;
+}
+
+.lp-logo-rule {
+  width: 1px;
+  height: 1.35rem;
+  background: #c9c4e4;
+  margin: 0 0.15rem;
+}
+
+.lp-logo-sequence {
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  color: #5b46e8;
 }
 
 .lp-brand-care {
@@ -90,10 +132,12 @@
 .lp-nav-links {
   display: flex;
   justify-content: center;
-  gap: 1.35rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--lp-muted);
+  gap: 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #3d475c;
+  position: relative;
+  z-index: 1;
 }
 
 .lp-nav-links a {
@@ -104,17 +148,6 @@
 
 .lp-nav-links a:hover {
   color: var(--lp-ink);
-}
-
-.lp-nav-links a:first-child::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -0.35rem;
-  height: 2px;
-  background: var(--lp-blue);
-  border-radius: 2px;
 }
 
 .lp-nav-actions {
@@ -151,6 +184,20 @@
 
 .lp-btn:active {
   transform: translateY(0);
+}
+
+.lp-btn-demo {
+  position: relative;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.7rem 1.25rem;
+  background: linear-gradient(90deg, #6d4bff 0%, #3b82f6 100%);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(91, 70, 232, 0.25);
+}
+
+.lp-btn-demo:hover {
+  background: linear-gradient(90deg, #5d3df0 0%, #2f74ef 100%);
 }
 
 .lp-btn-primary {
