@@ -13,6 +13,8 @@
   --lp-green-deep: #15803d;
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
   --lp-display: "Sora", "Source Sans 3", sans-serif;
+  --lp-gutter: 2.25rem;
+  --lp-measure: 100%;
   min-height: 100%;
   background: #fff;
   color: var(--lp-ink);
@@ -52,7 +54,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1.5rem;
-  padding: 0.45rem 1.5rem;
+  padding: 0.45rem var(--lp-gutter);
   position: relative;
   overflow: hidden;
   background:
@@ -278,13 +280,13 @@
 .lp-section {
   box-sizing: border-box;
   width: 100%;
-  padding: 4.25rem 1.75rem;
+  padding: 3.75rem var(--lp-gutter);
   background: #fff;
   border-top: 1px solid #e6ebf2;
 }
 
 .lp-section-inner {
-  width: min(1180px, 100%);
+  width: min(var(--lp-measure), 100%);
   margin: 0 auto;
 }
 
@@ -1461,7 +1463,7 @@
   display: flex;
   justify-content: center;
   margin: 0;
-  padding: 2.25rem 1.25rem 0.5rem;
+  padding: 2.25rem var(--lp-gutter) 0.5rem;
 }
 
 .lp-copyright {
@@ -1472,11 +1474,11 @@
 }
 
 .lp-footer {
-  padding: 2rem 1.25rem 2.5rem;
+  padding: 2rem var(--lp-gutter) 2.5rem;
 }
 
 .lp-footer-inner {
-  width: min(1180px, 100%);
+  width: min(var(--lp-measure), 100%);
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -1637,8 +1639,12 @@
     grid-template-columns: 1fr 1fr;
   }
 
+  .lp {
+    --lp-gutter: 1rem;
+  }
+
   .lp-nav {
-    padding: 0.9rem 1rem;
+    padding: 0.9rem var(--lp-gutter);
   }
 
   .lp-hero {
