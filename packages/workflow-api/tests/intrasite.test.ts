@@ -284,6 +284,25 @@ describe("Intrasite auth and multi-tenancy", () => {
       .send({ name: "Harbor Lab" });
     expect(harbor.status).toBe(201);
     expect(harbor.body.lab.administrator).toBe("Marcus Hale");
+
+    const assignedAdmin = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs/${north.body.lab.id}/administrator`)
+      .set(auth)
+      .send({ personId: "bc-park" });
+    expect(assignedAdmin.status).toBe(200);
+    expect(assignedAdmin.body.lab.administrator).toBe("Jonah Park");
+
+    const unknown = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs/${north.body.lab.id}/administrator`)
+      .set(auth)
+      .send({ personId: "bc-missing" });
+    expect(unknown.status).toBe(400);
+
+    const cleared = await request(app)
+      .delete(`/api/v1/intrasite/clients/${clientId}/labs/${north.body.lab.id}/administrator`)
+      .set(auth);
+    expect(cleared.status).toBe(200);
+    expect(cleared.body.lab.administrator).toBe("");
   });
 
   it("sets an httpOnly session cookie on login", async () => {

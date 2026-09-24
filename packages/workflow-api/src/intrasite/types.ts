@@ -188,6 +188,7 @@ export interface IntrasiteStore {
   ): Promise<Client | null>;
   listLabs(clientId: string): Promise<Lab[]>;
   createLab(clientId: string, input: CreateLabInput): Promise<Lab>;
+  setLabAdministrator(clientId: string, labId: string, personId: string | null): Promise<Lab>;
   getDossier(clientId: string): Promise<ClientDossier>;
   listModuleRequests(clientId: string, labId?: string): Promise<ModuleChangeRequest[]>;
   createModuleRequest(

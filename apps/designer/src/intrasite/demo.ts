@@ -308,6 +308,32 @@ export function demoCreateLab(
   return { lab };
 }
 
+export function demoSetLabAdministrator(
+  clientId: string,
+  labId: string,
+  personId: string | null
+): { lab: Lab } {
+  requireClient(clientId);
+  const lab = (labsByClient.get(clientId) ?? []).find((item) => item.id === labId);
+  if (!lab) {
+    const error = new Error("Lab not found") as Error & { status: number };
+    error.status = 404;
+    throw error;
+  }
+  if (!personId) {
+    lab.administrator = "";
+    return { lab };
+  }
+  const person = BUSINESS_CONTACTS.find((item) => item.id === personId);
+  if (!person) {
+    const error = new Error("Business contact not found") as Error & { status: number };
+    error.status = 400;
+    throw error;
+  }
+  lab.administrator = person.name;
+  return { lab };
+}
+
 export function demoQuery(
   clientId: string,
   sql: string,

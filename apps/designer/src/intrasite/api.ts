@@ -14,6 +14,7 @@ import {
   demoQuery,
   demoRemoveAccountPerson,
   demoRemoveLabModule,
+  demoSetLabAdministrator,
   isDemoCredentials,
 } from "./demo";
 
@@ -326,6 +327,17 @@ export async function createLab(
   return api<{ lab: Lab }>(`/clients/${clientId}/labs`, {
     method: "POST",
     body: JSON.stringify(input),
+  });
+}
+
+export async function setLabAdministrator(clientId: string, labId: string, personId: string | null) {
+  if (isDemoSession()) return demoSetLabAdministrator(clientId, labId, personId);
+  if (!personId) {
+    return api<{ lab: Lab }>(`/clients/${clientId}/labs/${labId}/administrator`, { method: "DELETE" });
+  }
+  return api<{ lab: Lab }>(`/clients/${clientId}/labs/${labId}/administrator`, {
+    method: "POST",
+    body: JSON.stringify({ personId }),
   });
 }
 

@@ -112,6 +112,15 @@ function parseModules(value: unknown): string[] {
   return [...DEFAULT_LAB_MODULES];
 }
 
+function administratorName(personId: string | null): string {
+  if (!personId) return "";
+  const person = accountPeopleCatalog("business_contact").find((item) => item.id === personId);
+  if (!person) {
+    throw Object.assign(new Error("Business contact not found"), { status: 400 });
+  }
+  return person.name;
+}
+
 export class PostgresIntrasiteStore implements IntrasiteStore {
   readonly kind = "postgres" as const;
   private control: Pool;
@@ -371,6 +380,22 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       throw error;
     }
     return lab;
+  }
+
+  async setLabAdministrator(clientId: string, labId: string, personId: string | null): Promise<Lab> {
+    const client = await this.requireClient(clientId);
+    const pool = await this.tenantPool(client.databaseName);
+    const existing = await pool.query("SELECT id FROM labs WHERE id = $1", [labId]);
+    if (existing.rowCount === 0) {
+      throw Object.assign(new Error("Lab not found"), { status: 404 });
+    }
+    const name = administratorName(personId);
+    await pool.query("UPDATE labs SET administrator = $1 WHERE id = $2", [name, labId]);
+    const result = await pool.query(
+      `SELECT id, client_id, name, slug, site_code, status, modules, administrator, created_at FROM labs WHERE id = $1`,
+      [labId]
+    );
+    return this.mapLab(result.rows[0]);
   }
 
   async close(): Promise<void> {
