@@ -14,6 +14,10 @@ export function LimsEnvironmentPage() {
     clientName: string;
     labName: string;
     envLabel: string;
+    connectionSpeed: string;
+    databaseName: string;
+    errorLog: string;
+    lastBackup: string;
   } | null>(null);
   const [missing, setMissing] = useState(false);
 
@@ -33,6 +37,10 @@ export function LimsEnvironmentPage() {
             clientName: detail.client.name,
             labName: lab.name,
             envLabel: env.label,
+            connectionSpeed: connectionSpeedFor(env.id),
+            databaseName: env.databaseName,
+            errorLog: env.id === "qa" ? "1 warning · driver retry" : "Clear",
+            lastBackup: lastBackupFor(env.id),
           });
         }
       } catch {
@@ -57,6 +65,10 @@ export function LimsEnvironmentPage() {
       clientName: context.clientName,
       labName: context.labName,
       envLabel: context.envLabel,
+      connectionSpeed: context.connectionSpeed,
+      databaseName: context.databaseName,
+      errorLog: context.errorLog,
+      lastBackup: context.lastBackup,
     });
     navigate("/app");
   }
@@ -107,6 +119,18 @@ export function LimsEnvironmentPage() {
       </div>
     </div>
   );
+}
+
+function connectionSpeedFor(envId: string): string {
+  if (envId === "dev2") return "27 ms";
+  if (envId === "qa") return "22 ms";
+  return "18 ms";
+}
+
+function lastBackupFor(envId: string): string {
+  if (envId === "dev2") return "2026-09-23T03:40:00.000Z";
+  if (envId === "qa") return "2026-09-23T01:05:00.000Z";
+  return "2026-09-23T02:15:00.000Z";
 }
 
 async function loadClient(clientId: string): Promise<{

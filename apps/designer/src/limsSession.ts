@@ -8,6 +8,10 @@ export type LimsSession = {
   clientName: string;
   labName: string;
   envLabel: string;
+  connectionSpeed: string;
+  databaseName: string;
+  errorLog: string;
+  lastBackup: string;
 };
 
 export function readLimsSession(): LimsSession | null {

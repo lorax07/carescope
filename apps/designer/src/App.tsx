@@ -22,6 +22,7 @@ export function AppShell() {
     () => searchParams.get("signup") === "1"
   );
   const lims = readLimsSession();
+  const [infraOpen, setInfraOpen] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -61,9 +62,59 @@ export function AppShell() {
           </span>
         </NavLink>
 
-        <div className="lims-site">
-          <span className="lims-site-dot" />
-          {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
+        <div className="lims-site-block">
+          <div className="lims-site">
+            <span className="lims-site-dot" />
+            <span className="lims-site-name">
+              {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
+            </span>
+            {lims ? (
+              <button
+                type="button"
+                className="lims-site-expand"
+                aria-expanded={infraOpen}
+                aria-label="Backend infrastructure"
+                onClick={() => setInfraOpen((open) => !open)}
+              >
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                  <path
+                    d={infraOpen ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+          {lims && infraOpen ? (
+            <dl className="lims-infra">
+              <div>
+                <dt>Connection speed</dt>
+                <dd>{lims.connectionSpeed || "18 ms"}</dd>
+              </div>
+              <div>
+                <dt>Database</dt>
+                <dd>
+                  <code>{lims.databaseName || "cs_apex_diagnostics_dev1"}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>Error log</dt>
+                <dd>{lims.errorLog || "Clear"}</dd>
+              </div>
+              <div>
+                <dt>Last backup</dt>
+                <dd>
+                  {lims.lastBackup
+                    ? new Date(lims.lastBackup).toLocaleString()
+                    : new Date("2026-09-23T02:15:00.000Z").toLocaleString()}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
