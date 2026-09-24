@@ -1461,40 +1461,15 @@
 }
 
 .lp-cta-band {
-  padding: 1.25rem;
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 1.25rem 1rem;
 }
 
-.lp-cta-band-inner {
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  border-radius: 24px;
-  padding: 3rem 2rem;
-  background:
-    radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.18), transparent 40%),
-    linear-gradient(135deg, #1559d6, #1b6ef3 55%, #3b82f6);
-  color: #fff;
-  text-align: center;
-}
-
-.lp-cta-band-inner .lp-h2 {
-  color: #fff;
-}
-
-.lp-cta-band-inner p {
-  margin: 0.85rem auto 1.5rem;
-  max-width: 34rem;
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 1.05rem;
-  line-height: 1.5;
-}
-
-.lp-cta-band-inner .lp-btn-primary {
-  background: #fff;
-  color: var(--lp-blue-deep);
-}
-
-.lp-cta-band-inner .lp-btn-primary:hover {
-  background: #eef4ff;
+.lp-brand-logo {
+  display: block;
+  width: min(520px, 88%);
+  height: auto;
 }
 
 .lp-footer {
