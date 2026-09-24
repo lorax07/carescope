@@ -291,7 +291,7 @@ function PlatformBand() {
           run a more efficient laboratory.
         </p>
         </div>
-        <ul className="lp-cols">
+        <ul className="lp-cols lp-cols-5">
           {PLATFORM_PILLARS.map((pillar) => (
             <li key={pillar.title}>
               <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
@@ -377,8 +377,8 @@ function ComplianceSection() {
 
 const PLATFORM_PILLARS = [
   {
-    title: "LIMS",
-    detail: "Manage samples, tests and results",
+    title: "Lab Operations",
+    detail: "The core LIMS",
     tone: "blue",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
@@ -395,43 +395,32 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Workflow",
-    detail: "Configure and adapt as your needs change",
+    title: "Instrument Integration",
+    detail: "Connect your instruments to Sequence",
     tone: "green",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <rect x="6" y="8" width="14" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M10 13h6M10 17h6M20 12h6M20 16h6M20 20h4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Connectivity",
+    detail: "Connect Sequence to the outside world",
+    tone: "violet",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
         <circle cx="8" cy="16" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="24" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <circle cx="24" cy="24" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M11 16h6a4 4 0 0 0 4-4V11M17 16a4 4 0 0 1 4 4v1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
+        <path d="M11 16h6a4 4 0 0 0 4-4V11M17 16a4 4 0 0 1 4 4v1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    title: "Integrations",
-    detail: "Connect the systems you already use",
-    tone: "violet",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <path
-          d="M10 20.5A6.5 6.5 0 0 1 16.2 12h.3A5.5 5.5 0 1 1 22 22.5H11.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Quality",
-    detail: "Maintain compliance and confidence",
+    title: "Quality & Compliance",
+    detail: "Keep the laboratory controlled and traceable",
     tone: "blue",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
@@ -442,48 +431,17 @@ const PLATFORM_PILLARS = [
           strokeWidth="1.8"
           strokeLinejoin="round"
         />
-        <path
-          d="m12.2 16.2 2.6 2.6 5-5.2"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <path d="m12.2 16.2 2.6 2.6 5-5.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
   {
-    title: "Analytics",
-    detail: "Turn data into better decisions",
+    title: "Insights",
+    detail: "Turn laboratory data into operational intelligence",
     tone: "cyan",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
-        <path
-          d="M7 24V14M13 24V8M19 24v-6M25 24V11"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    title: "Client Services",
-    detail: "Deliver a better client experience",
-    tone: "violet",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="21" cy="13" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M6.5 23.5c.8-3.2 2.8-4.8 5.5-4.8s4.7 1.6 5.5 4.8M18.2 23.5c.4-1.8 1.5-3.1 3.2-3.5 1.8.3 3 1.6 3.4 3.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
+        <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
