@@ -74,12 +74,10 @@ export function LandingPage() {
               </a>
             </div>
           </div>
-
-          <div className="lp-hero-visual" aria-hidden="true">
-            <IntegrationsComparisonVisual />
-          </div>
         </section>
       </div>
+
+      <PlatformBand />
 
       <section className="lp-section" id="capabilities">
         <div className="lp-section-inner lp-section-wide">
@@ -293,171 +291,149 @@ function usePageSize() {
   return size;
 }
 
-const FRAGMENTED_PAINS = [
-  "Each vendor is a paid integration project",
-  "Interfaces rebuilt and revalidated",
-  "Contracts and cutovers on the critical path",
-  "Cost sits in dependencies, not the LIMS license",
-] as const;
-
-const ONELAB_BENEFITS = [
-  "No middleware",
-  "No glue code",
-  "No stitching",
-] as const;
-
-const LIMS_DEPENDENCIES = [
-  { id: "emr", label: "Hospital EMR", cost: "Re-interface", x: 190, y: 36 },
-  { id: "billing", label: "Billing", cost: "Remap claims", x: 322, y: 96 },
-  { id: "portal", label: "Client portal", cost: "Re-validate", x: 314, y: 196 },
-  { id: "analyzers", label: "Analyzers", cost: "OEM drivers", x: 190, y: 254 },
-  { id: "qc", label: "QC / QMS", cost: "New contract", x: 66, y: 196 },
-  { id: "legacy", label: "Legacy LIS", cost: "Cutover", x: 58, y: 96 },
-] as const;
-
-const LIMS_CENTER = { x: 190, y: 146 };
-
-function TypicalLabStackVisual() {
+function PlatformBand() {
   return (
-    <div
-      className="lp-stack-board"
-      role="img"
-      aria-label="Board diagram of a typical LIMS replacement: changing the core LIMS reopens six surrounding vendor systems. Each connection is a paid integration project, for eight vendors, eleven interfaces, and a 14 to 18 month critical path."
-    >
-      <svg className="lp-stack-board-svg" viewBox="0 0 380 292" aria-hidden="true">
-        {LIMS_DEPENDENCIES.map((node) => {
-          const midX = (LIMS_CENTER.x + node.x) / 2;
-          const midY = (LIMS_CENTER.y + node.y) / 2;
-          return (
-            <g key={`${node.id}-edge`}>
-              <line
-                className="lp-stack-board-edge"
-                x1={LIMS_CENTER.x}
-                y1={LIMS_CENTER.y}
-                x2={node.x}
-                y2={node.y}
-              />
-              <circle className="lp-stack-board-joint" cx={midX} cy={midY} r="3.2" />
-            </g>
-          );
-        })}
-        {LIMS_DEPENDENCIES.map((node) => (
-          <g key={node.id} className="lp-stack-board-node" transform={`translate(${node.x} ${node.y})`}>
-            <rect x="-54" y="-22" width="108" height="44" rx="8" />
-            <text className="lp-stack-board-name" y="-2">
-              {node.label}
-            </text>
-            <text className="lp-stack-board-cost" y="13">
-              {node.cost}
-            </text>
-          </g>
-        ))}
-        <g className="lp-stack-board-core" transform={`translate(${LIMS_CENTER.x} ${LIMS_CENTER.y})`}>
-          <rect x="-66" y="-30" width="132" height="60" rx="10" />
-          <text className="lp-stack-board-core-kicker" y="-8">
-            Change this
-          </text>
-          <text className="lp-stack-board-core-name" y="12">
-            Core LIMS
-          </text>
-        </g>
+    <section className="lp-platform" aria-labelledby="platform-heading">
+      <div className="lp-platform-inner">
+        <h2 id="platform-heading">
+          The laboratory platform
+          <br />
+          that keeps you moving.
+        </h2>
+        <p>
+          CareScope Sequence brings your lab’s workflows, data and systems
+          together — so you can make changes faster, reduce integrations, and
+          run a more efficient laboratory.
+        </p>
+        <ul>
+          {PLATFORM_PILLARS.map((pillar) => (
+            <li key={pillar.title}>
+              <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
+                {pillar.icon}
+              </span>
+              <strong>{pillar.title}</strong>
+              <span>{pillar.detail}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const PLATFORM_PILLARS = [
+  {
+    title: "LIMS",
+    detail: "Manage samples, tests and results",
+    tone: "blue",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <path
+          d="M12 5h8M13.5 5v8.2L8.2 24.2A4.2 4.2 0 0 0 12 30h8a4.2 4.2 0 0 0 3.8-5.8L18.5 13.2V5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path d="M11 21h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
-      <p className="lp-stack-board-legend">Each line is a paid integration project</p>
-      <ul className="lp-stack-board-kpis">
-        <li>
-          <strong>8</strong>
-          <span>vendor contracts</span>
-        </li>
-        <li>
-          <strong>11</strong>
-          <span>interfaces to rebuild</span>
-        </li>
-        <li>
-          <strong>14–18</strong>
-          <span>month critical path</span>
-        </li>
-      </ul>
-    </div>
-  );
-}
-
-function IntegrationsComparisonVisual() {
-  return (
-    <div className="lp-compare">
-      <div className="lp-compare-panel lp-compare-before">
-        <div className="lp-compare-head">
-          <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
-          <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            A LIMS change is a multi-vendor program
-          </strong>
-          <ul className="lp-compare-pains">
-            {FRAGMENTED_PAINS.map((pain) => (
-              <li key={pain}>{pain}</li>
-            ))}
-          </ul>
-        </div>
-        <TypicalLabStackVisual />
-      </div>
-
-      <div className="lp-compare-divider" aria-hidden="true">
-        <span>vs</span>
-      </div>
-
-      <div className="lp-compare-panel lp-compare-after">
-        <div className="lp-compare-head">
-          <span className="lp-compare-brand-onelab">OneLab</span>
-          <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
-            One Native Integration
-          </strong>
-          <ul className="lp-compare-benefits">
-            {ONELAB_BENEFITS.map((benefit) => (
-              <li key={benefit}>{benefit}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="lp-compare-one">
-          <div className="lp-compare-one-glow" />
-          <OneLabUnifiedVisual />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const ONELAB_KEY_MODULES = [
-  "Sample Lifecycle",
-  "Data & Analytics",
-  "Lab Quality Management System",
-  "Billing",
-  "Customer Portal",
-  "20+ Modules",
+    ),
+  },
+  {
+    title: "Workflow",
+    detail: "Configure and adapt as your needs change",
+    tone: "green",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <circle cx="8" cy="16" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="24" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="24" cy="24" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M11 16h6a4 4 0 0 0 4-4V11M17 16a4 4 0 0 1 4 4v1"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Integrations",
+    detail: "Connect the systems you already use",
+    tone: "violet",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <path
+          d="M10 20.5A6.5 6.5 0 0 1 16.2 12h.3A5.5 5.5 0 1 1 22 22.5H11.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Quality",
+    detail: "Maintain compliance and confidence",
+    tone: "blue",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <path
+          d="M16 5.5 7.5 9v6.2c0 5.2 3.4 8.8 8.5 10.8 5.1-2 8.5-5.6 8.5-10.8V9L16 5.5Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path
+          d="m12.2 16.2 2.6 2.6 5-5.2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Analytics",
+    detail: "Turn data into better decisions",
+    tone: "cyan",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <path
+          d="M7 24V14M13 24V8M19 24v-6M25 24V11"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    title: "Client Services",
+    detail: "Deliver a better client experience",
+    tone: "violet",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="21" cy="13" r="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M6.5 23.5c.8-3.2 2.8-4.8 5.5-4.8s4.7 1.6 5.5 4.8M18.2 23.5c.4-1.8 1.5-3.1 3.2-3.5 1.8.3 3 1.6 3.4 3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
 ] as const;
-
-function OneLabUnifiedVisual() {
-  return (
-    <div
-      className="lp-compare-one-system"
-      aria-hidden="true"
-      role="img"
-      aria-label="OneLab ships key lab capabilities as one native integration"
-    >
-      <div className="lp-onelab-poster">
-        <div className="lp-onelab-included">
-          <p className="lp-onelab-included-label">
-            Everything ships inside <span className="lp-onelab-name">OneLab</span>
-          </p>
-          <ul>
-            {ONELAB_KEY_MODULES.map((item, i) => (
-              <li key={item} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function WorkflowMiniCanvas() {
   return (
