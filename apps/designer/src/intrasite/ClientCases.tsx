@@ -433,10 +433,12 @@ export function ClientCases({
             onClick={() => setOpen((current) => (current === item.id ? null : item.id))}
             aria-expanded={open === item.id}
           >
-            <span className="is-icon-mark">
-              <CaseIcon id={item.id} />
-            </span>
-            <strong>{item.label}</strong>
+            <strong>
+              <span className="is-icon-mark">
+                <CaseIcon id={item.id} />
+              </span>
+              {item.label}
+            </strong>
             <span>{item.blurb}</span>
           </button>
         ))}

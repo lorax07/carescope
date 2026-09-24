@@ -200,9 +200,28 @@
   padding: 1rem 1.1rem 1.15rem;
 }
 
-.is-panel h2 {
-  margin: 0 0 0.85rem;
-  font-size: 0.95rem;
+.is-panel > h2,
+.is-panel-head h2,
+.is-icon-tile strong {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 0.95rem;
+  padding: 0.42rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #c5d0de;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f6fb 58%, #e6edf5 100%);
+  color: #1e293b;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.28),
+    0 3px 0 #c5d0de,
+    0 7px 14px rgba(15, 23, 42, 0.1);
 }
 
 .is-panel-head {
@@ -213,7 +232,7 @@
 }
 
 .is-panel-head h2 {
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.7rem;
 }
 
 .is-panel-head .is-muted {
@@ -335,29 +354,50 @@
 .is-icon-tile {
   display: grid;
   justify-items: start;
-  gap: 0.4rem;
+  gap: 0.55rem;
   text-align: left;
-  background: #fff;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 0.95rem 1rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0.15rem 0.15rem 0.35rem;
   cursor: pointer;
   color: inherit;
 }
 
-.is-icon-tile:hover,
-.is-icon-tile.active {
-  border-color: #1b6ef3;
-  box-shadow: 0 0 0 3px rgba(27, 110, 243, 0.12);
+.is-icon-tile strong {
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.5rem 0.85rem 0.5rem 0.45rem;
+}
+
+.is-icon-tile:hover strong {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.28),
+    0 4px 0 #c5d0de,
+    0 10px 16px rgba(15, 23, 42, 0.12);
+}
+
+.is-icon-tile.active strong {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: linear-gradient(180deg, #ffffff 0%, #eaf2ff 100%);
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 1px 0 #bfdbfe,
+    0 3px 8px rgba(27, 110, 243, 0.18);
 }
 
 .is-icon-mark {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #eef4ff;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #e8f0ff;
+  flex: none;
 }
 
 .is-icon-tile strong {
