@@ -1760,16 +1760,6 @@ body:has(.lp) {
   margin: 2.5rem 0 0;
 }
 
-.lp-demo figcaption {
-  margin: 0 0 0.65rem;
-  text-align: center;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #615d59;
-}
-
 .lp-demo-frame {
   height: 640px;
   overflow: hidden;
@@ -1786,17 +1776,6 @@ body:has(.lp) {
   background: #fff;
 }
 
-.lp-demo p {
-  margin: 0.75rem 0 0;
-  text-align: center;
-}
-
-.lp-demo a {
-  color: #191918;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 
 .lp-solve-chart,
 .lp-solve-sequence {
