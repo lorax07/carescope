@@ -238,16 +238,6 @@ function RangeBar({
   );
 }
 
-function LimsDemo() {
-  return (
-    <figure className="lp-demo">
-      <div className="lp-demo-frame">
-        <iframe title="CareScope Sequence LIMS demo" src="/app" />
-      </div>
-    </figure>
-  );
-}
-
 function PlatformBand() {
   return (
     <section className="lp-section lp-platform" aria-labelledby="platform-heading">
@@ -264,7 +254,6 @@ function PlatformBand() {
           run a more efficient laboratory.
         </p>
         </div>
-        <LimsDemo />
         <ul className="lp-cols lp-cols-5">
           {PLATFORM_PILLARS.map((pillar) => (
             <li key={pillar.title}>
