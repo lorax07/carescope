@@ -6,6 +6,7 @@ export function LandingPage() {
     <div className="lp-page">
         <header className="lp-nav">
           <div className="lp-nav-bar">
+          <div className="lp-nav-start">
           <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
             <img
               className="lp-header-logo"
@@ -21,8 +22,12 @@ export function LandingPage() {
             <a href="#workflows">Resources</a>
             <a href="#compliance">About</a>
           </nav>
+          </div>
 
           <div className="lp-nav-actions">
+            <Link to="/intrasite" className="lp-nav-text">
+              Sign in
+            </Link>
             <Link to="/app?signup=1" className="lp-btn lp-btn-demo">
               Request a Demo
             </Link>
