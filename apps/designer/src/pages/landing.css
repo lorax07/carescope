@@ -85,17 +85,11 @@
   z-index: 1;
 }
 
-.lp-logo-mark {
-  display: grid;
-  place-items: center;
-}
-
-.lp-logo-word {
-  font-family: var(--lp-display);
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: -0.03em;
-  color: #243056;
+.lp-header-logo,
+.lp-footer-logo {
+  display: block;
+  height: 6.5rem;
+  width: auto;
 }
 
 .lp-logo-rule {
@@ -1519,12 +1513,6 @@
   font-size: 0.9rem;
   border-top: 1px solid var(--lp-line);
   padding-top: 1.5rem;
-}
-
-.lp-footer-logo {
-  display: block;
-  height: 6.5rem;
-  width: auto;
 }
 
 .lp-footer .lp-logo-word {
