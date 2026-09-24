@@ -1460,16 +1460,13 @@
   background: var(--lp-blue);
 }
 
-.lp-cta-band {
-  display: flex;
-  justify-content: center;
-  padding: 2.5rem 1.25rem 1rem;
-}
-
-.lp-brand-logo {
-  display: block;
-  width: min(520px, 88%);
-  height: auto;
+.lp-copyright {
+  margin: 0;
+  padding: 2.25rem 1.25rem 0.5rem;
+  text-align: center;
+  color: var(--lp-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .lp-footer {

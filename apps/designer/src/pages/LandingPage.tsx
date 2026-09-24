@@ -73,13 +73,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="lp-cta-band" aria-label="CareScope">
-        <img
-          className="lp-brand-logo"
-          src="/carescope-parent-logo.png"
-          alt="CareScope. Building Better Healthcare for Everyone."
-        />
-      </section>
+      <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
 
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
