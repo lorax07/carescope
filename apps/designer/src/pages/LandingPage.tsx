@@ -73,17 +73,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="lp-cta-band">
-        <div className="lp-cta-band-inner lp-section-wide">
-          <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
-          <p>
-            Configure CareScope around your methods, sites, and quality system —
-            then automate the rest through the workflow engine.
-          </p>
-          <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try OneLab
-          </Link>
-        </div>
+      <section className="lp-cta-band" aria-label="CareScope">
+        <img
+          className="lp-brand-logo"
+          src="/carescope-parent-logo.png"
+          alt="CareScope. Building Better Healthcare for Everyone."
+        />
       </section>
 
       <footer className="lp-footer">
