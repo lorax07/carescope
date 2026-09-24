@@ -26,7 +26,6 @@ export function LandingPage() {
               Request a Demo
             </Link>
           </div>
-          <span className="lp-nav-wave" aria-hidden="true" />
         </header>
 
         <PlatformBand />
