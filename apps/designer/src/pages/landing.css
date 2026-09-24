@@ -14,10 +14,7 @@
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
   --lp-display: "Sora", "Source Sans 3", sans-serif;
   min-height: 100%;
-  background:
-    radial-gradient(ellipse 70% 45% at 80% -10%, rgba(27, 110, 243, 0.14), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 0% 20%, rgba(27, 110, 243, 0.07), transparent 50%),
-    linear-gradient(180deg, #eef2f7 0%, var(--lp-bg) 28%, #eef1f6 100%);
+  background: #fff;
   color: var(--lp-ink);
   font-family: var(--lp-font);
   -webkit-font-smoothing: antialiased;
@@ -278,23 +275,28 @@
   margin-top: 1.6rem;
 }
 
-.lp-platform {
+.lp-section {
   box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  overflow: hidden;
+  padding: 4.25rem 1.75rem;
   background: #fff;
-  padding: 3rem 1.75rem 2.75rem;
+  border-top: 1px solid #e6ebf2;
 }
 
-.lp-platform-inner {
-  width: 100%;
-  max-width: 100%;
+.lp-section-inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.lp-section-head {
+  max-width: 42rem;
   margin: 0 auto;
   text-align: center;
 }
 
-.lp-platform h2 {
+.lp-section-head h2,
+.lp-platform h2,
+.lp-h2 {
   margin: 0;
   font-family: var(--lp-display);
   font-size: clamp(2rem, 4vw, 2.75rem);
@@ -304,7 +306,8 @@
   color: #1e3a5f;
 }
 
-.lp-platform-inner > p {
+.lp-section-head p,
+.lp-section-lede {
   max-width: 40rem;
   margin: 1.15rem auto 0;
   color: #64748b;
@@ -312,7 +315,7 @@
   line-height: 1.6;
 }
 
-.lp-platform ul {
+.lp-cols {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -320,18 +323,49 @@
   padding: 0;
 }
 
-.lp-platform li {
+.lp-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.lp-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lp-cols li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
   min-width: 0;
-  padding: 0 0.55rem;
+  padding: 0 0.85rem;
+  text-align: center;
   border-left: 1px solid #e6ebf2;
 }
 
-.lp-platform li:first-child {
+.lp-cols li:first-child {
   border-left: 0;
+}
+
+.lp-cols li strong {
+  font-size: 0.98rem;
+  color: #1e3a5f;
+}
+
+.lp-cols li span {
+  color: #64748b;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.lp-section-action {
+  display: flex;
+  justify-content: center;
+  margin: 2.25rem 0 0;
+}
+
+.lp-platform {
+  border-top: 0;
+  padding-top: 4.5rem;
 }
 
 .lp-platform-icon {
@@ -363,18 +397,6 @@
   color: #1493b8;
 }
 
-.lp-platform li strong {
-  font-size: 0.98rem;
-  color: #1e3a5f;
-}
-
-.lp-platform li span:last-child {
-  color: #64748b;
-  font-size: 0.86rem;
-  line-height: 1.4;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
 
 .lp-compare {
   display: grid;
@@ -880,21 +902,7 @@
   line-height: 1.25;
 }
 
-/* Sections */
-.lp-section {
-  padding: 4.5rem 1.25rem;
-}
-
-.lp-section-tint {
-  background:
-    linear-gradient(180deg, rgba(27, 110, 243, 0.04), transparent),
-    #eef3f9;
-}
-
-.lp-section-inner {
-  width: min(1120px, 100%);
-  margin: 0 auto;
-}
+/* Sections share the platform rhythm above. */
 
 .lp-section-wide {
   width: min(1440px, 100%);
@@ -938,9 +946,9 @@
 .lp-solve-sequence {
   margin: 0;
   background: #fff;
-  border: 1px solid var(--lp-line);
-  border-radius: 16px;
-  padding: 1.1rem 1.15rem 1rem;
+  border: 1px solid #e6ebf2;
+  border-radius: 0;
+  padding: 1.25rem 1.15rem 1rem;
 }
 
 .lp-solve-chart figcaption {
@@ -1337,22 +1345,6 @@
   color: var(--lp-blue);
 }
 
-.lp-h2 {
-  margin: 0;
-  font-family: var(--lp-display);
-  font-size: clamp(1.7rem, 3vw, 2.3rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-
-.lp-section-lede {
-  margin: 0.85rem 0 0;
-  max-width: 40rem;
-  color: var(--lp-muted);
-  font-size: 1.05rem;
-  line-height: 1.55;
-}
 
 .lp-split {
   display: grid;
@@ -1484,7 +1476,7 @@
 }
 
 .lp-footer-inner {
-  width: min(1440px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -1523,12 +1515,14 @@
 }
 
 @media (max-width: 1100px) {
-  .lp-platform ul {
+  .lp-cols,
+  .lp-cols-5,
+  .lp-cols-4 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     row-gap: 1.75rem;
   }
 
-  .lp-platform li:nth-child(4) {
+  .lp-cols li:nth-child(3n + 1) {
     border-left: 0;
   }
 
@@ -1606,13 +1600,15 @@
 }
 
 @media (max-width: 560px) {
-  .lp-platform ul {
+  .lp-cols,
+  .lp-cols-5,
+  .lp-cols-4 {
     grid-template-columns: 1fr 1fr;
   }
 
-  .lp-platform li,
-  .lp-platform li:nth-child(4) {
+  .lp-cols li {
     border-left: 0;
+    padding-top: 0.35rem;
   }
 
   .lp-frame {
