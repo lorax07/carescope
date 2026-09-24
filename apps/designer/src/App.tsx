@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import { readLimsSession } from "./limsSession";
 
 const NAV = [
   { to: "/app", label: "Dashboard", end: true },
@@ -20,6 +21,7 @@ export function AppShell() {
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
+  const lims = readLimsSession();
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -61,7 +63,7 @@ export function AppShell() {
 
         <div className="lims-site">
           <span className="lims-site-dot" />
-          North Lab · Production
+          {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
@@ -81,10 +83,10 @@ export function AppShell() {
 
         <div className="lims-sidebar-foot">
           <div className="lims-user">
-            <span className="lims-avatar">MC</span>
+            <span className="lims-avatar">{lims ? "AD" : "MC"}</span>
             <div>
-              <b>M. Chen</b>
-              <small>Lab Analyst</small>
+              <b>{lims ? lims.username : "M. Chen"}</b>
+              <small>{lims ? `${lims.clientName} LIMS` : "Lab Analyst"}</small>
             </div>
           </div>
         </div>

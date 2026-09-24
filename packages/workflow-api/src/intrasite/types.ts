@@ -71,6 +71,14 @@ export type BusinessContact = {
   phone: string;
 };
 
+export type TicketMessage = {
+  id: string;
+  at: string;
+  author: string;
+  side: "client" | "internal";
+  body: string;
+};
+
 export type SupportTicket = {
   id: string;
   title: string;
@@ -80,6 +88,7 @@ export type SupportTicket = {
   openedAt: string;
   status: "open" | "resolved";
   summary: string;
+  messages: TicketMessage[];
 };
 
 export type InstallationNode = {

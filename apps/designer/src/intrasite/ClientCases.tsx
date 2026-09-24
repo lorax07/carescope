@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useState } from "react";
 import {
   queryClientDatabase,
   type Client,
@@ -7,6 +7,7 @@ import {
   type Lab,
   type QueryEnvironment,
   type QueryResult,
+  type SupportTicket,
 } from "./api";
 
 export type ClientCaseId =
@@ -253,6 +254,7 @@ export function AccountHistoryPanel({
 }) {
   const [labId, setLabId] = useState(lockedLabId ?? "all");
   const [staff, setStaff] = useState("all");
+  const [selected, setSelected] = useState<SupportTicket | null>(null);
   const staffNames = useMemo(
     () => [...new Set(dossier.support.map((ticket) => ticket.staff))],
     [dossier.support]
@@ -311,8 +313,16 @@ export function AccountHistoryPanel({
             {tickets.map((ticket) => (
               <tr key={ticket.id}>
                 <td>
-                  <strong>{ticket.title}</strong>
+                  <button type="button" className="is-people-link" onClick={() => setSelected(ticket)}>
+                    {ticket.title}
+                  </button>
                   <div className="is-muted">{ticket.summary}</div>
+                  {ticket.messages?.length ? (
+                    <div className="is-ticket-preview">
+                      {ticket.messages[ticket.messages.length - 1]?.author}:{" "}
+                      {ticket.messages[ticket.messages.length - 1]?.body}
+                    </div>
+                  ) : null}
                 </td>
                 <td>{ticket.labName ?? "Account"}</td>
                 <td>{ticket.staff}</td>
@@ -327,6 +337,55 @@ export function AccountHistoryPanel({
           </tbody>
         </table>
       )}
+      {selected ? <TicketDialog ticket={selected} onClose={() => setSelected(null)} /> : null}
+    </div>
+  );
+}
+
+function TicketDialog({ ticket, onClose }: { ticket: SupportTicket; onClose: () => void }) {
+  const titleId = useId();
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="is-case-overlay" role="presentation" onClick={onClose}>
+      <div
+        className="is-form-dialog is-people-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <header className="is-case-head">
+          <div>
+            <p className="is-eyebrow">Account history</p>
+            <h2 id={titleId}>{ticket.title}</h2>
+            <p>
+              {ticket.labName ?? "Account"} · {ticket.staff} · {ticket.status}
+            </p>
+          </div>
+          <button type="button" className="btn" onClick={onClose}>
+            Close
+          </button>
+        </header>
+        <ol className="is-thread">
+          {(ticket.messages ?? []).map((message) => (
+            <li key={message.id} className={`is-thread-item ${message.side}`}>
+              <div>
+                <strong>{message.author}</strong>
+                <small>{message.side === "client" ? "Client" : "Internal resource"}</small>
+              </div>
+              <p>{message.body}</p>
+              <time dateTime={message.at}>{new Date(message.at).toLocaleString()}</time>
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 }

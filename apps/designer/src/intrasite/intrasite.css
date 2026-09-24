@@ -580,6 +580,62 @@
   box-shadow: var(--shadow);
 }
 
+.is-env-launch {
+  display: block;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.is-env-launch:hover {
+  border-color: #1b6ef3;
+}
+
+.is-ticket-preview {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.is-thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.is-thread-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+}
+
+.is-thread-item.client {
+  background: #f8fafc;
+}
+
+.is-thread-item.internal {
+  background: #eff6ff;
+}
+
+.is-thread-item strong,
+.is-thread-item small {
+  display: block;
+}
+
+.is-thread-item small,
+.is-thread-item time {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.is-thread-item p {
+  margin: 0.4rem 0;
+}
+
 .is-people-link {
   border: 0;
   background: none;

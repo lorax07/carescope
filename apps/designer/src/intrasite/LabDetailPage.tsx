@@ -17,6 +17,7 @@ export function IntrasiteLabDetailPage() {
   const { id = "", labId = "" } = useParams();
   const [client, setClient] = useState<Client | null>(null);
   const [lab, setLab] = useState<Lab | null>(null);
+  const [labs, setLabs] = useState<Lab[]>([]);
   const [dossier, setDossier] = useState<ClientDossier | null>(null);
   const [requests, setRequests] = useState<ModuleChangeRequest[]>([]);
   const [catalog, setCatalog] = useState<ModuleCatalogItem[]>(LAB_MODULE_CATALOG);
@@ -28,6 +29,7 @@ export function IntrasiteLabDetailPage() {
     const found = result.labs.find((item) => item.id === labId) ?? null;
     setClient(result.client);
     setLab(found);
+    setLabs(result.labs);
     setDossier(result.dossier);
     setRequests(result.requests);
     if (result.moduleCatalog?.length) setCatalog(result.moduleCatalog);
@@ -107,14 +109,22 @@ export function IntrasiteLabDetailPage() {
             <p className="is-muted">This lab instance is mapped onto Dev1, Dev2, and QA.</p>
             <div className="is-contact-grid">
               {(dossier?.infrastructure.environments ?? []).map((env) => (
-                <article key={env.id} className="is-contact-card">
+                <button
+                  key={env.id}
+                  type="button"
+                  className="is-contact-card is-env-launch"
+                  onClick={() => {
+                    const url = `/lims/${id}/${lab.id}/${env.id}`;
+                    window.open(url, `lims-${lab.id}-${env.id}`, "width=1280,height=840");
+                  }}
+                >
                   <span>{env.label}</span>
                   <strong>
                     {lab.name} · {env.label}
                   </strong>
                   <small>{env.purpose}</small>
                   <code>{env.host}</code>
-                </article>
+                </button>
               ))}
             </div>
           </section>
@@ -122,7 +132,7 @@ export function IntrasiteLabDetailPage() {
           {dossier ? (
             <section className="is-panel">
               <h2>Account History</h2>
-              <AccountHistoryPanel dossier={dossier} labs={[lab]} lockedLabId={lab.id} />
+              <AccountHistoryPanel dossier={dossier} labs={labs} />
             </section>
           ) : null}
         </>
