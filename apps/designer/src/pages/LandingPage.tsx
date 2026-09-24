@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./landing.css";
 
@@ -35,16 +36,7 @@ export function LandingPage() {
 
         <div className="lp">
         <PlatformBand />
-      <figure className="lp-lims-film">
-        <video
-          src="/lims-in-action.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-label="Sequence LIMS: workflow design, instrument integration, and an Insights metrics question, each opened from the left menu"
-        />
-      </figure>
+      <LimsFilm />
       <WhatWeSolve />
       <WorkflowSection />
       <ComplianceSection />
@@ -161,6 +153,40 @@ function WhatWeSolve() {
         </footer>
       </div>
     </section>
+  );
+}
+
+function LimsFilm() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = 0.85;
+    video.muted = false;
+    video.play().catch(() => {
+      video.muted = true;
+      void video.play();
+      const unmute = () => {
+        video.muted = false;
+        void video.play();
+      };
+      video.addEventListener("pointerdown", unmute, { once: true });
+    });
+  }, []);
+
+  return (
+    <figure className="lp-lims-film">
+      <video
+        ref={videoRef}
+        src="/lims-in-action.mp4"
+        autoPlay
+        loop
+        playsInline
+        controls
+        aria-label="Sequence LIMS: workflow design, instrument integration, and an Insights metrics question, each opened from the left menu"
+      />
+    </figure>
   );
 }
 
