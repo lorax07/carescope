@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import { readLimsSession } from "./limsSession";
 
 const NAV = [
   { to: "/app", label: "Dashboard", end: true },
@@ -14,12 +15,35 @@ const NAV = [
   { to: "/app/catalog", label: "Catalog" },
 ] as const;
 
+function useLocalClock(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now;
+}
+
+function utcOffsetLabel(date: Date): string {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "+" : "−";
+  const abs = Math.abs(offsetMinutes);
+  const hours = Math.floor(abs / 60);
+  const minutes = abs % 60;
+  if (minutes === 0) return `UTC${sign}${hours}`;
+  return `UTC${sign}${hours}:${String(minutes).padStart(2, "0")}`;
+}
+
 /** LIMS application shell */
 export function AppShell() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
+  const lims = readLimsSession();
+  const [infraOpen, setInfraOpen] = useState(false);
+  const now = useLocalClock();
+  const signedInName = lims?.username ?? "M. Chen";
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -59,9 +83,59 @@ export function AppShell() {
           </span>
         </NavLink>
 
-        <div className="lims-site">
-          <span className="lims-site-dot" />
-          North Lab · Production
+        <div className="lims-site-block">
+          <div className="lims-site">
+            <span className="lims-site-dot" />
+            <span className="lims-site-name">
+              {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
+            </span>
+            {lims ? (
+              <button
+                type="button"
+                className="lims-site-expand"
+                aria-expanded={infraOpen}
+                aria-label="Backend infrastructure"
+                onClick={() => setInfraOpen((open) => !open)}
+              >
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                  <path
+                    d={infraOpen ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+          {lims && infraOpen ? (
+            <dl className="lims-infra">
+              <div>
+                <dt>Connection speed</dt>
+                <dd>{lims.connectionSpeed || "18 ms"}</dd>
+              </div>
+              <div>
+                <dt>Database</dt>
+                <dd>
+                  <code>{lims.databaseName || "cs_apex_diagnostics_dev1"}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>Error log</dt>
+                <dd>{lims.errorLog || "Clear"}</dd>
+              </div>
+              <div>
+                <dt>Last backup</dt>
+                <dd>
+                  {lims.lastBackup
+                    ? new Date(lims.lastBackup).toLocaleString()
+                    : new Date("2026-09-23T02:15:00.000Z").toLocaleString()}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
@@ -81,10 +155,10 @@ export function AppShell() {
 
         <div className="lims-sidebar-foot">
           <div className="lims-user">
-            <span className="lims-avatar">MC</span>
+            <span className="lims-avatar">{lims ? "AD" : "MC"}</span>
             <div>
-              <b>M. Chen</b>
-              <small>Lab Analyst</small>
+              <b>{lims ? lims.username : "M. Chen"}</b>
+              <small>{lims ? `${lims.clientName} LIMS` : "Lab Analyst"}</small>
             </div>
           </div>
         </div>
@@ -100,9 +174,10 @@ export function AppShell() {
             />
           </div>
           <div className="lims-topbar-meta">
-            <span className="lims-chip warn">3 STAT</span>
-            <span className="lims-chip">Shift B</span>
-            <span className="lims-chip muted">UTC−5</span>
+            <time className="lims-chip" dateTime={now.toISOString()}>
+              {signedInName} · {now.toLocaleString()}
+            </time>
+            <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
         <div className="lims-content">

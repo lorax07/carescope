@@ -1,8 +1,16 @@
 import { Pool } from "pg";
 import { hashPassword } from "./auth.js";
-import { DEFAULT_LAB_MODULES, LAB_MODULE_CATALOG, buildDossier, moduleLabel } from "./catalog.js";
+import {
+  DEFAULT_LAB_MODULES,
+  LAB_MODULE_CATALOG,
+  accountPeopleCatalog,
+  buildDossier,
+  moduleLabel,
+  resolveAccountPeople,
+} from "./catalog.js";
 import type {
   AccountCloseRequest,
+  AccountPersonKind,
   Client,
   ClientDossier,
   CreateClientInput,
@@ -13,6 +21,7 @@ import type {
   ModuleChangeRequest,
 } from "./types.js";
 import {
+  administratorForLab,
   assertSlug,
   databaseNameForSlug,
   newId,
@@ -37,8 +46,12 @@ CREATE TABLE IF NOT EXISTS clients (
   slug TEXT NOT NULL UNIQUE,
   status TEXT NOT NULL,
   database_name TEXT NOT NULL UNIQUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  internal_resource_ids TEXT NOT NULL DEFAULT '[]',
+  business_contact_ids TEXT NOT NULL DEFAULT '[]'
 );
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS internal_resource_ids TEXT NOT NULL DEFAULT '[]';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS business_contact_ids TEXT NOT NULL DEFAULT '[]';
 `;
 
 const TENANT_SCHEMA = `
@@ -50,9 +63,11 @@ CREATE TABLE IF NOT EXISTS labs (
   site_code TEXT NOT NULL,
   status TEXT NOT NULL,
   modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]',
+  administrator TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]';
+ALTER TABLE labs ADD COLUMN IF NOT EXISTS administrator TEXT NOT NULL DEFAULT '';
 `;
 
 function adminUrl(databaseUrl: string): string {
@@ -65,6 +80,21 @@ function tenantUrl(databaseUrl: string, databaseName: string): string {
   const url = new URL(databaseUrl);
   url.pathname = `/${databaseName}`;
   return url.toString();
+}
+
+function parseIdList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item): item is string => typeof item === "string");
+      }
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 function parseModules(value: unknown): string[] {
@@ -113,11 +143,13 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           name: "North Lab",
           slug: "north-lab",
           siteCode: "NL-01",
+          administrator: "Marcus Hale",
         });
         const harborLab = await this.createLab(apex.id, {
           name: "Harbor Lab",
           slug: "harbor-lab",
           siteCode: "HL-02",
+          administrator: "Priya Shah",
         });
         await this.writeModules(apex.id, north.id, [
           "sample_lifecycle",
@@ -135,12 +167,21 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           name: "Main Campus",
           slug: "main-campus",
           siteCode: "MC-01",
+          administrator: "Elena Voss",
         });
         await this.writeModules(harbor.id, main.id, [
           "sample_lifecycle",
           "billing",
           "customer_portal",
         ]);
+        await this.assignAccountPerson(apex.id, "internal_resource", "ir-ruiz");
+        await this.assignAccountPerson(apex.id, "internal_resource", "ir-chen");
+        await this.assignAccountPerson(apex.id, "business_contact", "bc-shah");
+        await this.assignAccountPerson(apex.id, "business_contact", "bc-hale");
+        await this.assignAccountPerson(harbor.id, "internal_resource", "ir-patel");
+        await this.assignAccountPerson(harbor.id, "internal_resource", "ir-okonkwo");
+        await this.assignAccountPerson(harbor.id, "business_contact", "bc-voss");
+        await this.assignAccountPerson(harbor.id, "business_contact", "bc-park");
       }
     }
   }
@@ -163,7 +204,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
 
   async listClients(): Promise<Client[]> {
     const result = await this.control.query(
-      `SELECT id, name, slug, status, database_name, created_at FROM clients ORDER BY name`
+      `SELECT id, name, slug, status, database_name, created_at, internal_resource_ids, business_contact_ids FROM clients ORDER BY name`
     );
     const clients = [];
     for (const row of result.rows) {
@@ -174,7 +215,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
 
   async getClient(id: string): Promise<Client | null> {
     const result = await this.control.query(
-      `SELECT id, name, slug, status, database_name, created_at FROM clients WHERE id = $1`,
+      `SELECT id, name, slug, status, database_name, created_at, internal_resource_ids, business_contact_ids FROM clients WHERE id = $1`,
       [id]
     );
     return result.rows[0] ? this.mapClient(result.rows[0]) : null;
@@ -207,6 +248,53 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     return (await this.getClient(id))!;
   }
 
+  async assignAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = await this.getClient(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    if (!accountPeopleCatalog(kind).some((person) => person.id === personId)) {
+      throw Object.assign(new Error("Unknown person"), { status: 400 });
+    }
+    const current = kind === "internal_resource" ? existing.internalResources : existing.businessContacts;
+    if (current.some((person) => person.id === personId)) {
+      throw Object.assign(new Error("That person is already assigned"), { status: 409 });
+    }
+    const column = kind === "internal_resource" ? "internal_resource_ids" : "business_contact_ids";
+    const ids = [...current.map((person) => person.id), personId];
+    await this.control.query(`UPDATE clients SET ${column} = $2 WHERE id = $1`, [
+      clientId,
+      JSON.stringify(ids),
+    ]);
+    return (await this.getClient(clientId))!;
+  }
+
+  async removeAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client> {
+    const existing = await this.getClient(clientId);
+    if (!existing) {
+      throw Object.assign(new Error("Client not found"), { status: 404 });
+    }
+    const current = kind === "internal_resource" ? existing.internalResources : existing.businessContacts;
+    if (!current.some((person) => person.id === personId)) {
+      throw Object.assign(new Error("That person is not assigned"), { status: 404 });
+    }
+    const column = kind === "internal_resource" ? "internal_resource_ids" : "business_contact_ids";
+    const ids = current.map((person) => person.id).filter((id) => id !== personId);
+    await this.control.query(`UPDATE clients SET ${column} = $2 WHERE id = $1`, [
+      clientId,
+      JSON.stringify(ids),
+    ]);
+    return (await this.getClient(clientId))!;
+  }
+
   async updateClient(
     id: string,
     patch: Partial<Pick<Client, "name" | "status">>
@@ -225,7 +313,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     const client = await this.requireClient(clientId);
     const pool = await this.tenantPool(client.databaseName);
     const result = await pool.query(
-      `SELECT id, client_id, name, slug, site_code, status, modules, created_at FROM labs ORDER BY name`
+      `SELECT id, client_id, name, slug, site_code, status, modules, administrator, created_at FROM labs ORDER BY name`
     );
     return result.rows.map((row) => this.mapLab(row));
   }
@@ -241,6 +329,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     const id = newId();
     const slug = slugify(input.slug ?? name, `lab-${id.slice(0, 8)}`);
     assertSlug(slug);
+    const existing = await pool.query("SELECT administrator FROM labs");
     const lab: Lab = {
       id,
       clientId,
@@ -249,12 +338,17 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       siteCode: input.siteCode?.trim() || siteCodeForName(name, Number(count.rows[0]?.n ?? 0)),
       status: "active",
       modules: [...DEFAULT_LAB_MODULES],
+      administrator: administratorForLab(
+        input.administrator,
+        client.businessContacts,
+        existing.rows.map((row) => ({ administrator: String(row["administrator"] ?? "") }))
+      ),
       createdAt: nowIso(),
     };
     try {
       await pool.query(
-        `INSERT INTO labs (id, client_id, name, slug, site_code, status, modules, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        `INSERT INTO labs (id, client_id, name, slug, site_code, status, modules, administrator, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           lab.id,
           lab.clientId,
@@ -263,6 +357,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           lab.siteCode,
           lab.status,
           JSON.stringify(lab.modules),
+          lab.administrator,
           lab.createdAt,
         ]
       );
@@ -348,6 +443,14 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       databaseName,
       isolation: "dedicated_database",
       labCount,
+      internalResources: resolveAccountPeople(
+        parseIdList(row["internal_resource_ids"]),
+        "internal_resource"
+      ),
+      businessContacts: resolveAccountPeople(
+        parseIdList(row["business_contact_ids"]),
+        "business_contact"
+      ),
       createdAt: new Date(String(row["created_at"])).toISOString(),
     };
   }
@@ -361,6 +464,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       siteCode: String(row["site_code"]),
       status: row["status"] as Lab["status"],
       modules: parseModules(row["modules"]),
+      administrator: String(row["administrator"] ?? ""),
       createdAt: new Date(String(row["created_at"])).toISOString(),
     };
   }

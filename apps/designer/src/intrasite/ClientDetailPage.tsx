@@ -137,6 +137,7 @@ export function IntrasiteClientDetailPage() {
               <tr>
                 <th>Lab</th>
                 <th>Site</th>
+                <th>Lab Administrator</th>
                 <th>Status</th>
                 <th>Modules</th>
                 <th></th>
@@ -156,6 +157,7 @@ export function IntrasiteClientDetailPage() {
                   <td>
                     <code>{lab.siteCode}</code>
                   </td>
+                  <td>{lab.administrator}</td>
                   <td>
                     <span className={`is-pill ${lab.status}`}>{lab.status}</span>
                   </td>

@@ -2,14 +2,17 @@ import {
   DEMO_TOKEN,
   demoApproveCloseRequest,
   demoApproveModuleRequest,
+  demoAssignAccountPerson,
   demoCreateClient,
   demoCreateCloseRequest,
   demoCreateLab,
   demoCreateModuleRequest,
   demoGetClient,
+  demoListAccountPeople,
   demoListClients,
   demoLogin,
   demoQuery,
+  demoRemoveAccountPerson,
   demoRemoveLabModule,
   isDemoCredentials,
 } from "./demo";
@@ -23,6 +26,14 @@ export type IntrasiteUser = {
   role: IntrasiteRole;
 };
 
+export type AccountPerson = {
+  id: string;
+  name: string;
+  roles: string[];
+};
+
+export type AccountPersonKind = "internal_resource" | "business_contact";
+
 export type Client = {
   id: string;
   name: string;
@@ -31,6 +42,8 @@ export type Client = {
   databaseName: string;
   isolation: "dedicated_database";
   labCount: number;
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
   createdAt: string;
 };
 
@@ -42,6 +55,7 @@ export type Lab = {
   siteCode: string;
   status: "active" | "suspended";
   modules: string[];
+  administrator: string;
   createdAt: string;
 };
 
@@ -77,15 +91,25 @@ export type BusinessContact = {
   phone: string;
 };
 
+export type TicketMessage = {
+  id: string;
+  at: string;
+  author: string;
+  side: "client" | "internal";
+  body: string;
+};
+
 export type SupportTicket = {
   id: string;
   title: string;
   labId: string | null;
   labName: string | null;
+  requestor: string;
   staff: string;
   openedAt: string;
   status: "open" | "resolved";
   summary: string;
+  messages: TicketMessage[];
 };
 
 export type InstallationNode = {
@@ -245,6 +269,36 @@ export async function listClients() {
   return api<{ clients: Client[] }>("/clients");
 }
 
+export async function listAccountPeople() {
+  if (isDemoSession()) return demoListAccountPeople();
+  return api<{ internalResources: AccountPerson[]; businessContacts: AccountPerson[] }>(
+    "/account-people"
+  );
+}
+
+export async function assignAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+) {
+  if (isDemoSession()) return demoAssignAccountPerson(clientId, kind, personId);
+  return api<{ client: Client }>(`/clients/${clientId}/assignments`, {
+    method: "POST",
+    body: JSON.stringify({ kind, personId }),
+  });
+}
+
+export async function removeAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+) {
+  if (isDemoSession()) return demoRemoveAccountPerson(clientId, kind, personId);
+  return api<{ client: Client }>(`/clients/${clientId}/assignments/${kind}/${personId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function createClient(input: { name: string; slug?: string }) {
   if (isDemoSession()) return demoCreateClient(input);
   return api<{ client: Client; routing: ClientRouting }>("/clients", {
@@ -266,7 +320,7 @@ export async function getClient(id: string) {
 
 export async function createLab(
   clientId: string,
-  input: { name: string; slug?: string; siteCode?: string }
+  input: { name: string; slug?: string; siteCode?: string; administrator?: string }
 ) {
   if (isDemoSession()) return demoCreateLab(clientId, input);
   return api<{ lab: Lab }>(`/clients/${clientId}/labs`, {

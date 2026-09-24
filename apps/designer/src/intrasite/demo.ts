@@ -1,5 +1,7 @@
 import type {
   AccountCloseRequest,
+  AccountPerson,
+  AccountPersonKind,
   Client,
   ClientDetail,
   ClientRouting,
@@ -10,8 +12,11 @@ import type {
   QueryResult,
 } from "./api";
 import {
+  BUSINESS_CONTACTS,
   DEFAULT_LAB_MODULES,
+  INTERNAL_RESOURCES,
   LAB_MODULE_CATALOG,
+  accountPeopleCatalog,
   buildDossier,
   moduleLabel,
   runInfraQuery,
@@ -39,6 +44,8 @@ const clients: Client[] = [
     databaseName: "cs_apex_diagnostics",
     isolation: "dedicated_database",
     labCount: 2,
+    internalResources: peopleById(INTERNAL_RESOURCES, ["ir-ruiz", "ir-chen"]),
+    businessContacts: peopleById(BUSINESS_CONTACTS, ["bc-shah", "bc-hale"]),
     createdAt,
   },
   {
@@ -49,9 +56,18 @@ const clients: Client[] = [
     databaseName: "cs_harbor_clinical",
     isolation: "dedicated_database",
     labCount: 1,
+    internalResources: peopleById(INTERNAL_RESOURCES, ["ir-patel", "ir-okonkwo"]),
+    businessContacts: peopleById(BUSINESS_CONTACTS, ["bc-voss", "bc-park"]),
     createdAt,
   },
 ];
+
+function peopleById(catalog: AccountPerson[], ids: string[]): AccountPerson[] {
+  return ids.flatMap((id) => {
+    const person = catalog.find((item) => item.id === id);
+    return person ? [person] : [];
+  });
+}
 
 const labsByClient = new Map<string, Lab[]>([
   [
@@ -65,6 +81,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "NL-01",
         status: "active",
         modules: ["sample_lifecycle", "instrument_integration", "results_entry", "coa_generation"],
+        administrator: "Marcus Hale",
         createdAt,
       },
       {
@@ -75,6 +92,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "HL-02",
         status: "active",
         modules: ["sample_lifecycle", "quality_events", "capa"],
+        administrator: "Priya Shah",
         createdAt,
       },
     ],
@@ -90,6 +108,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "MC-01",
         status: "active",
         modules: ["sample_lifecycle", "billing", "customer_portal"],
+        administrator: "Elena Voss",
         createdAt,
       },
     ],
@@ -158,6 +177,56 @@ export function demoListClients(): { clients: Client[] } {
   return { clients: [...clients].sort((a, b) => a.name.localeCompare(b.name)) };
 }
 
+export function demoListAccountPeople(): {
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
+} {
+  return { internalResources: INTERNAL_RESOURCES, businessContacts: BUSINESS_CONTACTS };
+}
+
+function assignedList(client: Client, kind: AccountPersonKind): AccountPerson[] {
+  return kind === "internal_resource" ? client.internalResources : client.businessContacts;
+}
+
+export function demoAssignAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+): { client: Client } {
+  const client = requireClient(clientId);
+  const person = accountPeopleCatalog(kind).find((item) => item.id === personId);
+  if (!person) {
+    const error = new Error("Unknown person") as Error & { status: number };
+    error.status = 400;
+    throw error;
+  }
+  const list = assignedList(client, kind);
+  if (list.some((item) => item.id === personId)) {
+    const error = new Error("That person is already assigned") as Error & { status: number };
+    error.status = 409;
+    throw error;
+  }
+  list.push(person);
+  return { client };
+}
+
+export function demoRemoveAccountPerson(
+  clientId: string,
+  kind: AccountPersonKind,
+  personId: string
+): { client: Client } {
+  const client = requireClient(clientId);
+  const list = assignedList(client, kind);
+  const index = list.findIndex((item) => item.id === personId);
+  if (index < 0) {
+    const error = new Error("That person is not assigned") as Error & { status: number };
+    error.status = 404;
+    throw error;
+  }
+  list.splice(index, 1);
+  return { client };
+}
+
 export function demoGetClient(id: string): ClientDetail {
   const client = requireClient(id);
   syncLabCount(client);
@@ -193,6 +262,8 @@ export function demoCreateClient(input: { name: string; slug?: string }): {
     databaseName: `cs_${slug.replace(/-/g, "_")}`.slice(0, 63),
     isolation: "dedicated_database",
     labCount: 0,
+    internalResources: [],
+    businessContacts: [],
     createdAt: new Date().toISOString(),
   };
   clients.push(client);
@@ -200,9 +271,21 @@ export function demoCreateClient(input: { name: string; slug?: string }): {
   return { client, routing: routingFor(client) };
 }
 
+function administratorForNewLab(
+  requested: string | undefined,
+  contacts: Array<{ name: string }>,
+  existing: Lab[]
+): string {
+  const explicit = requested?.trim();
+  if (explicit) return explicit;
+  const used = new Set(existing.map((lab) => lab.administrator));
+  const next = contacts.find((person) => !used.has(person.name));
+  return next?.name ?? contacts[0]?.name ?? "Unassigned";
+}
+
 export function demoCreateLab(
   clientId: string,
-  input: { name: string; slug?: string; siteCode?: string }
+  input: { name: string; slug?: string; siteCode?: string; administrator?: string }
 ): { lab: Lab } {
   const client = requireClient(clientId);
   const id = crypto.randomUUID();
@@ -216,6 +299,7 @@ export function demoCreateLab(
     siteCode: input.siteCode?.trim() || `LB-${String(existing.length + 1).padStart(2, "0")}`,
     status: "active",
     modules: [...DEFAULT_LAB_MODULES],
+    administrator: administratorForNewLab(input.administrator, client.businessContacts, existing),
     createdAt: new Date().toISOString(),
   };
   existing.push(lab);

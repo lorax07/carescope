@@ -580,6 +580,130 @@
   box-shadow: var(--shadow);
 }
 
+.is-env-launch {
+  display: block;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.is-env-launch:hover {
+  border-color: #1b6ef3;
+}
+
+.is-ticket-preview {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.is-thread {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.is-thread-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+}
+
+.is-thread-item.client {
+  background: #f8fafc;
+}
+
+.is-thread-item.internal {
+  background: #eff6ff;
+}
+
+.is-thread-item strong,
+.is-thread-item small {
+  display: block;
+}
+
+.is-thread-item small,
+.is-thread-item time {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.is-thread-item p {
+  margin: 0.4rem 0;
+}
+
+.is-people-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent, #1b6ef3);
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.is-people-dialog {
+  width: min(560px, 100%);
+}
+
+.is-people-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.is-people-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+}
+
+.is-people-list strong,
+.is-people-list small {
+  display: block;
+}
+
+.is-people-list small {
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.is-people-assign {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem;
+  align-items: end;
+}
+
+.is-people-assign label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.is-people-assign select {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  background: #fff;
+  font-size: 0.95rem;
+}
+
 .is-form-dialog-actions {
   display: flex;
   justify-content: flex-end;
@@ -673,6 +797,7 @@
   }
 
   .is-inline-form,
+  .is-people-assign,
   .is-panel-head,
   .is-icon-grid,
   .is-infra-meta,

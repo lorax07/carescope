@@ -16,6 +16,14 @@ export type IntrasiteUserRecord = IntrasiteUser & {
   passwordHash: string;
 };
 
+export type AccountPerson = {
+  id: string;
+  name: string;
+  roles: string[];
+};
+
+export type AccountPersonKind = "internal_resource" | "business_contact";
+
 export type Client = {
   id: string;
   name: string;
@@ -24,6 +32,8 @@ export type Client = {
   databaseName: string;
   isolation: "dedicated_database";
   labCount: number;
+  internalResources: AccountPerson[];
+  businessContacts: AccountPerson[];
   createdAt: string;
 };
 
@@ -35,6 +45,7 @@ export type Lab = {
   siteCode: string;
   status: LabStatus;
   modules: string[];
+  administrator: string;
   createdAt: string;
 };
 
@@ -61,15 +72,25 @@ export type BusinessContact = {
   phone: string;
 };
 
+export type TicketMessage = {
+  id: string;
+  at: string;
+  author: string;
+  side: "client" | "internal";
+  body: string;
+};
+
 export type SupportTicket = {
   id: string;
   title: string;
   labId: string | null;
   labName: string | null;
+  requestor: string;
   staff: string;
   openedAt: string;
   status: "open" | "resolved";
   summary: string;
+  messages: TicketMessage[];
 };
 
 export type InstallationNode = {
@@ -133,6 +154,7 @@ export type CreateLabInput = {
   name: string;
   slug?: string;
   siteCode?: string;
+  administrator?: string;
 };
 
 export type IntrasiteMeta = {
@@ -150,6 +172,16 @@ export interface IntrasiteStore {
   listClients(): Promise<Client[]>;
   getClient(id: string): Promise<Client | null>;
   createClient(input: CreateClientInput): Promise<Client>;
+  assignAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client>;
+  removeAccountPerson(
+    clientId: string,
+    kind: AccountPersonKind,
+    personId: string
+  ): Promise<Client>;
   updateClient(
     id: string,
     patch: Partial<Pick<Client, "name" | "status">>

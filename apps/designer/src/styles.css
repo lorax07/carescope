@@ -104,17 +104,74 @@ a {
   text-transform: uppercase;
 }
 
+.lims-site-block {
+  margin: 0 0.45rem 1rem;
+}
+
 .lims-site {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  margin: 0 0.45rem 1rem;
   padding: 0.55rem 0.65rem;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   color: #b7c6da;
   font-size: 0.78rem;
   font-weight: 600;
+}
+
+.lims-site-name {
+  min-width: 0;
+}
+
+.lims-site-expand {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #dbe7f5;
+  cursor: pointer;
+}
+
+.lims-site-expand:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.lims-infra {
+  margin: 0.4rem 0 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 0.45rem;
+}
+
+.lims-infra div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.lims-infra dt {
+  color: #8fa3bf;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lims-infra dd {
+  margin: 0;
+  color: #e8eef6;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.lims-infra code {
+  font-size: 0.75rem;
 }
 
 .lims-site-dot {

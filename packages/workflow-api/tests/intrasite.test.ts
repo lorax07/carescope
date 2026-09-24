@@ -82,6 +82,7 @@ describe("Intrasite auth and multi-tenancy", () => {
     expect(apexLabs.body.labs).toHaveLength(1);
     expect(apexLabs.body.labs[0].name).toBe("North Lab");
     expect(apexLabs.body.labs[0].modules).toEqual(["sample_lifecycle"]);
+    expect(apexLabs.body.labs[0].administrator).toBe("Unassigned");
     expect(harborLabs.body.labs).toHaveLength(0);
   });
 
@@ -214,6 +215,75 @@ describe("Intrasite auth and multi-tenancy", () => {
       "dev2",
       "qa",
     ]);
+  });
+
+  it("assigns and removes internal resources and business contacts", async () => {
+    const app = createApp();
+    const login = await request(app).post("/api/v1/intrasite/auth/login").send(admin);
+    const auth = { Authorization: `Bearer ${login.body.token as string}` };
+
+    const created = await request(app)
+      .post("/api/v1/intrasite/clients")
+      .set(auth)
+      .send({ name: "Northwind Labs" });
+    expect(created.status).toBe(201);
+    expect(created.body.client.internalResources).toEqual([]);
+    expect(created.body.client.businessContacts).toEqual([]);
+
+    const directory = await request(app).get("/api/v1/intrasite/account-people").set(auth);
+    expect(directory.status).toBe(200);
+    expect(directory.body.internalResources.map((person: { name: string }) => person.name)).toContain(
+      "A. Ruiz"
+    );
+
+    const clientId = created.body.client.id as string;
+    const assigned = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "internal_resource", personId: "ir-ruiz" });
+    expect(assigned.status).toBe(201);
+    expect(assigned.body.client.internalResources).toEqual([
+      { id: "ir-ruiz", name: "A. Ruiz", roles: ["Customer success", "Implementation"] },
+    ]);
+
+    const duplicate = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "internal_resource", personId: "ir-ruiz" });
+    expect(duplicate.status).toBe(409);
+
+    const contact = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "business_contact", personId: "bc-shah" });
+    expect(contact.status).toBe(201);
+    expect(contact.body.client.businessContacts[0].name).toBe("Priya Shah");
+    expect(contact.body.client.businessContacts[0].roles).toEqual(["Executive sponsor"]);
+
+    const removed = await request(app)
+      .delete(`/api/v1/intrasite/clients/${clientId}/assignments/internal_resource/ir-ruiz`)
+      .set(auth);
+    expect(removed.status).toBe(200);
+    expect(removed.body.client.internalResources).toEqual([]);
+    expect(removed.body.client.businessContacts).toHaveLength(1);
+
+    const north = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs`)
+      .set(auth)
+      .send({ name: "North Lab" });
+    expect(north.status).toBe(201);
+    expect(north.body.lab.administrator).toBe("Priya Shah");
+
+    await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "business_contact", personId: "bc-hale" });
+    const harbor = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs`)
+      .set(auth)
+      .send({ name: "Harbor Lab" });
+    expect(harbor.status).toBe(201);
+    expect(harbor.body.lab.administrator).toBe("Marcus Hale");
   });
 
   it("sets an httpOnly session cookie on login", async () => {
