@@ -45,6 +45,7 @@ export type Lab = {
   siteCode: string;
   status: LabStatus;
   modules: string[];
+  administrator: string;
   createdAt: string;
 };
 
@@ -153,6 +154,7 @@ export type CreateLabInput = {
   name: string;
   slug?: string;
   siteCode?: string;
+  administrator?: string;
 };
 
 export type IntrasiteMeta = {

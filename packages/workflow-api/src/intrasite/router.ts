@@ -278,6 +278,7 @@ export function createIntrasiteRouter(): Router {
           name: String(req.body?.name ?? ""),
           slug: req.body?.slug ? String(req.body.slug) : undefined,
           siteCode: req.body?.siteCode ? String(req.body.siteCode) : undefined,
+          administrator: req.body?.administrator ? String(req.body.administrator) : undefined,
         });
         res.status(201).json({ lab });
       } catch (error) {

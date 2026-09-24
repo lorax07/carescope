@@ -82,6 +82,7 @@ describe("Intrasite auth and multi-tenancy", () => {
     expect(apexLabs.body.labs).toHaveLength(1);
     expect(apexLabs.body.labs[0].name).toBe("North Lab");
     expect(apexLabs.body.labs[0].modules).toEqual(["sample_lifecycle"]);
+    expect(apexLabs.body.labs[0].administrator).toBe("Unassigned");
     expect(harborLabs.body.labs).toHaveLength(0);
   });
 
@@ -265,6 +266,24 @@ describe("Intrasite auth and multi-tenancy", () => {
     expect(removed.status).toBe(200);
     expect(removed.body.client.internalResources).toEqual([]);
     expect(removed.body.client.businessContacts).toHaveLength(1);
+
+    const north = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs`)
+      .set(auth)
+      .send({ name: "North Lab" });
+    expect(north.status).toBe(201);
+    expect(north.body.lab.administrator).toBe("Priya Shah");
+
+    await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/assignments`)
+      .set(auth)
+      .send({ kind: "business_contact", personId: "bc-hale" });
+    const harbor = await request(app)
+      .post(`/api/v1/intrasite/clients/${clientId}/labs`)
+      .set(auth)
+      .send({ name: "Harbor Lab" });
+    expect(harbor.status).toBe(201);
+    expect(harbor.body.lab.administrator).toBe("Marcus Hale");
   });
 
   it("sets an httpOnly session cookie on login", async () => {

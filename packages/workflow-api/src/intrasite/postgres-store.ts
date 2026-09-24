@@ -21,6 +21,7 @@ import type {
   ModuleChangeRequest,
 } from "./types.js";
 import {
+  administratorForLab,
   assertSlug,
   databaseNameForSlug,
   newId,
@@ -62,9 +63,11 @@ CREATE TABLE IF NOT EXISTS labs (
   site_code TEXT NOT NULL,
   status TEXT NOT NULL,
   modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]',
+  administrator TEXT NOT NULL DEFAULT '',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["sample_lifecycle"]';
+ALTER TABLE labs ADD COLUMN IF NOT EXISTS administrator TEXT NOT NULL DEFAULT '';
 `;
 
 function adminUrl(databaseUrl: string): string {
@@ -140,11 +143,13 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           name: "North Lab",
           slug: "north-lab",
           siteCode: "NL-01",
+          administrator: "Marcus Hale",
         });
         const harborLab = await this.createLab(apex.id, {
           name: "Harbor Lab",
           slug: "harbor-lab",
           siteCode: "HL-02",
+          administrator: "Priya Shah",
         });
         await this.writeModules(apex.id, north.id, [
           "sample_lifecycle",
@@ -162,6 +167,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           name: "Main Campus",
           slug: "main-campus",
           siteCode: "MC-01",
+          administrator: "Elena Voss",
         });
         await this.writeModules(harbor.id, main.id, [
           "sample_lifecycle",
@@ -307,7 +313,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     const client = await this.requireClient(clientId);
     const pool = await this.tenantPool(client.databaseName);
     const result = await pool.query(
-      `SELECT id, client_id, name, slug, site_code, status, modules, created_at FROM labs ORDER BY name`
+      `SELECT id, client_id, name, slug, site_code, status, modules, administrator, created_at FROM labs ORDER BY name`
     );
     return result.rows.map((row) => this.mapLab(row));
   }
@@ -323,6 +329,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
     const id = newId();
     const slug = slugify(input.slug ?? name, `lab-${id.slice(0, 8)}`);
     assertSlug(slug);
+    const existing = await pool.query("SELECT administrator FROM labs");
     const lab: Lab = {
       id,
       clientId,
@@ -331,12 +338,17 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       siteCode: input.siteCode?.trim() || siteCodeForName(name, Number(count.rows[0]?.n ?? 0)),
       status: "active",
       modules: [...DEFAULT_LAB_MODULES],
+      administrator: administratorForLab(
+        input.administrator,
+        client.businessContacts,
+        existing.rows.map((row) => ({ administrator: String(row["administrator"] ?? "") }))
+      ),
       createdAt: nowIso(),
     };
     try {
       await pool.query(
-        `INSERT INTO labs (id, client_id, name, slug, site_code, status, modules, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        `INSERT INTO labs (id, client_id, name, slug, site_code, status, modules, administrator, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           lab.id,
           lab.clientId,
@@ -345,6 +357,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
           lab.siteCode,
           lab.status,
           JSON.stringify(lab.modules),
+          lab.administrator,
           lab.createdAt,
         ]
       );
@@ -451,6 +464,7 @@ export class PostgresIntrasiteStore implements IntrasiteStore {
       siteCode: String(row["site_code"]),
       status: row["status"] as Lab["status"],
       modules: parseModules(row["modules"]),
+      administrator: String(row["administrator"] ?? ""),
       createdAt: new Date(String(row["created_at"])).toISOString(),
     };
   }

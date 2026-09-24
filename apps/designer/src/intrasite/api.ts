@@ -55,6 +55,7 @@ export type Lab = {
   siteCode: string;
   status: "active" | "suspended";
   modules: string[];
+  administrator: string;
   createdAt: string;
 };
 
@@ -319,7 +320,7 @@ export async function getClient(id: string) {
 
 export async function createLab(
   clientId: string,
-  input: { name: string; slug?: string; siteCode?: string }
+  input: { name: string; slug?: string; siteCode?: string; administrator?: string }
 ) {
   if (isDemoSession()) return demoCreateLab(clientId, input);
   return api<{ lab: Lab }>(`/clients/${clientId}/labs`, {

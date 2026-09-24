@@ -81,6 +81,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "NL-01",
         status: "active",
         modules: ["sample_lifecycle", "instrument_integration", "results_entry", "coa_generation"],
+        administrator: "Marcus Hale",
         createdAt,
       },
       {
@@ -91,6 +92,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "HL-02",
         status: "active",
         modules: ["sample_lifecycle", "quality_events", "capa"],
+        administrator: "Priya Shah",
         createdAt,
       },
     ],
@@ -106,6 +108,7 @@ const labsByClient = new Map<string, Lab[]>([
         siteCode: "MC-01",
         status: "active",
         modules: ["sample_lifecycle", "billing", "customer_portal"],
+        administrator: "Elena Voss",
         createdAt,
       },
     ],
@@ -268,9 +271,21 @@ export function demoCreateClient(input: { name: string; slug?: string }): {
   return { client, routing: routingFor(client) };
 }
 
+function administratorForNewLab(
+  requested: string | undefined,
+  contacts: Array<{ name: string }>,
+  existing: Lab[]
+): string {
+  const explicit = requested?.trim();
+  if (explicit) return explicit;
+  const used = new Set(existing.map((lab) => lab.administrator));
+  const next = contacts.find((person) => !used.has(person.name));
+  return next?.name ?? contacts[0]?.name ?? "Unassigned";
+}
+
 export function demoCreateLab(
   clientId: string,
-  input: { name: string; slug?: string; siteCode?: string }
+  input: { name: string; slug?: string; siteCode?: string; administrator?: string }
 ): { lab: Lab } {
   const client = requireClient(clientId);
   const id = crypto.randomUUID();
@@ -284,6 +299,7 @@ export function demoCreateLab(
     siteCode: input.siteCode?.trim() || `LB-${String(existing.length + 1).padStart(2, "0")}`,
     status: "active",
     modules: [...DEFAULT_LAB_MODULES],
+    administrator: administratorForNewLab(input.administrator, client.businessContacts, existing),
     createdAt: new Date().toISOString(),
   };
   existing.push(lab);

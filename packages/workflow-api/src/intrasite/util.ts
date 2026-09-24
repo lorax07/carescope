@@ -34,6 +34,18 @@ export function databaseNameForSlug(slug: string): string {
   return `cs_${slug.replace(/-/g, "_")}`.slice(0, 63);
 }
 
+export function administratorForLab(
+  requested: string | undefined,
+  contacts: Array<{ name: string }>,
+  existing: Array<{ administrator: string }>
+): string {
+  const explicit = requested?.trim();
+  if (explicit) return explicit;
+  const used = new Set(existing.map((lab) => lab.administrator));
+  const next = contacts.find((person) => !used.has(person.name));
+  return next?.name ?? contacts[0]?.name ?? "Unassigned";
+}
+
 export function siteCodeForName(name: string, index: number): string {
   const letters = name
     .replace(/[^A-Za-z]/g, "")

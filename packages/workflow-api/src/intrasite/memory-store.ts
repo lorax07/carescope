@@ -25,6 +25,7 @@ import {
   newId,
   normalizeEmail,
   nowIso,
+  administratorForLab,
   siteCodeForName,
   slugify,
 } from "./util.js";
@@ -62,11 +63,17 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
 
   private async seedDemo(): Promise<void> {
     const apex = await this.createClient({ name: "Apex Diagnostics", slug: "apex-diagnostics" });
-    const north = await this.createLab(apex.id, { name: "North Lab", slug: "north-lab", siteCode: "NL-01" });
+    const north = await this.createLab(apex.id, {
+      name: "North Lab",
+      slug: "north-lab",
+      siteCode: "NL-01",
+      administrator: "Marcus Hale",
+    });
     const harborLab = await this.createLab(apex.id, {
       name: "Harbor Lab",
       slug: "harbor-lab",
       siteCode: "HL-02",
+      administrator: "Priya Shah",
     });
     this.patchLab(apex.id, north.id, {
       modules: ["sample_lifecycle", "instrument_integration", "results_entry", "coa_generation"],
@@ -79,6 +86,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       name: "Main Campus",
       slug: "main-campus",
       siteCode: "MC-01",
+      administrator: "Elena Voss",
     });
     this.patchLab(harbor.id, main.id, {
       modules: ["sample_lifecycle", "billing", "customer_portal"],
@@ -215,6 +223,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
         status: 409,
       });
     }
+    const contacts = resolveAccountPeople(this.businessContactIds.get(clientId) ?? [], "business_contact");
     const lab: Lab = {
       id,
       clientId,
@@ -223,6 +232,7 @@ export class MemoryIntrasiteStore implements IntrasiteStore {
       siteCode: input.siteCode?.trim() || siteCodeForName(name, db.labs.size),
       status: "active",
       modules: [...DEFAULT_LAB_MODULES],
+      administrator: administratorForLab(input.administrator, contacts, [...db.labs.values()]),
       createdAt: nowIso(),
     };
     db.labs.set(id, lab);
