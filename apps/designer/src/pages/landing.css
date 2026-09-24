@@ -1677,9 +1677,29 @@ body:has(.lp) {
   color: #191918;
 }
 
-.lp-nav {
+.lp-page {
+  min-height: 100%;
   background: #f6f5f4;
-  border-bottom: 0;
+}
+
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  background: #f6f5f4;
+  border-bottom: 1px solid #e3e1de;
+  padding: 0;
+}
+
+.lp-nav-bar {
+  width: min(var(--lp-measure), 100%);
+  margin: 0 auto;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
   padding: 0.85rem var(--lp-gutter);
 }
 
