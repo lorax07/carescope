@@ -1238,6 +1238,12 @@
   padding-top: 1.5rem;
 }
 
+.lp-footer-logo {
+  display: block;
+  height: 6.5rem;
+  width: auto;
+}
+
 .lp-footer .lp-logo-word {
   color: inherit;
 }

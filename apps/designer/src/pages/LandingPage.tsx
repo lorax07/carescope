@@ -160,10 +160,11 @@ export function LandingPage() {
 
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
-          <span className="lp-logo-word">
-            <span className="lp-brand-care">CareScope</span>
-          </span>
-          <span>Laboratory information management</span>
+          <img
+            className="lp-footer-logo"
+            src="/carescope-parent-logo.png"
+            alt="CareScope. Building Better Healthcare for Everyone."
+          />
           <nav>
             <a href="/intrasite" className="lp-footer-intrasite">
               Intrasite
