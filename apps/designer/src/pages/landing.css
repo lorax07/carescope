@@ -1632,17 +1632,22 @@ body:has(.lp) {
 }
 
 .lp-btn-demo {
-  background: #111;
-  color: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+  color: #16325c;
+  border: 1px solid rgba(27, 110, 243, 0.45);
   border-radius: 999px;
   padding: 0.48rem 0.95rem;
   font-size: 0.92rem;
   font-weight: 600;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 0 rgba(27, 110, 243, 0.2),
+    0 6px 14px rgba(27, 110, 243, 0.16);
 }
 
 .lp-btn-demo:hover {
-  background: #000;
+  background: linear-gradient(180deg, #ffffff 0%, #e8f0ff 100%);
+  border-color: rgba(27, 110, 243, 0.7);
 }
 
 .lp-nav-wave {
@@ -1671,15 +1676,25 @@ body:has(.lp) {
 }
 
 .lp-btn-demo {
-  background: #111;
-  color: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f7ff 100%);
+  color: #16325c;
+  border: 1px solid rgba(27, 110, 243, 0.45);
   border-radius: 999px;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 1px 0 rgba(27, 110, 243, 0.2),
+    0 6px 14px rgba(27, 110, 243, 0.16);
   font-weight: 600;
 }
 
 .lp-btn-demo:hover {
-  background: #000;
+  background: linear-gradient(180deg, #ffffff 0%, #e8f0ff 100%);
+  border-color: rgba(27, 110, 243, 0.7);
+}
+
+.lp .lp-btn-demo,
+.lp-page .lp-btn-demo {
+  color: #16325c;
 }
 
 .lp-section {
