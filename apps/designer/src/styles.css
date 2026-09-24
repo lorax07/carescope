@@ -345,6 +345,63 @@ a {
   max-width: 40rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.insights-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 5rem);
+}
+
+.insights-thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.insights-msg {
+  margin: 0;
+  max-width: 36rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  line-height: 1.45;
+}
+
+.insights-msg.assistant {
+  background: #f4f7fb;
+  border: 1px solid var(--border-subtle);
+}
+
+.insights-msg.user {
+  align-self: flex-end;
+  background: #1b6ef3;
+  color: #fff;
+}
+
+.insights-ask {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.insights-ask input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
 .lims-page-actions {
   display: flex;
   gap: 0.5rem;
