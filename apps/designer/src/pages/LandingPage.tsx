@@ -16,7 +16,7 @@ export function LandingPage() {
           </Link>
 
           <nav className="lp-nav-links" aria-label="Primary">
-            <a href="#capabilities">Solutions</a>
+            <a href="#capabilities">What we solve</a>
             <a href="#workflows">Resources</a>
             <a href="#compliance">About</a>
           </nav>
