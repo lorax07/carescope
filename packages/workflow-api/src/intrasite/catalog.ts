@@ -173,18 +173,24 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
   ];
 
   const staff = ["A. Ruiz", "S. Patel", "M. Chen", "L. Okonkwo"];
-  const clientSpeaker = contacts[1]?.name ?? "Client contact";
+  const requestors = [
+    contacts[1]?.name ?? "Marcus Hale",
+    contacts[2]?.name ?? "Elena Voss",
+    contacts[0]?.name ?? "Priya Shah",
+    contacts[3]?.name ?? "Jonah Park",
+  ];
   const support: SupportTicket[] = [
     {
       id: `${client.id}-sup-1`,
       title: "STAT queue notification delay",
       labId: labs[0]?.id ?? null,
       labName: labs[0]?.name ?? null,
+      requestor: requestors[0],
       staff: staff[0],
       openedAt: "2026-08-12T14:20:00.000Z",
       status: "resolved",
       summary: "Webhook retry window increased for STAT accession events.",
-      messages: ticketThread(`${client.id}-sup-1`, staff[0], clientSpeaker, [
+      messages: ticketThread(`${client.id}-sup-1`, staff[0], requestors[0], [
         ["2026-08-12T14:22:00.000Z", "client", "STAT accessions are sitting in the queue for almost an hour before the lab sees them."],
         ["2026-08-12T15:05:00.000Z", "internal", "I can see the webhook retries dying after the first failure. I am widening the retry window."],
         ["2026-08-12T18:40:00.000Z", "internal", "Retry window is increased. New STAT events are posting within a minute."],
@@ -196,11 +202,12 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
       title: "Instrument driver update",
       labId: labs[1]?.id ?? labs[0]?.id ?? null,
       labName: labs[1]?.name ?? labs[0]?.name ?? null,
+      requestor: requestors[1],
       staff: staff[1],
       openedAt: "2026-08-28T09:05:00.000Z",
       status: "open",
       summary: "HPLC driver staged; waiting on change-control window.",
-      messages: ticketThread(`${client.id}-sup-2`, staff[1], clientSpeaker, [
+      messages: ticketThread(`${client.id}-sup-2`, staff[1], requestors[1], [
         ["2026-08-28T09:10:00.000Z", "client", "The HPLC driver on the harbor instrument is still on the previous build."],
         ["2026-08-28T11:30:00.000Z", "internal", "Driver is staged in Dev1. We need your change-control window before it can move to QA."],
         ["2026-08-29T08:15:00.000Z", "client", "Change control is Thursday 18:00. Please hold until then."],
@@ -211,11 +218,12 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
       title: "SSO group mapping",
       labId: null,
       labName: null,
+      requestor: requestors[2],
       staff: staff[3],
       openedAt: "2026-07-03T16:40:00.000Z",
       status: "resolved",
       summary: "Mapped QA reviewers to the client IdP quality group.",
-      messages: ticketThread(`${client.id}-sup-3`, staff[3], clientSpeaker, [
+      messages: ticketThread(`${client.id}-sup-3`, staff[3], requestors[2], [
         ["2026-07-03T16:45:00.000Z", "client", "QA reviewers are not landing in the quality group after SSO."],
         ["2026-07-03T17:20:00.000Z", "internal", "The IdP claim was mapped to the analyst group. I am pointing it at quality."],
         ["2026-07-06T10:00:00.000Z", "client", "Reviewers can sign results now. Thank you."],
@@ -226,11 +234,12 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
       title: "CoA template tweak",
       labId: labs[0]?.id ?? null,
       labName: labs[0]?.name ?? null,
+      requestor: requestors[3],
       staff: staff[2],
       openedAt: "2026-09-01T11:15:00.000Z",
       status: "open",
       summary: "Client requested additional lot lineage on released CoAs.",
-      messages: ticketThread(`${client.id}-sup-4`, staff[2], clientSpeaker, [
+      messages: ticketThread(`${client.id}-sup-4`, staff[2], requestors[3], [
         ["2026-09-01T11:20:00.000Z", "client", "Released certificates need the full lot lineage, not just the batch id."],
         ["2026-09-01T13:45:00.000Z", "internal", "I added the lineage block to the draft template in Dev2. Can you review a sample CoA?"],
         ["2026-09-02T09:05:00.000Z", "client", "The sample looks right. Please keep this open until QA signs the template."],

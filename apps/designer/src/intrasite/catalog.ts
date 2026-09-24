@@ -179,18 +179,18 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
 }
 
 function supportTickets(clientId: string, labs: Lab[]) {
-  const clientSpeaker = "Marcus Hale";
   return [
     {
       id: `${clientId}-sup-1`,
       title: "STAT queue notification delay",
       labId: labs[0]?.id ?? null,
       labName: labs[0]?.name ?? null,
+      requestor: "Marcus Hale",
       staff: "A. Ruiz",
       openedAt: "2026-08-12T14:20:00.000Z",
       status: "resolved" as const,
       summary: "Webhook retry window increased for STAT accession events.",
-      messages: ticketThread(`${clientId}-sup-1`, "A. Ruiz", clientSpeaker, [
+      messages: ticketThread(`${clientId}-sup-1`, "A. Ruiz", "Marcus Hale", [
         ["2026-08-12T14:22:00.000Z", "client", "STAT accessions are sitting in the queue for almost an hour before the lab sees them."],
         ["2026-08-12T15:05:00.000Z", "internal", "I can see the webhook retries dying after the first failure. I am widening the retry window."],
         ["2026-08-12T18:40:00.000Z", "internal", "Retry window is increased. New STAT events are posting within a minute."],
@@ -202,11 +202,12 @@ function supportTickets(clientId: string, labs: Lab[]) {
       title: "Instrument driver update",
       labId: labs[1]?.id ?? labs[0]?.id ?? null,
       labName: labs[1]?.name ?? labs[0]?.name ?? null,
+      requestor: "Elena Voss",
       staff: "S. Patel",
       openedAt: "2026-08-28T09:05:00.000Z",
       status: "open" as const,
       summary: "HPLC driver staged; waiting on change-control window.",
-      messages: ticketThread(`${clientId}-sup-2`, "S. Patel", clientSpeaker, [
+      messages: ticketThread(`${clientId}-sup-2`, "S. Patel", "Elena Voss", [
         ["2026-08-28T09:10:00.000Z", "client", "The HPLC driver on the harbor instrument is still on the previous build."],
         ["2026-08-28T11:30:00.000Z", "internal", "Driver is staged in Dev1. We need your change-control window before it can move to QA."],
         ["2026-08-29T08:15:00.000Z", "client", "Change control is Thursday 18:00. Please hold until then."],
@@ -217,11 +218,12 @@ function supportTickets(clientId: string, labs: Lab[]) {
       title: "SSO group mapping",
       labId: null,
       labName: null,
+      requestor: "Priya Shah",
       staff: "L. Okonkwo",
       openedAt: "2026-07-03T16:40:00.000Z",
       status: "resolved" as const,
       summary: "Mapped QA reviewers to the client IdP quality group.",
-      messages: ticketThread(`${clientId}-sup-3`, "L. Okonkwo", clientSpeaker, [
+      messages: ticketThread(`${clientId}-sup-3`, "L. Okonkwo", "Priya Shah", [
         ["2026-07-03T16:45:00.000Z", "client", "QA reviewers are not landing in the quality group after SSO."],
         ["2026-07-03T17:20:00.000Z", "internal", "The IdP claim was mapped to the analyst group. I am pointing it at quality."],
         ["2026-07-06T10:00:00.000Z", "client", "Reviewers can sign results now. Thank you."],
@@ -232,11 +234,12 @@ function supportTickets(clientId: string, labs: Lab[]) {
       title: "CoA template tweak",
       labId: labs[0]?.id ?? null,
       labName: labs[0]?.name ?? null,
+      requestor: "Jonah Park",
       staff: "M. Chen",
       openedAt: "2026-09-01T11:15:00.000Z",
       status: "open" as const,
       summary: "Client requested additional lot lineage on released CoAs.",
-      messages: ticketThread(`${clientId}-sup-4`, "M. Chen", clientSpeaker, [
+      messages: ticketThread(`${clientId}-sup-4`, "M. Chen", "Jonah Park", [
         ["2026-09-01T11:20:00.000Z", "client", "Released certificates need the full lot lineage, not just the batch id."],
         ["2026-09-01T13:45:00.000Z", "internal", "I added the lineage block to the draft template in Dev2. Can you review a sample CoA?"],
         ["2026-09-02T09:05:00.000Z", "client", "The sample looks right. Please keep this open until QA signs the template."],

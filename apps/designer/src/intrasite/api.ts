@@ -103,6 +103,7 @@ export type SupportTicket = {
   title: string;
   labId: string | null;
   labName: string | null;
+  requestor: string;
   staff: string;
   openedAt: string;
   status: "open" | "resolved";

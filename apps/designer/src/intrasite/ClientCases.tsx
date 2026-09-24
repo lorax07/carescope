@@ -254,9 +254,14 @@ export function AccountHistoryPanel({
 }) {
   const [labId, setLabId] = useState(lockedLabId ?? "all");
   const [staff, setStaff] = useState("all");
+  const [requestor, setRequestor] = useState("all");
   const [selected, setSelected] = useState<SupportTicket | null>(null);
   const staffNames = useMemo(
     () => [...new Set(dossier.support.map((ticket) => ticket.staff))],
+    [dossier.support]
+  );
+  const requestors = useMemo(
+    () => [...new Set(dossier.support.map((ticket) => ticket.requestor))].sort((a, b) => a.localeCompare(b)),
     [dossier.support]
   );
   const tickets = dossier.support.filter((ticket) => {
@@ -264,7 +269,8 @@ export function AccountHistoryPanel({
       ? ticket.labId === lockedLabId
       : labId === "all" || ticket.labId === labId || (labId === "account" && !ticket.labId);
     const staffOk = staff === "all" || ticket.staff === staff;
-    return labOk && staffOk;
+    const requestorOk = requestor === "all" || ticket.requestor === requestor;
+    return labOk && staffOk && requestorOk;
   });
 
   return (
@@ -285,6 +291,17 @@ export function AccountHistoryPanel({
         </label>
         )}
         <label>
+          Requestor
+          <select value={requestor} onChange={(event) => setRequestor(event.target.value)}>
+            <option value="all">All requestors</option>
+            {requestors.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
           Staff who helped
           <select value={staff} onChange={(event) => setStaff(event.target.value)}>
             <option value="all">All staff</option>
@@ -304,6 +321,7 @@ export function AccountHistoryPanel({
             <tr>
               <th>Case</th>
               <th>Lab</th>
+              <th>Requestor</th>
               <th>Staff</th>
               <th>Opened</th>
               <th>Status</th>
@@ -325,6 +343,7 @@ export function AccountHistoryPanel({
                   ) : null}
                 </td>
                 <td>{ticket.labName ?? "Account"}</td>
+                <td>{ticket.requestor}</td>
                 <td>{ticket.staff}</td>
                 <td>{new Date(ticket.openedAt).toLocaleDateString()}</td>
                 <td>
@@ -366,7 +385,7 @@ function TicketDialog({ ticket, onClose }: { ticket: SupportTicket; onClose: () 
             <p className="is-eyebrow">Account history</p>
             <h2 id={titleId}>{ticket.title}</h2>
             <p>
-              {ticket.labName ?? "Account"} · {ticket.staff} · {ticket.status}
+              {ticket.labName ?? "Account"} · Requested by {ticket.requestor} · {ticket.staff} · {ticket.status}
             </p>
           </div>
           <button type="button" className="btn" onClick={onClose}>
