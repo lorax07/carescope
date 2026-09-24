@@ -167,7 +167,7 @@ export function LandingPage() {
           />
           <nav>
             <a href="/intrasite" className="lp-footer-intrasite">
-              Intrasite
+              Sequence Intrasite Access
             </a>
           </nav>
         </div>
