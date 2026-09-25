@@ -927,6 +927,45 @@ a {
   white-space: nowrap;
 }
 
+.order-id-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.receipt-folder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.receipt-folder:hover {
+  background: var(--accent-soft);
+}
+
+.receipt-form {
+  padding: 1.1rem 1.25rem 1.35rem;
+}
+
+.receipt-form h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.receipt-form-lede {
+  margin: 0.3rem 0 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
 .lims-table td {
   padding: 0.75rem 0.85rem;
   border-bottom: 1px solid var(--border-subtle);
