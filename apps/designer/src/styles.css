@@ -360,7 +360,15 @@ a {
   margin-right: 0.3rem;
 }
 
-.lab-ops-drag input:not([type="checkbox"]) {
+.lab-ops-drag input[type="color"] {
+  width: 2rem;
+  height: 1.6rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.lab-ops-drag input:not([type="checkbox"]):not([type="color"]) {
   flex: 1;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -974,6 +982,25 @@ a {
   margin: 0 0 0.5rem;
   color: var(--text-muted);
   font-size: 0.82rem;
+}
+
+.lims-test-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.lims-test-filter select {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  color: var(--text);
 }
 
 .lims-modal-actions {
