@@ -91,7 +91,7 @@ function cell(
 ) {
   if (id === "accessionId") {
     return (
-      <button type="button" className="lims-mono lims-linkish instrument-link" onClick={() => onOpen?.(sample)}>
+      <button type="button" className="lims-mono lims-linkish accession-link" onClick={() => onOpen?.(sample)}>
         {sample.accessionId}
       </button>
     );
