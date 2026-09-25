@@ -351,7 +351,8 @@ export function createIntrasiteRouter(): Router {
         const environment =
           req.body?.environment === "dev1" ||
           req.body?.environment === "dev2" ||
-          req.body?.environment === "qa"
+          req.body?.environment === "qa" ||
+          req.body?.environment === "prod"
             ? String(req.body.environment)
             : undefined;
         res.json(runInfraQuery(String(req.body?.sql ?? ""), labs, dossier, environment));

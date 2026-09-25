@@ -214,6 +214,7 @@ describe("Intrasite auth and multi-tenancy", () => {
       "dev1",
       "dev2",
       "qa",
+      "prod",
     ]);
   });
 

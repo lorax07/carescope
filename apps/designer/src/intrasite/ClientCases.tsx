@@ -455,7 +455,7 @@ export function ClientCases({
         <section className="is-panel is-case-panel">
           <h2>{active.label}</h2>
           <p className="is-muted">
-            How this account’s labs map across the Dev1, Dev2, and QA installations.
+            How this account’s labs map across the Dev1, Dev2, QA, and Production installations.
           </p>
           <ArchitectureMap nodes={dossier.architecture} />
         </section>

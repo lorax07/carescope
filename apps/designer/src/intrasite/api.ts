@@ -123,7 +123,7 @@ export type InstallationNode = {
 };
 
 export type QueryEnvironment = {
-  id: "dev1" | "dev2" | "qa";
+  id: "dev1" | "dev2" | "qa" | "prod";
   label: string;
   databaseName: string;
   host: string;

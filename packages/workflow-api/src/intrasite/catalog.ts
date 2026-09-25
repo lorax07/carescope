@@ -94,6 +94,7 @@ const ENV_META: Array<{
   { id: "dev1", label: "Dev1", purpose: "Developer sandbox", scale: 0.25 },
   { id: "dev2", label: "Dev2", purpose: "Integration / vendor dry-run", scale: 0.4 },
   { id: "qa", label: "QA", purpose: "Validation and change-control", scale: 0.7 },
+  { id: "prod", label: "Production", purpose: "Live laboratory operations", scale: 1 },
 ];
 
 export function environmentsFor(client: Client): QueryEnvironment[] {
