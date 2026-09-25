@@ -97,7 +97,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const approved = useReviewApprovals();
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
-  const [selected, setSelected] = useState<string | null>(null);
+  const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
@@ -108,12 +108,29 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const reviewRows =
     reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
   const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
-  const approveTarget =
-    view !== "review"
-      ? []
-      : reviewFilter === "individual"
-        ? reviewRows.filter((sample) => sample.accessionId === selected)
-        : reviewRows.filter((sample) => sample.batchId === selected);
+  const listed = view === "review" ? reviewRows : rows;
+  const approveTarget = view === "review" ? listed.filter((sample) => checked.has(sample.accessionId)) : [];
+  const allListedChecked = listed.length > 0 && listed.every((sample) => checked.has(sample.accessionId));
+
+  function toggleChecked(id: string) {
+    setChecked((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleMany(ids: string[], on: boolean) {
+    setChecked((current) => {
+      const next = new Set(current);
+      for (const id of ids) {
+        if (on) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
   const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
     (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
   );
@@ -149,7 +166,11 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               type="button"
               className="btn btn-primary"
               disabled={approveTarget.length === 0}
-              onClick={() => approveSamples(approveTarget.map((sample) => sample.accessionId))}
+              onClick={() => {
+                const ids = approveTarget.map((sample) => sample.accessionId);
+                approveSamples(ids);
+                toggleMany(ids, false);
+              }}
             >
               Approve
             </button>
@@ -179,6 +200,13 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               <ul className="lims-list">
                 {queue.rows.map((sample) => (
                   <li key={sample.accessionId}>
+                    <input
+                      type="checkbox"
+                      className="lims-row-check"
+                      aria-label={`Select ${sample.accessionId}`}
+                      checked={checked.has(sample.accessionId)}
+                      onChange={() => toggleChecked(sample.accessionId)}
+                    />
                     <div>
                       <b>
                         <Link to={`/app/samples/${sample.accessionId}`}>{sample.accessionId}</Link>
@@ -204,10 +232,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 type="button"
                 className={`lims-filter${reviewFilter === item ? " active" : ""}`}
                 aria-pressed={reviewFilter === item}
-                onClick={() => {
-                  setReviewFilter(item);
-                  setSelected(null);
-                }}
+                onClick={() => setReviewFilter(item)}
               >
                 {item === "individual" ? "Individual" : "Batch"}
               </button>
@@ -230,6 +255,14 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <table className="lims-table">
             <thead>
               <tr>
+                <th className="lims-check">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all samples"
+                    checked={allListedChecked}
+                    onChange={() => toggleMany(listed.map((sample) => sample.accessionId), !allListedChecked)}
+                  />
+                </th>
                 {view === "review" && reviewFilter === "batch" ? <th>Batch</th> : null}
                 {visible.map((column) => (
                   <th key={column.id}>{column.label}</th>
@@ -241,7 +274,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 ? batches.length === 0
                   ? (
                     <tr>
-                      <td className="lims-empty" colSpan={(visible.length || 1) + 1}>
+                      <td className="lims-empty" colSpan={(visible.length || 1) + 2}>
                         No batches are ready for review.
                       </td>
                     </tr>
@@ -252,11 +285,29 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         .map((sample, index, group) => (
                           <tr
                             key={sample.accessionId}
-                            className={selected === batchId ? "is-selected" : ""}
-                            onClick={() => setSelected(batchId)}
+                            className={checked.has(sample.accessionId) ? "is-selected" : ""}
                           >
+                            <td className="lims-check">
+                              <input
+                                type="checkbox"
+                                aria-label={`Select ${sample.accessionId}`}
+                                checked={checked.has(sample.accessionId)}
+                                onChange={() => toggleChecked(sample.accessionId)}
+                              />
+                            </td>
                             {index === 0 ? (
                               <td className="lims-batch" rowSpan={group.length}>
+                                <input
+                                  type="checkbox"
+                                  aria-label={`Select batch ${batchId}`}
+                                  checked={group.every((item) => checked.has(item.accessionId))}
+                                  onChange={() =>
+                                    toggleMany(
+                                      group.map((item) => item.accessionId),
+                                      !group.every((item) => checked.has(item.accessionId))
+                                    )
+                                  }
+                                />
                                 {batchId}
                               </td>
                             ) : null}
@@ -269,7 +320,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 : (view === "review" ? reviewRows : rows).length === 0
                   ? (
                     <tr>
-                      <td className="lims-empty" colSpan={visible.length || 1}>
+                      <td className="lims-empty" colSpan={(visible.length || 1) + 1}>
                         {view === "review" ? "No individual samples are ready for review." : "No samples match this filter."}
                       </td>
                     </tr>
@@ -277,9 +328,16 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                   : (view === "review" ? reviewRows : rows).map((sample) => (
                       <tr
                         key={sample.accessionId}
-                        className={view === "review" && selected === sample.accessionId ? "is-selected" : ""}
-                        onClick={view === "review" ? () => setSelected(sample.accessionId) : undefined}
+                        className={checked.has(sample.accessionId) ? "is-selected" : ""}
                       >
+                        <td className="lims-check">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${sample.accessionId}`}
+                            checked={checked.has(sample.accessionId)}
+                            onChange={() => toggleChecked(sample.accessionId)}
+                          />
+                        </td>
                         {visible.map((column) => (
                           <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
                         ))}

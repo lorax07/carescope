@@ -701,9 +701,19 @@ a {
   background: #e8f1ff;
 }
 
+.lims-check {
+  width: 2.4rem;
+  text-align: center;
+}
+
 .lims-batch {
   font-weight: 700;
   vertical-align: top;
+}
+
+.lims-batch input,
+.lims-row-check {
+  margin-right: 0.45rem;
 }
 
 .lims-mono {
