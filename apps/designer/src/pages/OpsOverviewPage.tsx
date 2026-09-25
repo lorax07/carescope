@@ -128,6 +128,73 @@ export function OpsOverviewPage() {
           </section>
         </aside>
       </div>
+
+      <div className="ops-charts">
+        <section className="lims-panel">
+          <div className="lims-panel-head">
+            <h2>Stage chart</h2>
+          </div>
+          <Bars
+            rows={stages.map((stage) => ({
+              label: stage.label,
+              value: stage.count,
+              color: stage.label === "On hold" ? "#dc2626" : "#1b6ef3",
+            }))}
+          />
+        </section>
+        <section className="lims-panel">
+          <div className="lims-panel-head">
+            <h2>Priority chart</h2>
+          </div>
+          <Bars
+            rows={["STAT", "Rush", "Routine"].map((priority) => ({
+              label: priority,
+              value: open.filter((sample) => sample.priority === priority).length,
+              color: priority === "STAT" ? "#b91c1c" : priority === "Rush" ? "#c2410c" : "#0b1f44",
+            }))}
+          />
+        </section>
+        <section className="lims-panel">
+          <div className="lims-panel-head">
+            <h2>Site chart</h2>
+          </div>
+          <Bars
+            rows={sites.map((row) => ({
+              label: row.site,
+              value: row.count,
+              color: "#1b6ef3",
+            }))}
+          />
+        </section>
+        <section className="lims-panel">
+          <div className="lims-panel-head">
+            <h2>On time this week</h2>
+          </div>
+          <Bars
+            rows={[
+              { label: "On time", value: Math.round(126 * 0.94), color: "#059669" },
+              { label: "Late", value: 126 - Math.round(126 * 0.94), color: "#d97706" },
+            ]}
+          />
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Bars({ rows }: { rows: { label: string; value: number; color: string }[] }) {
+  const max = Math.max(...rows.map((row) => row.value), 1);
+  return (
+    <div className="ops-bars">
+      {rows.map((row) => (
+        <div key={row.label} className="ops-bar-row">
+          <span>{row.label}</span>
+          <div className="ops-bar-track" role="img" aria-label={`${row.label} ${row.value}`}>
+            <div style={{ width: `${(row.value / max) * 100}%`, background: row.color }} />
+          </div>
+          <b>{row.value}</b>
+        </div>
+      ))}
     </div>
   );
 }
