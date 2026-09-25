@@ -93,8 +93,38 @@ function money(value: number): string {
 }
 
 function WhatWeSolve() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    const update = () => {
+      const rect = section.getBoundingClientRect();
+      const view = window.innerHeight;
+      const enter = 1 - (rect.top - view * 0.12) / (view * 0.42);
+      const leave = (rect.bottom - view * 0.08) / (view * 0.38);
+      const spotlight = Math.min(1, Math.max(0, Math.min(enter, leave)));
+      section.style.setProperty("--spotlight", spotlight.toFixed(3));
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
-    <section className="lp-section" id="capabilities">
+    <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
       <div className="lp-section-inner">
         <div className="lp-section-head lp-section-head-left">
           <h2>What we solve</h2>
