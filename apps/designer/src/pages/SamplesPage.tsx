@@ -413,10 +413,10 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       {openSample ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenSample(null)}>
           <div className="lims-modal lims-modal-wide" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-            <div className="lims-modal-actions">
+            <div className="lims-dialog-bar">
               <button
                 type="button"
-                className="btn btn-primary"
+                className="dialog-pin"
                 onClick={() => {
                   sectionTabs.pin({ kind: "sample", recordId: openSample.accessionId, title: openSample.accessionId });
                   setOpenSample(null);
@@ -424,7 +424,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               >
                 Tab screen
               </button>
-              <button type="button" className="btn" onClick={() => setOpenSample(null)}>
+              <button type="button" onClick={() => setOpenSample(null)}>
                 Close
               </button>
             </div>

@@ -1269,9 +1269,47 @@ a {
   color: #fff;
 }
 
+.lims-dialog-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #f8fafc;
+}
+
+.lims-dialog-bar button {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.32rem 0.72rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lims-dialog-bar button:hover {
+  background: #e8eef6;
+  color: var(--text);
+}
+
+.lims-dialog-bar button.dialog-pin {
+  background: var(--accent);
+  color: #fff;
+}
+
+.lims-dialog-bar button.dialog-pin:hover {
+  background: var(--accent-dim);
+  color: #fff;
+}
+
 .lims-modal-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 0.45rem;
   padding: 0 1rem 1rem;
 }
 
