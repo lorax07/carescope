@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { useSectionTabs } from "../sectionTabs";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
+import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
@@ -69,7 +70,24 @@ function matchesView(sample: SampleRecord, status: SampleRecord["status"], view:
   return status === "released";
 }
 
-function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status, onOpen?: (sample: SampleRecord) => void) {
+function FolderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M3.5 6.5A2.5 2.5 0 0 1 6 4h4.1a2 2 0 0 1 1.4.6l1.2 1.2H18A2.5 2.5 0 0 1 20.5 8.3v9.2A2.5 2.5 0 0 1 18 20H6a2.5 2.5 0 0 1-2.5-2.5v-11z"
+      />
+    </svg>
+  );
+}
+
+function cell(
+  sample: SampleRecord,
+  id: SampleColumnId,
+  status = sample.status,
+  onOpen?: (sample: SampleRecord) => void,
+  onReceipt?: (sample: SampleRecord) => void,
+) {
   if (id === "accessionId") {
     return (
       <button type="button" className="lims-mono lims-linkish instrument-link" onClick={() => onOpen?.(sample)}>
@@ -77,7 +95,21 @@ function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status, 
       </button>
     );
   }
-  if (id === "orderId") return <span className="lims-mono">{sample.orderId}</span>;
+  if (id === "orderId") {
+    return (
+      <span className="order-id-cell">
+        <span className="lims-mono">{sample.orderId}</span>
+        <button
+          type="button"
+          className="receipt-folder"
+          aria-label={`Receipt form for ${sample.orderId}`}
+          onClick={() => onReceipt?.(sample)}
+        >
+          <FolderIcon />
+        </button>
+      </span>
+    );
+  }
   if (id === "received") return <span className="lims-mono muted">{sample.received}</span>;
   if (id === "client") return sample.client;
   if (id === "matrix") return sample.matrix;
@@ -106,6 +138,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const planted = useResultFlags();
   const sectionTabs = useSectionTabs();
   const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
+  const [receiptSample, setReceiptSample] = useState<SampleRecord | null>(null);
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
@@ -366,7 +399,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                               </td>
                             ) : null}
                             {visible.map((column) => (
-                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample)}</td>
+                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
                             ))}
                             <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
@@ -397,7 +430,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                           />
                         </td>
                         {visible.map((column) => (
-                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample)}</td>
+                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
                         ))}
                         {view === "review" ? (
                           <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
@@ -409,6 +442,8 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           </table>
         </div>
       </section>
+
+      {receiptSample ? <ReceiptFormDialog sample={receiptSample} onClose={() => setReceiptSample(null)} /> : null}
 
       {openSample ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenSample(null)}>
