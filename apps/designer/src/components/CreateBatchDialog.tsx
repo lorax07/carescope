@@ -77,7 +77,7 @@ export function CreateBatchDialog({
                   matched.map((sample) => (
                     <li key={sample.accessionId}>
                       <div>
-                        <b>{sample.sampleId}</b>
+                        <b>{sample.accessionId}</b>
                         <small>
                           {sample.client} · {sample.tests}
                         </small>

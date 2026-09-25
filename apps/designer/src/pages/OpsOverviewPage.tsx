@@ -51,7 +51,7 @@ export function OpsOverviewPage() {
         <div className="lims-kpi accent">
           <span>STAT open</span>
           <strong>{stat.length}</strong>
-          <small>{stat.map((sample) => sample.sampleId).join(", ") || "None"}</small>
+          <small>{stat.map((sample) => sample.accessionId).join(", ") || "None"}</small>
         </div>
         <div className="lims-kpi">
           <span>Awaiting review</span>

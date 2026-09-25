@@ -217,7 +217,7 @@ export function nextSampleId(accountId: string): number {
   return samples.reduce((max, sample) => (sample.accountId === accountId ? Math.max(max, sample.sampleId) : max), 0) + 1;
 }
 
-function nextAccession(): string {
+export function nextAccessionId(): string {
   const highest = samples.reduce((max, sample) => {
     const value = Number(sample.accessionId.replace(/\D/g, ""));
     return Number.isFinite(value) ? Math.max(max, value) : max;
@@ -247,7 +247,7 @@ export function logSample(input: SampleLog): SampleRecord {
   const sample: SampleRecord = {
     ...input,
     sampleId: nextSampleId(input.accountId),
-    accessionId: nextAccession(),
+    accessionId: nextAccessionId(),
     received: loggedAt(),
     status: "received",
     custody: "Intake",
