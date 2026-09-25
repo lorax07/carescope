@@ -73,9 +73,10 @@ export function IntrasiteLabDetailPage() {
         <>
           <section className="is-infra-meta">
             <article>
-              <span>Status</span>
-              <strong>
+              <span>Lab Instance Status</span>
+              <strong className="is-status-row">
                 <span className={`is-pill ${lab.status}`}>{lab.status}</span>
+                <span className="is-status-lab">{lab.name}</span>
               </strong>
             </article>
             <article>

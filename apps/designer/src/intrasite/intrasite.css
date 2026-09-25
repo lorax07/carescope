@@ -452,6 +452,27 @@
   margin-top: 0.25rem;
 }
 
+.is-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.is-infra-meta .is-status-row .is-pill {
+  display: inline-flex;
+  width: fit-content;
+}
+
+.is-infra-meta .is-status-lab {
+  display: inline;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f1724;
+}
+
 .is-contact-card a,
 .is-contact-card small {
   display: block;
