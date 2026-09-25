@@ -225,10 +225,9 @@ function AppFrame() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [navPos, setNavPos] = useState({ x: 16, y: 16 });
-  const [openEdge, setOpenEdge] = useState<OpenEdge>("top");
+  const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
   const navPosRef = useRef(navPos);
   const navOpenRef = useRef(false);
-  const parkedRef = useRef<{ x: number; y: number } | null>(null);
   navPosRef.current = navPos;
   navOpenRef.current = navOpen;
   const dockRef = useRef<HTMLDivElement>(null);
@@ -284,7 +283,7 @@ function AppFrame() {
   }, [navOpen, navPos, edge, viewport, infraOpen, horizontal]);
 
   useLayoutEffect(() => {
-    if (!navOpen || openEdge !== "right") return;
+    if (openEdge !== "right") return;
     const width = dockRef.current?.offsetWidth ?? LAUNCHER;
     const x = Math.max(EDGE_PAD, viewport.width - EDGE_PAD - width);
     setNavPos((pos) => (pos.x === x && pos.y === EDGE_PAD ? pos : { x, y: EDGE_PAD }));
@@ -300,7 +299,6 @@ function AppFrame() {
       window.innerWidth,
     );
     const next = snappedPos(nextEdge, window.innerWidth);
-    parkedRef.current = from;
     setOpenEdge(nextEdge);
     navPosRef.current = next;
     setNavPos(next);
@@ -308,11 +306,12 @@ function AppFrame() {
   }
 
   function placeClosed() {
-    const parked = parkedRef.current;
-    if (parked) {
-      navPosRef.current = parked;
-      setNavPos(parked);
-    }
+    const next =
+      openEdge === "right"
+        ? { x: Math.max(EDGE_PAD, window.innerWidth - EDGE_PAD - LAUNCHER), y: EDGE_PAD }
+        : { x: EDGE_PAD, y: EDGE_PAD };
+    navPosRef.current = next;
+    setNavPos(next);
     setNavOpen(false);
   }
 
@@ -379,7 +378,7 @@ function AppFrame() {
         } as CSSProperties
       }
     >
-      <div ref={dockRef} className={`lims-nav-dock${navOpen ? ` is-open is-${edge}` : ""}`} style={{ left: navPos.x, top: navPos.y }}>
+      <div ref={dockRef} className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}`} style={{ left: navPos.x, top: navPos.y }}>
         <button
           type="button"
           className={`lims-nav-launcher${navOpen ? "" : " is-icons"}`}

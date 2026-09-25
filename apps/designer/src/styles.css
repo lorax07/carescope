@@ -140,6 +140,10 @@ a {
   gap: 4px;
 }
 
+.lims-nav-dock.is-top .lims-nav-launcher.is-icons {
+  flex-direction: row;
+}
+
 .lims-nav-launcher.is-icons .lims-nav-icon.is-current {
   background: #1b6ef3;
   border-color: #1b6ef3;
