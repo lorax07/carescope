@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { passwordMatches, saveLimsPassword } from "../limsPassword";
 import { readLimsSession } from "../limsSession";
 import {
   pinExpiresOn,
@@ -17,6 +18,11 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const [again, setAgain] = useState("");
   const [error, setError] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSaved, setPasswordSaved] = useState(false);
   const expires = pinExpiresOn();
 
   function save() {
@@ -33,6 +39,30 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
     setAgain("");
     setError("");
     setResetting(false);
+  }
+
+  function resetPassword() {
+    if (!passwordMatches(currentPassword)) {
+      setPasswordError("Current password does not match.");
+      setPasswordSaved(false);
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("Use at least 8 characters.");
+      setPasswordSaved(false);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("The two passwords do not match.");
+      setPasswordSaved(false);
+      return;
+    }
+    saveLimsPassword(newPassword);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError("");
+    setPasswordSaved(true);
   }
 
   const showForm = state !== "active" || resetting;
@@ -59,6 +89,49 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
               {readLimsSession()?.username ?? "M. Chen"} ·{" "}
               {readLimsSession() ? `${readLimsSession()?.clientName} LIMS` : "Lab Analyst"}
             </p>
+          </section>
+          <section className="settings-option">
+            <h3>Password</h3>
+            <p>Resets the password used to enter this LIMS environment.</p>
+            <div className="settings-pin-fields">
+              <label>
+                Current password
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  aria-label="Current password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                />
+              </label>
+              <label>
+                New password
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  aria-label="New password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                />
+              </label>
+              <label>
+                Confirm new password
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  aria-label="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                />
+              </label>
+              {passwordError ? <p className="settings-error">{passwordError}</p> : null}
+              {passwordSaved ? (
+                <p className="settings-saved">Password updated. Use it the next time you sign in.</p>
+              ) : null}
+              <button type="button" className="btn btn-primary" onClick={resetPassword}>
+                Reset password
+              </button>
+            </div>
           </section>
           <section className="settings-option">
             <h3>Reviewer PIN</h3>

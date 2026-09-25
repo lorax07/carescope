@@ -625,6 +625,11 @@ a {
   font-size: 0.78rem;
 }
 
+.lims-modal-body .settings-saved {
+  color: #15803d;
+  font-weight: 700;
+}
+
 .result-flag-pin {
   display: inline-flex;
   align-items: center;
