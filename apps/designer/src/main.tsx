@@ -10,6 +10,7 @@ import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
 import { LandingPage } from "./pages/LandingPage";
 import { LimsEnvironmentPage } from "./pages/LimsEnvironmentPage";
+import { SampleDetailPage } from "./pages/SampleDetailPage";
 import { SamplesPage } from "./pages/SamplesPage";
 import {
   LimsModulePage,
@@ -67,6 +68,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="ops/testing" element={<SamplesPage view="testing" />} />
           <Route path="ops/review" element={<SamplesPage view="review" />} />
           <Route path="ops/release" element={<SamplesPage view="release" />} />
+          <Route path="samples/:accessionId" element={<SampleDetailPage />} />
           <Route path="samples" element={<SamplesPage view="home" />} />
           <Route path="tests" element={<TestsPage />} />
           <Route path="results" element={<ResultsPage />} />

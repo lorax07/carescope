@@ -168,7 +168,7 @@ export function AppShell() {
           <div className="lims-search">
             <input
               type="search"
-              placeholder="Search accession, sample ID, batch…"
+              placeholder="Search accession, order, client…"
               aria-label="Search laboratory records"
             />
           </div>

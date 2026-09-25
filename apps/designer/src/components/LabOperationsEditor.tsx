@@ -4,6 +4,7 @@ import {
   useLabOperations,
   type LabMenuItem,
   type LabOperationsConfig,
+  type SampleColumn,
 } from "../labOperations";
 
 function move<T>(list: T[], from: number, to: number): T[] {
@@ -16,22 +17,23 @@ function move<T>(list: T[], from: number, to: number): T[] {
 
 export function LabOperationsEditor() {
   const config = useLabOperations();
-  const dragRef = useRef<{ list: "menu" | "priorities"; index: number } | null>(null);
+  const dragRef = useRef<{ list: "menu" | "priorities" | "columns"; index: number } | null>(null);
 
   function update(next: LabOperationsConfig) {
     saveLabOperations(next);
   }
 
-  function beginDrag(list: "menu" | "priorities", index: number) {
-    const next = { list, index };
-    dragRef.current = next;
+  function beginDrag(list: "menu" | "priorities" | "columns", index: number) {
+    dragRef.current = { list, index };
   }
 
-  function dropOn(list: "menu" | "priorities", index: number) {
+  function dropOn(list: "menu" | "priorities" | "columns", index: number) {
     const current = dragRef.current;
     if (!current || current.list !== list) return;
     if (list === "menu") update({ ...config, menu: move(config.menu, current.index, index) });
-    else update({ ...config, priorities: move(config.priorities, current.index, index) });
+    else if (list === "priorities") {
+      update({ ...config, priorities: move(config.priorities, current.index, index) });
+    } else update({ ...config, columns: move(config.columns, current.index, index) });
     dragRef.current = null;
   }
 
@@ -39,6 +41,22 @@ export function LabOperationsEditor() {
     update({
       ...config,
       menu: config.menu.map((item) => (item.id === id ? { ...item, label } : item)),
+    });
+  }
+
+  function renameColumn(id: string, label: string) {
+    update({
+      ...config,
+      columns: config.columns.map((column) => (column.id === id ? { ...column, label } : column)),
+    });
+  }
+
+  function toggleColumn(column: SampleColumn) {
+    update({
+      ...config,
+      columns: config.columns.map((entry) =>
+        entry.id === column.id ? { ...entry, enabled: !entry.enabled } : entry
+      ),
     });
   }
 
@@ -57,7 +75,8 @@ export function LabOperationsEditor() {
         <h2>Lab operations</h2>
         <p>
           Drag to set the order the laboratory sees. Home lists samples from the top priority
-          downward. Menu items here are the options under Lab Operations.
+          downward. Menu items here are the options under Lab Operations. Column names and
+          visibility control the sample list. Matrix stays off until you show it.
         </p>
       </div>
       <div className="lab-ops-editor-grid">
@@ -102,6 +121,34 @@ export function LabOperationsEditor() {
                     type="checkbox"
                     checked={item.enabled}
                     onChange={() => toggle(item)}
+                  />
+                  Show
+                </label>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div>
+          <h3>Sample list columns</h3>
+          <ol className="lab-ops-drag" onDragOver={(event) => event.preventDefault()}>
+            {config.columns.map((column, index) => (
+              <li
+                key={column.id}
+                draggable
+                onDragStart={() => beginDrag("columns", index)}
+                onDrop={() => dropOn("columns", index)}
+              >
+                <span aria-hidden="true">⋮⋮</span>
+                <input
+                  aria-label={`${column.id} column name`}
+                  value={column.label}
+                  onChange={(event) => renameColumn(column.id, event.target.value)}
+                />
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={column.enabled}
+                    onChange={() => toggleColumn(column)}
                   />
                   Show
                 </label>
