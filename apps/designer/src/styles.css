@@ -1058,48 +1058,8 @@ a {
   color: var(--text);
 }
 
-.result-flag-token {
-  border: 1px dashed #b91c1c;
-  background: #fff5f5;
-  color: #b91c1c;
-  border-radius: 999px;
-  padding: 0.28rem 0.7rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: grab;
-}
-
-.result-flag-token.is-armed {
-  background: #b91c1c;
-  color: #fff;
-  border-style: solid;
-}
-
-.result-flag-hint {
-  margin: 0;
-  padding: 0.55rem 1rem 0;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-}
-
-.result-flag-mark {
-  display: inline-block;
-  margin-right: 0.4rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 4px;
-  background: #b91c1c;
-  color: #fff;
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .lims-table tr.is-flagged td {
   background: #fff1f2;
-}
-
-.lims-table tr.is-flag-target {
-  cursor: crosshair;
 }
 
 .result-flag-note {
