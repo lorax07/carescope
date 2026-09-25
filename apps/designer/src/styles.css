@@ -216,6 +216,97 @@ a {
   color: #fff;
 }
 
+.lims-nav-label {
+  margin: 0.35rem 0.7rem 0.2rem;
+  color: #8fa3bf;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lims-nav-sub {
+  padding-left: 1.15rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.lab-ops-editor {
+  margin: 0 0 1.75rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.lab-ops-editor h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.lab-ops-editor p {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  max-width: 46rem;
+}
+
+.lab-ops-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.25rem;
+}
+
+.lab-ops-editor h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.lab-ops-drag {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.lab-ops-drag li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+  cursor: grab;
+}
+
+.lab-ops-drag li span {
+  color: #94a3b8;
+  letter-spacing: -0.08em;
+}
+
+.lab-ops-drag input[type="checkbox"] {
+  margin-right: 0.3rem;
+}
+
+.lab-ops-drag input:not([type="checkbox"]) {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem;
+  font: inherit;
+}
+
+.lab-ops-drag label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
 .lims-sidebar-foot {
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);

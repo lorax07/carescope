@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 
 const NAV = [
-  { to: "/app", label: "Lab Operations", end: true },
   { to: "/app/design", label: "Workflow design" },
   { to: "/app/instruments", label: "Instrument Integration" },
   { to: "/app/connectivity", label: "Healthcare CRM" },
@@ -38,6 +38,7 @@ export function AppShell() {
     () => searchParams.get("signup") === "1"
   );
   const lims = readLimsSession();
+  const labOps = useLabOperations();
   const [infraOpen, setInfraOpen] = useState(false);
   const now = useLocalClock();
   const signedInName = lims?.username ?? "M. Chen";
@@ -123,11 +124,25 @@ export function AppShell() {
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
+          <p className="lims-nav-label">Lab Operations</p>
+          {labOps.menu
+            .filter((item) => item.enabled && item.label.trim())
+            .map((item) => (
+              <NavLink
+                key={item.id}
+                to={labMenuPath(item.view)}
+                end={item.view === "home"}
+                className={({ isActive }) =>
+                  `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              end={"end" in item ? item.end : false}
               className={({ isActive }) =>
                 `lims-nav-item${isActive ? " active" : ""}`
               }
