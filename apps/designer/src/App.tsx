@@ -27,23 +27,23 @@ function useLocalClock(): Date {
   return now;
 }
 
-type DockEdge = "left" | "right" | "top" | "bottom";
+type OpenEdge = "left" | "right" | "top";
 
 const LAUNCHER = 52;
 const PANEL_GAP = 8;
+const EDGE_PAD = 16;
 
-function nearestEdge(x: number, y: number, width: number, height: number): DockEdge {
+function openEdgeFor(x: number, y: number, width: number): OpenEdge {
   const cx = x + LAUNCHER / 2;
   const cy = y + LAUNCHER / 2;
-  const distances: Record<DockEdge, number> = {
+  const distances: Record<OpenEdge, number> = {
     top: cy,
-    bottom: height - cy,
     left: cx,
     right: width - cx,
   };
-  let edge: DockEdge = "top";
+  let edge: OpenEdge = "top";
   let best = Infinity;
-  for (const side of ["top", "bottom", "left", "right"] as const) {
+  for (const side of ["top", "left", "right"] as const) {
     if (distances[side] < best) {
       best = distances[side];
       edge = side;
@@ -52,11 +52,14 @@ function nearestEdge(x: number, y: number, width: number, height: number): DockE
   return edge;
 }
 
-function panelPlacement(edge: DockEdge, x: number, y: number, width: number, height: number): CSSProperties {
+function snappedPos(edge: OpenEdge, width: number): { x: number; y: number } {
+  if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - LAUNCHER), y: EDGE_PAD };
+  return { x: EDGE_PAD, y: EDGE_PAD };
+}
+
+function panelPlacement(edge: OpenEdge, x: number, y: number, width: number, height: number): CSSProperties {
   const below = height - (y + LAUNCHER);
   const above = y;
-  const right = width - (x + LAUNCHER);
-  const left = x;
   if (edge === "left" || edge === "right") {
     const upward = below < 240 && above > below;
     const room = Math.max(180, (upward ? above : below) - PANEL_GAP - 12);
@@ -67,14 +70,13 @@ function panelPlacement(edge: DockEdge, x: number, y: number, width: number, hei
       ...(upward ? { bottom: `calc(100% + ${PANEL_GAP}px)` } : { top: `calc(100% + ${PANEL_GAP}px)` }),
     };
   }
-  const growLeft = left > right;
-  const room = Math.max(280, (growLeft ? left : right) - PANEL_GAP - 12);
+  const room = Math.max(280, width - x - LAUNCHER - PANEL_GAP - 12);
   return {
     width: room,
     maxWidth: room,
     maxHeight: Math.round(height * 0.46),
-    ...(edge === "top" ? { top: 0 } : { bottom: 0 }),
-    ...(growLeft ? { right: `calc(100% + ${PANEL_GAP}px)` } : { left: `calc(100% + ${PANEL_GAP}px)` }),
+    top: 0,
+    left: `calc(100% + ${PANEL_GAP}px)`,
   };
 }
 
@@ -221,15 +223,19 @@ function AppFrame() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [navPos, setNavPos] = useState({ x: 16, y: 16 });
+  const [openEdge, setOpenEdge] = useState<OpenEdge>("top");
   const navPosRef = useRef(navPos);
+  const navOpenRef = useRef(false);
+  const parkedRef = useRef<{ x: number; y: number } | null>(null);
   navPosRef.current = navPos;
+  navOpenRef.current = navOpen;
   const dockRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
   const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const now = useLocalClock();
-  const edge = nearestEdge(navPos.x, navPos.y, viewport.width, viewport.height);
-  const horizontal = edge === "top" || edge === "bottom";
+  const edge = openEdge;
+  const horizontal = edge === "top";
   const signedInName = lims?.username ?? "M. Chen";
 
   useEffect(() => {
@@ -260,7 +266,6 @@ function AppFrame() {
     const menu = panel.getBoundingClientRect();
     const left = Math.min(logo.left, menu.left);
     const right = Math.max(logo.right, menu.right);
-    const top = Math.min(logo.top, menu.top);
     const bottom = Math.max(logo.bottom, menu.bottom);
     const gap = 12;
     const next =
@@ -268,9 +273,7 @@ function AppFrame() {
         ? { left: Math.ceil(right + gap), right: 0, top: 0, bottom: 0 }
         : edge === "right"
           ? { left: 0, right: Math.ceil(window.innerWidth - left + gap), top: 0, bottom: 0 }
-          : edge === "top"
-            ? { left: 0, right: 0, top: Math.ceil(bottom + gap), bottom: 0 }
-            : { left: 0, right: 0, top: 0, bottom: Math.ceil(window.innerHeight - top + gap) };
+          : { left: 0, right: 0, top: Math.ceil(bottom + gap), bottom: 0 };
     setInsets((current) =>
       current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
         ? current
@@ -278,16 +281,43 @@ function AppFrame() {
     );
   }, [navOpen, navPos, edge, viewport, infraOpen, horizontal]);
 
+  useEffect(() => {
+    if (!navOpen || openEdge !== "right") return;
+    const x = Math.max(EDGE_PAD, viewport.width - EDGE_PAD - LAUNCHER);
+    setNavPos((pos) => (pos.x === x && pos.y === EDGE_PAD ? pos : { x, y: EDGE_PAD }));
+  }, [navOpen, openEdge, viewport.width]);
+
+  function placeOpen(from: { x: number; y: number }) {
+    const nextEdge = openEdgeFor(from.x, from.y, window.innerWidth);
+    const next = snappedPos(nextEdge, window.innerWidth);
+    parkedRef.current = from;
+    setOpenEdge(nextEdge);
+    navPosRef.current = next;
+    setNavPos(next);
+    setNavOpen(true);
+  }
+
+  function placeClosed() {
+    const parked = parkedRef.current;
+    if (parked) {
+      navPosRef.current = parked;
+      setNavPos(parked);
+    }
+    setNavOpen(false);
+  }
+
   function beginNavDrag(event: ReactPointerEvent<HTMLButtonElement>) {
     event.preventDefault();
     const startX = event.clientX;
     const startY = event.clientY;
     const origin = navPosRef.current;
+    const wasOpen = navOpenRef.current;
     let moved = false;
     function move(ev: { clientX: number; clientY: number }) {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
       if (Math.hypot(dx, dy) > 4) moved = true;
+      if (wasOpen) return;
       const x = Math.min(Math.max(8, origin.x + dx), window.innerWidth - 68);
       const y = Math.min(Math.max(8, origin.y + dy), window.innerHeight - 68);
       const next = { x, y };
@@ -299,7 +329,9 @@ function AppFrame() {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("mouseup", up);
-      if (!moved) setNavOpen((open) => !open);
+      if (moved) return;
+      if (wasOpen) placeClosed();
+      else placeOpen(origin);
     }
     window.addEventListener("pointermove", move);
     window.addEventListener("mousemove", move);
