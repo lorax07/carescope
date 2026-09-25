@@ -256,6 +256,25 @@ a {
   gap: 1.25rem;
 }
 
+.sample-work-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.sample-work-hint {
+  margin: 0;
+  padding: 0.65rem 1rem 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.lims-count {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 .sample-detail-grid {
   display: grid;
   grid-template-columns: 1.45fr 0.9fr;
@@ -1498,7 +1517,8 @@ a {
   .lims-dash-grid,
   .designer-layout,
   .lab-ops-editor-grid,
-  .sample-detail-grid {
+  .sample-detail-grid,
+  .sample-work-grid {
     grid-template-columns: 1fr;
   }
 

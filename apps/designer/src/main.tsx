@@ -10,6 +10,7 @@ import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
 import { LandingPage } from "./pages/LandingPage";
 import { LimsEnvironmentPage } from "./pages/LimsEnvironmentPage";
+import { OpsOverviewPage } from "./pages/OpsOverviewPage";
 import { SampleDetailPage } from "./pages/SampleDetailPage";
 import { SamplesPage } from "./pages/SamplesPage";
 import {
@@ -63,8 +64,8 @@ createRoot(document.getElementById("root")!).render(
         <Route path="lims/:clientId/:labId/:envId" element={<LimsEnvironmentPage />} />
         <Route path="*" element={<UnmatchedRoute />} />
         <Route path="app" element={<AppShell />}>
-          <Route index element={<SamplesPage view="home" />} />
-          <Route path="ops/accession" element={<SamplesPage view="accession" />} />
+          <Route index element={<OpsOverviewPage />} />
+          <Route path="ops/home" element={<SamplesPage view="home" />} />
           <Route path="ops/testing" element={<SamplesPage view="testing" />} />
           <Route path="ops/review" element={<SamplesPage view="review" />} />
           <Route path="ops/release" element={<SamplesPage view="release" />} />

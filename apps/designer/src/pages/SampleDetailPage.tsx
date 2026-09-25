@@ -11,7 +11,7 @@ export function SampleDetailPage() {
         <p className="lims-eyebrow">Sample</p>
         <h1>Sample not found</h1>
         <p>
-          <Link to="/app">Back to Home</Link>
+          <Link to="/app/ops/home">Back to Home</Link>
         </p>
       </div>
     );
@@ -27,7 +27,7 @@ export function SampleDetailPage() {
             {sample.client} · {sample.tests}
           </p>
         </div>
-        <Link className="btn" to="/app">
+        <Link className="btn" to="/app/ops/home">
           Back to Home
         </Link>
       </div>
