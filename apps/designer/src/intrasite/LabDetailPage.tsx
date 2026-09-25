@@ -86,7 +86,12 @@ export function IntrasiteLabDetailPage() {
 
           <section className="is-panel">
             <div className="is-panel-head">
-              <h2>Modules</h2>
+              <div>
+                <h2>Modules</h2>
+                <p className="is-muted">
+                  Adding and removing a module applies to all installed environments.
+                </p>
+              </div>
               <button type="button" className="btn btn-primary" onClick={() => setModuleOpen(true)}>
                 Add Or Remove Module
               </button>
