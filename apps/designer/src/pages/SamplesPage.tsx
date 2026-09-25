@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
-import { SAMPLES, STATUS_LABEL, type SampleRecord } from "../samples";
+import {
+  approveSamples,
+  reviewStatus,
+  SAMPLES,
+  STATUS_LABEL,
+  useReviewApprovals,
+  type SampleRecord,
+} from "../samples";
 
 type QuickFilter = "all" | "stat" | "testing" | "review" | "hold";
+type ReviewFilter = "individual" | "batch";
 
 const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
   { id: "all", label: "All open" },
@@ -37,7 +45,7 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
   review: {
     eyebrow: "Lab operations",
     title: "Review",
-    lede: "Samples in peer review or QA approval.",
+    lede: "Samples ready for review. Approve one sample, or every sample in a batch, with the same button.",
   },
   release: {
     eyebrow: "Lab operations",
@@ -49,11 +57,11 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
 function matchesView(status: SampleRecord["status"], view: SampleView): boolean {
   if (view === "home") return true;
   if (view === "testing") return status === "testing";
-  if (view === "review") return status === "review" || status === "approval";
+  if (view === "review") return status === "review";
   return status === "released";
 }
 
-function cell(sample: SampleRecord, id: SampleColumnId) {
+function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status) {
   if (id === "accessionId") {
     return (
       <Link className="lims-mono lims-linkish" to={`/app/samples/${sample.accessionId}`}>
@@ -78,7 +86,7 @@ function cell(sample: SampleRecord, id: SampleColumnId) {
     );
   }
   if (id === "status") {
-    return <span className={`lims-status ${sample.status}`}>{STATUS_LABEL[sample.status]}</span>;
+    return <span className={`lims-status ${status}`}>{STATUS_LABEL[status]}</span>;
   }
   if (id === "custody") return sample.custody;
   return sample.site;
@@ -86,13 +94,26 @@ function cell(sample: SampleRecord, id: SampleColumnId) {
 
 export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const { priorities, menu, columns } = useLabOperations();
+  const approved = useReviewApprovals();
   const [filter, setFilter] = useState<QuickFilter>("all");
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
+  const [selected, setSelected] = useState<string | null>(null);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
-  const rows = SAMPLES.filter(
-    (sample) => matchesView(sample.status, view) && matchesQuickFilter(sample, filter)
-  ).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+  const rows = SAMPLES.filter((sample) => {
+    const status = reviewStatus(sample, approved);
+    return matchesView(status, view) && (view === "review" || matchesQuickFilter(sample, filter));
+  }).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+  const reviewRows =
+    reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
+  const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
+  const approveTarget =
+    view !== "review"
+      ? []
+      : reviewFilter === "individual"
+        ? reviewRows.filter((sample) => sample.accessionId === selected)
+        : reviewRows.filter((sample) => sample.batchId === selected);
   const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
     (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
   );
@@ -123,12 +144,25 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <p className="lims-page-lede">{copy.lede}</p>
         </div>
         <div className="lims-page-actions">
-          <button type="button" className="btn">
-            Scan barcode
-          </button>
-          <button type="button" className="btn btn-primary">
-            Receive sample
-          </button>
+          {view === "review" ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={approveTarget.length === 0}
+              onClick={() => approveSamples(approveTarget.map((sample) => sample.accessionId))}
+            >
+              Approve
+            </button>
+          ) : (
+            <>
+              <button type="button" className="btn">
+                Scan barcode
+              </button>
+              <button type="button" className="btn btn-primary">
+                Receive sample
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -163,17 +197,32 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       ) : null}
 
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
-        {QUICK_FILTERS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={`lims-filter${filter === item.id ? " active" : ""}`}
-            aria-pressed={filter === item.id}
-            onClick={() => setFilter(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
+        {view === "review"
+          ? (["individual", "batch"] as const).map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`lims-filter${reviewFilter === item ? " active" : ""}`}
+                aria-pressed={reviewFilter === item}
+                onClick={() => {
+                  setReviewFilter(item);
+                  setSelected(null);
+                }}
+              >
+                {item === "individual" ? "Individual" : "Batch"}
+              </button>
+            ))
+          : QUICK_FILTERS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`lims-filter${filter === item.id ? " active" : ""}`}
+                aria-pressed={filter === item.id}
+                onClick={() => setFilter(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
       </div>
 
       <section className="lims-panel">
@@ -181,27 +230,61 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <table className="lims-table">
             <thead>
               <tr>
+                {view === "review" && reviewFilter === "batch" ? <th>Batch</th> : null}
                 {visible.map((column) => (
                   <th key={column.id}>{column.label}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td className="lims-empty" colSpan={visible.length || 1}>
-                    No samples match this filter.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((sample) => (
-                  <tr key={sample.accessionId}>
-                    {visible.map((column) => (
-                      <td key={column.id}>{cell(sample, column.id)}</td>
+              {view === "review" && reviewFilter === "batch"
+                ? batches.length === 0
+                  ? (
+                    <tr>
+                      <td className="lims-empty" colSpan={(visible.length || 1) + 1}>
+                        No batches are ready for review.
+                      </td>
+                    </tr>
+                  )
+                  : batches.map((batchId) =>
+                      reviewRows
+                        .filter((sample) => sample.batchId === batchId)
+                        .map((sample, index, group) => (
+                          <tr
+                            key={sample.accessionId}
+                            className={selected === batchId ? "is-selected" : ""}
+                            onClick={() => setSelected(batchId)}
+                          >
+                            {index === 0 ? (
+                              <td className="lims-batch" rowSpan={group.length}>
+                                {batchId}
+                              </td>
+                            ) : null}
+                            {visible.map((column) => (
+                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
+                            ))}
+                          </tr>
+                        ))
+                    )
+                : (view === "review" ? reviewRows : rows).length === 0
+                  ? (
+                    <tr>
+                      <td className="lims-empty" colSpan={visible.length || 1}>
+                        {view === "review" ? "No individual samples are ready for review." : "No samples match this filter."}
+                      </td>
+                    </tr>
+                  )
+                  : (view === "review" ? reviewRows : rows).map((sample) => (
+                      <tr
+                        key={sample.accessionId}
+                        className={view === "review" && selected === sample.accessionId ? "is-selected" : ""}
+                        onClick={view === "review" ? () => setSelected(sample.accessionId) : undefined}
+                      >
+                        {visible.map((column) => (
+                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))
-              )}
             </tbody>
           </table>
         </div>
