@@ -40,7 +40,7 @@ function utcOffsetLabel(date: Date): string {
 function PinnedScreen({ tab }: { tab: PinnedTab }) {
   if (tab.kind === "sample") {
     const sample = findSample(tab.recordId);
-    return sample ? <SampleDetailBody sample={sample} /> : null;
+    return sample ? <SampleDetailBody sample={sample} withTabs /> : null;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
@@ -226,7 +226,7 @@ function AppFrame() {
             <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        {sectionTabs.tabs.length > 0 ? (
+        {sectionTabs.tabs.length > 0 && sectionTabs.tabs.find((tab) => tab.id === sectionTabs.activeId)?.kind !== "sample" ? (
           <div className="lims-tabs" role="tablist" aria-label="Screens for this section">
             {sectionTabs.tabs.map((tab) => (
               <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
