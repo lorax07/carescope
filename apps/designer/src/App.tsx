@@ -283,9 +283,10 @@ function AppFrame() {
     );
   }, [navOpen, navPos, edge, viewport, infraOpen, horizontal]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!navOpen || openEdge !== "right") return;
-    const x = Math.max(EDGE_PAD, viewport.width - EDGE_PAD - LAUNCHER);
+    const width = dockRef.current?.offsetWidth ?? LAUNCHER;
+    const x = Math.max(EDGE_PAD, viewport.width - EDGE_PAD - width);
     setNavPos((pos) => (pos.x === x && pos.y === EDGE_PAD ? pos : { x, y: EDGE_PAD }));
   }, [navOpen, openEdge, viewport.width]);
 
@@ -387,7 +388,7 @@ function AppFrame() {
           onPointerDown={beginNavDrag}
         >
           {navOpen ? (
-            <img src="/carescope-mark.png" alt="" />
+            <span className="sequence-wordmark">Sequence</span>
           ) : (
             closedIcons.map((name) => (
               <span key={name} className={`lims-nav-icon${activeSection === name ? " is-current" : ""}`}>
