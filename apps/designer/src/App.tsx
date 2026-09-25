@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
+import { SampleDetailBody } from "./pages/SampleDetailPage";
+import { findSample } from "./samples";
+import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -32,14 +37,39 @@ function utcOffsetLabel(date: Date): string {
   return `UTC${sign}${hours}:${String(minutes).padStart(2, "0")}`;
 }
 
+function PinnedScreen({ tab }: { tab: PinnedTab }) {
+  if (tab.kind === "sample") {
+    const sample = findSample(tab.recordId);
+    return sample ? <SampleDetailBody sample={sample} /> : null;
+  }
+  const instrument = findInstrument(tab.recordId);
+  if (!instrument) return null;
+  return (
+    <div className="lims-page">
+      <section className="lims-panel">
+        <InstrumentRecordView instrument={instrument} />
+      </section>
+    </div>
+  );
+}
+
 /** LIMS application shell */
 export function AppShell() {
+  return (
+    <SectionTabsProvider>
+      <AppFrame />
+    </SectionTabsProvider>
+  );
+}
+
+function AppFrame() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
   const lims = readLimsSession();
   const labOps = useLabOperations();
+  const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const now = useLocalClock();
@@ -134,6 +164,7 @@ export function AppShell() {
                 key={item.id}
                 to={labMenuPath(item.view)}
                 end={item.view === "overview"}
+                onClick={() => sectionTabs.showSection(item.view)}
                 className={({ isActive }) =>
                   `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
                 }
@@ -145,6 +176,7 @@ export function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
               className={({ isActive }) =>
                 `lims-nav-item${isActive ? " active" : ""}`
               }
@@ -194,9 +226,30 @@ export function AppShell() {
             <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        <div className="lims-content">
+        {sectionTabs.tabs.length > 0 ? (
+          <div className="lims-tabs" role="tablist" aria-label="Screens for this section">
+            {sectionTabs.tabs.map((tab) => (
+              <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
+                <button type="button" role="tab" aria-selected={sectionTabs.activeId === tab.id} onClick={() => sectionTabs.select(tab.id)}>
+                  {tab.title}
+                </button>
+                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => sectionTabs.close(tab.id)}>
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <div className="lims-content" hidden={Boolean(sectionTabs.activeId)}>
           <Outlet />
         </div>
+        {sectionTabs.tabs
+          .filter((tab) => tab.id === sectionTabs.activeId)
+          .map((tab) => (
+            <div key={tab.id} className="lims-content">
+              <PinnedScreen tab={tab} />
+            </div>
+          ))}
       </div>
 
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
