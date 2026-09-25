@@ -131,7 +131,7 @@ export function AppShell() {
               <NavLink
                 key={item.id}
                 to={labMenuPath(item.view)}
-                end={item.view === "home"}
+                end={item.view === "overview"}
                 className={({ isActive }) =>
                   `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
                 }

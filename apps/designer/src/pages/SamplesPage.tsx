@@ -21,16 +21,13 @@ function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean 
   return sample.status === "hold";
 }
 
-const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: string }> = {
+type SampleView = Exclude<LabMenuView, "overview">;
+
+const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: string }> = {
   home: {
     eyebrow: "Lab operations",
     title: "Home",
-    lede: "Samples in the laboratory, listed from the highest priority set in Workflow design.",
-  },
-  accession: {
-    eyebrow: "Lab operations",
-    title: "Accession",
-    lede: "Samples waiting to be received into the laboratory.",
+    lede: "Receive, prioritize, and move samples. The list follows the priority order set in Workflow design.",
   },
   testing: {
     eyebrow: "Lab operations",
@@ -49,9 +46,8 @@ const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: str
   },
 };
 
-function matchesView(status: SampleRecord["status"], view: LabMenuView): boolean {
+function matchesView(status: SampleRecord["status"], view: SampleView): boolean {
   if (view === "home") return true;
-  if (view === "accession") return status === "received";
   if (view === "testing") return status === "testing";
   if (view === "review") return status === "review" || status === "approval";
   return status === "released";
@@ -88,7 +84,7 @@ function cell(sample: SampleRecord, id: SampleColumnId) {
   return sample.site;
 }
 
-export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
+export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const { priorities, menu, columns } = useLabOperations();
   const [filter, setFilter] = useState<QuickFilter>("all");
   const copy = VIEW_COPY[view];
@@ -97,6 +93,26 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
   const rows = SAMPLES.filter(
     (sample) => matchesView(sample.status, view) && matchesQuickFilter(sample, filter)
   ).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+  const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
+    (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
+  );
+  const workQueues = [
+    {
+      title: "Waiting to start",
+      hint: "Received and still at intake",
+      rows: open.filter((sample) => sample.status === "received"),
+    },
+    {
+      title: "STAT on the floor",
+      hint: "Highest priority still open",
+      rows: open.filter((sample) => sample.priority === "STAT"),
+    },
+    {
+      title: "Blocked",
+      hint: "On hold until custody or the deviation clears",
+      rows: open.filter((sample) => sample.status === "hold"),
+    },
+  ];
 
   return (
     <div className="lims-page">
@@ -115,6 +131,36 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
           </button>
         </div>
       </div>
+
+      {view === "home" ? (
+        <div className="sample-work-grid">
+          {workQueues.map((queue) => (
+            <section key={queue.title} className="lims-panel">
+              <div className="lims-panel-head">
+                <h2>
+                  {queue.title} <span className="lims-count">{queue.rows.length}</span>
+                </h2>
+              </div>
+              <p className="sample-work-hint">{queue.hint}</p>
+              <ul className="lims-list">
+                {queue.rows.map((sample) => (
+                  <li key={sample.accessionId}>
+                    <div>
+                      <b>
+                        <Link to={`/app/samples/${sample.accessionId}`}>{sample.accessionId}</Link>
+                      </b>
+                      <small>
+                        {sample.client} · {sample.tests}
+                      </small>
+                    </div>
+                    <span className="lims-badge">{sample.site}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : null}
 
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
         {QUICK_FILTERS.map((item) => (

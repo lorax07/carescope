@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type LabMenuView = "home" | "accession" | "testing" | "review" | "release";
+export type LabMenuView = "overview" | "home" | "testing" | "review" | "release";
 
 export type LabMenuItem = {
   id: string;
@@ -39,8 +39,8 @@ const EVENT = "carescope-lab-ops";
 export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
   priorities: ["STAT", "Rush", "Routine"],
   menu: [
+    { id: "overview", label: "Overview", view: "overview", enabled: true },
     { id: "home", label: "Home", view: "home", enabled: true },
-    { id: "accession", label: "Accession", view: "accession", enabled: true },
     { id: "testing", label: "Testing", view: "testing", enabled: true },
     { id: "review", label: "Review", view: "review", enabled: true },
     { id: "release", label: "Release", view: "release", enabled: true },
@@ -59,6 +59,17 @@ export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
   ],
 };
 
+const MENU_VIEWS = new Set(DEFAULT_LAB_OPERATIONS.menu.map((item) => item.view));
+
+function mergeMenu(saved: LabMenuItem[] | undefined): LabMenuItem[] {
+  const known = (saved ?? []).filter((item) => MENU_VIEWS.has(item.view));
+  const seen = new Set(known.map((item) => item.view));
+  const missing = DEFAULT_LAB_OPERATIONS.menu.filter((item) => !seen.has(item.view));
+  const overview = missing.filter((item) => item.view === "overview");
+  const rest = missing.filter((item) => item.view !== "overview");
+  return [...overview, ...known, ...rest];
+}
+
 const COLUMN_IDS = new Set(DEFAULT_LAB_OPERATIONS.columns.map((column) => column.id));
 
 function mergeColumns(saved: SampleColumn[] | undefined): SampleColumn[] {
@@ -73,7 +84,9 @@ function mergeColumns(saved: SampleColumn[] | undefined): SampleColumn[] {
 }
 
 export function labMenuPath(view: LabMenuView): string {
-  return view === "home" ? "/app" : `/app/ops/${view}`;
+  if (view === "overview") return "/app";
+  if (view === "home") return "/app/ops/home";
+  return `/app/ops/${view}`;
 }
 
 export function readLabOperations(): LabOperationsConfig {
@@ -86,7 +99,7 @@ export function readLabOperations(): LabOperationsConfig {
     }
     return {
       priorities: parsed.priorities,
-      menu: parsed.menu,
+      menu: mergeMenu(parsed.menu),
       columns: mergeColumns(parsed.columns),
     };
   } catch {
