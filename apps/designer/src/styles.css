@@ -1207,7 +1207,8 @@ a {
 .receipt-pdf {
   display: block;
   width: 100%;
-  height: min(72vh, 760px);
+  height: 100%;
+  min-height: 0;
   border: 0;
   background: #f4f1ea;
 }
@@ -1497,16 +1498,63 @@ a {
 }
 
 .lims-modal-wide {
-  width: min(960px, 100%);
+  width: min(960px, calc(100vw - 3rem));
+  height: min(78vh, 760px);
 }
 
 .lims-modal {
-  width: min(720px, 100%);
-  max-height: min(80vh, 720px);
-  overflow: auto;
-  background: #fff;
+  display: flex;
+  flex-direction: column;
+  width: min(720px, calc(100vw - 3rem));
+  min-width: 360px;
+  min-height: 220px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+  resize: both;
+  container: dialog / inline-size;
+  padding-bottom: 16px;
+  background:
+    linear-gradient(135deg, transparent 42%, #94a3b8 42% 54%, transparent 54% 66%, #94a3b8 66% 78%, transparent 78%)
+      right 4px bottom 4px / 14px 14px no-repeat,
+    #fff;
   border-radius: 12px;
   border: 1px solid var(--border);
+}
+
+.lims-modal > .lims-dialog-bar,
+.lims-modal > .lims-panel-head,
+.lims-modal > .lims-modal-actions {
+  flex: none;
+}
+
+.lims-modal-body,
+.lims-modal > .lims-page,
+.lims-modal > .receipt-pdf,
+.lims-modal > :not(.lims-dialog-bar):not(.lims-panel-head):not(.lims-modal-actions) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.lims-modal .settings-pin-fields,
+.lims-modal .receive-fields,
+.lims-modal .sample-detail-grid,
+.lims-modal .lims-table {
+  width: 100%;
+  max-width: none;
+}
+
+.lims-modal > .receipt-pdf {
+  height: auto;
+}
+
+@container dialog (max-width: 640px) {
+  .sample-detail-grid,
+  .receive-fields {
+    grid-template-columns: 1fr;
+  }
 }
 
 .lims-modal-body {
@@ -2211,9 +2259,20 @@ button.palette-category-title {
 
 .signup-modal {
   position: relative;
-  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 3rem));
+  min-width: 320px;
+  min-height: 240px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  resize: both;
   border-radius: 16px;
-  background: #fff;
+  background:
+    linear-gradient(135deg, transparent 42%, #94a3b8 42% 54%, transparent 54% 66%, #94a3b8 66% 78%, transparent 78%)
+      right 4px bottom 4px / 14px 14px no-repeat,
+    #fff;
   border: 1px solid var(--border);
   box-shadow: 0 24px 60px rgba(15, 23, 36, 0.22);
   padding: 1.25rem 1.3rem 1.35rem;
@@ -2274,6 +2333,7 @@ button.palette-category-title {
 .signup-modal-form {
   display: grid;
   gap: 0.75rem;
+  flex: 1;
 }
 
 .signup-modal-form label {
@@ -2286,6 +2346,7 @@ button.palette-category-title {
 }
 
 .signup-modal-form input {
+  width: 100%;
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0.65rem 0.75rem;
