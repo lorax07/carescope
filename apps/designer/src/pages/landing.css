@@ -1590,8 +1590,9 @@ body:has(.lp) {
 }
 
 .lp-header-logo {
-  height: 3.45rem;
-  width: auto;
+  height: 56px;
+  width: 224px;
+  image-rendering: auto;
 }
 
 .lp-logo-sequence {
@@ -1785,6 +1786,27 @@ body:has(.lp) {
 .lp-brand-lockup,
 .lp-footer {
   background: #f6f5f4;
+}
+
+.lp-page,
+.lp,
+.lp-nav,
+.lp-section-head h2,
+.lp-platform h2,
+.lp-h2,
+.lp-logo-sequence,
+.lp-cycle-face h3,
+.lp-cycle-cost {
+  font-family: Inter, "Source Sans 3", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.lp-nav-links,
+.lp-nav-links a,
+.lp-nav-text {
+  letter-spacing: -0.011em;
 }
 
 .lp-spotlight {
