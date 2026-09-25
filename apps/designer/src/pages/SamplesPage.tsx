@@ -157,7 +157,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         type="button"
         className="btn btn-mini"
         style={buttonStyle(viewResultsButton.color)}
-        onClick={() => setResultWindow({ samples: [sample], authorize: false })}
+        onClick={() => setResultWindow({ samples: [sample], authorize: true })}
       >
         {viewResultsButton.label}
       </button>
