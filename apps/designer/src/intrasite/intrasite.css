@@ -641,24 +641,40 @@
   padding: 1rem;
 }
 
-.is-case {
-  width: min(880px, 100%);
-  max-height: min(92vh, 900px);
+.is-case,
+.is-form-dialog {
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 240px;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
   overflow: auto;
+  resize: both;
   background: #fff;
   border-radius: 16px;
   padding: 1.2rem 1.3rem 1.4rem;
   box-shadow: var(--shadow);
 }
 
+.is-case {
+  width: min(880px, calc(100vw - 3rem));
+}
+
 .is-form-dialog {
-  width: min(440px, 100%);
-  max-height: min(92vh, 900px);
-  overflow: auto;
-  background: #fff;
-  border-radius: 16px;
-  padding: 1.2rem 1.3rem 1.4rem;
-  box-shadow: var(--shadow);
+  width: min(440px, calc(100vw - 3rem));
+}
+
+.is-form-dialog form,
+.is-case form {
+  flex: 1;
+  min-width: 0;
+}
+
+.is-dialog-form input,
+.is-dialog-form select,
+.is-dialog-form textarea {
+  width: 100%;
 }
 
 .is-env-launch {
