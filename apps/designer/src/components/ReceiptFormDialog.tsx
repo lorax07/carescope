@@ -20,7 +20,7 @@ export function ReceiptFormDialog({ sample, onClose }: { sample: SampleRecord; o
         onClick={(event) => event.stopPropagation()}
       >
         <div className="lims-dialog-bar">
-          <button type="button" onClick={onClose}>
+          <button type="button" className="btn" onClick={onClose}>
             Close
           </button>
         </div>

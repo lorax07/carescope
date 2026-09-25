@@ -451,7 +451,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
             <div className="lims-dialog-bar">
               <button
                 type="button"
-                className="dialog-pin"
+                className="btn btn-primary"
                 onClick={() => {
                   sectionTabs.pin({ kind: "sample", recordId: openSample.accessionId, title: openSample.accessionId });
                   setOpenSample(null);
@@ -459,7 +459,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               >
                 Tab screen
               </button>
-              <button type="button" onClick={() => setOpenSample(null)}>
+              <button type="button" className="btn" onClick={() => setOpenSample(null)}>
                 Close
               </button>
             </div>
