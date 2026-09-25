@@ -392,6 +392,7 @@ a {
   display: flex;
   align-items: center;
   gap: 0.65rem;
+  width: 100%;
   padding: 0.45rem;
 }
 
@@ -404,6 +405,60 @@ a {
   background: #1b6ef3;
   color: #fff;
   font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.lims-settings {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #c5d4ea;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+
+.lims-settings:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.settings-option h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.settings-pin-fields {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 16rem;
+}
+
+.settings-pin-fields label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.settings-pin-fields input,
+.result-flag-pin input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+}
+
+.settings-error {
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.result-flag-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 

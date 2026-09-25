@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { readLimsSession } from "../limsSession";
+import { pinState, verifyReviewerPin } from "../reviewerPin";
 import { sampleResults, type SampleRecord } from "../samples";
 
 const REASONS = ["Out of limit", "Recheck", "Unexpected"] as const;
 
-type Flag = { reason: (typeof REASONS)[number] };
+type Flag = { reason: (typeof REASONS)[number]; by: string };
 
 const flags = new Map<string, Flag>();
 const listeners = new Set<() => void>();
@@ -44,10 +46,36 @@ export function ResultWindow({
   const planted = useFlags();
   const [armed, setArmed] = useState(false);
   const [pending, setPending] = useState<string | null>(null);
+  const [draftReason, setDraftReason] = useState<(typeof REASONS)[number] | null>(null);
+  const [pin, setPin] = useState("");
+  const [pinError, setPinError] = useState("");
 
   function plant(key: string) {
     setPending(key);
+    setDraftReason(null);
+    setPin("");
+    setPinError("");
     setArmed(false);
+  }
+
+  function confirmFlag(key: string) {
+    if (!draftReason) {
+      setPinError("Choose a reason first.");
+      return;
+    }
+    const status = pinState();
+    if (status !== "active") {
+      setPinError("Set a reviewer PIN in Settings. A PIN lasts 90 days.");
+      return;
+    }
+    if (!verifyReviewerPin(pin)) {
+      setPinError("PIN does not match.");
+      return;
+    }
+    const session = readLimsSession();
+    setFlag(key, { reason: draftReason, by: session?.username ?? "M. Chen" });
+    setPin("");
+    setPinError("");
   }
 
   return (
@@ -139,24 +167,45 @@ export function ResultWindow({
                   <div key={key} className="result-flag-note">
                     <b>
                       {row.analyte}
-                      {flag ? ` · ${flag.reason}` : ""}
+                      {flag ? ` · ${flag.reason} · ${flag.by}` : draftReason ? ` · ${draftReason}` : ""}
                     </b>
                     <div>
                       {REASONS.map((reason) => (
                         <button
                           key={reason}
                           type="button"
-                          className={`btn btn-mini${flag?.reason === reason ? " is-on" : ""}`}
-                          onClick={() => setFlag(key, { reason })}
+                          className={`btn btn-mini${(flag?.reason ?? draftReason) === reason ? " is-on" : ""}`}
+                          onClick={() => {
+                            setDraftReason(reason);
+                            setPinError("");
+                          }}
                         >
                           {reason}
                         </button>
                       ))}
+                      {pending === key && !flag ? (
+                        <label className="result-flag-pin">
+                          PIN
+                          <input
+                            type="password"
+                            inputMode="numeric"
+                            aria-label="Reviewer PIN"
+                            value={pin}
+                            onChange={(event) => setPin(event.target.value)}
+                          />
+                        </label>
+                      ) : null}
+                      {pending === key && !flag ? (
+                        <button type="button" className="btn btn-mini" onClick={() => confirmFlag(key)}>
+                          Confirm
+                        </button>
+                      ) : null}
                       {flag ? (
                         <button type="button" className="btn btn-mini" onClick={() => setFlag(key, null)}>
                           Clear
                         </button>
                       ) : null}
+                      {pinError && pending === key ? <span className="settings-error">{pinError}</span> : null}
                     </div>
                   </div>
                 );

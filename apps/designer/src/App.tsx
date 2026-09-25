@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { labMenuPath, useLabOperations } from "./labOperations";
@@ -40,6 +41,7 @@ export function AppShell() {
   const lims = readLimsSession();
   const labOps = useLabOperations();
   const [infraOpen, setInfraOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const now = useLocalClock();
   const signedInName = lims?.username ?? "M. Chen";
 
@@ -159,6 +161,19 @@ export function AppShell() {
               <b>{lims ? lims.username : "M. Chen"}</b>
               <small>{lims ? `${lims.clientName} LIMS` : "Lab Analyst"}</small>
             </div>
+            <button
+              type="button"
+              className="lims-settings"
+              aria-label="Settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M19.4 13a7.8 7.8 0 0 0 .1-1 7.8 7.8 0 0 0-.1-1l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.4a.5.5 0 0 0-.6-.2l-2.5 1a7.4 7.4 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4L9.1 4.2a7.4 7.4 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.4a.5.5 0 0 0 .1.6L4.6 11a7.8 7.8 0 0 0-.1 1 7.8 7.8 0 0 0 .1 1l-2.1 1.6a.5.5 0 0 0-.1.6l2 3.4a.5.5 0 0 0 .6.2l2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1a.5.5 0 0 0 .6-.2l2-3.4a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
@@ -185,6 +200,7 @@ export function AppShell() {
       </div>
 
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
+      {settingsOpen ? <SettingsDialog onClose={() => setSettingsOpen(false)} /> : null}
     </div>
   );
 }
