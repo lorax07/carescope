@@ -7,7 +7,7 @@ import { readLimsSession } from "./limsSession";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
-  { to: "/app/instruments", label: "Instrument Integration" },
+  { to: "/app/instruments", label: "Instrument Interface" },
   { to: "/app/connectivity", label: "Healthcare CRM" },
   { to: "/app/quality", label: "Quality & Compliance" },
   { to: "/app/insights", label: "Insights" },
