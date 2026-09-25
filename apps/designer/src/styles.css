@@ -72,9 +72,14 @@ a {
 .lims-nav-dock {
   position: fixed;
   z-index: 30;
+  width: max-content;
+  height: max-content;
+  overflow: visible;
+}
+
+.lims-nav-dock.is-open {
   width: 52px;
   height: 52px;
-  overflow: visible;
 }
 
 .lims-nav-launcher {
@@ -96,6 +101,23 @@ a {
 .lims-nav-dock.is-open .lims-nav-launcher,
 .lims-nav-dock.is-open .lims-nav-launcher:active {
   cursor: pointer;
+}
+
+.lims-nav-launcher.is-icons {
+  width: auto;
+  height: auto;
+  border-radius: 18px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.lims-nav-launcher.is-icons .lims-nav-icon.is-current {
+  background: #1b6ef3;
+  border-color: #1b6ef3;
+  color: #fff;
 }
 
 .lims-nav-launcher img {

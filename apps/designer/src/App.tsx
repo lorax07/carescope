@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
-import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { findInstrument } from "./instruments";
@@ -33,9 +33,9 @@ const LAUNCHER = 52;
 const PANEL_GAP = 8;
 const EDGE_PAD = 16;
 
-function openEdgeFor(x: number, y: number, width: number): OpenEdge {
-  const cx = x + LAUNCHER / 2;
-  const cy = y + LAUNCHER / 2;
+function openEdgeFor(x: number, y: number, dockWidth: number, dockHeight: number, width: number): OpenEdge {
+  const cx = x + dockWidth / 2;
+  const cy = y + dockHeight / 2;
   const distances: Record<OpenEdge, number> = {
     top: cy,
     left: cx,
@@ -218,6 +218,8 @@ function AppFrame() {
   );
   const lims = readLimsSession();
   const labOps = useLabOperations();
+  const location = useLocation();
+  const activeSection = sectionFromPath(location.pathname);
   const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -288,7 +290,14 @@ function AppFrame() {
   }, [navOpen, openEdge, viewport.width]);
 
   function placeOpen(from: { x: number; y: number }) {
-    const nextEdge = openEdgeFor(from.x, from.y, window.innerWidth);
+    const dockBox = dockRef.current?.getBoundingClientRect();
+    const nextEdge = openEdgeFor(
+      from.x,
+      from.y,
+      dockBox?.width ?? LAUNCHER,
+      dockBox?.height ?? LAUNCHER,
+      window.innerWidth,
+    );
     const next = snappedPos(nextEdge, window.innerWidth);
     parkedRef.current = from;
     setOpenEdge(nextEdge);
@@ -318,8 +327,11 @@ function AppFrame() {
       const dy = ev.clientY - startY;
       if (Math.hypot(dx, dy) > 4) moved = true;
       if (wasOpen) return;
-      const x = Math.min(Math.max(8, origin.x + dx), window.innerWidth - 68);
-      const y = Math.min(Math.max(8, origin.y + dy), window.innerHeight - 68);
+      const bounds = dockRef.current?.getBoundingClientRect();
+      const limitX = window.innerWidth - Math.ceil(bounds?.width ?? LAUNCHER) - 8;
+      const limitY = window.innerHeight - Math.ceil(bounds?.height ?? LAUNCHER) - 8;
+      const x = Math.min(Math.max(8, origin.x + dx), Math.max(8, limitX));
+      const y = Math.min(Math.max(8, origin.y + dy), Math.max(8, limitY));
       const next = { x, y };
       navPosRef.current = next;
       setNavPos(next);
@@ -349,6 +361,10 @@ function AppFrame() {
   }
 
   const panelStyle = panelPlacement(edge, navPos.x, navPos.y, viewport.width, viewport.height);
+  const closedIcons = [
+    ...labOps.menu.filter((item) => item.enabled && item.label.trim()).map((item) => item.view),
+    ...NAV.map((item) => sectionFromPath(item.to)),
+  ];
 
   return (
     <div
@@ -365,12 +381,20 @@ function AppFrame() {
       <div ref={dockRef} className={`lims-nav-dock${navOpen ? ` is-open is-${edge}` : ""}`} style={{ left: navPos.x, top: navPos.y }}>
         <button
           type="button"
-          className="lims-nav-launcher"
+          className={`lims-nav-launcher${navOpen ? "" : " is-icons"}`}
           aria-expanded={navOpen}
           aria-label={navOpen ? "Collapse navigation" : "Expand navigation"}
           onPointerDown={beginNavDrag}
         >
-          <img src="/carescope-mark.png" alt="" />
+          {navOpen ? (
+            <img src="/carescope-mark.png" alt="" />
+          ) : (
+            closedIcons.map((name) => (
+              <span key={name} className={`lims-nav-icon${activeSection === name ? " is-current" : ""}`}>
+                <NavIcon name={name} />
+              </span>
+            ))
+          )}
         </button>
       {navOpen ? (
       <aside ref={panelRef} className="lims-sidebar" style={panelStyle}>
