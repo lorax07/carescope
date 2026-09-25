@@ -102,7 +102,7 @@ export type InstallationNode = {
   connectsTo: string[];
 };
 
-export type QueryEnvironmentId = "dev1" | "dev2" | "qa";
+export type QueryEnvironmentId = "dev1" | "dev2" | "qa" | "prod";
 
 export type QueryEnvironment = {
   id: QueryEnvironmentId;

@@ -61,8 +61,8 @@ export function IntrasiteLabDetailPage() {
           </p>
           <h1>{lab?.name ?? "Lab instance"}</h1>
           <p>
-            Instance details for this lab, including the modules it runs and the Dev1, Dev2, and QA
-            installations it is mapped to.
+            Instance details for this lab, including the modules it runs and the Dev1, Dev2, QA, and
+            Production installations it is mapped to.
           </p>
         </div>
       </header>
@@ -106,13 +106,13 @@ export function IntrasiteLabDetailPage() {
 
           <section className="is-panel">
             <h2>Installations</h2>
-            <p className="is-muted">This lab instance is mapped onto Dev1, Dev2, and QA.</p>
+            <p className="is-muted">This lab instance is mapped onto Dev1, Dev2, QA, and Production.</p>
             <div className="is-contact-grid">
               {(dossier?.infrastructure.environments ?? []).map((env) => (
                 <button
                   key={env.id}
                   type="button"
-                  className="is-contact-card is-env-launch"
+                  className={`is-contact-card is-env-launch${env.id === "prod" ? " is-env-production" : ""}`}
                   onClick={() => {
                     const url = `/lims/${id}/${lab.id}/${env.id}`;
                     window.open(url, `lims-${lab.id}-${env.id}`, "width=1280,height=840");

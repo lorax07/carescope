@@ -651,6 +651,10 @@
   border-color: #1b6ef3;
 }
 
+.is-env-production {
+  border-color: #1b6ef3;
+}
+
 .is-ticket-preview {
   margin-top: 0.35rem;
   color: var(--text-muted);
