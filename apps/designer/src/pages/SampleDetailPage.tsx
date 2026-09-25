@@ -68,7 +68,7 @@ export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
 
         <section className="lims-panel sample-detail-panel sample-account-panel">
           <div className="lims-panel-head">
-            <h2>Account record</h2>
+            <h2>Sample metadata</h2>
           </div>
           <dl className="sample-detail-fields">
             <div>
@@ -76,15 +76,16 @@ export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
               <dd className="lims-mono">{sample.sampleId}</dd>
             </div>
             <div>
+              <dt>Account ID</dt>
+              <dd className="lims-mono">{sample.accountId}</dd>
+            </div>
+            <div>
               <dt>Account</dt>
               <dd>{sample.accountName}</dd>
             </div>
             <div>
-              <dt>How it is assigned</dt>
-              <dd>
-                Sample ID counts samples logged on this account. North Lab and East Lab share
-                the same sequence.
-              </dd>
+              <dt>Batch ID</dt>
+              <dd className="lims-mono">{sample.batchId ?? "—"}</dd>
             </div>
           </dl>
         </section>
