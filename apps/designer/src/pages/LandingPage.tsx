@@ -10,7 +10,9 @@ export function LandingPage() {
           <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
             <img
               className="lp-header-logo"
-              src="/carescope-parent-logo.png"
+              src="/carescope-header-logo.png"
+              width={224}
+              height={56}
               alt="CareScope. Building Better Healthcare for Everyone."
             />
             <span className="lp-logo-rule" aria-hidden="true" />
