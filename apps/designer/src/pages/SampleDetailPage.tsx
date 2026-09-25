@@ -1,9 +1,23 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
 import { useSectionTabs } from "../sectionTabs";
 
+function FolderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M3.5 6.5A2.5 2.5 0 0 1 6 4h4.1a2 2 0 0 1 1.4.6l1.2 1.2H18A2.5 2.5 0 0 1 20.5 8.3v9.2A2.5 2.5 0 0 1 18 20H6a2.5 2.5 0 0 1-2.5-2.5v-11z"
+      />
+    </svg>
+  );
+}
+
 export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleRecord; withTabs?: boolean }) {
   const sectionTabs = useSectionTabs();
+  const [attachmentOpen, setAttachmentOpen] = useState(false);
   return (
     <div className="lims-page">
       <div className="sample-tab-row">
@@ -25,14 +39,10 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
           </div>
         ) : null}
       </div>
-      <p className="lims-eyebrow">Sample</p>
       <div className="lims-page-header">
-        <div>
-          <h1>{sample.sampleId}</h1>
-          <p className="lims-page-lede">
-            {sample.client} · {sample.tests}
-          </p>
-        </div>
+        <p className="lims-page-lede">
+          {sample.client} · {sample.tests}
+        </p>
       </div>
 
       <div className="sample-detail-grid">
@@ -48,6 +58,19 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
             <div>
               <dt>Order ID</dt>
               <dd className="lims-mono">{sample.orderId}</dd>
+            </div>
+            <div>
+              <dt>Sample attachment</dt>
+              <dd>
+                <button
+                  type="button"
+                  className="receipt-folder"
+                  aria-label={`Scanned paperwork for ${sample.orderId}`}
+                  onClick={() => setAttachmentOpen(true)}
+                >
+                  <FolderIcon />
+                </button>
+              </dd>
             </div>
             <div>
               <dt>Received</dt>
@@ -108,6 +131,7 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
           </dl>
         </section>
       </div>
+      {attachmentOpen ? <ReceiptFormDialog sample={sample} onClose={() => setAttachmentOpen(false)} /> : null}
     </div>
   );
 }
