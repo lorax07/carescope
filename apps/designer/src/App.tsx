@@ -408,7 +408,6 @@ function AppFrame() {
                 end={item.view === "overview"}
                 onClick={() => {
                   sectionTabs.showSection(item.view);
-                  setNavOpen(false);
                 }}
                 className={({ isActive }) =>
                   `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
@@ -426,7 +425,6 @@ function AppFrame() {
               to={item.to}
               onClick={() => {
                 sectionTabs.showSection(sectionFromPath(item.to));
-                setNavOpen(false);
               }}
               className={({ isActive }) =>
                 `lims-nav-item${isActive ? " active" : ""}`
