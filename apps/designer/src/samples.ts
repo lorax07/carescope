@@ -206,6 +206,38 @@ export function isResulted(sample: SampleRecord): boolean {
   return sample.accessionId in RESULTS;
 }
 
+export function testNames(sample: SampleRecord): string[] {
+  return sample.tests.split(",").map((name) => name.trim()).filter(Boolean);
+}
+
+const assignedBatches = new Map<string, string>();
+const batchListeners = new Set<() => void>();
+let nextBatch = 1201;
+
+export function useAssignedBatches(): Map<string, string> {
+  const [batches, setBatches] = useState(() => new Map(assignedBatches));
+  useEffect(() => {
+    const sync = () => setBatches(new Map(assignedBatches));
+    batchListeners.add(sync);
+    return () => {
+      batchListeners.delete(sync);
+    };
+  }, []);
+  return batches;
+}
+
+export function assignBatch(accessionIds: string[]): string {
+  const batchId = `B-${nextBatch}`;
+  nextBatch += 1;
+  for (const id of accessionIds) assignedBatches.set(id, batchId);
+  batchListeners.forEach((listener) => listener());
+  return batchId;
+}
+
+export function sampleBatchId(sample: SampleRecord, assigned: Map<string, string>): string | null {
+  return assigned.get(sample.accessionId) ?? sample.batchId;
+}
+
 export function findSample(accessionId: string): SampleRecord | undefined {
   return SAMPLES.find((sample) => sample.accessionId === accessionId);
 }

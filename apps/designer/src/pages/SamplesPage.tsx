@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ResultWindow } from "../components/ResultWindow";
-import { priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
+import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import {
   approveSamples,
+  assignBatch,
   isResulted,
   reviewStatus,
   SAMPLES,
   STATUS_LABEL,
+  testNames,
   useReviewApprovals,
   type SampleRecord,
 } from "../samples";
@@ -95,19 +98,27 @@ function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status) 
 }
 
 export function SamplesPage({ view = "home" }: { view?: SampleView }) {
-  const { priorities, menu, columns } = useLabOperations();
+  const { priorities, menu, columns, buttons } = useLabOperations();
   const approved = useReviewApprovals();
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
+  const [testFilter, setTestFilter] = useState("");
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchFromSelection, setBatchFromSelection] = useState(false);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
-  const rows = SAMPLES.filter((sample) => {
+  const contextRows = SAMPLES.filter((sample) => {
     const status = reviewStatus(sample, approved);
-    return matchesView(sample, status, view) && (view === "review" || matchesQuickFilter(sample, filter));
-  }).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+    return matchesView(sample, status, view);
+  });
+  const testOptions = [...new Set(contextRows.flatMap(testNames))].sort();
+  const rows = contextRows
+    .filter((sample) => view === "review" || matchesQuickFilter(sample, filter))
+    .filter((sample) => !testFilter || testNames(sample).includes(testFilter))
+    .sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
   const reviewRows =
     reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
   const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
@@ -134,17 +145,31 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       return next;
     });
   }
+  const pageButtons = buttons.filter((button) => button.enabled && button.views.includes(view) && button.id !== "viewResults");
+  const viewResultsButton = buttons.find((button) => button.id === "viewResults");
+
   function resultButton(sample: SampleRecord) {
-    if (!isResulted(sample)) return null;
+    if (!isResulted(sample) || !viewResultsButton?.enabled) return null;
     return (
       <button
         type="button"
         className="btn btn-mini"
+        style={buttonStyle(viewResultsButton.color)}
         onClick={() => setResultWindow({ samples: [sample], authorize: false })}
       >
-        View Results
+        {viewResultsButton.label}
       </button>
     );
+  }
+
+  function runButton(id: string) {
+    if (id === "createBatch") {
+      setBatchFromSelection(listed.some((sample) => checked.has(sample.accessionId)));
+      setBatchOpen(true);
+    }
+    if (id === "completeReview" && approveTarget.length > 0) {
+      setResultWindow({ samples: approveTarget, authorize: true });
+    }
   }
 
   const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
@@ -177,25 +202,18 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <p className="lims-page-lede">{copy.lede}</p>
         </div>
         <div className="lims-page-actions">
-          {view === "review" ? (
+          {pageButtons.map((button) => (
             <button
+              key={button.id}
               type="button"
-              className="btn btn-primary"
-              disabled={approveTarget.length === 0}
-              onClick={() => setResultWindow({ samples: approveTarget, authorize: true })}
+              className="btn"
+              style={buttonStyle(button.color)}
+              disabled={button.id === "completeReview" && approveTarget.length === 0}
+              onClick={() => runButton(button.id)}
             >
-              Complete Review
+              {button.label}
             </button>
-          ) : (
-            <>
-              <button type="button" className="btn">
-                Scan barcode
-              </button>
-              <button type="button" className="btn btn-primary">
-                Receive sample
-              </button>
-            </>
-          )}
+          ))}
         </div>
       </div>
 
@@ -238,6 +256,17 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       ) : null}
 
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
+        <label className="lims-test-filter">
+          Tests
+          <select aria-label="Tests" value={testFilter} onChange={(event) => setTestFilter(event.target.value)}>
+            <option value="">All tests</option>
+            {testOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
         {view === "review"
           ? (["individual", "batch"] as const).map((item) => (
               <button
@@ -363,6 +392,20 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           </table>
         </div>
       </section>
+
+      {batchOpen ? (
+        <CreateBatchDialog
+          fromSelection={batchFromSelection}
+          pool={
+            batchFromSelection ? listed.filter((sample) => checked.has(sample.accessionId)) : listed
+          }
+          onClose={() => setBatchOpen(false)}
+          onCreate={(samples) => {
+            assignBatch(samples.map((sample) => sample.accessionId));
+            setBatchOpen(false);
+          }}
+        />
+      ) : null}
 
       {resultWindow ? (
         <ResultWindow
