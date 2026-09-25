@@ -88,6 +88,12 @@ a {
   text-decoration: none;
 }
 
+.cs-mark {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
 .lims-brand strong {
   display: block;
   font-family: var(--font-display);
