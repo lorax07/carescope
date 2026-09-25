@@ -1501,12 +1501,23 @@ a {
 }
 
 .palette-category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim);
   padding: 0.35rem 0.4rem;
+  background: none;
+  border: 0;
+  text-align: left;
+}
+
+button.palette-category-title {
+  cursor: pointer;
 }
 
 .palette-item {

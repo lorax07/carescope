@@ -1,6 +1,8 @@
 import { useMemo, useState, type DragEvent } from "react";
 import type { NodePlugin } from "@carescope/workflow-core";
 
+const COLLAPSIBLE = new Set(["flow", "human", "logic", "laboratory"]);
+
 const CATEGORY_ORDER = [
   "flow",
   "human",
@@ -21,6 +23,7 @@ interface Props {
 
 export function NodePalette({ plugins }: Props) {
   const [query, setQuery] = useState("");
+  const [closed, setClosed] = useState<Set<string>>(() => new Set());
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -67,10 +70,33 @@ export function NodePalette({ plugins }: Props) {
         />
       </div>
       <div className="palette-body">
-        {grouped.map((group) => (
+        {grouped.map((group) => {
+          const collapsible = COLLAPSIBLE.has(group.category);
+          const open = !collapsible || !closed.has(group.category);
+          return (
           <div key={group.category} className="palette-category">
-            <div className="palette-category-title">{group.category}</div>
-            {group.items.map((plugin) => (
+            {collapsible ? (
+              <button
+                type="button"
+                className="palette-category-title"
+                aria-expanded={open}
+                onClick={() =>
+                  setClosed((current) => {
+                    const next = new Set(current);
+                    if (next.has(group.category)) next.delete(group.category);
+                    else next.add(group.category);
+                    return next;
+                  })
+                }
+              >
+                <span aria-hidden="true">{open ? "▾" : "▸"}</span>
+                {group.category}
+              </button>
+            ) : (
+              <div className="palette-category-title">{group.category}</div>
+            )}
+            {open
+              ? group.items.map((plugin) => (
               <div
                 key={plugin.type}
                 className="palette-item"
@@ -84,9 +110,11 @@ export function NodePalette({ plugins }: Props) {
                 />
                 <span>{plugin.label}</span>
               </div>
-            ))}
+            ))
+              : null}
           </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );
