@@ -42,7 +42,7 @@ export function InstrumentRecordView({
         </div>
         {onOpenWindow ? (
           <button type="button" className="btn" onClick={onOpenWindow}>
-            Open in Tab View
+            Tab screen
           </button>
         ) : null}
       </div>

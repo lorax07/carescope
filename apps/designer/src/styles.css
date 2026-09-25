@@ -1192,6 +1192,10 @@ a {
   padding: 1.5rem;
 }
 
+.lims-modal-wide {
+  width: min(960px, 100%);
+}
+
 .lims-modal {
   width: min(720px, 100%);
   max-height: min(80vh, 720px);

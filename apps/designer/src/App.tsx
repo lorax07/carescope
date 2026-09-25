@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
-import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { findInstrument } from "./instruments";
-import { labMenuPath, useLabOperations, type LabOperationsConfig } from "./labOperations";
+import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
+import { SampleDetailBody } from "./pages/SampleDetailPage";
+import { findSample } from "./samples";
+import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -13,24 +17,6 @@ const NAV = [
   { to: "/app/quality", label: "Quality & Compliance" },
   { to: "/app/insights", label: "Insights" },
 ] as const;
-
-type AppTab = { path: string; title: string };
-
-function tabTitle(path: string, labOps: LabOperationsConfig): string {
-  const menuLabel = (view: LabOperationsConfig["menu"][number]["view"]) =>
-    labOps.menu.find((item) => item.view === view)?.label;
-  if (path === "/app" || path === "/app/") return menuLabel("overview") || "Overview";
-  if (path === labMenuPath("home") || path === "/app/samples") return menuLabel("home") || "Home";
-  if (path === labMenuPath("testing")) return menuLabel("testing") || "Testing";
-  if (path === labMenuPath("review")) return menuLabel("review") || "Review";
-  if (path === labMenuPath("release")) return menuLabel("release") || "Release";
-  if (path === "/app/instruments") return "Instrument Interface";
-  const instrument = path.match(/^\/app\/instruments\/([^/]+)$/);
-  if (instrument) return findInstrument(decodeURIComponent(instrument[1]))?.name || "Instrument";
-  const sample = path.match(/^\/app\/samples\/([^/]+)$/);
-  if (sample) return decodeURIComponent(sample[1]);
-  return NAV.find((item) => item.to === path)?.label || "Sequence";
-}
 
 function useLocalClock(): Date {
   const [now, setNow] = useState(() => new Date());
@@ -51,45 +37,43 @@ function utcOffsetLabel(date: Date): string {
   return `UTC${sign}${hours}:${String(minutes).padStart(2, "0")}`;
 }
 
+function PinnedScreen({ tab }: { tab: PinnedTab }) {
+  if (tab.kind === "sample") {
+    const sample = findSample(tab.recordId);
+    return sample ? <SampleDetailBody sample={sample} /> : null;
+  }
+  const instrument = findInstrument(tab.recordId);
+  if (!instrument) return null;
+  return (
+    <div className="lims-page">
+      <section className="lims-panel">
+        <InstrumentRecordView instrument={instrument} />
+      </section>
+    </div>
+  );
+}
+
 /** LIMS application shell */
 export function AppShell() {
+  return (
+    <SectionTabsProvider>
+      <AppFrame />
+    </SectionTabsProvider>
+  );
+}
+
+function AppFrame() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
   const lims = readLimsSession();
   const labOps = useLabOperations();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [tabs, setTabs] = useState<AppTab[]>([]);
+  const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const now = useLocalClock();
   const signedInName = lims?.username ?? "M. Chen";
-
-  useEffect(() => {
-    const path = location.pathname;
-    if (!path.startsWith("/app")) return;
-    const title = tabTitle(path, labOps);
-    setTabs((current) => {
-      const existing = current.find((tab) => tab.path === path);
-      if (!existing) return [...current, { path, title }];
-      if (existing.title === title) return current;
-      return current.map((tab) => (tab.path === path ? { ...tab, title } : tab));
-    });
-  }, [location.pathname, labOps]);
-
-  function closeTab(path: string) {
-    setTabs((current) => {
-      if (current.length < 2) return current;
-      const index = current.findIndex((tab) => tab.path === path);
-      const next = current.filter((tab) => tab.path !== path);
-      if (location.pathname === path && next.length) {
-        navigate(next[Math.max(0, index - 1)].path);
-      }
-      return next;
-    });
-  }
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -180,6 +164,7 @@ export function AppShell() {
                 key={item.id}
                 to={labMenuPath(item.view)}
                 end={item.view === "overview"}
+                onClick={() => sectionTabs.showSection(item.view)}
                 className={({ isActive }) =>
                   `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
                 }
@@ -191,6 +176,7 @@ export function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
               className={({ isActive }) =>
                 `lims-nav-item${isActive ? " active" : ""}`
               }
@@ -240,23 +226,30 @@ export function AppShell() {
             <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        <div className="lims-tabs" role="tablist" aria-label="Open views">
-          {tabs.map((tab) => (
-            <div key={tab.path} className={`lims-tab${location.pathname === tab.path ? " active" : ""}`}>
-              <button type="button" role="tab" aria-selected={location.pathname === tab.path} onClick={() => navigate(tab.path)}>
-                {tab.title}
-              </button>
-              {tabs.length > 1 ? (
-                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => closeTab(tab.path)}>
+        {sectionTabs.tabs.length > 0 ? (
+          <div className="lims-tabs" role="tablist" aria-label="Screens for this section">
+            {sectionTabs.tabs.map((tab) => (
+              <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
+                <button type="button" role="tab" aria-selected={sectionTabs.activeId === tab.id} onClick={() => sectionTabs.select(tab.id)}>
+                  {tab.title}
+                </button>
+                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => sectionTabs.close(tab.id)}>
                   ×
                 </button>
-              ) : null}
-            </div>
-          ))}
-        </div>
-        <div className="lims-content">
+              </div>
+            ))}
+          </div>
+        ) : null}
+        <div className="lims-content" hidden={Boolean(sectionTabs.activeId)}>
           <Outlet />
         </div>
+        {sectionTabs.tabs
+          .filter((tab) => tab.id === sectionTabs.activeId)
+          .map((tab) => (
+            <div key={tab.id} className="lims-content">
+              <PinnedScreen tab={tab} />
+            </div>
+          ))}
       </div>
 
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />

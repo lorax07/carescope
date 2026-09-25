@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { SampleDetailBody } from "./SampleDetailPage";
+import { useSectionTabs } from "../sectionTabs";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
@@ -67,12 +69,12 @@ function matchesView(sample: SampleRecord, status: SampleRecord["status"], view:
   return status === "released";
 }
 
-function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status) {
+function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status, onOpen?: (sample: SampleRecord) => void) {
   if (id === "accessionId") {
     return (
-      <Link className="lims-mono lims-linkish" to={`/app/samples/${sample.accessionId}`}>
+      <button type="button" className="lims-mono lims-linkish instrument-link" onClick={() => onOpen?.(sample)}>
         {sample.accessionId}
-      </Link>
+      </button>
     );
   }
   if (id === "orderId") return <span className="lims-mono">{sample.orderId}</span>;
@@ -102,6 +104,8 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const { priorities, menu, columns, buttons } = useLabOperations();
   const approved = useReviewApprovals();
   const planted = useResultFlags();
+  const sectionTabs = useSectionTabs();
+  const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
@@ -241,7 +245,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                     />
                     <div>
                       <b>
-                        <Link to={`/app/samples/${sample.accessionId}`}>{sample.accessionId}</Link>
+                        <button type="button" className="instrument-link" onClick={() => setOpenSample(sample)}>
+                          {sample.accessionId}
+                        </button>
                       </b>
                       <small>
                         {sample.client} · {sample.tests}
@@ -360,7 +366,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                               </td>
                             ) : null}
                             {visible.map((column) => (
-                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
+                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample)}</td>
                             ))}
                             <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
@@ -391,7 +397,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                           />
                         </td>
                         {visible.map((column) => (
-                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
+                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample)}</td>
                         ))}
                         {view === "review" ? (
                           <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
@@ -403,6 +409,29 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           </table>
         </div>
       </section>
+
+      {openSample ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenSample(null)}>
+          <div className="lims-modal lims-modal-wide" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-modal-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  sectionTabs.pin({ kind: "sample", recordId: openSample.accessionId, title: openSample.accessionId });
+                  setOpenSample(null);
+                }}
+              >
+                Tab screen
+              </button>
+              <button type="button" className="btn" onClick={() => setOpenSample(null)}>
+                Close
+              </button>
+            </div>
+            <SampleDetailBody sample={openSample} />
+          </div>
+        </div>
+      ) : null}
 
       {batchOpen ? (
         <CreateBatchDialog

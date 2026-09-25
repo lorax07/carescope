@@ -1,22 +1,7 @@
 import { Link, useParams } from "react-router-dom";
-import { findSample, STATUS_LABEL } from "../samples";
+import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
 
-export function SampleDetailPage() {
-  const { accessionId = "" } = useParams();
-  const sample = findSample(decodeURIComponent(accessionId));
-
-  if (!sample) {
-    return (
-      <div className="lims-page">
-        <p className="lims-eyebrow">Sample</p>
-        <h1>Sample not found</h1>
-        <p>
-          <Link to="/app/ops/home">Back to Home</Link>
-        </p>
-      </div>
-    );
-  }
-
+export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
   return (
     <div className="lims-page">
       <p className="lims-eyebrow">Sample</p>
@@ -106,4 +91,23 @@ export function SampleDetailPage() {
       </div>
     </div>
   );
+}
+
+export function SampleDetailPage() {
+  const { accessionId = "" } = useParams();
+  const sample = findSample(decodeURIComponent(accessionId));
+
+  if (!sample) {
+    return (
+      <div className="lims-page">
+        <p className="lims-eyebrow">Sample</p>
+        <h1>Sample not found</h1>
+        <p>
+          <Link to="/app/ops/home">Back to Home</Link>
+        </p>
+      </div>
+    );
+  }
+
+  return <SampleDetailBody sample={sample} />;
 }
