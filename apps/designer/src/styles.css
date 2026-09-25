@@ -252,8 +252,57 @@ a {
 
 .lab-ops-editor-grid {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 0.8fr 1.1fr 1.2fr;
   gap: 1.25rem;
+}
+
+.sample-detail-grid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.9fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.sample-detail-panel .lims-panel-head h2 {
+  font-size: 0.95rem;
+}
+
+.sample-detail-fields {
+  margin: 0;
+  display: grid;
+}
+
+.sample-detail-fields > div {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sample-detail-fields > div:last-child {
+  border-bottom: none;
+}
+
+.sample-detail-fields dt {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.sample-detail-fields dd {
+  margin: 0;
+}
+
+.sample-account-panel {
+  background: #f8fafc;
+}
+
+.lims-table a.lims-linkish {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .lab-ops-editor h3 {
@@ -1442,7 +1491,9 @@ a {
 
   .lims-kpi-row,
   .lims-dash-grid,
-  .designer-layout {
+  .designer-layout,
+  .lab-ops-editor-grid,
+  .sample-detail-grid {
     grid-template-columns: 1fr;
   }
 

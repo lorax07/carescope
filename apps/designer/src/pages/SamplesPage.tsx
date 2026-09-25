@@ -1,106 +1,6 @@
 import { Link } from "react-router-dom";
-import { priorityRank, useLabOperations, type LabMenuView } from "../labOperations";
-
-type SampleRow = {
-  id: string;
-  received: string;
-  client: string;
-  matrix: string;
-  tests: string;
-  status: "received" | "testing" | "review" | "approval" | "released" | "hold";
-  priority: "STAT" | "Rush" | "Routine";
-  custody: string;
-  site: string;
-};
-
-const SAMPLES: SampleRow[] = [
-  {
-    id: "SCP-20491",
-    received: "2026-07-25 08:12",
-    client: "Aether Pharma",
-    matrix: "Finished product",
-    tests: "HPLC Assay, Impurities",
-    status: "testing",
-    priority: "STAT",
-    custody: "Bench 3 · QR verified",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20488",
-    received: "2026-07-25 07:40",
-    client: "Northwind Foods",
-    matrix: "Raw material",
-    tests: "Microbial Limits",
-    status: "review",
-    priority: "Routine",
-    custody: "Micro suite",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20485",
-    received: "2026-07-25 07:18",
-    client: "Helix Biologics",
-    matrix: "Drug substance",
-    tests: "Potency ELISA",
-    status: "received",
-    priority: "Rush",
-    custody: "Intake rack A",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20479",
-    received: "2026-07-24 16:55",
-    client: "Summit Generics",
-    matrix: "Tablet",
-    tests: "Dissolution",
-    status: "approval",
-    priority: "Routine",
-    custody: "QA hold",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20471",
-    received: "2026-07-24 15:10",
-    client: "Cascade Nutraceuticals",
-    matrix: "Powder",
-    tests: "Heavy Metals ICP-MS",
-    status: "testing",
-    priority: "Routine",
-    custody: "Metals lab",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20460",
-    received: "2026-07-24 11:02",
-    client: "Aether Pharma",
-    matrix: "Stability pull",
-    tests: "Assay, Appearance",
-    status: "released",
-    priority: "Routine",
-    custody: "Archive",
-    site: "North Lab",
-  },
-  {
-    id: "SCP-20458",
-    received: "2026-07-24 09:44",
-    client: "Vertex Materials",
-    matrix: "Polymer",
-    tests: "Identity FTIR",
-    status: "hold",
-    priority: "Rush",
-    custody: "Deviation DEV-118",
-    site: "East Lab",
-  },
-];
-
-const STATUS_LABEL: Record<SampleRow["status"], string> = {
-  received: "Received",
-  testing: "In testing",
-  review: "Peer review",
-  approval: "QA approval",
-  released: "Released",
-  hold: "On hold",
-};
+import { priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
+import { SAMPLES, STATUS_LABEL, type SampleRecord } from "../samples";
 
 const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: string }> = {
   home: {
@@ -130,7 +30,7 @@ const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: str
   },
 };
 
-function matchesView(status: SampleRow["status"], view: LabMenuView): boolean {
+function matchesView(status: SampleRecord["status"], view: LabMenuView): boolean {
   if (view === "home") return true;
   if (view === "accession") return status === "received";
   if (view === "testing") return status === "testing";
@@ -138,10 +38,42 @@ function matchesView(status: SampleRow["status"], view: LabMenuView): boolean {
   return status === "released";
 }
 
+function cell(sample: SampleRecord, id: SampleColumnId) {
+  if (id === "accessionId") {
+    return (
+      <Link className="lims-mono lims-linkish" to={`/app/samples/${sample.accessionId}`}>
+        {sample.accessionId}
+      </Link>
+    );
+  }
+  if (id === "orderId") return <span className="lims-mono">{sample.orderId}</span>;
+  if (id === "received") return <span className="lims-mono muted">{sample.received}</span>;
+  if (id === "client") return sample.client;
+  if (id === "matrix") return sample.matrix;
+  if (id === "tests") return sample.tests;
+  if (id === "priority") {
+    return (
+      <span
+        className={`lims-badge ${
+          sample.priority === "STAT" ? "danger" : sample.priority === "Rush" ? "warn" : ""
+        }`}
+      >
+        {sample.priority}
+      </span>
+    );
+  }
+  if (id === "status") {
+    return <span className={`lims-status ${sample.status}`}>{STATUS_LABEL[sample.status]}</span>;
+  }
+  if (id === "custody") return sample.custody;
+  return sample.site;
+}
+
 export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
-  const { priorities, menu } = useLabOperations();
+  const { priorities, menu, columns } = useLabOperations();
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
+  const visible = columns.filter((column) => column.enabled && column.label.trim());
   const rows = SAMPLES.filter((sample) => matchesView(sample.status, view)).sort(
     (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
   );
@@ -187,47 +119,17 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
           <table className="lims-table">
             <thead>
               <tr>
-                <th>Accession</th>
-                <th>Received</th>
-                <th>Client</th>
-                <th>Matrix</th>
-                <th>Tests</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Custody</th>
-                <th>Site</th>
+                {visible.map((column) => (
+                  <th key={column.id}>{column.label}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map((s) => (
-                <tr key={s.id}>
-                  <td>
-                    <span className="lims-mono lims-linkish">{s.id}</span>
-                  </td>
-                  <td className="lims-mono muted">{s.received}</td>
-                  <td>{s.client}</td>
-                  <td>{s.matrix}</td>
-                  <td>{s.tests}</td>
-                  <td>
-                    <span
-                      className={`lims-badge ${
-                        s.priority === "STAT"
-                          ? "danger"
-                          : s.priority === "Rush"
-                            ? "warn"
-                            : ""
-                      }`}
-                    >
-                      {s.priority}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`lims-status ${s.status}`}>
-                      {STATUS_LABEL[s.status]}
-                    </span>
-                  </td>
-                  <td>{s.custody}</td>
-                  <td>{s.site}</td>
+              {rows.map((sample) => (
+                <tr key={sample.accessionId}>
+                  {visible.map((column) => (
+                    <td key={column.id}>{cell(sample, column.id)}</td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -237,8 +139,8 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
 
       <p className="lims-footnote">
         Sample events can trigger CareScope workflows —{" "}
-        <Link to="/app/workflows">configure automations</Link> for receive, assign,
-        review, and CoA release.
+        <Link to="/app/workflows">configure automations</Link> for receive, assign, review, and
+        CoA release.
       </p>
     </div>
   );

@@ -9,9 +9,28 @@ export type LabMenuItem = {
   enabled: boolean;
 };
 
+export type SampleColumnId =
+  | "accessionId"
+  | "orderId"
+  | "received"
+  | "client"
+  | "matrix"
+  | "tests"
+  | "priority"
+  | "status"
+  | "custody"
+  | "site";
+
+export type SampleColumn = {
+  id: SampleColumnId;
+  label: string;
+  enabled: boolean;
+};
+
 export type LabOperationsConfig = {
   priorities: string[];
   menu: LabMenuItem[];
+  columns: SampleColumn[];
 };
 
 const KEY = "carescope.labOperations";
@@ -26,7 +45,32 @@ export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
     { id: "review", label: "Review", view: "review", enabled: true },
     { id: "release", label: "Release", view: "release", enabled: true },
   ],
+  columns: [
+    { id: "accessionId", label: "Accession ID", enabled: true },
+    { id: "orderId", label: "Order ID", enabled: true },
+    { id: "received", label: "Received", enabled: true },
+    { id: "client", label: "Client", enabled: true },
+    { id: "tests", label: "Tests", enabled: true },
+    { id: "priority", label: "Priority", enabled: true },
+    { id: "status", label: "Status", enabled: true },
+    { id: "custody", label: "Custody", enabled: true },
+    { id: "site", label: "Site", enabled: true },
+    { id: "matrix", label: "Matrix", enabled: false },
+  ],
 };
+
+const COLUMN_IDS = new Set(DEFAULT_LAB_OPERATIONS.columns.map((column) => column.id));
+
+function mergeColumns(saved: SampleColumn[] | undefined): SampleColumn[] {
+  const known = (saved ?? []).filter((column) => COLUMN_IDS.has(column.id));
+  const seen = new Set(known.map((column) => column.id));
+  const missing = DEFAULT_LAB_OPERATIONS.columns.filter((column) => !seen.has(column.id));
+  return [...known, ...missing].map((column) => ({
+    id: column.id,
+    label: column.label?.trim() ? column.label : DEFAULT_LAB_OPERATIONS.columns.find((item) => item.id === column.id)!.label,
+    enabled: Boolean(column.enabled),
+  }));
+}
 
 export function labMenuPath(view: LabMenuView): string {
   return view === "home" ? "/app" : `/app/ops/${view}`;
@@ -40,7 +84,11 @@ export function readLabOperations(): LabOperationsConfig {
     if (!Array.isArray(parsed.priorities) || !Array.isArray(parsed.menu)) {
       return DEFAULT_LAB_OPERATIONS;
     }
-    return parsed;
+    return {
+      priorities: parsed.priorities,
+      menu: parsed.menu,
+      columns: mergeColumns(parsed.columns),
+    };
   } catch {
     return DEFAULT_LAB_OPERATIONS;
   }
