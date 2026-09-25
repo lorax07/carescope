@@ -684,6 +684,10 @@ a {
   padding: 1.35rem 1.35rem 2.5rem;
 }
 
+.sample-back {
+  margin-bottom: 0.9rem;
+}
+
 .lims-page-header {
   display: flex;
   justify-content: space-between;

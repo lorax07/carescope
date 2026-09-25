@@ -4,6 +4,9 @@ import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
 export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
   return (
     <div className="lims-page">
+      <Link className="btn sample-back" to="/app/ops/home">
+        Back to Home
+      </Link>
       <p className="lims-eyebrow">Sample</p>
       <div className="lims-page-header">
         <div>
@@ -12,9 +15,6 @@ export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
             {sample.client} · {sample.tests}
           </p>
         </div>
-        <Link className="btn" to="/app/ops/home">
-          Back to Home
-        </Link>
       </div>
 
       <div className="sample-detail-grid">
