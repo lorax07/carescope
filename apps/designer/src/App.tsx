@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
@@ -25,6 +25,57 @@ function useLocalClock(): Date {
     return () => window.clearInterval(id);
   }, []);
   return now;
+}
+
+type DockEdge = "left" | "right" | "top" | "bottom";
+
+const LAUNCHER = 52;
+const PANEL_GAP = 8;
+
+function nearestEdge(x: number, y: number, width: number, height: number): DockEdge {
+  const cx = x + LAUNCHER / 2;
+  const cy = y + LAUNCHER / 2;
+  const distances: Record<DockEdge, number> = {
+    top: cy,
+    bottom: height - cy,
+    left: cx,
+    right: width - cx,
+  };
+  let edge: DockEdge = "top";
+  let best = Infinity;
+  for (const side of ["top", "bottom", "left", "right"] as const) {
+    if (distances[side] < best) {
+      best = distances[side];
+      edge = side;
+    }
+  }
+  return edge;
+}
+
+function panelPlacement(edge: DockEdge, x: number, y: number, width: number, height: number): CSSProperties {
+  const below = height - (y + LAUNCHER);
+  const above = y;
+  const right = width - (x + LAUNCHER);
+  const left = x;
+  if (edge === "left" || edge === "right") {
+    const upward = below < 240 && above > below;
+    const room = Math.max(180, (upward ? above : below) - PANEL_GAP - 12);
+    return {
+      width: 280,
+      maxHeight: room,
+      ...(edge === "left" ? { left: 0 } : { right: 0 }),
+      ...(upward ? { bottom: `calc(100% + ${PANEL_GAP}px)` } : { top: `calc(100% + ${PANEL_GAP}px)` }),
+    };
+  }
+  const growLeft = left > right;
+  const room = Math.max(280, (growLeft ? left : right) - PANEL_GAP - 12);
+  return {
+    width: room,
+    maxWidth: room,
+    maxHeight: Math.round(height * 0.46),
+    ...(edge === "top" ? { top: 0 } : { bottom: 0 }),
+    ...(growLeft ? { right: `calc(100% + ${PANEL_GAP}px)` } : { left: `calc(100% + ${PANEL_GAP}px)` }),
+  };
 }
 
 function utcOffsetLabel(date: Date): string {
@@ -172,7 +223,13 @@ function AppFrame() {
   const [navPos, setNavPos] = useState({ x: 16, y: 16 });
   const navPosRef = useRef(navPos);
   navPosRef.current = navPos;
+  const dockRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
+  const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const now = useLocalClock();
+  const edge = nearestEdge(navPos.x, navPos.y, viewport.width, viewport.height);
+  const horizontal = edge === "top" || edge === "bottom";
   const signedInName = lims?.username ?? "M. Chen";
 
   useEffect(() => {
@@ -180,6 +237,46 @@ function AppFrame() {
       setSignupOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!navOpen) {
+      setInsets((current) =>
+        current.left === 0 && current.right === 0 && current.top === 0 && current.bottom === 0
+          ? current
+          : { left: 0, right: 0, top: 0, bottom: 0 },
+      );
+      return;
+    }
+    const dock = dockRef.current;
+    const panel = panelRef.current;
+    if (!dock || !panel) return;
+    const logo = dock.getBoundingClientRect();
+    const menu = panel.getBoundingClientRect();
+    const left = Math.min(logo.left, menu.left);
+    const right = Math.max(logo.right, menu.right);
+    const top = Math.min(logo.top, menu.top);
+    const bottom = Math.max(logo.bottom, menu.bottom);
+    const gap = 12;
+    const next =
+      edge === "left"
+        ? { left: Math.ceil(right + gap), right: 0, top: 0, bottom: 0 }
+        : edge === "right"
+          ? { left: 0, right: Math.ceil(window.innerWidth - left + gap), top: 0, bottom: 0 }
+          : edge === "top"
+            ? { left: 0, right: 0, top: Math.ceil(bottom + gap), bottom: 0 }
+            : { left: 0, right: 0, top: 0, bottom: Math.ceil(window.innerHeight - top + gap) };
+    setInsets((current) =>
+      current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
+        ? current
+        : next,
+    );
+  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal]);
 
   function beginNavDrag(event: ReactPointerEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -219,9 +316,21 @@ function AppFrame() {
     }
   }
 
+  const panelStyle = panelPlacement(edge, navPos.x, navPos.y, viewport.width, viewport.height);
+
   return (
-    <div className="lims-shell">
-      <div className={`lims-nav-dock${navOpen ? " is-open" : ""}`} style={{ left: navPos.x, top: navPos.y }}>
+    <div
+      className={navOpen ? `lims-shell is-nav-open is-${edge}` : "lims-shell"}
+      style={
+        {
+          "--nav-left": `${insets.left}px`,
+          "--nav-right": `${insets.right}px`,
+          "--nav-top": `${insets.top}px`,
+          "--nav-bottom": `${insets.bottom}px`,
+        } as CSSProperties
+      }
+    >
+      <div ref={dockRef} className={`lims-nav-dock${navOpen ? ` is-open is-${edge}` : ""}`} style={{ left: navPos.x, top: navPos.y }}>
         <button
           type="button"
           className="lims-nav-launcher"
@@ -232,7 +341,7 @@ function AppFrame() {
           <img src="/carescope-mark.png" alt="" />
         </button>
       {navOpen ? (
-      <aside className="lims-sidebar" style={{ maxHeight: `calc(100vh - ${navPos.y + 76}px)` }}>
+      <aside ref={panelRef} className="lims-sidebar" style={panelStyle}>
         <div className="lims-site-block">
           <div className="lims-site">
             <span className="lims-site-dot" />
