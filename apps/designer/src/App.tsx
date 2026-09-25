@@ -64,7 +64,6 @@ export function AppShell() {
           <img className="cs-mark" src="/carescope-mark.png" alt="" />
           <span>
             <strong>Sequence</strong>
-            <small>LIMS</small>
           </span>
         </NavLink>
 
