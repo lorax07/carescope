@@ -65,7 +65,7 @@ export function ResultWindow({
           {samples.map((sample) => (
             <section key={sample.accessionId}>
               <h3>
-                {sample.sampleId}
+                {sample.accessionId}
                 {sample.batchId ? ` · ${sample.batchId}` : ""}
               </h3>
               <p>

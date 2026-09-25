@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { logSample, nextSampleId, SAMPLE_ACCOUNT, useSamples, type SampleRecord } from "../samples";
+import { logSample, nextAccessionId, SAMPLE_ACCOUNT, useSamples, type SampleRecord } from "../samples";
 
 const SITES = ["North Lab", "East Lab"] as const;
 
@@ -11,7 +11,7 @@ export function ReceiveSampleDialog({
   onLogged: (sample: SampleRecord) => void;
 }) {
   useSamples();
-  const nextId = nextSampleId(SAMPLE_ACCOUNT.id);
+  const nextId = nextAccessionId();
   const [orderId, setOrderId] = useState("");
   const [client, setClient] = useState("");
   const [matrix, setMatrix] = useState("");
@@ -44,7 +44,7 @@ export function ReceiveSampleDialog({
             <p className="lims-eyebrow">Log a sample</p>
             <h2 id="receive-sample-title">Receive sample</h2>
             <p className="receipt-form-lede">
-              Sample ID {nextId} is next for {SAMPLE_ACCOUNT.name}. North Lab and East Lab share this sequence.
+              Accession {nextId} is next for {SAMPLE_ACCOUNT.name}. North Lab and East Lab share this sequence.
             </p>
             <div className="receive-fields">
               <label>

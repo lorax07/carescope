@@ -283,7 +283,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                     <div>
                       <b>
                         <button type="button" className="instrument-link" onClick={() => setOpenSample(sample)}>
-                          {sample.sampleId}
+                          {sample.accessionId}
                         </button>
                       </b>
                       <small>
@@ -467,7 +467,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  sectionTabs.pin({ kind: "sample", recordId: String(openSample.sampleId), title: String(openSample.sampleId) });
+                  sectionTabs.pin({ kind: "sample", recordId: openSample.accessionId, title: openSample.accessionId });
                   setOpenSample(null);
                 }}
               >

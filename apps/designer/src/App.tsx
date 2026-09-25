@@ -524,7 +524,7 @@ function AppFrame() {
           <div className="lims-search">
             <input
               type="search"
-              placeholder="Search sample ID, accession, order, client…"
+              placeholder="Search accession, order, client…"
               aria-label="Search laboratory records"
             />
           </div>
