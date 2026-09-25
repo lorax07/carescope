@@ -104,7 +104,7 @@ function cell(
         <button
           type="button"
           className="receipt-folder"
-          aria-label={`Receipt form for ${sample.orderId}`}
+          aria-label={`Scanned paperwork for ${sample.orderId}`}
           onClick={() => onReceipt?.(sample)}
         >
           <FolderIcon />

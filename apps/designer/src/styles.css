@@ -990,12 +990,25 @@ a {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--accent);
+  color: #e6a817;
   cursor: pointer;
 }
 
 .receipt-folder:hover {
-  background: var(--accent-soft);
+  background: #fff4cc;
+}
+
+.lims-dialog-bar h2 {
+  margin: 0 auto 0 0;
+  font-size: 0.95rem;
+}
+
+.receipt-pdf {
+  display: block;
+  width: 100%;
+  height: min(72vh, 760px);
+  border: 0;
+  background: #f4f1ea;
 }
 
 .receipt-form {
