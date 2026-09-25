@@ -28,9 +28,10 @@ export function ReceiptFormDialog({ sample, onClose }: { sample: SampleRecord; o
           <p className="lims-eyebrow">Attached at receipt</p>
           <h2 id="receipt-form-title">Sample receipt</h2>
           <p className="receipt-form-lede">
-            {sample.accessionId} · {sample.orderId}
+            Sample {sample.sampleId} · {sample.orderId}
           </p>
           <dl className="sample-detail-fields">
+            <Field label="Sample ID" value={String(sample.sampleId)} mono />
             <Field label="Accession ID" value={sample.accessionId} mono />
             <Field label="Order ID" value={sample.orderId} mono />
             <Field label="Received" value={sample.received} mono />

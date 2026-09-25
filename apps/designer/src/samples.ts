@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export type SampleStatus = "received" | "testing" | "review" | "approval" | "released" | "hold";
 
 export type SampleRecord = {
-  /** Account-scoped sequence. Staff do not see this on the sample list. */
+  /** Primary sample key. Increments on the account each time a sample is logged. */
   sampleId: number;
   accountId: string;
   accountName: string;
@@ -178,7 +178,87 @@ export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): Sa
     });
 }
 
-export const SAMPLES: SampleRecord[] = withAccountSampleIds(LOGGED);
+const LOGGED_KEY = "carescope.samples.logged";
+const sampleListeners = new Set<() => void>();
+
+function readLogged(): SampleRecord[] {
+  try {
+    const raw = localStorage.getItem(LOGGED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SampleRecord[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((row) => row && typeof row.sampleId === "number" && typeof row.accountId === "string");
+  } catch {
+    return [];
+  }
+}
+
+let samples: SampleRecord[] = [...withAccountSampleIds(LOGGED), ...readLogged()];
+
+function notifySamples(): void {
+  sampleListeners.forEach((listener) => listener());
+}
+
+export function useSamples(): SampleRecord[] {
+  const [rows, setRows] = useState(() => samples);
+  useEffect(() => {
+    const sync = () => setRows(samples);
+    sampleListeners.add(sync);
+    return () => {
+      sampleListeners.delete(sync);
+    };
+  }, []);
+  return rows;
+}
+
+export const SAMPLE_ACCOUNT = ACCOUNT;
+
+export function nextSampleId(accountId: string): number {
+  return samples.reduce((max, sample) => (sample.accountId === accountId ? Math.max(max, sample.sampleId) : max), 0) + 1;
+}
+
+function nextAccession(): string {
+  const highest = samples.reduce((max, sample) => {
+    const value = Number(sample.accessionId.replace(/\D/g, ""));
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 0);
+  return `SCP-${highest + 1}`;
+}
+
+function loggedAt(): string {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+export type SampleLog = {
+  accountId: string;
+  accountName: string;
+  orderId: string;
+  client: string;
+  matrix: string;
+  tests: string;
+  priority: SampleRecord["priority"];
+  site: string;
+};
+
+/** Logs a sample and assigns the next Sample ID for that account. */
+export function logSample(input: SampleLog): SampleRecord {
+  const sample: SampleRecord = {
+    ...input,
+    sampleId: nextSampleId(input.accountId),
+    accessionId: nextAccession(),
+    received: loggedAt(),
+    status: "received",
+    custody: "Intake",
+    batchId: null,
+  };
+  samples = [...samples, sample];
+  const seeded = new Set(LOGGED.map((row) => row.accessionId));
+  localStorage.setItem(LOGGED_KEY, JSON.stringify(samples.filter((row) => !seeded.has(row.accessionId))));
+  notifySamples();
+  return sample;
+}
 
 export type TestResult = {
   analyte: string;
@@ -238,8 +318,13 @@ export function sampleBatchId(sample: SampleRecord, assigned: Map<string, string
   return assigned.get(sample.accessionId) ?? sample.batchId;
 }
 
-export function findSample(accessionId: string): SampleRecord | undefined {
-  return SAMPLES.find((sample) => sample.accessionId === accessionId);
+export function findSample(id: string): SampleRecord | undefined {
+  const sampleId = Number(id);
+  if (Number.isInteger(sampleId) && sampleId > 0) {
+    const match = samples.find((sample) => sample.sampleId === sampleId);
+    if (match) return match;
+  }
+  return samples.find((sample) => sample.accessionId === id);
 }
 
 export const STATUS_LABEL: Record<SampleStatus, string> = {

@@ -4,6 +4,7 @@ import { SampleDetailBody } from "./SampleDetailPage";
 import { useSectionTabs } from "../sectionTabs";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
+import { ReceiveSampleDialog } from "../components/ReceiveSampleDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
@@ -12,10 +13,10 @@ import {
   assignBatch,
   isResulted,
   reviewStatus,
-  SAMPLES,
   STATUS_LABEL,
   testNames,
   useReviewApprovals,
+  useSamples,
   type SampleRecord,
 } from "../samples";
 
@@ -88,13 +89,14 @@ function cell(
   onOpen?: (sample: SampleRecord) => void,
   onReceipt?: (sample: SampleRecord) => void,
 ) {
-  if (id === "accessionId") {
+  if (id === "sampleId") {
     return (
       <button type="button" className="lims-mono lims-linkish instrument-link" onClick={() => onOpen?.(sample)}>
-        {sample.accessionId}
+        {sample.sampleId}
       </button>
     );
   }
+  if (id === "accessionId") return <span className="lims-mono">{sample.accessionId}</span>;
   if (id === "orderId") {
     return (
       <span className="order-id-cell">
@@ -137,8 +139,10 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const approved = useReviewApprovals();
   const planted = useResultFlags();
   const sectionTabs = useSectionTabs();
+  const samples = useSamples();
   const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
   const [receiptSample, setReceiptSample] = useState<SampleRecord | null>(null);
+  const [receiveOpen, setReceiveOpen] = useState(false);
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
@@ -149,7 +153,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
-  const contextRows = SAMPLES.filter((sample) => {
+  const contextRows = samples.filter((sample) => {
     const status = reviewStatus(sample, approved);
     return matchesView(sample, status, view);
   });
@@ -202,6 +206,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   }
 
   function runButton(id: string) {
+    if (id === "receive") setReceiveOpen(true);
     if (id === "createBatch") {
       setBatchFromSelection(listed.some((sample) => checked.has(sample.accessionId)));
       setBatchOpen(true);
@@ -211,7 +216,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     }
   }
 
-  const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
+  const open = samples.filter((sample) => sample.status !== "released").sort(
     (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
   );
   const workQueues = [
@@ -279,7 +284,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                     <div>
                       <b>
                         <button type="button" className="instrument-link" onClick={() => setOpenSample(sample)}>
-                          {sample.accessionId}
+                          {sample.sampleId}
                         </button>
                       </b>
                       <small>
@@ -443,6 +448,16 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         </div>
       </section>
 
+      {receiveOpen ? (
+        <ReceiveSampleDialog
+          onClose={() => setReceiveOpen(false)}
+          onLogged={(sample) => {
+            setReceiveOpen(false);
+            setOpenSample(sample);
+          }}
+        />
+      ) : null}
+
       {receiptSample ? <ReceiptFormDialog sample={receiptSample} onClose={() => setReceiptSample(null)} /> : null}
 
       {openSample ? (
@@ -453,7 +468,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  sectionTabs.pin({ kind: "sample", recordId: openSample.accessionId, title: openSample.accessionId });
+                  sectionTabs.pin({ kind: "sample", recordId: String(openSample.sampleId), title: String(openSample.sampleId) });
                   setOpenSample(null);
                 }}
               >
