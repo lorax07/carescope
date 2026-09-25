@@ -9,6 +9,7 @@
   --lp-blue: #1b6ef3;
   --lp-blue-deep: #0f4fc0;
   --lp-blue-soft: rgba(27, 110, 243, 0.1);
+  --lp-navy: #0b1f44;
   --lp-green: #16a34a;
   --lp-green-deep: #15803d;
   --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
@@ -1545,11 +1546,13 @@ body:has(.lp) {
   --lp-ink: #191918;
   --lp-muted: #615d59;
   --lp-line: #e7e5e4;
+  --lp-navy: #0b1f44;
   background: #f6f5f4;
   color: #191918;
 }
 
 .lp-page {
+  --lp-navy: #0b1f44;
   min-height: 100%;
   background: #f6f5f4;
 }
@@ -1594,7 +1597,7 @@ body:has(.lp) {
 .lp-logo-sequence {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #1b6ef3;
+  color: var(--lp-navy);
 }
 
 .lp-nav-links {
@@ -1655,7 +1658,7 @@ body:has(.lp) {
 }
 
 .lp-logo-sequence {
-  color: #1b6ef3;
+  color: var(--lp-navy);
   font-weight: 600;
 }
 
