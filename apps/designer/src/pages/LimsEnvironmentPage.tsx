@@ -2,13 +2,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getClient, type Lab, type QueryEnvironment } from "../intrasite/api";
 import { demoGetClient } from "../intrasite/demo";
-import { LIMS_PASSWORD, LIMS_USERNAME, writeLimsSession } from "../limsSession";
+import { hasCustomPassword, passwordMatches } from "../limsPassword";
+import { LIMS_USERNAME, writeLimsSession } from "../limsSession";
 
 export function LimsEnvironmentPage() {
   const { clientId = "", labId = "", envId = "" } = useParams();
   const navigate = useNavigate();
   const [username, setUsername] = useState(LIMS_USERNAME);
-  const [password, setPassword] = useState(LIMS_PASSWORD);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState<{
     clientName: string;
@@ -55,8 +56,12 @@ export function LimsEnvironmentPage() {
 
   function signIn(event: FormEvent) {
     event.preventDefault();
-    if (username.trim() !== LIMS_USERNAME || password !== LIMS_PASSWORD) {
-      setError("Use admin and password to enter this environment.");
+    if (username.trim() !== LIMS_USERNAME || !passwordMatches(password)) {
+      setError(
+        hasCustomPassword()
+          ? "That username or password is not correct."
+          : "Use admin and password to enter this environment.",
+      );
       return;
     }
     if (!context) return;
@@ -87,7 +92,13 @@ export function LimsEnvironmentPage() {
                 : "Loading environment…"}
             </p>
             <p className="is-login-hint">
-              Sign in with <code>admin</code> / <code>password</code>.
+              {hasCustomPassword() ? (
+                "Sign in with your account password."
+              ) : (
+                <>
+                  Sign in with <code>admin</code> / <code>password</code>.
+                </>
+              )}
             </p>
             <form onSubmit={signIn}>
               <label>
