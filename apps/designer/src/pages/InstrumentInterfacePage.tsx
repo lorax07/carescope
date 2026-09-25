@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { InstrumentRecordView } from "../components/InstrumentRecordView";
 import { addInstrument, findInstrument, useInstruments, type InstrumentRecord } from "../instruments";
 
@@ -15,6 +15,7 @@ function SequenceMark({ instrument }: { instrument: InstrumentRecord }) {
 }
 
 export function InstrumentInterfacePage() {
+  const navigate = useNavigate();
   const instruments = useInstruments();
   const [openId, setOpenId] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -34,8 +35,9 @@ export function InstrumentInterfacePage() {
     setOpenId(created.id);
   }
 
-  function openWindow(id: string) {
-    window.open(`/app/instruments/${id}`, "_blank", "noopener,noreferrer");
+  function openTab(id: string) {
+    setOpenId(null);
+    navigate(`/app/instruments/${id}`);
   }
 
   return (
@@ -154,7 +156,7 @@ export function InstrumentInterfacePage() {
       {open ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenId(null)}>
           <div className="lims-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-record-title" onClick={(event) => event.stopPropagation()}>
-            <InstrumentRecordView instrument={open} onOpenWindow={() => openWindow(open.id)} />
+            <InstrumentRecordView instrument={open} onOpenWindow={() => openTab(open.id)} />
             <div className="lims-modal-actions">
               <button type="button" className="btn" onClick={() => setOpenId(null)}>
                 Close
