@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { priorityRank, useLabOperations, type LabMenuView } from "../labOperations";
 
 type SampleRow = {
   id: string;
@@ -101,16 +102,57 @@ const STATUS_LABEL: Record<SampleRow["status"], string> = {
   hold: "On hold",
 };
 
-export function SamplesPage() {
+const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: string }> = {
+  home: {
+    eyebrow: "Lab operations",
+    title: "Home",
+    lede: "Samples in the laboratory, listed from the highest priority set in Workflow design.",
+  },
+  accession: {
+    eyebrow: "Lab operations",
+    title: "Accession",
+    lede: "Samples waiting to be received into the laboratory.",
+  },
+  testing: {
+    eyebrow: "Lab operations",
+    title: "Testing",
+    lede: "Samples currently in testing.",
+  },
+  review: {
+    eyebrow: "Lab operations",
+    title: "Review",
+    lede: "Samples in peer review or QA approval.",
+  },
+  release: {
+    eyebrow: "Lab operations",
+    title: "Release",
+    lede: "Samples released from the laboratory.",
+  },
+};
+
+function matchesView(status: SampleRow["status"], view: LabMenuView): boolean {
+  if (view === "home") return true;
+  if (view === "accession") return status === "received";
+  if (view === "testing") return status === "testing";
+  if (view === "review") return status === "review" || status === "approval";
+  return status === "released";
+}
+
+export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
+  const { priorities, menu } = useLabOperations();
+  const copy = VIEW_COPY[view];
+  const title = menu.find((item) => item.view === view)?.label || copy.title;
+  const rows = SAMPLES.filter((sample) => matchesView(sample.status, view)).sort(
+    (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
+  );
+
   return (
     <div className="lims-page">
       <div className="lims-page-header">
         <div>
-          <p className="lims-eyebrow">Sample lifecycle</p>
-          <h1>Sample worklist</h1>
-          <p className="lims-page-lede">
-            Accession, custody, and test assignment for samples currently in the laboratory.
-          </p>
+          <p className="lims-eyebrow">{copy.eyebrow}</p>
+          <h1>{title}</h1>
+          <p className="lims-page-lede">{copy.lede}</p>
         </div>
         <div className="lims-page-actions">
           <button type="button" className="btn">
@@ -157,7 +199,7 @@ export function SamplesPage() {
               </tr>
             </thead>
             <tbody>
-              {SAMPLES.map((s) => (
+              {rows.map((s) => (
                 <tr key={s.id}>
                   <td>
                     <span className="lims-mono lims-linkish">{s.id}</span>

@@ -62,8 +62,12 @@ createRoot(document.getElementById("root")!).render(
         <Route path="lims/:clientId/:labId/:envId" element={<LimsEnvironmentPage />} />
         <Route path="*" element={<UnmatchedRoute />} />
         <Route path="app" element={<AppShell />}>
-          <Route index element={<LimsModulePage id="lab_operations" />} />
-          <Route path="samples" element={<SamplesPage />} />
+          <Route index element={<SamplesPage view="home" />} />
+          <Route path="ops/accession" element={<SamplesPage view="accession" />} />
+          <Route path="ops/testing" element={<SamplesPage view="testing" />} />
+          <Route path="ops/review" element={<SamplesPage view="review" />} />
+          <Route path="ops/release" element={<SamplesPage view="release" />} />
+          <Route path="samples" element={<SamplesPage view="home" />} />
           <Route path="tests" element={<TestsPage />} />
           <Route path="results" element={<ResultsPage />} />
           <Route path="instruments" element={<LimsModulePage id="instrument_integration" />} />

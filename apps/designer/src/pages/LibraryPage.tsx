@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { LabOperationsEditor } from "../components/LabOperationsEditor";
 import { workflowService } from "../platform";
 
 export function LibraryPage() {
@@ -41,6 +42,8 @@ export function LibraryPage() {
           New workflow
         </button>
       </div>
+
+      <LabOperationsEditor />
 
       <h2 style={{ fontSize: "1rem", color: "var(--text-muted)", fontWeight: 600 }}>
         Your workflows
