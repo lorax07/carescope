@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
+import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
 import {
   approveSamples,
   assignBatch,
@@ -100,6 +101,7 @@ function cell(sample: SampleRecord, id: SampleColumnId, status = sample.status) 
 export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const { priorities, menu, columns, buttons } = useLabOperations();
   const approved = useReviewApprovals();
+  const planted = useResultFlags();
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
@@ -309,6 +311,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 {visible.map((column) => (
                   <th key={column.id}>{column.label}</th>
                 ))}
+                {view === "review" ? <th>Flag</th> : null}
                 <th />
               </tr>
             </thead>
@@ -328,7 +331,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         .map((sample, index, group) => (
                           <tr
                             key={sample.accessionId}
-                            className={checked.has(sample.accessionId) ? "is-selected" : ""}
+                            className={`${checked.has(sample.accessionId) ? "is-selected" : ""} ${
+                              isSampleFlagged(sample.accessionId, planted) ? "is-flagged" : ""
+                            }`}
                           >
                             <td className="lims-check">
                               <input
@@ -357,6 +362,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                             {visible.map((column) => (
                               <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
                             ))}
+                            <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
                           </tr>
                         ))
@@ -372,7 +378,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                   : (view === "review" ? reviewRows : rows).map((sample) => (
                       <tr
                         key={sample.accessionId}
-                        className={checked.has(sample.accessionId) ? "is-selected" : ""}
+                        className={`${checked.has(sample.accessionId) ? "is-selected" : ""} ${
+                          view === "review" && isSampleFlagged(sample.accessionId, planted) ? "is-flagged" : ""
+                        }`}
                       >
                         <td className="lims-check">
                           <input
@@ -385,6 +393,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         {visible.map((column) => (
                           <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
                         ))}
+                        {view === "review" ? (
+                          <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
+                        ) : null}
                         <td>{resultButton(sample)}</td>
                       </tr>
                     ))}
@@ -412,7 +423,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           samples={resultWindow.samples}
           authorize={resultWindow.authorize}
           onAuthorize={() => {
-            const ids = resultWindow.samples.map((sample) => sample.accessionId);
+            const ids = resultWindow.samples
+              .map((sample) => sample.accessionId)
+              .filter((id) => !isSampleFlagged(id, planted));
             approveSamples(ids);
             toggleMany(ids, false);
             setResultWindow(null);
