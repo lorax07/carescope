@@ -318,6 +318,105 @@ a {
   background: #f8fafc;
 }
 
+.instrument-link {
+  color: var(--accent);
+  font-weight: 700;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.seq-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.seq-mark i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.seq-mark.is-running {
+  color: #0b1f44;
+  font-weight: 700;
+}
+
+.seq-mark.is-running i {
+  background: #059669;
+  box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.18);
+}
+
+.instrument-workflow {
+  margin-bottom: 0.85rem;
+}
+
+.instrument-steps {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0.75rem 1rem 0;
+  list-style: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.instrument-steps .is-current {
+  color: var(--accent);
+}
+
+.instrument-fields {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0;
+}
+
+.instrument-fields label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.instrument-fields input,
+.instrument-fields select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  color: var(--text);
+}
+
+.instrument-workflow-actions {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.85rem 1rem 1rem;
+}
+
+.instrument-record-body {
+  padding: 0 0.25rem 0.5rem;
+}
+
+.instrument-record-body h3 {
+  margin: 0.85rem 1rem 0;
+  font-size: 0.9rem;
+}
+
+.instrument-record-body > p,
+.instrument-record .lims-panel-head p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .lims-table a.lims-linkish {
   color: var(--accent);
   text-decoration: underline;
