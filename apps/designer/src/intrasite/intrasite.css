@@ -29,6 +29,12 @@
   margin-bottom: 1.1rem;
 }
 
+.cs-mark {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
 .is-login-brand strong,
 .is-brand strong {
   display: block;
