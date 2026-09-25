@@ -321,15 +321,14 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Connectivity",
-    detail: "Connect Sequence to the outside world",
+    title: "Healthcare CRM",
+    detail: "A custom CRM designed for healthcare",
     tone: "violet",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
-        <circle cx="8" cy="16" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="24" cy="8" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="24" cy="24" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M11 16h6a4 4 0 0 0 4-4V11M17 16a4 4 0 0 1 4 4v1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="16" cy="11" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9.5 23.5c1.2-3 3.5-4.5 6.5-4.5s5.3 1.5 6.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M22 8.5h5M24.5 6v5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },

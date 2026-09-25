@@ -7,7 +7,7 @@ const NAV = [
   { to: "/app", label: "Lab Operations", end: true },
   { to: "/app/design", label: "Workflow design" },
   { to: "/app/instruments", label: "Instrument Integration" },
-  { to: "/app/connectivity", label: "Connectivity" },
+  { to: "/app/connectivity", label: "Healthcare CRM" },
   { to: "/app/quality", label: "Quality & Compliance" },
   { to: "/app/insights", label: "Insights" },
 ] as const;

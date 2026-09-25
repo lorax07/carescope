@@ -41,9 +41,10 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
   },
   {
     id: "connectivity",
-    label: "Connectivity",
-    positioning: "Connect Sequence to the outside world",
-    capabilities: "HL7, FHIR, APIs, EMRs/EHRs, client systems, file exchange",
+    label: "Healthcare CRM",
+    positioning: "A custom CRM designed for healthcare",
+    capabilities:
+      "Client accounts, provider relationships, referrals, outreach, service agreements, follow-up",
   },
   {
     id: "quality_compliance",
