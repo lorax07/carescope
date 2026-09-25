@@ -66,7 +66,6 @@ export function ResultWindow({
     setFlag(key, { reason: draftReason, by: session?.username ?? "M. Chen" });
     setPin("");
     setPinError("");
-    setOpenKey(null);
   }
 
   return (
