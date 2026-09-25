@@ -417,10 +417,10 @@ a {
   font-size: 0.82rem;
 }
 
-.lims-table a.lims-linkish {
+.lims-table a.lims-linkish,
+.lims-table .instrument-link {
   color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .lab-ops-editor h3 {
