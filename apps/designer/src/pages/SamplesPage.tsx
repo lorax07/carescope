@@ -89,14 +89,13 @@ function cell(
   onOpen?: (sample: SampleRecord) => void,
   onReceipt?: (sample: SampleRecord) => void,
 ) {
-  if (id === "sampleId") {
+  if (id === "accessionId") {
     return (
       <button type="button" className="lims-mono lims-linkish instrument-link" onClick={() => onOpen?.(sample)}>
-        {sample.sampleId}
+        {sample.accessionId}
       </button>
     );
   }
-  if (id === "accessionId") return <span className="lims-mono">{sample.accessionId}</span>;
   if (id === "orderId") {
     return (
       <span className="order-id-cell">

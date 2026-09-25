@@ -10,7 +10,6 @@ export type LabMenuItem = {
 };
 
 export type SampleColumnId =
-  | "sampleId"
   | "accessionId"
   | "orderId"
   | "received"
@@ -58,7 +57,6 @@ export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
     { id: "release", label: "Release", view: "release", enabled: true },
   ],
   columns: [
-    { id: "sampleId", label: "Sample ID", enabled: true },
     { id: "accessionId", label: "Accession ID", enabled: true },
     { id: "orderId", label: "Order ID", enabled: true },
     { id: "received", label: "Received", enabled: true },
@@ -128,9 +126,7 @@ function mergeColumns(saved: SampleColumn[] | undefined): SampleColumn[] {
   const known = (saved ?? []).filter((column) => COLUMN_IDS.has(column.id));
   const seen = new Set(known.map((column) => column.id));
   const missing = DEFAULT_LAB_OPERATIONS.columns.filter((column) => !seen.has(column.id));
-  const sampleId = missing.filter((column) => column.id === "sampleId");
-  const rest = missing.filter((column) => column.id !== "sampleId");
-  return [...sampleId, ...known, ...rest].map((column) => ({
+  return [...known, ...missing].map((column) => ({
     id: column.id,
     label: column.label?.trim() ? column.label : DEFAULT_LAB_OPERATIONS.columns.find((item) => item.id === column.id)!.label,
     enabled: Boolean(column.enabled),
