@@ -1,48 +1,34 @@
+import { useEffect, useState } from "react";
+import { receiptPdfUrl } from "../receiptPdf";
 import type { SampleRecord } from "../samples";
 
-function Field({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <dt>{label}</dt>
-      <dd className={mono ? "lims-mono" : undefined}>{value}</dd>
-    </div>
-  );
-}
-
 export function ReceiptFormDialog({ sample, onClose }: { sample: SampleRecord; onClose: () => void }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const next = receiptPdfUrl(sample);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [sample]);
+
   return (
     <div className="lims-modal-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="lims-modal"
+        className="lims-modal lims-modal-wide"
         role="dialog"
         aria-modal="true"
         aria-labelledby="receipt-form-title"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="lims-dialog-bar">
+          <h2 id="receipt-form-title">Scanned paperwork</h2>
           <button type="button" className="btn" onClick={onClose}>
             Close
           </button>
         </div>
-        <div className="receipt-form">
-          <p className="lims-eyebrow">Attached at receipt</p>
-          <h2 id="receipt-form-title">Sample receipt</h2>
-          <p className="receipt-form-lede">
-            Sample {sample.sampleId} · {sample.orderId}
-          </p>
-          <dl className="sample-detail-fields">
-            <Field label="Sample ID" value={String(sample.sampleId)} mono />
-            <Field label="Accession ID" value={sample.accessionId} mono />
-            <Field label="Order ID" value={sample.orderId} mono />
-            <Field label="Received" value={sample.received} mono />
-            <Field label="Client" value={sample.client} />
-            <Field label="Matrix" value={sample.matrix} />
-            <Field label="Tests" value={sample.tests} />
-            <Field label="Priority" value={sample.priority} />
-            <Field label="Site" value={sample.site} />
-            <Field label="Custody" value={sample.custody} />
-          </dl>
-        </div>
+        {url ? (
+          <iframe className="receipt-pdf" title={`Scanned paperwork for ${sample.orderId}`} src={url} />
+        ) : null}
       </div>
     </div>
   );
