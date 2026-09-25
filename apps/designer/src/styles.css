@@ -90,8 +90,10 @@ a {
 
 .cs-mark {
   display: block;
-  height: 32px;
+  height: 48px;
   width: auto;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .lims-brand strong {
