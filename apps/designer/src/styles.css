@@ -684,8 +684,32 @@ a {
   padding: 1.35rem 1.35rem 2.5rem;
 }
 
-.sample-back {
+.sample-tab-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   margin-bottom: 0.9rem;
+}
+
+.sample-back {
+  flex: none;
+}
+
+.lims-tabs-inline {
+  flex: 1;
+  padding: 0;
+  background: transparent;
+  border-bottom: 0;
+}
+
+.lims-tabs-inline .lims-tab {
+  border-bottom: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.lims-tabs-inline .lims-tab.active {
+  border-color: #bfd4f7;
+  background: #f3f7fd;
 }
 
 .lims-page-header {

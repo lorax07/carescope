@@ -1,12 +1,30 @@
 import { Link, useParams } from "react-router-dom";
 import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
+import { useSectionTabs } from "../sectionTabs";
 
-export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
+export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleRecord; withTabs?: boolean }) {
+  const sectionTabs = useSectionTabs();
   return (
     <div className="lims-page">
-      <Link className="btn sample-back" to="/app/ops/home">
-        Back to Home
-      </Link>
+      <div className="sample-tab-row">
+        <Link className="btn sample-back" to="/app/ops/home">
+          Back to Home
+        </Link>
+        {withTabs ? (
+          <div className="lims-tabs lims-tabs-inline" role="tablist" aria-label="Screens for this section">
+            {sectionTabs.tabs.map((tab) => (
+              <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
+                <button type="button" role="tab" aria-selected={sectionTabs.activeId === tab.id} onClick={() => sectionTabs.select(tab.id)}>
+                  {tab.title}
+                </button>
+                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => sectionTabs.close(tab.id)}>
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
       <p className="lims-eyebrow">Sample</p>
       <div className="lims-page-header">
         <div>
