@@ -28,7 +28,7 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
       <p className="lims-eyebrow">Sample</p>
       <div className="lims-page-header">
         <div>
-          <h1>{sample.accessionId}</h1>
+          <h1>{sample.sampleId}</h1>
           <p className="lims-page-lede">
             {sample.client} · {sample.tests}
           </p>

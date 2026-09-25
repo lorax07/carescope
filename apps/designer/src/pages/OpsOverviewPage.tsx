@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { labMenuPath, useLabOperations } from "../labOperations";
-import { SAMPLES } from "../samples";
+import { useSamples } from "../samples";
 
 const WEEK = {
   tat: "18.4 h",
@@ -10,8 +10,9 @@ const WEEK = {
 
 export function OpsOverviewPage() {
   const { menu } = useLabOperations();
+  const samples = useSamples();
   const title = menu.find((item) => item.view === "overview")?.label || "Overview";
-  const open = SAMPLES.filter((sample) => sample.status !== "released");
+  const open = samples.filter((sample) => sample.status !== "released");
   const stat = open.filter((sample) => sample.priority === "STAT");
   const hold = open.filter((sample) => sample.status === "hold");
   const review = open.filter((sample) => sample.status === "review" || sample.status === "approval");
@@ -50,7 +51,7 @@ export function OpsOverviewPage() {
         <div className="lims-kpi accent">
           <span>STAT open</span>
           <strong>{stat.length}</strong>
-          <small>{stat.map((sample) => sample.accessionId).join(", ") || "None"}</small>
+          <small>{stat.map((sample) => sample.sampleId).join(", ") || "None"}</small>
         </div>
         <div className="lims-kpi">
           <span>Awaiting review</span>
