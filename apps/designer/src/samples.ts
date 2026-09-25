@@ -180,6 +180,32 @@ export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): Sa
 
 export const SAMPLES: SampleRecord[] = withAccountSampleIds(LOGGED);
 
+export type TestResult = {
+  analyte: string;
+  result: string;
+  unit: string;
+  limit: string;
+};
+
+const RESULTS: Record<string, TestResult[]> = {
+  "SCP-20460": [
+    { analyte: "Assay", result: "99.2", unit: "%", limit: "98.0–102.0" },
+    { analyte: "Appearance", result: "Pass", unit: "—", limit: "Conforms" },
+  ],
+  "SCP-20479": [{ analyte: "Dissolution", result: "92", unit: "%", limit: "Q ≥ 80" }],
+  "SCP-20488": [{ analyte: "TAMC", result: "40", unit: "CFU/g", limit: "≤ 1000" }],
+  "SCP-20494": [{ analyte: "Salmonella", result: "Absent", unit: "/25 g", limit: "Absent" }],
+  "SCP-20496": [{ analyte: "Uniformity", result: "98.4", unit: "%", limit: "85.0–115.0" }],
+};
+
+export function sampleResults(accessionId: string): TestResult[] | null {
+  return RESULTS[accessionId] ?? null;
+}
+
+export function isResulted(sample: SampleRecord): boolean {
+  return sample.accessionId in RESULTS;
+}
+
 export function findSample(accessionId: string): SampleRecord | undefined {
   return SAMPLES.find((sample) => sample.accessionId === accessionId);
 }

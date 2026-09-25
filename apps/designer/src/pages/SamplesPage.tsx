@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ResultWindow } from "../components/ResultWindow";
 import { priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import {
   approveSamples,
+  isResulted,
   reviewStatus,
   SAMPLES,
   STATUS_LABEL,
@@ -45,7 +47,7 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
   review: {
     eyebrow: "Lab operations",
     title: "Review",
-    lede: "Samples ready for review. Approve one sample, or every sample in a batch, with the same button.",
+    lede: "Samples with results, ready for review. Complete Review opens the results, then authorize them.",
   },
   release: {
     eyebrow: "Lab operations",
@@ -54,10 +56,10 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
   },
 };
 
-function matchesView(status: SampleRecord["status"], view: SampleView): boolean {
+function matchesView(sample: SampleRecord, status: SampleRecord["status"], view: SampleView): boolean {
   if (view === "home") return true;
   if (view === "testing") return status === "testing";
-  if (view === "review") return status === "review";
+  if (view === "review") return status === "review" && isResulted(sample);
   return status === "released";
 }
 
@@ -98,12 +100,13 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
+  const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
   const rows = SAMPLES.filter((sample) => {
     const status = reviewStatus(sample, approved);
-    return matchesView(status, view) && (view === "review" || matchesQuickFilter(sample, filter));
+    return matchesView(sample, status, view) && (view === "review" || matchesQuickFilter(sample, filter));
   }).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
   const reviewRows =
     reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
@@ -131,6 +134,19 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       return next;
     });
   }
+  function resultButton(sample: SampleRecord) {
+    if (!isResulted(sample)) return null;
+    return (
+      <button
+        type="button"
+        className="btn btn-mini"
+        onClick={() => setResultWindow({ samples: [sample], authorize: false })}
+      >
+        View Results
+      </button>
+    );
+  }
+
   const open = SAMPLES.filter((sample) => sample.status !== "released").sort(
     (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
   );
@@ -166,13 +182,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               type="button"
               className="btn btn-primary"
               disabled={approveTarget.length === 0}
-              onClick={() => {
-                const ids = approveTarget.map((sample) => sample.accessionId);
-                approveSamples(ids);
-                toggleMany(ids, false);
-              }}
+              onClick={() => setResultWindow({ samples: approveTarget, authorize: true })}
             >
-              Approve
+              Complete Review
             </button>
           ) : (
             <>
@@ -215,6 +227,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         {sample.client} · {sample.tests}
                       </small>
                     </div>
+                    {resultButton(sample)}
                     <span className="lims-badge">{sample.site}</span>
                   </li>
                 ))}
@@ -267,6 +280,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 {visible.map((column) => (
                   <th key={column.id}>{column.label}</th>
                 ))}
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -274,7 +288,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 ? batches.length === 0
                   ? (
                     <tr>
-                      <td className="lims-empty" colSpan={(visible.length || 1) + 2}>
+                      <td className="lims-empty" colSpan={(visible.length || 1) + 3}>
                         No batches are ready for review.
                       </td>
                     </tr>
@@ -314,13 +328,14 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                             {visible.map((column) => (
                               <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
                             ))}
+                            <td>{resultButton(sample)}</td>
                           </tr>
                         ))
                     )
                 : (view === "review" ? reviewRows : rows).length === 0
                   ? (
                     <tr>
-                      <td className="lims-empty" colSpan={(visible.length || 1) + 1}>
+                      <td className="lims-empty" colSpan={(visible.length || 1) + 2}>
                         {view === "review" ? "No individual samples are ready for review." : "No samples match this filter."}
                       </td>
                     </tr>
@@ -341,12 +356,27 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         {visible.map((column) => (
                           <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved))}</td>
                         ))}
+                        <td>{resultButton(sample)}</td>
                       </tr>
                     ))}
             </tbody>
           </table>
         </div>
       </section>
+
+      {resultWindow ? (
+        <ResultWindow
+          samples={resultWindow.samples}
+          authorize={resultWindow.authorize}
+          onAuthorize={() => {
+            const ids = resultWindow.samples.map((sample) => sample.accessionId);
+            approveSamples(ids);
+            toggleMany(ids, false);
+            setResultWindow(null);
+          }}
+          onClose={() => setResultWindow(null)}
+        />
+      ) : null}
 
       <p className="lims-footnote">
         Sample events can trigger CareScope workflows —{" "}
