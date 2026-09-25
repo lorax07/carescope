@@ -20,7 +20,7 @@ export function SampleDetailBody({ sample }: { sample: SampleRecord }) {
       <div className="sample-detail-grid">
         <section className="lims-panel sample-detail-panel">
           <div className="lims-panel-head">
-            <h2>For laboratory staff</h2>
+            <h2>Sample details</h2>
           </div>
           <dl className="sample-detail-fields">
             <div>
