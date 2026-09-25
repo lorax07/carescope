@@ -98,35 +98,25 @@ a {
   cursor: grabbing;
 }
 
-.lims-nav-dock.is-open .lims-nav-launcher,
-.lims-nav-dock.is-open .lims-nav-launcher:active {
-  cursor: pointer;
-}
-
-.lims-nav-dock.is-open .lims-nav-launcher {
-  width: auto;
-  height: auto;
-  padding: 0.4rem 0.85rem 0.85rem 0.7rem;
-  border-radius: 12px;
-  overflow: visible;
+.lims-menu-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
 }
 
 .sequence-wordmark {
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.28rem;
-  letter-spacing: -0.04em;
+  margin: 0.15rem 0.2rem 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: "Bitec Sans", sans-serif;
+  font-weight: 700;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
   line-height: 1;
-  color: #0c0c0c;
-  text-shadow:
-    0 -1px 0 #fff,
-    1px 1px 0 #f3f3f3,
-    2px 2px 0 #d7d7d7,
-    3px 3px 0 #b0b0b0,
-    4px 4px 0 #848484,
-    5px 5px 0 #4a4a4a,
-    6px 6px 0 #161616;
+  color: #111;
+  cursor: pointer;
 }
 
 .lims-nav-launcher.is-icons {
@@ -212,6 +202,8 @@ a {
   margin: 0 0.15rem 0 0.2rem;
 }
 
+.lims-nav-dock.is-top .lims-menu-brand,
+.lims-nav-dock.is-bottom .lims-menu-brand,
 .lims-nav-dock.is-top .lims-site-block,
 .lims-nav-dock.is-bottom .lims-site-block {
   margin: 0;

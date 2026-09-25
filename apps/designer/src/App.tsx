@@ -30,7 +30,6 @@ function useLocalClock(): Date {
 type OpenEdge = "left" | "right" | "top";
 
 const LAUNCHER = 52;
-const PANEL_GAP = 8;
 const EDGE_PAD = 16;
 
 function openEdgeFor(x: number, y: number, dockWidth: number, dockHeight: number, width: number): OpenEdge {
@@ -58,25 +57,22 @@ function snappedPos(edge: OpenEdge, width: number): { x: number; y: number } {
 }
 
 function panelPlacement(edge: OpenEdge, x: number, y: number, width: number, height: number): CSSProperties {
-  const below = height - (y + LAUNCHER);
-  const above = y;
   if (edge === "left" || edge === "right") {
-    const upward = below < 240 && above > below;
-    const room = Math.max(180, (upward ? above : below) - PANEL_GAP - 12);
+    const room = Math.max(180, height - y - 12);
     return {
+      top: 0,
       width: 280,
       maxHeight: room,
       ...(edge === "left" ? { left: 0 } : { right: 0 }),
-      ...(upward ? { bottom: `calc(100% + ${PANEL_GAP}px)` } : { top: `calc(100% + ${PANEL_GAP}px)` }),
     };
   }
-  const room = Math.max(280, width - x - LAUNCHER - PANEL_GAP - 12);
+  const room = Math.max(280, width - x - 12);
   return {
+    top: 0,
+    left: 0,
     width: room,
     maxWidth: room,
     maxHeight: Math.round(height * 0.46),
-    top: 0,
-    left: `calc(100% + ${PANEL_GAP}px)`,
   };
 }
 
@@ -379,25 +375,27 @@ function AppFrame() {
       }
     >
       <div ref={dockRef} className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}`} style={{ left: navPos.x, top: navPos.y }}>
+        {navOpen ? null : (
         <button
           type="button"
-          className={`lims-nav-launcher${navOpen ? "" : " is-icons"}`}
-          aria-expanded={navOpen}
-          aria-label={navOpen ? "Collapse navigation" : "Expand navigation"}
+          className="lims-nav-launcher is-icons"
+          aria-expanded={false}
+          aria-label="Expand navigation"
           onPointerDown={beginNavDrag}
         >
-          {navOpen ? (
-            <span className="sequence-wordmark">Sequence</span>
-          ) : (
-            closedIcons.map((name) => (
-              <span key={name} className={`lims-nav-icon${activeSection === name ? " is-current" : ""}`}>
-                <NavIcon name={name} />
-              </span>
-            ))
-          )}
+          {closedIcons.map((name) => (
+            <span key={name} className={`lims-nav-icon${activeSection === name ? " is-current" : ""}`}>
+              <NavIcon name={name} />
+            </span>
+          ))}
         </button>
+      )}
       {navOpen ? (
       <aside ref={panelRef} className="lims-sidebar" style={panelStyle}>
+        <div className="lims-menu-brand">
+          <button type="button" className="sequence-wordmark" onClick={placeClosed}>
+            Sequence
+          </button>
         <div className="lims-site-block">
           <div className="lims-site">
             <span className="lims-site-dot" />
@@ -451,6 +449,7 @@ function AppFrame() {
               </div>
             </dl>
           ) : null}
+        </div>
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
