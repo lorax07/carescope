@@ -93,6 +93,11 @@ a {
   cursor: grabbing;
 }
 
+.lims-nav-dock.is-open .lims-nav-launcher,
+.lims-nav-dock.is-open .lims-nav-launcher:active {
+  cursor: pointer;
+}
+
 .lims-nav-launcher img {
   display: block;
   width: 100%;
