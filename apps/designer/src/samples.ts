@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 export type SampleStatus = "received" | "testing" | "review" | "approval" | "released" | "hold";
 
 export type SampleRecord = {
@@ -15,6 +17,8 @@ export type SampleRecord = {
   priority: "STAT" | "Rush" | "Routine";
   custody: string;
   site: string;
+  /** Set when the sample was logged into a batch. Null means it is reviewed alone. */
+  batchId: string | null;
 };
 
 const ACCOUNT = {
@@ -83,7 +87,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     site: "North Lab",
   },
   {
-    ...ACCOUNT_FIELDS("SCP-20488", "ORD-44096"),
+    ...ACCOUNT_FIELDS("SCP-20488", "ORD-44096", "B-1184"),
     received: "2026-07-25 07:40",
     client: "Northwind Foods",
     matrix: "Raw material",
@@ -104,15 +108,63 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     custody: "Bench 3 · QR verified",
     site: "North Lab",
   },
+  {
+    ...ACCOUNT_FIELDS("SCP-20494", "ORD-44108", "B-1184"),
+    received: "2026-07-25 08:40",
+    client: "Northwind Foods",
+    matrix: "Raw material",
+    tests: "Salmonella",
+    status: "review",
+    priority: "Routine",
+    custody: "Micro suite",
+    site: "North Lab",
+  },
+  {
+    ...ACCOUNT_FIELDS("SCP-20496", "ORD-44115"),
+    received: "2026-07-25 09:05",
+    client: "Summit Generics",
+    matrix: "Tablet",
+    tests: "Uniformity",
+    status: "review",
+    priority: "Routine",
+    custody: "Review bench",
+    site: "North Lab",
+  },
 ];
 
-function ACCOUNT_FIELDS(accessionId: string, orderId: string) {
+function ACCOUNT_FIELDS(accessionId: string, orderId: string, batchId: string | null = null) {
   return {
     accountId: ACCOUNT.id,
     accountName: ACCOUNT.name,
     accessionId,
     orderId,
+    batchId,
   };
+}
+
+const approvedIds = new Set<string>();
+const approvalListeners = new Set<() => void>();
+
+export function useReviewApprovals(): Set<string> {
+  const [ids, setIds] = useState(() => new Set(approvedIds));
+  useEffect(() => {
+    const sync = () => setIds(new Set(approvedIds));
+    approvalListeners.add(sync);
+    return () => {
+      approvalListeners.delete(sync);
+    };
+  }, []);
+  return ids;
+}
+
+export function approveSamples(accessionIds: string[]): void {
+  for (const id of accessionIds) approvedIds.add(id);
+  approvalListeners.forEach((listener) => listener());
+}
+
+export function reviewStatus(sample: SampleRecord, approved: Set<string>): SampleStatus {
+  if (sample.status === "review" && approved.has(sample.accessionId)) return "approval";
+  return sample.status;
 }
 
 export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): SampleRecord[] {

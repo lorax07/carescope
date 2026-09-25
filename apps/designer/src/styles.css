@@ -697,6 +697,15 @@ a {
   background: #f8fbff;
 }
 
+.lims-table tr.is-selected td {
+  background: #e8f1ff;
+}
+
+.lims-batch {
+  font-weight: 700;
+  vertical-align: top;
+}
+
 .lims-mono {
   font-family: var(--font-mono);
   font-size: 0.8rem;
