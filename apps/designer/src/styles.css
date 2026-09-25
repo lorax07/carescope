@@ -685,6 +685,44 @@ a {
   color: var(--danger);
 }
 
+.ops-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+}
+
+.ops-bars {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.ops-bar-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 2rem;
+  gap: 0.55rem;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.ops-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+
+.ops-bar-track div {
+  height: 100%;
+  border-radius: inherit;
+  min-width: 2px;
+}
+
+.ops-bar-row b {
+  text-align: right;
+}
+
 .lims-dash-grid {
   display: grid;
   grid-template-columns: 1.7fr 0.9fr;
@@ -1688,6 +1726,7 @@ a {
 
   .lims-kpi-row,
   .lims-dash-grid,
+  .ops-charts,
   .designer-layout,
   .lab-ops-editor-grid,
   .sample-detail-grid,
