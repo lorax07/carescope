@@ -1786,3 +1786,21 @@ body:has(.lp) {
 .lp-footer {
   background: #f6f5f4;
 }
+
+.lp-spotlight {
+  --spotlight: 0;
+  position: relative;
+  z-index: 1;
+  width: calc(100% + (100vw - 100% - 3rem) * var(--spotlight));
+  margin-left: calc((100% - (100% + (100vw - 100% - 3rem) * var(--spotlight))) / 2);
+  border-radius: calc(28px * var(--spotlight));
+  background: color-mix(in srgb, #fff calc(var(--spotlight) * 100%), #f6f5f4);
+  box-shadow:
+    0 0 0 1px rgba(11, 31, 68, calc(0.05 * var(--spotlight))),
+    0 calc(28px * var(--spotlight)) calc(70px * var(--spotlight)) rgba(11, 31, 68, calc(0.1 * var(--spotlight)));
+}
+
+.lp-spotlight .lp-section-inner {
+  width: 100%;
+  max-width: none;
+}
