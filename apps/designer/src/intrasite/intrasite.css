@@ -651,7 +651,10 @@
   max-height: calc(100vh - 2rem);
   overflow: auto;
   resize: both;
-  background: #fff;
+  background:
+    linear-gradient(135deg, transparent 42%, #94a3b8 42% 54%, transparent 54% 66%, #94a3b8 66% 78%, transparent 78%)
+      right 4px bottom 4px / 14px 14px no-repeat,
+    #fff;
   border-radius: 16px;
   padding: 1.2rem 1.3rem 1.4rem;
   box-shadow: var(--shadow);

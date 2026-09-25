@@ -1513,7 +1513,11 @@ a {
   overflow: hidden;
   resize: both;
   container: dialog / inline-size;
-  background: #fff;
+  padding-bottom: 16px;
+  background:
+    linear-gradient(135deg, transparent 42%, #94a3b8 42% 54%, transparent 54% 66%, #94a3b8 66% 78%, transparent 78%)
+      right 4px bottom 4px / 14px 14px no-repeat,
+    #fff;
   border-radius: 12px;
   border: 1px solid var(--border);
 }
@@ -2265,7 +2269,10 @@ button.palette-category-title {
   overflow: auto;
   resize: both;
   border-radius: 16px;
-  background: #fff;
+  background:
+    linear-gradient(135deg, transparent 42%, #94a3b8 42% 54%, transparent 54% 66%, #94a3b8 66% 78%, transparent 78%)
+      right 4px bottom 4px / 14px 14px no-repeat,
+    #fff;
   border: 1px solid var(--border);
   box-shadow: 0 24px 60px rgba(15, 23, 36, 0.22);
   padding: 1.25rem 1.3rem 1.35rem;
