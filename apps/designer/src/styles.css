@@ -852,6 +852,11 @@ a {
   background: var(--accent-soft);
 }
 
+.lims-empty {
+  color: var(--text-muted);
+  padding: 1.25rem 0.85rem;
+}
+
 .lims-footnote {
   margin: 0.85rem 0 0;
   font-size: 0.85rem;

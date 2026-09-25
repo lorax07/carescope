@@ -1,6 +1,25 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { SAMPLES, STATUS_LABEL, type SampleRecord } from "../samples";
+
+type QuickFilter = "all" | "stat" | "testing" | "review" | "hold";
+
+const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
+  { id: "all", label: "All open" },
+  { id: "stat", label: "STAT" },
+  { id: "testing", label: "In testing" },
+  { id: "review", label: "Review" },
+  { id: "hold", label: "On hold" },
+];
+
+function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "stat") return sample.priority === "STAT";
+  if (filter === "testing") return sample.status === "testing";
+  if (filter === "review") return sample.status === "review" || sample.status === "approval";
+  return sample.status === "hold";
+}
 
 const VIEW_COPY: Record<LabMenuView, { eyebrow: string; title: string; lede: string }> = {
   home: {
@@ -71,12 +90,13 @@ function cell(sample: SampleRecord, id: SampleColumnId) {
 
 export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
   const { priorities, menu, columns } = useLabOperations();
+  const [filter, setFilter] = useState<QuickFilter>("all");
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
-  const rows = SAMPLES.filter((sample) => matchesView(sample.status, view)).sort(
-    (a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities)
-  );
+  const rows = SAMPLES.filter(
+    (sample) => matchesView(sample.status, view) && matchesQuickFilter(sample, filter)
+  ).sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
 
   return (
     <div className="lims-page">
@@ -96,22 +116,18 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
         </div>
       </div>
 
-      <div className="lims-filter-bar">
-        <button type="button" className="lims-filter active">
-          All open
-        </button>
-        <button type="button" className="lims-filter">
-          STAT
-        </button>
-        <button type="button" className="lims-filter">
-          In testing
-        </button>
-        <button type="button" className="lims-filter">
-          Review
-        </button>
-        <button type="button" className="lims-filter">
-          On hold
-        </button>
+      <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
+        {QUICK_FILTERS.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`lims-filter${filter === item.id ? " active" : ""}`}
+            aria-pressed={filter === item.id}
+            onClick={() => setFilter(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
 
       <section className="lims-panel">
@@ -125,13 +141,21 @@ export function SamplesPage({ view = "home" }: { view?: LabMenuView }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((sample) => (
-                <tr key={sample.accessionId}>
-                  {visible.map((column) => (
-                    <td key={column.id}>{cell(sample, column.id)}</td>
-                  ))}
+              {rows.length === 0 ? (
+                <tr>
+                  <td className="lims-empty" colSpan={visible.length || 1}>
+                    No samples match this filter.
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                rows.map((sample) => (
+                  <tr key={sample.accessionId}>
+                    {visible.map((column) => (
+                      <td key={column.id}>{cell(sample, column.id)}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
