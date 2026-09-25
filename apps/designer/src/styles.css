@@ -936,6 +936,52 @@ a {
   border-color: var(--accent-dim);
 }
 
+.btn-mini {
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  border-radius: 6px;
+}
+
+.lims-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(15, 23, 36, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.lims-modal {
+  width: min(720px, 100%);
+  max-height: min(80vh, 720px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.lims-modal-body {
+  padding: 0.5rem 1rem 1rem;
+}
+
+.lims-modal-body h3 {
+  margin: 0.85rem 0 0.15rem;
+  font-size: 0.95rem;
+}
+
+.lims-modal-body p {
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.lims-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem 1rem;
+}
+
 .btn-ghost {
   background: transparent;
   border-color: transparent;
