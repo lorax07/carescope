@@ -15,6 +15,7 @@ const NAV = [
   { to: "/app/instruments", label: "Instrument Interface" },
   { to: "/app/connectivity", label: "Healthcare CRM" },
   { to: "/app/quality", label: "Quality & Compliance" },
+  { to: "/app/billing", label: "Billing & Revenue" },
   { to: "/app/insights", label: "Insights" },
 ] as const;
 
@@ -171,6 +172,14 @@ function NavIcon({ name }: { name: string }) {
     return (
       <svg {...common}>
         <path d="M12 3.5 19 6.5v5.2c0 4.2-2.8 7.2-7 8.8-4.2-1.6-7-4.6-7-8.8V6.5L12 3.5z" />
+      </svg>
+    );
+  }
+  if (name === "billing") {
+    return (
+      <svg {...common}>
+        <rect x="6" y="4" width="12" height="16" rx="1.5" />
+        <path d="M9 9h6M9 12h6M9 15h4" />
       </svg>
     );
   }

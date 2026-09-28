@@ -392,7 +392,7 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Billing",
+    title: "Billing & Revenue",
     detail: "Invoice clients for completed laboratory work",
     tone: "amber",
     icon: (
