@@ -238,7 +238,7 @@ function PlatformBand() {
           run a more efficient laboratory.
         </p>
         </div>
-        <ul className="lp-cols lp-cols-5">
+        <ul className="lp-cols">
           {PLATFORM_PILLARS.map((pillar) => (
             <li key={pillar.title}>
               <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
@@ -388,6 +388,17 @@ const PLATFORM_PILLARS = [
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
         <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Billing",
+    detail: "Invoice clients for completed laboratory work",
+    tone: "amber",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <rect x="8" y="5.5" width="16" height="21" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M12 12h8M12 16h8M12 20h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },

@@ -408,6 +408,11 @@
   color: #1493b8;
 }
 
+.lp-platform-icon.amber {
+  background: #fff4e5;
+  color: #c2410c;
+}
+
 
 .lp-compare {
   display: grid;
