@@ -137,12 +137,7 @@ export function BillingPage() {
     ? requestedStage
     : ((["denials", "edits", "ready", "capture", "submitted", "awaiting", "closed"] as const).find((item) => counts[item]) ?? "capture");
   const rows = useMemo(() => rowsFor(stage, cycle, samples, accountFilter), [stage, cycle, samples, accountFilter]);
-
-  useEffect(() => {
-    if (selected && rows.some((row) => row.kind === selected.kind && row.id === selected.id)) return;
-    const first = rows[0];
-    setSelected(first ? { kind: first.kind, id: first.id } : null);
-  }, [rows, selected]);
+  const current = rows.find((row) => selected && row.kind === selected.kind && row.id === selected.id) ?? rows[0] ?? null;
 
   function chooseStage(next: WorkStage) {
     const query = new URLSearchParams(params);
@@ -174,8 +169,8 @@ export function BillingPage() {
   const books = ledgerSnapshot(cycle.charges);
   const denial = cycle.charges.find((charge) => charge.status === "denied");
   const buckets = aging(cycle.charges);
-  const selectedSample = selected?.kind === "sample" ? samples.find((sample) => sample.accessionId === selected.id) : undefined;
-  const selectedCharge = selected?.kind === "charge" ? cycle.charges.find((charge) => charge.id === selected.id) : undefined;
+  const selectedSample = current?.kind === "sample" ? current.sample : undefined;
+  const selectedCharge = current?.kind === "charge" ? current.charge : undefined;
 
   return (
     <div className="lims-page">
@@ -243,7 +238,7 @@ export function BillingPage() {
               ))}
             </select>
           </div>
-          <WorkTable rows={rows} stage={stage} selected={selected} onSelect={setSelected} />
+          <WorkTable rows={rows} stage={stage} selected={current ? { kind: current.kind, id: current.id } : null} onSelect={setSelected} />
         </section>
         <section className="lims-panel">
           {selectedSample ? (
@@ -623,6 +618,14 @@ function SampleCase({
         <h2 className="lims-mono">{sample.accessionId}</h2>
         <span>{STATUS_LABEL[sample.status]}</span>
       </div>
+      {stage === "awaiting" ? <p className="billing-note">Charge capture opens when this accession reaches review.</p> : null}
+      {stage === "capture" ? (
+        <div className="rcm-actions">
+          <button type="button" className="btn btn-primary" onClick={() => onCapture(sample.accessionId)}>
+            Capture charges
+          </button>
+        </div>
+      ) : null}
       <dl className="account-facts">
         <div>
           <dt>Account</dt>
@@ -658,15 +661,134 @@ function SampleCase({
           </li>
         ))}
       </ul>
-      {stage === "awaiting" ? <p className="billing-note">Charge capture opens when this accession reaches review.</p> : null}
-      {stage === "capture" ? (
-        <div className="rcm-actions">
-          <button type="button" className="btn btn-primary" onClick={() => onCapture(sample.accessionId)}>
-            Capture charges
-          </button>
-        </div>
-      ) : null}
     </>
+  );
+}
+
+function ChargeActions({
+  charge,
+  account,
+  sample,
+  reasons,
+  replacement,
+  canCode,
+  onFocus,
+}: {
+  charge: Charge;
+  account: ReturnType<typeof accountById>;
+  sample: SampleRecord | undefined;
+  reasons: string[];
+  replacement: Charge | undefined;
+  canCode: boolean;
+  onFocus: (id: string) => void;
+}) {
+  return (
+    <div className="rcm-actions">
+      {canCode ? (
+        <label>
+          ICD-10
+          <select
+            aria-label="ICD-10"
+            value={charge.icd10}
+            onChange={(event) => {
+              setDiagnosis(charge.id, event.target.value);
+              onFocus(charge.id);
+            }}
+          >
+            <option value="">Select a diagnosis</option>
+            {ICD10.map((code) => (
+              <option key={code.code} value={code.code}>
+                {code.code} — {code.description}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {charge.status === "held" && sample?.status === "hold" && !charge.labOverride ? (
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            billDespiteLabHold(charge.id);
+            onFocus(charge.id);
+          }}
+        >
+          Bill despite laboratory hold
+        </button>
+      ) : null}
+      {charge.status === "held" && account?.status === "On hold" && !charge.accountOverride ? (
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            overrideAccountHold(charge.id);
+            onFocus(charge.id);
+          }}
+        >
+          Override account hold
+        </button>
+      ) : null}
+      {charge.manualHold && (charge.status === "held" || charge.status === "ready") ? (
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            releaseHold(charge.id);
+            onFocus(charge.id);
+          }}
+        >
+          Release manual hold
+        </button>
+      ) : null}
+      {charge.status === "ready" ? (
+        <>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              submitCharge(charge.id);
+              onFocus(charge.id);
+            }}
+          >
+            Submit {routeLabel(charge.route).toLowerCase()}
+          </button>
+          <HoldBox chargeId={charge.id} onFocus={onFocus} />
+        </>
+      ) : null}
+      {charge.status === "submitted" || charge.status === "partial" ? (
+        <PaymentBox key={`${charge.id}-${charge.paidCents}`} charge={charge} onFocus={onFocus} />
+      ) : null}
+      {charge.status === "denied" ? (
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={reasons.length > 0}
+          onClick={() => {
+            const id = rebillCharge(charge.id);
+            if (id) onFocus(id);
+          }}
+        >
+          Rebill
+        </button>
+      ) : null}
+      {charge.status === "submitted" || charge.status === "partial" || charge.status === "denied" ? (
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            writeOffCharge(charge.id);
+            onFocus(charge.id);
+          }}
+        >
+          Write off balance
+        </button>
+      ) : null}
+      {replacement ? (
+        <button type="button" className="btn" onClick={() => onFocus(replacement.id)}>
+          Open {replacement.id}
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -695,6 +817,14 @@ function ChargeCase({
         <span>Balance</span>
         {money(balance(charge))}
       </p>
+      {reasons.length > 0 && (charge.status === "held" || charge.status === "denied") ? (
+        <ul className="rcm-edits">
+          {reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      ) : null}
+      <ChargeActions charge={charge} account={account} sample={sample} reasons={reasons} replacement={replacement} canCode={canCode} onFocus={onFocus} />
       <dl className="account-facts">
         <div>
           <dt>Accession</dt>
@@ -771,67 +901,6 @@ function ChargeCase({
           </div>
         ) : null}
       </dl>
-      {reasons.length > 0 && (charge.status === "held" || charge.status === "denied") ? (
-        <ul className="rcm-edits">
-          {reasons.map((reason) => (
-            <li key={reason}>{reason}</li>
-          ))}
-        </ul>
-      ) : null}
-      <div className="rcm-actions">
-        {canCode ? (
-          <label>
-            ICD-10
-            <select aria-label="ICD-10" value={charge.icd10} onChange={(event) => { setDiagnosis(charge.id, event.target.value); onFocus(charge.id); }}>
-              <option value="">Select a diagnosis</option>
-              {ICD10.map((code) => (
-                <option key={code.code} value={code.code}>
-                  {code.code} — {code.description}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        {charge.status === "held" && sample?.status === "hold" && !charge.labOverride ? (
-          <button type="button" className="btn btn-primary" onClick={() => { billDespiteLabHold(charge.id); onFocus(charge.id); }}>
-            Bill despite laboratory hold
-          </button>
-        ) : null}
-        {charge.status === "held" && account?.status === "On hold" && !charge.accountOverride ? (
-          <button type="button" className="btn btn-primary" onClick={() => { overrideAccountHold(charge.id); onFocus(charge.id); }}>
-            Override account hold
-          </button>
-        ) : null}
-        {charge.manualHold && (charge.status === "held" || charge.status === "ready") ? (
-          <button type="button" className="btn" onClick={() => { releaseHold(charge.id); onFocus(charge.id); }}>
-            Release manual hold
-          </button>
-        ) : null}
-        {charge.status === "ready" ? (
-          <>
-            <button type="button" className="btn btn-primary" onClick={() => { submitCharge(charge.id); onFocus(charge.id); }}>
-              Submit {routeLabel(charge.route).toLowerCase()}
-            </button>
-            <HoldBox chargeId={charge.id} onFocus={onFocus} />
-          </>
-        ) : null}
-        {charge.status === "submitted" || charge.status === "partial" ? <PaymentBox key={`${charge.id}-${charge.paidCents}`} charge={charge} onFocus={onFocus} /> : null}
-        {charge.status === "denied" ? (
-          <button type="button" className="btn btn-primary" disabled={reasons.length > 0} onClick={() => { const id = rebillCharge(charge.id); if (id) onFocus(id); }}>
-            Rebill
-          </button>
-        ) : null}
-        {charge.status === "submitted" || charge.status === "partial" || charge.status === "denied" ? (
-          <button type="button" className="btn" onClick={() => { writeOffCharge(charge.id); onFocus(charge.id); }}>
-            Write off balance
-          </button>
-        ) : null}
-        {replacement ? (
-          <button type="button" className="btn" onClick={() => onFocus(replacement.id)}>
-            Open {replacement.id}
-          </button>
-        ) : null}
-      </div>
       <h3>Ledger</h3>
       <ul className="account-activity">
         {charge.events.map((event, index) => (
