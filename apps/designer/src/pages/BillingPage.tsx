@@ -192,8 +192,8 @@ export function BillingPage() {
     <div className="lims-page">
       <div className="lims-page-header">
         <div>
-          <p className="lims-eyebrow">Billing</p>
-          <h1>Billing & Revenue</h1>
+          <p className="lims-eyebrow">Revenue</p>
+          <h1>Sequence Revenue</h1>
           <p className="lims-page-lede">
             Capture charges, price tests, bill payers and clients, and follow claims through payment. Accounts are the Healthcare CRM account list.
           </p>

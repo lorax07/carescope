@@ -7,7 +7,7 @@ export type CrmAccount = {
   status: "Active" | "On hold";
 };
 
-/** Client accounts owned by Healthcare CRM and reused by Billing & Revenue. */
+/** Client accounts owned by Healthcare CRM and reused by Sequence Revenue. */
 export const CRM_ACCOUNTS: CrmAccount[] = [
   {
     id: "acc-vertex",

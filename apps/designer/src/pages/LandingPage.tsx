@@ -392,7 +392,7 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Billing & Revenue",
+    title: "Sequence Revenue",
     detail: "Invoice clients for completed laboratory work",
     tone: "amber",
     icon: (
