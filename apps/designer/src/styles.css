@@ -2012,8 +2012,14 @@ a {
 .lims-filter-bar {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.85rem;
+}
+
+.lims-filter-bar .lims-test-filter {
+  margin-left: 0;
 }
 
 .lims-filter {
