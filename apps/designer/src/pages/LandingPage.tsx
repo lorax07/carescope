@@ -393,7 +393,7 @@ const PLATFORM_PILLARS = [
   },
   {
     title: "Sequence Revenue",
-    detail: "Run the laboratory revenue cycle",
+    detail: "This is a robust revenue Cycle management system",
     tone: "amber",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
