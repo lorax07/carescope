@@ -80,3 +80,32 @@ export function useSectionTabs(): SectionTabsValue {
   if (!value) throw new Error("Section tabs are unavailable");
   return value;
 }
+
+/** Parked screens, shown on the right of the main workflow so the list stays available. */
+export function SectionTabStrip() {
+  const tabs = useSectionTabs();
+  if (tabs.tabs.length === 0) return null;
+
+  return (
+    <div className="lims-tabs lims-tabs-inline lims-tabs-parked" role="tablist" aria-label="Tabbed screens">
+      {tabs.tabs.map((tab) => {
+        const selected = tabs.activeId === tab.id;
+        return (
+          <div key={tab.id} className={`lims-tab${selected ? " active" : ""}`}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => (selected ? tabs.showSection() : tabs.select(tab.id))}
+            >
+              {tab.title}
+            </button>
+            <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => tabs.close(tab.id)}>
+              ×
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}

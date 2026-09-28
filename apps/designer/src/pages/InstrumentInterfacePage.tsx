@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useSectionTabs } from "../sectionTabs";
+import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { InstrumentRecordView } from "../components/InstrumentRecordView";
 import { addInstrument, findInstrument, useInstruments, type InstrumentRecord } from "../instruments";
 
@@ -54,6 +54,7 @@ export function InstrumentInterfacePage() {
       <section className="lims-panel instrument-workflow">
         <div className="lims-panel-head">
           <h2>Add an instrument</h2>
+          <SectionTabStrip />
         </div>
         <ol className="instrument-steps">
           {STEPS.map((label, index) => (
