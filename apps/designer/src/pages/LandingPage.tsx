@@ -354,7 +354,7 @@ const PLATFORM_PILLARS = [
   },
   {
     title: "Sequence Client",
-    detail: "Accounts, pipeline, and lab work on one record",
+    detail: "This is an RCM for accounts, pipeline, and lab work",
     tone: "violet",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
