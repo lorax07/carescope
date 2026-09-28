@@ -382,16 +382,6 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Sequence Insights",
-    detail: "Turn laboratory data into operational intelligence",
-    tone: "cyan",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
     title: "Sequence Revenue",
     detail: "This is a robust revenue Cycle management system",
     tone: "amber",
@@ -399,6 +389,16 @@ const PLATFORM_PILLARS = [
       <svg viewBox="0 0 32 32" width="28" height="28">
         <rect x="8" y="5.5" width="16" height="21" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path d="M12 12h8M12 16h8M12 20h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Sequence Insights",
+    detail: "Turn laboratory data into operational intelligence",
+    tone: "cyan",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
