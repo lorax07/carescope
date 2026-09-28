@@ -66,268 +66,294 @@ export function LandingPage() {
   );
 }
 
-type ComparePoint = {
+type StackSegment = {
   id: string;
   label: string;
-  traditional: number;
-  traditionalLabel: string;
-  /** Undefined hides the Sequence bar. Null means the source did not publish a figure. */
-  sequence?: number | null;
-  sequenceLabel?: string;
+  value: number;
 };
 
-type TopicChart = {
+type ChangeExample = {
   id: string;
-  kicker: string;
-  title: string;
-  axis: string;
-  max: number;
-  ticks: { label: string; at: number }[];
-  points: ComparePoint[];
-  note: string;
+  name: string;
+  cost: number;
+  costLabel: string;
+  /** Hours at the long end of a published range. Null when the source publishes a label only. */
+  hours: number | null;
+  timeLabel: string;
+  sequenceCost: number | null;
+  sequenceCostLabel: string;
+  sequenceHours: number | null;
+  sequenceTimeLabel: string;
 };
 
 type Topic = {
   id: string;
   label: string;
+  kicker: string;
+  title: string;
+  note: string;
   sources: number[];
-  chart: TopicChart;
+  emphasis: "cost" | "time";
+  examples: ChangeExample[];
 };
 
 const WEEK = 7 * 24;
-const COST_MAX = 6000;
-const COST_TICKS = [
-  { label: "$6,000", at: 1 },
-  { label: "$4,000", at: 4 / 6 },
-  { label: "$2,000", at: 2 / 6 },
-  { label: "$0", at: 0 },
-];
-const TIME_MAX = 4 * WEEK * 1.22;
-const WEEK_TICKS = [4, 3, 2, 1, 0].map((weeks) => ({
-  label: weeks === 0 ? "0" : `${weeks} wk`,
-  at: (weeks * WEEK) / TIME_MAX,
-}));
+
+const REPORT: ChangeExample = {
+  id: "report",
+  name: "New report template",
+  cost: 2000,
+  costLabel: "$2,000",
+  hours: 3 * WEEK,
+  timeLabel: "2–3 weeks",
+  sequenceCost: 0,
+  sequenceCostLabel: "$0",
+  sequenceHours: 1,
+  sequenceTimeLabel: "1 hour",
+};
+
+const DEPARTMENT: ChangeExample = {
+  id: "department",
+  name: "Add a department",
+  cost: 3600,
+  costLabel: "$3,600",
+  hours: 4 * WEEK,
+  timeLabel: "3–4 weeks",
+  sequenceCost: 0,
+  sequenceCostLabel: "$0",
+  sequenceHours: 24,
+  sequenceTimeLabel: "1 day",
+};
 
 const TOPICS: Topic[] = [
   {
     id: "cost",
     label: "The Cost of Change",
-    sources: [1, 3],
-    chart: {
-      id: "cost",
-      kicker: "Vendor fee",
-      title: "What one change costs after go-live",
-      axis: "Cost",
-      max: COST_MAX,
-      ticks: COST_TICKS,
-      note: "Traditional bars are the published vendor fee. Sequence bars are that source’s self-configuration result, with no invoice.",
-      points: [
-        { id: "report", label: "New report\ntemplate", traditional: 2000, traditionalLabel: "$2,000", sequence: 0, sequenceLabel: "$0" },
-        { id: "department", label: "Add a\ndepartment", traditional: 3600, traditionalLabel: "$3,600", sequence: 0, sequenceLabel: "$0" },
-        { id: "tweak", label: "Minor tweak", traditional: 4000, traditionalLabel: "About $4,000", sequence: 0, sequenceLabel: "$0" },
-      ],
-    },
+    kicker: "Custom change",
+    title: "Total cost of a priced change",
+    emphasis: "cost",
+    sources: [1],
+    note: "Each total is one custom change from CleverLAB. The cost bar is the consultant fee, which is the whole published price. The article says every change also needs project scope. It does not price internal IT, the project manager, or lab staff.",
+    examples: [REPORT, DEPARTMENT],
   },
   {
     id: "friction",
     label: "Operational Friction",
-    sources: [1, 2, 3],
-    chart: {
-      id: "friction",
-      kicker: "Calendar time",
-      title: "How long the same kind of change takes",
-      axis: "Time",
-      max: TIME_MAX,
-      ticks: WEEK_TICKS,
-      note: "Where a source gives a range, the bar reaches the long end and the label shows the range. A new instrument interface takes one to two weeks. The time to turn on an interface that already exists is not published.",
-      points: [
-        { id: "report", label: "New report\ntemplate", traditional: 3 * WEEK, traditionalLabel: "2–3 weeks", sequence: 1, sequenceLabel: "1 hour" },
-        { id: "department", label: "Add a\ndepartment", traditional: 4 * WEEK, traditionalLabel: "3–4 weeks", sequence: 24, sequenceLabel: "1 day" },
-        { id: "tweak", label: "Minor tweak", traditional: 4 * WEEK, traditionalLabel: "About 4 weeks", sequence: 10 / 3600, sequenceLabel: "Seconds" },
-        { id: "interface", label: "Instrument\ninterface", traditional: 2 * WEEK, traditionalLabel: "1–2 weeks", sequence: null, sequenceLabel: "Not published" },
-      ],
-    },
+    kicker: "Custom change",
+    title: "Total calendar time for that change",
+    emphasis: "time",
+    sources: [1],
+    note: "The time total is calendar time for the whole change, not a sum of hours from each function. A range is drawn to its long end and labeled in full. Sequence is the lab configuring the change itself.",
+    examples: [REPORT, DEPARTMENT],
   },
   {
     id: "consultants",
     label: "Consultant Dependency",
-    sources: [1, 2, 3],
-    chart: {
-      id: "consultants",
-      kicker: "Outside specialist",
-      title: "The fee for a programmer or vendor",
-      axis: "Cost",
-      max: COST_MAX,
-      ticks: COST_TICKS,
-      note: "These are published programmer or vendor fees, not a split of internal labor. Sequence is $0 where the source publishes self-configuration. A new bidirectional interface is about $5,000; that article does not publish a self-configuration price for building one. An interface that already exists is free.",
-      points: [
-        { id: "report", label: "New report\ntemplate", traditional: 2000, traditionalLabel: "$2,000", sequence: 0, sequenceLabel: "$0" },
-        { id: "department", label: "Add a\ndepartment", traditional: 3600, traditionalLabel: "$3,600", sequence: 0, sequenceLabel: "$0" },
-        { id: "tweak", label: "Minor tweak", traditional: 4000, traditionalLabel: "About $4,000", sequence: 0, sequenceLabel: "$0" },
-        { id: "interface", label: "Bidirectional\ninterface", traditional: 5000, traditionalLabel: "About $5,000", sequence: null, sequenceLabel: "Not published" },
-      ],
-    },
+    kicker: "Custom change",
+    title: "The consultant fee is the published total",
+    emphasis: "cost",
+    sources: [1],
+    note: "CleverLAB prices a custom change as a programmer’s fee. That fee is the cost total. On Sequence the same change is self-configuration, so the consultant fee is $0.",
+    examples: [REPORT, DEPARTMENT],
   },
   {
     id: "integration",
     label: "Integration Complexity",
+    kicker: "Custom interface",
+    title: "Total cost and time to connect an instrument",
+    emphasis: "cost",
     sources: [2],
-    chart: {
-      id: "integration",
-      kicker: "Instrument interface",
-      title: "Published cost of connecting an instrument",
-      axis: "Cost",
-      max: COST_MAX,
-      ticks: COST_TICKS,
-      note: "A new unidirectional interface is about $3,000 and a bidirectional interface is about $5,000. Either takes one to two weeks, including testing. An interface already in the catalogue is free. The time to turn an existing interface on is not published.",
-      points: [
-        { id: "uni", label: "Unidirectional", traditional: 3000, traditionalLabel: "About $3,000" },
-        { id: "bi", label: "Bidirectional", traditional: 5000, traditionalLabel: "About $5,000" },
-        { id: "exists", label: "Already in\nthe catalogue", traditional: 0, traditionalLabel: "$0" },
-      ],
-    },
+    note: "Bika prices a new interface as vendor customisation, built with help from the lab during testing. The cost total is that vendor fee. The time total is one to two weeks, including testing. An interface already in the catalogue is free, and its turn-on time is not published.",
+    examples: [
+      {
+        id: "uni",
+        name: "Unidirectional interface",
+        cost: 3000,
+        costLabel: "About $3,000",
+        hours: 2 * WEEK,
+        timeLabel: "1–2 weeks",
+        sequenceCost: null,
+        sequenceCostLabel: "Not published",
+        sequenceHours: null,
+        sequenceTimeLabel: "Not published",
+      },
+      {
+        id: "bi",
+        name: "Bidirectional interface",
+        cost: 5000,
+        costLabel: "About $5,000",
+        hours: 2 * WEEK,
+        timeLabel: "1–2 weeks",
+        sequenceCost: null,
+        sequenceCostLabel: "Not published",
+        sequenceHours: null,
+        sequenceTimeLabel: "Not published",
+      },
+      {
+        id: "exists",
+        name: "Already in the catalogue",
+        cost: 0,
+        costLabel: "$0",
+        hours: null,
+        timeLabel: "Not published",
+        sequenceCost: 0,
+        sequenceCostLabel: "$0",
+        sequenceHours: null,
+        sequenceTimeLabel: "Not published",
+      },
+    ],
   },
   {
     id: "compliance",
     label: "Compliance Friction",
-    sources: [3],
-    chart: {
-      id: "compliance",
-      kicker: "Controlled change",
-      title: "Calendar time for a minor tweak",
-      axis: "Time",
-      max: TIME_MAX,
-      ticks: WEEK_TICKS,
-      note: "Each traditional bar is the same published figure: about four weeks and about $4,000 for one minor tweak. It is not three invoices added together. On a configurable system, staff adjust a worksheet or certificate of analysis, or generate a report, in seconds and without that invoice.",
-      points: [
-        { id: "worksheet", label: "Worksheet", traditional: 4 * WEEK, traditionalLabel: "About 4 weeks", sequence: 10 / 3600, sequenceLabel: "Seconds" },
-        { id: "coa", label: "Certificate\nof analysis", traditional: 4 * WEEK, traditionalLabel: "About 4 weeks", sequence: 10 / 3600, sequenceLabel: "Seconds" },
-        { id: "report", label: "Generate\na report", traditional: 4 * WEEK, traditionalLabel: "About 4 weeks", sequence: 10 / 3600, sequenceLabel: "Seconds" },
-      ],
-    },
+    kicker: "Custom report",
+    title: "A new report template, priced as one change",
+    emphasis: "time",
+    sources: [1],
+    note: "CleverLAB’s priced custom report is a new report template: $2,000 and 2–3 weeks with a programmer, or $0 and 1 hour when the lab configures it. The article does not publish a second price for a compliance-only tweak.",
+    examples: [REPORT],
   },
 ];
 
-function AxisLabel({ text }: { text: string }) {
-  const [first, second] = text.split("\n");
-  if (!second) return first;
-  return (
-    <>
-      {first}
-      <span className="lp-role-gap"> </span>
-      <span className="lp-role-break">{second}</span>
-    </>
-  );
-}
+const FUNCTIONS = [
+  { id: "consultants", label: "Consultants", hint: "The published fee" },
+  { id: "it", label: "Internal IT", hint: "Not priced" },
+  { id: "pm", label: "Project manager", hint: "Not priced" },
+  { id: "lab", label: "Lab staff", hint: "Configures Sequence" },
+] as const;
 
-function barPresentation(value: number, max: number): { stub: boolean; height: string } {
+const INTERFACE_FUNCTIONS = [
+  { id: "consultants", label: "Consultants", hint: "The vendor fee" },
+  { id: "it", label: "Internal IT", hint: "Not priced" },
+  { id: "pm", label: "Project manager", hint: "Not priced" },
+  { id: "lab", label: "Lab staff", hint: "Help with testing" },
+] as const;
+
+function stackWidth(value: number | null, max: number): string {
+  if (value == null || max <= 0 || value <= 0) return "0%";
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  if (pct < 3.5) return { stub: true, height: "6px" };
-  return { stub: false, height: `${pct}%` };
+  return `max(10px, ${pct}%)`;
 }
 
-function CompareBar({
-  value,
-  label,
-  max,
-  tone,
-}: {
-  value: number;
-  label: string;
-  max: number;
-  tone: "traditional" | "sequence";
-}) {
-  const bar = barPresentation(value, max);
+function StackBar({ segments, max }: { segments: StackSegment[]; max: number }) {
+  const drawn = segments.filter((segment) => segment.value > 0);
   return (
-    <div className="lp-role-col">
-      <span className="lp-role-val" style={{ bottom: bar.stub ? "calc(6px + 0.35rem)" : `calc(${bar.height} + 0.35rem)` }}>
-        {label}
-      </span>
-      <div className={`lp-role-bar is-${tone}${bar.stub ? " is-zero" : ""}`} style={bar.stub ? undefined : { height: bar.height }} />
+    <div className="lp-stack" aria-hidden="true">
+      {drawn.length === 0 ? <i className="is-empty" /> : null}
+      {drawn.map((segment) => (
+          <i key={segment.id} className={`is-${segment.id}`} style={{ width: stackWidth(segment.value, max) }}>
+          {segment.label ? <span>{segment.label}</span> : null}
+        </i>
+      ))}
     </div>
   );
 }
 
-function TopicChartView({ chart }: { chart: TopicChart }) {
-  const paired = chart.points.some((point) => point.sequence !== undefined);
-  const columns = `repeat(${chart.points.length}, minmax(0, 1fr))`;
+function costSegments(value: number | null, sequence: boolean): StackSegment[] {
+  if (value == null || value <= 0) return [];
+  if (sequence) return [{ id: "lab", label: "Lab staff", value }];
+  return [{ id: "consultants", label: "Consultants", value }];
+}
+
+function timeSegments(hours: number | null, sequence: boolean): StackSegment[] {
+  if (hours == null || hours <= 0) return [];
+  if (sequence) return [{ id: "lab", label: "Lab staff", value: hours }];
+  return [{ id: "calendar", label: "", value: hours }];
+}
+
+function ChangeInfographic({ topic }: { topic: Topic }) {
+  const costMax = Math.max(1, ...topic.examples.map((item) => item.cost));
+  const timeMax = Math.max(
+    1,
+    ...topic.examples.flatMap((item) => [item.hours ?? 0, item.sequenceHours ?? 0]),
+  );
+  const functions = topic.id === "integration" ? INTERFACE_FUNCTIONS : FUNCTIONS;
   const summary = [
-    chart.title,
-    ...chart.points.map((point) => {
-      const name = point.label.replace("\n", " ");
-      const sequence = point.sequence === undefined ? "" : `, Sequence ${point.sequenceLabel}`;
-      return `${name}: traditional ${point.traditionalLabel}${sequence}`;
-    }),
+    topic.title,
+    ...topic.examples.map(
+      (item) =>
+        `${item.name}: traditional cost ${item.costLabel}, traditional time ${item.timeLabel}, Sequence cost ${item.sequenceCostLabel}, Sequence time ${item.sequenceTimeLabel}`,
+    ),
   ].join(". ");
 
   return (
-    <figure className="lp-role" aria-label={summary}>
-      <div className="lp-role-top">
+    <figure className={`lp-info is-${topic.emphasis}`} aria-label={summary}>
+      <div className="lp-info-head">
         <div>
-          <p className="lp-role-kicker">{chart.kicker}</p>
-          <h3 className="lp-compare-change">{chart.title}</h3>
+          <p className="lp-info-kicker">{topic.kicker}</p>
+          <h3 className="lp-compare-change">{topic.title}</h3>
         </div>
-        <ul className="lp-role-legend">
+        <ul className="lp-info-legend">
           <li>
-            <i className="is-traditional" aria-hidden="true" />
-            {paired ? "Traditional LIMS" : "Published fee"}
+            <i className="is-consultants" aria-hidden="true" />
+            Traditional
           </li>
-          {paired ? (
-            <li>
-              <i className="is-sequence" aria-hidden="true" />
-              Sequence
-            </li>
-          ) : null}
+          <li>
+            <i className="is-lab" aria-hidden="true" />
+            Sequence
+          </li>
         </ul>
       </div>
-      <div className="lp-role-plot" key={chart.id}>
-        <div className="lp-role-yaxis">
-          <span className="lp-role-axis-name">{chart.axis}</span>
-          <div className="lp-role-yticks" aria-hidden="true">
-            {chart.ticks.map((tick) => (
-              <span key={tick.label} style={{ top: `${(1 - tick.at) * 100}%` }}>
-                {tick.label}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="lp-role-canvas">
-          <div className="lp-role-stage">
-            <div className="lp-role-grid" aria-hidden="true">
-              {chart.ticks.map((tick) => (
-                <span key={tick.label} style={{ top: `${(1 - tick.at) * 100}%` }} data-axis={tick.at === 0 ? "zero" : undefined} />
-              ))}
-            </div>
-            <div className="lp-role-groups" style={{ gridTemplateColumns: columns }}>
-              {chart.points.map((point) => (
-                <div className="lp-role-group" key={point.id}>
-                  <CompareBar value={point.traditional} label={point.traditionalLabel} max={chart.max} tone="traditional" />
-                  {point.sequence === undefined ? null : point.sequence === null ? (
-                    <div className="lp-role-col">
-                      <span className="lp-role-val" style={{ bottom: "1.35rem" }}>
-                        {point.sequenceLabel}
-                      </span>
-                      <span className="lp-role-empty" aria-hidden="true">
-                        —
-                      </span>
-                    </div>
-                  ) : (
-                    <CompareBar value={point.sequence} label={point.sequenceLabel ?? ""} max={chart.max} tone="sequence" />
-                  )}
+
+      <div className="lp-info-examples">
+        {topic.examples.map((example) => (
+          <article className="lp-info-example" key={example.id}>
+            <h4>{example.name}</h4>
+            <div className="lp-info-sections">
+              <section className="lp-info-cost" aria-label={`${example.name} cost`}>
+                <p>Cost <span>Total fee</span></p>
+                <div className="lp-info-metric">
+                  <div>
+                    <span>Traditional total</span>
+                    <strong className={example.costLabel === "Not published" ? "is-quiet" : undefined}>{example.costLabel}</strong>
+                  </div>
+                  <StackBar segments={costSegments(example.cost, false)} max={costMax} />
                 </div>
-              ))}
+                <div className="lp-info-metric">
+                  <div>
+                    <span>Sequence total</span>
+                    <strong className={example.sequenceCostLabel === "Not published" ? "is-quiet" : undefined}>
+                      {example.sequenceCostLabel}
+                    </strong>
+                  </div>
+                  <StackBar segments={costSegments(example.sequenceCost, true)} max={costMax} />
+                </div>
+              </section>
+              <section className="lp-info-time" aria-label={`${example.name} time`}>
+                <p>Time <span>Total calendar time</span></p>
+                <div className="lp-info-metric">
+                  <div>
+                    <span>Traditional total</span>
+                    <strong className={example.timeLabel === "Not published" ? "is-quiet" : undefined}>{example.timeLabel}</strong>
+                  </div>
+                  <StackBar segments={timeSegments(example.hours, false)} max={timeMax} />
+                </div>
+                <div className="lp-info-metric">
+                  <div>
+                    <span>Sequence total</span>
+                    <strong className={example.sequenceTimeLabel === "Not published" ? "is-quiet" : undefined}>
+                      {example.sequenceTimeLabel}
+                    </strong>
+                  </div>
+                  <StackBar segments={timeSegments(example.sequenceHours, true)} max={timeMax} />
+                </div>
+              </section>
             </div>
-          </div>
-          <div className="lp-role-x" style={{ gridTemplateColumns: columns }}>
-            {chart.points.map((point) => (
-              <span key={point.id}>
-                <AxisLabel text={point.label} />
-              </span>
-            ))}
-          </div>
-        </div>
+          </article>
+        ))}
       </div>
-      <p className="lp-role-note">{chart.note}</p>
+
+      <p className="lp-functions-title">Who takes part</p>
+      <ul className="lp-functions">
+        {functions.map((fn) => (
+          <li key={fn.id}>
+            <i className={`is-${fn.id}`} aria-hidden="true" />
+            <span>{fn.label}</span>
+            <small>{fn.hint}</small>
+          </li>
+        ))}
+      </ul>
+      <p className="lp-info-note">{topic.note}</p>
     </figure>
   );
 }
@@ -386,7 +412,7 @@ function WhatWeSolve() {
         <div className="lp-section-head lp-section-head-left">
           <h2>What we solve</h2>
           <p className="lp-compare-lede">
-            Published vendor fees and calendar times for a change after go-live. Adding a department is the 3–4 week example.
+            Custom change cost from one source. The cost section shows the total fee. The time section shows the total calendar time. Adding a department is the 3–4 week example.
           </p>
         </div>
 
@@ -417,18 +443,19 @@ function WhatWeSolve() {
           id={`solve-panel-${active.id}`}
           aria-labelledby={`solve-tab-${active.id}`}
         >
-          <TopicChartView chart={active.chart} />
+          <ChangeInfographic topic={active} />
           <p className="lp-compare-cite">{sourceCite(active.sources)}</p>
         </div>
 
         <footer className="lp-solve-sources">
           <p>
-            Traditional bars are the vendor fee or calendar time published for that change. Sequence bars are the
-            same source’s published self-configuration result, with no vendor invoice. Where a source gives a range,
-            the bar reaches the long end and the label shows the range. Adding a laboratory department is the 3–4
-            week example: $3,600 and 3–4 weeks on a traditional LIMS, and $0 and 1 day when the laboratory configures
-            the department itself. These figures are not a survey of Sequence customers. No source publishes an
-            average for laboratories of 50 to 2,000 people.
+            Custom change totals come from CleverLAB. Instrument interfaces come from Bika. The cost total is the
+            published fee. The time total is the published calendar time. The fee sits with the consultant or vendor.
+            Neither source itemizes internal IT, the project manager, or lab staff, so those functions are named and
+            not given a slice of the total. Sequence is the same source’s self-configuration result. Where a source
+            gives a range, the bar reaches the long end and the label shows the range. Adding a department is $3,600
+            and 3–4 weeks, or $0 and 1 day when the lab configures it. These figures are not a survey of Sequence
+            customers.
           </p>
           <ol>
             <li>
@@ -440,18 +467,10 @@ function WhatWeSolve() {
             <li>
               Bika Lab Systems, “A Realistic Timeline and Cost Breakdown for Implementing Bika LIMS.” A unidirectional
               instrument interface is about $3,000 and a bidirectional interface is about $5,000. Either takes one to
-              two weeks, including testing. An interface that already exists is free. The article does not say how
-              long an existing interface takes to turn on.{" "}
+              two weeks, including testing with help from the lab. An interface that already exists is free. The
+              article does not say how long an existing interface takes to turn on.{" "}
               <a href="https://www.bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims">
                 bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims
-              </a>
-            </li>
-            <li>
-              QBench, Nicholas Evans, “The Hidden Costs of a LIMS,” 29 December 2025. Legacy vendors bill about
-              $4,000 and take about four weeks for a minor tweak. On a configurable system, staff adjust a worksheet
-              or certificate of analysis, automate a process, or generate a report in seconds, without that invoice.{" "}
-              <a href="https://qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy">
-                qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy
               </a>
             </li>
           </ol>
