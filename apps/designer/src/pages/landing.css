@@ -1108,14 +1108,6 @@
   color: #1d4ed8;
 }
 
-.lp-compare-lede {
-  margin: 0.35rem 0 0;
-  max-width: 40rem;
-  color: var(--lp-muted);
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
 .lp-compare-tabs {
   display: flex;
   flex-wrap: wrap;

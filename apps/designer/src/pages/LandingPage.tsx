@@ -411,9 +411,6 @@ function WhatWeSolve() {
       <div className="lp-section-inner">
         <div className="lp-section-head lp-section-head-left">
           <h2>What we solve</h2>
-          <p className="lp-compare-lede">
-            Custom change cost from one source. The cost section shows the total fee. The time section shows the total calendar time. Adding a department is the 3–4 week example.
-          </p>
         </div>
 
         <div className="lp-compare-tabs" role="tablist" aria-label="Change costs" onKeyDown={moveTab}>
