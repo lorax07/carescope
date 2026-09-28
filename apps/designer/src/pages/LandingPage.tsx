@@ -215,19 +215,16 @@ const TOPICS: Topic[] = [
   },
 ];
 
-const FUNCTIONS = [
-  { id: "consultants", label: "Consultants", hint: "The published fee" },
-  { id: "it", label: "Internal IT", hint: "Not priced" },
-  { id: "pm", label: "Project manager", hint: "Not priced" },
-  { id: "lab", label: "Lab staff", hint: "Configures Sequence" },
+const ROLES = [
+  { id: "consultants", label: "Consultants" },
+  { id: "it", label: "Internal IT" },
+  { id: "pm", label: "Project manager" },
+  { id: "lab", label: "Lab staff" },
 ] as const;
 
-const INTERFACE_FUNCTIONS = [
-  { id: "consultants", label: "Consultants", hint: "The vendor fee" },
-  { id: "it", label: "Internal IT", hint: "Not priced" },
-  { id: "pm", label: "Project manager", hint: "Not priced" },
-  { id: "lab", label: "Lab staff", hint: "Help with testing" },
-] as const;
+function money(value: number): string {
+  return `$${value.toLocaleString("en-US")}`;
+}
 
 function stackWidth(value: number | null, max: number): string {
   if (value == null || max <= 0 || value <= 0) return "0%";
@@ -241,7 +238,7 @@ function StackBar({ segments, max }: { segments: StackSegment[]; max: number }) 
     <div className="lp-stack" aria-hidden="true">
       {drawn.length === 0 ? <i className="is-empty" /> : null}
       {drawn.map((segment) => (
-          <i key={segment.id} className={`is-${segment.id}`} style={{ width: stackWidth(segment.value, max) }}>
+        <i key={segment.id} className={`is-${segment.id}`} style={{ width: stackWidth(segment.value, max) }}>
           {segment.label ? <span>{segment.label}</span> : null}
         </i>
       ))}
@@ -249,10 +246,23 @@ function StackBar({ segments, max }: { segments: StackSegment[]; max: number }) 
   );
 }
 
-function costSegments(value: number | null, sequence: boolean): StackSegment[] {
-  if (value == null || value <= 0) return [];
-  if (sequence) return [{ id: "lab", label: "Lab staff", value }];
-  return [{ id: "consultants", label: "Consultants", value }];
+function traditionalRoles(example: ChangeExample): StackSegment[] {
+  if (example.cost <= 0) return [];
+  return [{ id: "consultants", label: "Consultants", value: example.cost }];
+}
+
+function sequenceRoles(example: ChangeExample): StackSegment[] {
+  if (example.sequenceCost == null || example.sequenceCost <= 0) return [];
+  return [{ id: "lab", label: "Lab staff", value: example.sequenceCost }];
+}
+
+function roleCosts(example: ChangeExample): { id: string; label: string; cost: string }[] {
+  return [
+    { id: "consultants", label: "Consultants", cost: example.costLabel },
+    { id: "it", label: "Internal IT", cost: "Not published" },
+    { id: "pm", label: "Project manager", cost: "Not published" },
+    { id: "lab", label: "Lab staff", cost: example.sequenceCostLabel },
+  ];
 }
 
 function timeSegments(hours: number | null, sequence: boolean): StackSegment[] {
@@ -261,19 +271,52 @@ function timeSegments(hours: number | null, sequence: boolean): StackSegment[] {
   return [{ id: "calendar", label: "", value: hours }];
 }
 
+function VerticalRoleStack({
+  total,
+  caption,
+  segments,
+  max,
+}: {
+  total: string;
+  caption: string;
+  segments: StackSegment[];
+  max: number;
+}) {
+  const sum = segments.reduce((totalValue, segment) => totalValue + segment.value, 0);
+  const pct = max <= 0 || sum <= 0 ? 0 : Math.max(18, Math.min(100, (sum / max) * 100));
+  const quiet = total === "Not published";
+  return (
+    <div className="lp-vcol">
+      <strong className={quiet ? "is-quiet" : undefined}>{total}</strong>
+      <div className="lp-vplot" aria-hidden="true">
+        <div className="lp-vbar" style={pct === 0 ? undefined : { height: `${pct}%` }}>
+          {segments.map((segment) => (
+            <i key={segment.id} className={`is-${segment.id}`} style={{ flex: `${segment.value} 1 0` }}>
+              <span>{segment.label}</span>
+              <b>{money(segment.value)}</b>
+            </i>
+          ))}
+        </div>
+      </div>
+      <em>{caption}</em>
+    </div>
+  );
+}
+
 function ChangeInfographic({ topic }: { topic: Topic }) {
   const costMax = Math.max(1, ...topic.examples.map((item) => item.cost));
   const timeMax = Math.max(
     1,
     ...topic.examples.flatMap((item) => [item.hours ?? 0, item.sequenceHours ?? 0]),
   );
-  const functions = topic.id === "integration" ? INTERFACE_FUNCTIONS : FUNCTIONS;
   const summary = [
     topic.title,
-    ...topic.examples.map(
-      (item) =>
-        `${item.name}: traditional cost ${item.costLabel}, traditional time ${item.timeLabel}, Sequence cost ${item.sequenceCostLabel}, Sequence time ${item.sequenceTimeLabel}`,
-    ),
+    ...topic.examples.map((item) => {
+      const roles = roleCosts(item)
+        .map((role) => `${role.label} ${role.cost}`)
+        .join(", ");
+      return `${item.name}: ${roles}. Time ${item.timeLabel}, Sequence ${item.sequenceTimeLabel}`;
+    }),
   ].join(". ");
 
   return (
@@ -284,75 +327,77 @@ function ChangeInfographic({ topic }: { topic: Topic }) {
           <h3 className="lp-compare-change">{topic.title}</h3>
         </div>
         <ul className="lp-info-legend">
-          <li>
-            <i className="is-consultants" aria-hidden="true" />
-            Traditional
-          </li>
-          <li>
-            <i className="is-lab" aria-hidden="true" />
-            Sequence
-          </li>
+          {ROLES.map((role) => (
+            <li key={role.id}>
+              <i className={`is-${role.id}`} aria-hidden="true" />
+              {role.label}
+            </li>
+          ))}
         </ul>
       </div>
 
-      <div className="lp-info-examples">
-        {topic.examples.map((example) => (
-          <article className="lp-info-example" key={example.id}>
-            <h4>{example.name}</h4>
-            <div className="lp-info-sections">
-              <section className="lp-info-cost" aria-label={`${example.name} cost`}>
-                <p>Cost <span>Total fee</span></p>
-                <div className="lp-info-metric">
-                  <div>
-                    <span>Traditional total</span>
-                    <strong className={example.costLabel === "Not published" ? "is-quiet" : undefined}>{example.costLabel}</strong>
-                  </div>
-                  <StackBar segments={costSegments(example.cost, false)} max={costMax} />
-                </div>
-                <div className="lp-info-metric">
-                  <div>
-                    <span>Sequence total</span>
-                    <strong className={example.sequenceCostLabel === "Not published" ? "is-quiet" : undefined}>
-                      {example.sequenceCostLabel}
-                    </strong>
-                  </div>
-                  <StackBar segments={costSegments(example.sequenceCost, true)} max={costMax} />
-                </div>
-              </section>
-              <section className="lp-info-time" aria-label={`${example.name} time`}>
-                <p>Time <span>Total calendar time</span></p>
-                <div className="lp-info-metric">
-                  <div>
-                    <span>Traditional total</span>
-                    <strong className={example.timeLabel === "Not published" ? "is-quiet" : undefined}>{example.timeLabel}</strong>
-                  </div>
-                  <StackBar segments={timeSegments(example.hours, false)} max={timeMax} />
-                </div>
-                <div className="lp-info-metric">
-                  <div>
-                    <span>Sequence total</span>
-                    <strong className={example.sequenceTimeLabel === "Not published" ? "is-quiet" : undefined}>
-                      {example.sequenceTimeLabel}
-                    </strong>
-                  </div>
-                  <StackBar segments={timeSegments(example.sequenceHours, true)} max={timeMax} />
-                </div>
-              </section>
+      <div className="lp-pair">
+        <section className="lp-pair-side" aria-label="Cost by who took part">
+          <p>
+            Who took part <span>Cost in each stack</span>
+          </p>
+          {topic.examples.map((example) => (
+            <div className="lp-vgroup" key={example.id}>
+              <h4>{example.name}</h4>
+              <div className="lp-vrow">
+                <VerticalRoleStack
+                  total={example.costLabel}
+                  caption="Traditional"
+                  segments={traditionalRoles(example)}
+                  max={costMax}
+                />
+                <VerticalRoleStack
+                  total={example.sequenceCostLabel}
+                  caption="Sequence"
+                  segments={sequenceRoles(example)}
+                  max={costMax}
+                />
+              </div>
+              <ul className="lp-role-key">
+                {roleCosts(example).map((role) => (
+                  <li key={role.id}>
+                    <i className={`is-${role.id}`} aria-hidden="true" />
+                    <span>{role.label}</span>
+                    <b className={role.cost === "Not published" ? "is-quiet" : undefined}>{role.cost}</b>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </article>
-        ))}
-      </div>
+          ))}
+        </section>
 
-      <p className="lp-functions-title">Who takes part</p>
-      <ul className="lp-functions">
-        {functions.map((fn) => (
-          <li key={fn.id}>
-            <i className={`is-${fn.id}`} aria-hidden="true" />
-            <span>{fn.label}</span>
-            <small>{fn.hint}</small>
-          </li>
-        ))}
-      </ul>
+        <section className="lp-pair-side lp-pair-time" aria-label="Time">
+          <p>
+            Time <span>Total calendar time</span>
+          </p>
+          {topic.examples.map((example) => (
+            <div className="lp-vgroup" key={example.id}>
+              <h4>{example.name}</h4>
+              <div className="lp-info-metric">
+                <div>
+                  <span>Traditional total</span>
+                  <strong className={example.timeLabel === "Not published" ? "is-quiet" : undefined}>{example.timeLabel}</strong>
+                </div>
+                <StackBar segments={timeSegments(example.hours, false)} max={timeMax} />
+              </div>
+              <div className="lp-info-metric">
+                <div>
+                  <span>Sequence total</span>
+                  <strong className={example.sequenceTimeLabel === "Not published" ? "is-quiet" : undefined}>
+                    {example.sequenceTimeLabel}
+                  </strong>
+                </div>
+                <StackBar segments={timeSegments(example.sequenceHours, true)} max={timeMax} />
+              </div>
+            </div>
+          ))}
+        </section>
+      </div>
       <p className="lp-info-note">{topic.note}</p>
     </figure>
   );
