@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import "./landing.css";
 
@@ -66,36 +66,123 @@ export function LandingPage() {
   );
 }
 
-const CHANGE_CYCLES = [
-  {
-    id: "report",
-    label: "New report",
-    note: "2–3 weeks",
-    cost: 2_000,
-    source: "CleverLAB",
-  },
-  {
-    id: "department",
-    label: "New department",
-    note: "3–4 weeks",
-    cost: 3_600,
-    source: "CleverLAB",
-  },
-  {
-    id: "tweak",
-    label: "Minor tweak",
-    note: "About 4 weeks",
-    cost: 4_000,
-    source: "QBench",
-  },
-] as const;
+type ChangeBar = {
+  cost: number;
+  costLabel: string;
+  hours: number | null;
+  timeLabel: string;
+};
 
-function money(value: number): string {
-  return `$${value.toLocaleString("en-US")}`;
+type ModuleChange = {
+  id: string;
+  module: string;
+  change: string;
+  traditional: ChangeBar;
+  sequence: ChangeBar;
+  sources: number[];
+};
+
+const WEEK = 7 * 24;
+
+const MODULE_CHANGES: ModuleChange[] = [
+  {
+    id: "operations",
+    module: "Sequence Operations",
+    change: "Add a laboratory department",
+    traditional: { cost: 3600, costLabel: "$3,600", hours: 4 * WEEK, timeLabel: "3–4 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: 24, timeLabel: "1 day" },
+    sources: [1],
+  },
+  {
+    id: "instruments",
+    module: "Sequence Instruments",
+    change: "Add a bidirectional instrument interface",
+    traditional: { cost: 5000, costLabel: "About $5,000", hours: 2 * WEEK, timeLabel: "1–2 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: null, timeLabel: "Not published" },
+    sources: [2],
+  },
+  {
+    id: "compliance",
+    module: "Sequence Compliance",
+    change: "Adjust a controlled worksheet",
+    traditional: { cost: 4000, costLabel: "About $4,000", hours: 4 * WEEK, timeLabel: "About 4 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: 10 / 3600, timeLabel: "Seconds" },
+    sources: [3],
+  },
+  {
+    id: "client",
+    module: "Sequence Client",
+    change: "Adjust a client worksheet",
+    traditional: { cost: 4000, costLabel: "About $4,000", hours: 4 * WEEK, timeLabel: "About 4 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: 10 / 3600, timeLabel: "Seconds" },
+    sources: [3],
+  },
+  {
+    id: "revenue",
+    module: "Sequence Revenue",
+    change: "Adjust an invoice report",
+    traditional: { cost: 4000, costLabel: "About $4,000", hours: 4 * WEEK, timeLabel: "About 4 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: 10 / 3600, timeLabel: "Seconds" },
+    sources: [3],
+  },
+  {
+    id: "insights",
+    module: "Sequence Insights",
+    change: "New report template",
+    traditional: { cost: 2000, costLabel: "$2,000", hours: 3 * WEEK, timeLabel: "2–3 weeks" },
+    sequence: { cost: 0, costLabel: "$0", hours: 1, timeLabel: "1 hour" },
+    sources: [1],
+  },
+];
+
+function barWidth(value: number | null, max: number): string {
+  if (value == null || max <= 0) return "0%";
+  return `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
+}
+
+function CompareChart({
+  title,
+  unit,
+  traditional,
+  sequence,
+  traditionalValue,
+  sequenceValue,
+}: {
+  title: string;
+  unit: string;
+  traditional: ChangeBar;
+  sequence: ChangeBar;
+  traditionalValue: number;
+  sequenceValue: number | null;
+}) {
+  const max = Math.max(traditionalValue, sequenceValue ?? 0, 1);
+  return (
+    <figure className="lp-compare-chart">
+      <figcaption>{title}</figcaption>
+      <div className="lp-compare-plot">
+        <div className="lp-compare-row">
+          <span>Traditional LIMS</span>
+          <div className="lp-compare-track">
+            <div className="lp-compare-fill is-traditional" style={{ width: barWidth(traditionalValue, max) }} />
+          </div>
+          <strong>{unit === "cost" ? traditional.costLabel : traditional.timeLabel}</strong>
+        </div>
+        <div className="lp-compare-row">
+          <span>Sequence</span>
+          <div className="lp-compare-track">
+            <div className="lp-compare-fill is-sequence" style={{ width: barWidth(sequenceValue, max) }} />
+          </div>
+          <strong>{unit === "cost" ? sequence.costLabel : sequence.timeLabel}</strong>
+        </div>
+      </div>
+    </figure>
+  );
 }
 
 function WhatWeSolve() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [activeId, setActiveId] = useState(MODULE_CHANGES[0].id);
+  const active = MODULE_CHANGES.find((item) => item.id === activeId) ?? MODULE_CHANGES[0];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -125,58 +212,99 @@ function WhatWeSolve() {
     };
   }, []);
 
+  function moveTab(event: KeyboardEvent<HTMLDivElement>) {
+    const index = MODULE_CHANGES.findIndex((item) => item.id === active.id);
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = event.key === "ArrowRight" ? (index + 1) % MODULE_CHANGES.length : (index - 1 + MODULE_CHANGES.length) % MODULE_CHANGES.length;
+    setActiveId(MODULE_CHANGES[next].id);
+  }
+
   return (
     <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
       <div className="lp-section-inner">
         <div className="lp-section-head lp-section-head-left">
           <h2>What we solve</h2>
+          <p className="lp-compare-lede">
+            One change after go-live, for each module. The bars are published vendor fees and calendar times, not a survey average.
+          </p>
         </div>
 
-        <ul className="lp-solve-cards">
-          {CHANGE_CYCLES.map((cycle) => (
-            <li key={cycle.id}>
-              <article className="lp-cycle-card" tabIndex={0}>
-                <div className="lp-cycle-face">
-                  <p>One change after go-live</p>
-                  <h3>{cycle.label}</h3>
-                  <span>Hover for the published cost</span>
-                </div>
-                <div className="lp-cycle-data">
-                  <p className="lp-cycle-cost">{money(cycle.cost)}</p>
-                  <dl>
-                    <div>
-                      <dt>Calendar time</dt>
-                      <dd>{cycle.note}</dd>
-                    </div>
-                    <div>
-                      <dt>Source</dt>
-                      <dd>{cycle.source}</dd>
-                    </div>
-                  </dl>
-                </div>
-              </article>
-            </li>
-          ))}
-        </ul>
+        <div className="lp-compare-tabs" role="tablist" aria-label="Sequence modules" onKeyDown={moveTab}>
+          {MODULE_CHANGES.map((item) => {
+            const selected = item.id === active.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                id={`solve-tab-${item.id}`}
+                aria-selected={selected}
+                aria-controls={`solve-panel-${item.id}`}
+                tabIndex={selected ? 0 : -1}
+                className={selected ? "is-on" : undefined}
+                onClick={() => setActiveId(item.id)}
+              >
+                {item.module}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className="lp-compare-panel"
+          role="tabpanel"
+          id={`solve-panel-${active.id}`}
+          aria-labelledby={`solve-tab-${active.id}`}
+        >
+          <p className="lp-compare-change">{active.change}</p>
+          <div className="lp-compare-charts">
+            <CompareChart
+              title="Cost of the change"
+              unit="cost"
+              traditional={active.traditional}
+              sequence={active.sequence}
+              traditionalValue={active.traditional.cost}
+              sequenceValue={active.sequence.cost}
+            />
+            <CompareChart
+              title="Calendar time"
+              unit="time"
+              traditional={active.traditional}
+              sequence={active.sequence}
+              traditionalValue={active.traditional.hours ?? 0}
+              sequenceValue={active.sequence.hours}
+            />
+          </div>
+          <p className="lp-compare-cite">Sources {active.sources.join(" and ")} below.</p>
+        </div>
 
         <footer className="lp-solve-sources">
           <p>
-            These figures are the published cost of one change after the LIMS is already live. They
-            are not the cost of the first implementation, and they are not a surveyed average for
-            laboratories of 50 to 2,000 people. No source publishes that average.
+            Where a source gives a range, the bar reaches the long end and the label shows the range. The Sequence
+            bar is that source’s published self-configuration result for the same kind of change. It is not a survey
+            of Sequence customers. No source publishes an average for laboratories of 50 to 2,000 people.
           </p>
           <ol>
             <li>
-              CleverLAB, “How We Reduced LIMS Costs by 90%.” A traditional new report template is
-              cited at $2,000 and 2–3 weeks. Adding a laboratory department is cited at $3,600 and
-              3–4 weeks.{" "}
-              <a href="https://cleverlab.pl/lims_cost_reduction_en.html">
-                cleverlab.pl/lims_cost_reduction_en.html
+              CleverLAB, Piotr Płonka, “How We Reduced LIMS Costs by 90%,” 1 October 2025. A traditional new report
+              template is $2,000 and 2–3 weeks; self-configuration is $0 and 1 hour. Adding a laboratory department
+              is $3,600 and 3–4 weeks; self-configuration is $0 and 1 day.{" "}
+              <a href="https://cleverlab.pl/lims_cost_reduction_en.html">cleverlab.pl/lims_cost_reduction_en.html</a>
+            </li>
+            <li>
+              Bika Lab Systems, “A Realistic Timeline and Cost Breakdown for Implementing Bika LIMS.” A unidirectional
+              instrument interface is about $3,000 and a bidirectional interface is about $5,000. Either takes one to
+              two weeks, including testing. An interface that already exists is free. The article does not say how
+              long an existing interface takes to turn on.{" "}
+              <a href="https://www.bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims">
+                bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims
               </a>
             </li>
             <li>
-              QBench, “The Hidden Costs of a LIMS.” Describes legacy vendors billing about $4,000
-              and about four weeks for a minor tweak.{" "}
+              QBench, Nicholas Evans, “The Hidden Costs of a LIMS,” 29 December 2025. Legacy vendors bill about
+              $4,000 and take about four weeks for a minor tweak. On a configurable system, staff adjust a worksheet
+              or certificate of analysis, automate a process, or generate a report in seconds, without that invoice.{" "}
               <a href="https://qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy">
                 qbench.com/blog/the-hidden-costs-of-a-lims-what-to-know-before-you-buy
               </a>
