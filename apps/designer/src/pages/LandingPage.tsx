@@ -366,7 +366,7 @@ const PLATFORM_PILLARS = [
   },
   {
     title: "Sequence Compliance",
-    detail: "Keep the laboratory controlled and traceable",
+    detail: "This is a quality and Compliance module",
     tone: "blue",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">

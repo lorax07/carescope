@@ -39,7 +39,7 @@ export const LAB_MODULE_CATALOG = [
   {
     id: "quality_compliance",
     label: "Sequence Compliance",
-    positioning: "Keep the laboratory controlled and traceable",
+    positioning: "This is a quality and Compliance module",
     capabilities:
       "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
   },
