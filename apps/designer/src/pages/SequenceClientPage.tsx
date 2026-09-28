@@ -2,10 +2,12 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AccountTable } from "../components/AccountTable";
 import { accountById, accountOpportunities, CRM_ACCOUNTS, type CrmAccount } from "../crmAccounts";
+import { accountRevenueLabel, useRevenue } from "../revenueCycle";
 import { STATUS_LABEL, useSamples } from "../samples";
 
 export function SequenceClientPage() {
   const samples = useSamples();
+  const ledger = useRevenue();
   const [params, setParams] = useSearchParams();
   const selected = accountById(params.get("account") ?? "") ?? CRM_ACCOUNTS[0];
   const work = useMemo(
@@ -92,7 +94,7 @@ export function SequenceClientPage() {
             </div>
             <div>
               <dt>Revenue</dt>
-              <dd>{selected.revenue}</dd>
+              <dd>{accountRevenueLabel(ledger.charges, selected.id)}</dd>
             </div>
           </dl>
 
@@ -194,7 +196,7 @@ export function SequenceClientPage() {
             </ul>
             <p className="billing-note">
               Pricing and claims for this account are in{" "}
-              <Link className="lims-linkish" to="/app/billing">
+              <Link className="lims-linkish" to={`/app/billing?account=${selected.id}`}>
                 Sequence Revenue
               </Link>
               .
