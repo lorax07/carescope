@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
-import { useSectionTabs } from "../sectionTabs";
+import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
@@ -245,7 +245,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <h1>{title}</h1>
           <p className="lims-page-lede">{copy.lede}</p>
         </div>
-        <div className="lims-page-actions">
+        <div className="lims-header-side">
+          <SectionTabStrip />
+          <div className="lims-page-actions">
           {pageButtons.map((button) => (
             <button
               key={button.id}
@@ -258,6 +260,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               {button.label}
             </button>
           ))}
+          </div>
         </div>
       </div>
 

@@ -198,7 +198,7 @@ function NavIcon({ name }: { name: string }) {
 function PinnedScreen({ tab }: { tab: PinnedTab }) {
   if (tab.kind === "sample") {
     const sample = findSample(tab.recordId);
-    return sample ? <SampleDetailBody sample={sample} withTabs /> : null;
+    return sample ? <SampleDetailBody sample={sample} /> : null;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
@@ -655,30 +655,24 @@ function AppFrame() {
             <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        {sectionTabs.tabs.length > 0 && sectionTabs.tabs.find((tab) => tab.id === sectionTabs.activeId)?.kind !== "sample" ? (
-          <div className="lims-tabs" role="tablist" aria-label="Screens for this section">
-            {sectionTabs.tabs.map((tab) => (
-              <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
-                <button type="button" role="tab" aria-selected={sectionTabs.activeId === tab.id} onClick={() => sectionTabs.select(tab.id)}>
-                  {tab.title}
-                </button>
-                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => sectionTabs.close(tab.id)}>
-                  ×
-                </button>
-              </div>
-            ))}
+        <div className={`lims-workspace${sectionTabs.activeId ? " has-dock" : ""}`}>
+          <div className="lims-content">
+            <Outlet />
           </div>
-        ) : null}
-        <div className="lims-content" hidden={Boolean(sectionTabs.activeId)}>
-          <Outlet />
+          {sectionTabs.tabs
+            .filter((tab) => tab.id === sectionTabs.activeId)
+            .map((tab) => (
+              <aside key={tab.id} className="lims-screen-dock" aria-label={tab.title}>
+                <div className="lims-screen-dock-head">
+                  <strong>{tab.title}</strong>
+                  <button type="button" className="btn" onClick={() => sectionTabs.showSection()}>
+                    Main screen
+                  </button>
+                </div>
+                <PinnedScreen tab={tab} />
+              </aside>
+            ))}
         </div>
-        {sectionTabs.tabs
-          .filter((tab) => tab.id === sectionTabs.activeId)
-          .map((tab) => (
-            <div key={tab.id} className="lims-content">
-              <PinnedScreen tab={tab} />
-            </div>
-          ))}
       </div>
 
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
