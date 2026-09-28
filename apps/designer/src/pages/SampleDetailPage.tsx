@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { AccountLink } from "../components/AccountTable";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
 import { useSectionTabs } from "../sectionTabs";
@@ -78,7 +79,9 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
             </div>
             <div>
               <dt>Client</dt>
-              <dd>{sample.client}</dd>
+              <dd>
+                <AccountLink name={sample.client} />
+              </dd>
             </div>
             <div>
               <dt>Matrix</dt>

@@ -13,7 +13,7 @@ import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
   { to: "/app/instruments", label: "Instrument Interface" },
-  { to: "/app/connectivity", label: "Healthcare CRM" },
+  { to: "/app/connectivity", label: "Sequence Client" },
   { to: "/app/quality", label: "Quality & Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
   { to: "/app/insights", label: "Insights" },

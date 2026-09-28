@@ -21,6 +21,7 @@ import {
 } from "./pages/ModulePages";
 import { InstrumentInterfacePage, InstrumentRecordPage } from "./pages/InstrumentInterfacePage";
 import { BillingPage } from "./pages/BillingPage";
+import { SequenceClientPage } from "./pages/SequenceClientPage";
 import { InsightsChatPage } from "./pages/InsightsChatPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { WorkflowDesignPage } from "./pages/WorkflowDesignPage";
@@ -77,7 +78,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="results" element={<ResultsPage />} />
           <Route path="instruments/:instrumentId" element={<InstrumentRecordPage />} />
           <Route path="instruments" element={<InstrumentInterfacePage />} />
-          <Route path="connectivity" element={<LimsModulePage id="connectivity" />} />
+          <Route path="connectivity" element={<SequenceClientPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="quality" element={<LimsModulePage id="quality_compliance" />} />
           <Route path="billing" element={<BillingPage />} />

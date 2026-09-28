@@ -42,10 +42,10 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
   },
   {
     id: "connectivity",
-    label: "Healthcare CRM",
-    positioning: "A custom CRM designed for healthcare",
+    label: "Sequence Client",
+    positioning: "Accounts, pipeline, and lab work on one record",
     capabilities:
-      "Client accounts, provider relationships, referrals, outreach, service agreements, follow-up",
+      "Shared account table, contacts, pipeline, activities, service agreements, laboratory work, revenue handoff",
   },
   {
     id: "quality_compliance",
