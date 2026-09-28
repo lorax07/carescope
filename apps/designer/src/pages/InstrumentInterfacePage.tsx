@@ -46,7 +46,7 @@ export function InstrumentInterfacePage() {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">Equipment</p>
-          <h1>Instrument Interface</h1>
+          <h1>Sequence Instruments</h1>
           <p className="lims-page-lede">Integrated instruments, their status, and whether a sequence is running.</p>
         </div>
       </div>

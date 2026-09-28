@@ -39,7 +39,7 @@ export function InsightsChatPage() {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">Turn laboratory data into operational intelligence</p>
-          <h1>Insights</h1>
+          <h1>Sequence Insights</h1>
         </div>
       </div>
       <section className="insights-thread" aria-live="polite">

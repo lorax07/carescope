@@ -216,7 +216,7 @@ function LimsFilm() {
         loop
         playsInline
         controls
-        aria-label="Sequence LIMS: workflow design, instrument integration, and an Insights metrics question, each opened from the left menu"
+        aria-label="Sequence LIMS: workflow design, Sequence Instruments, and a Sequence Insights metrics question, each opened from the left menu"
       />
     </figure>
   );
@@ -324,7 +324,7 @@ function ComplianceSection() {
 
 const PLATFORM_PILLARS = [
   {
-    title: "Lab Operations",
+    title: "Sequence Operations",
     detail: "The core LIMS",
     tone: "blue",
     icon: (
@@ -342,7 +342,7 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Instrument Integration",
+    title: "Sequence Instruments",
     detail: "Connect your instruments to Sequence",
     tone: "green",
     icon: (
@@ -365,7 +365,7 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Quality & Compliance",
+    title: "Sequence Compliance",
     detail: "Keep the laboratory controlled and traceable",
     tone: "blue",
     icon: (
@@ -382,7 +382,7 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Insights",
+    title: "Sequence Insights",
     detail: "Turn laboratory data into operational intelligence",
     tone: "cyan",
     icon: (
