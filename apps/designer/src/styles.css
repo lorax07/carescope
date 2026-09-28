@@ -966,6 +966,29 @@ a {
   max-width: 40rem;
 }
 
+.billing-panel {
+  margin-top: 0.85rem;
+}
+
+.billing-areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.85rem 1rem 0;
+}
+
+.billing-areas .btn.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.billing-note {
+  margin: 0.75rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

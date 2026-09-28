@@ -44,6 +44,13 @@ export const LAB_MODULE_CATALOG = [
       "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
   },
   {
+    id: "billing_revenue",
+    label: "Billing & Revenue",
+    positioning: "Invoice clients for completed laboratory work",
+    capabilities:
+      "Charge capture, test pricing, client-specific pricing, insurance billing, CPT/HCPCS codes, ICD-10 codes, payer information, claim data, self-pay, client billing, billing edits/holds, rebilling, denials and exceptions, payment status, revenue reporting",
+  },
+  {
     id: "insights",
     label: "Insights",
     positioning: "Turn laboratory data into operational intelligence",

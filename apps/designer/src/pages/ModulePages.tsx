@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CrmAccountList } from "../components/CrmAccountList";
 import { LAB_MODULE_CATALOG, type LabModuleId } from "../intrasite/catalog";
 
 type ModulePageProps = {
@@ -6,9 +7,10 @@ type ModulePageProps = {
   title: string;
   lede: string;
   rows: { label: string; value: string; meta?: string; tone?: string }[];
+  accounts?: boolean;
 };
 
-function ModulePage({ eyebrow, title, lede, rows }: ModulePageProps) {
+function ModulePage({ eyebrow, title, lede, rows, accounts = false }: ModulePageProps) {
   return (
     <div className="lims-page">
       <div className="lims-page-header">
@@ -23,6 +25,14 @@ function ModulePage({ eyebrow, title, lede, rows }: ModulePageProps) {
           </Link>
         </div>
       </div>
+      {accounts ? (
+        <section className="lims-panel billing-panel">
+          <div className="lims-panel-head">
+            <h2>Accounts</h2>
+          </div>
+          <CrmAccountList />
+        </section>
+      ) : null}
       <section className="lims-panel">
         <ul className="lims-list dense">
           {rows.map((row) => (
@@ -52,6 +62,7 @@ export function LimsModulePage({ id }: { id: LabModuleId }) {
         label: capability,
         value: "Included",
       }))}
+      accounts={id === "connectivity"}
     />
   );
 }
