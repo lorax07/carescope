@@ -33,18 +33,22 @@ type OpenEdge = "left" | "right" | "top";
 const LAUNCHER = 52;
 const EDGE_PAD = 16;
 
-function openEdgeFor(x: number, y: number, dockWidth: number, dockHeight: number, width: number): OpenEdge {
-  const cx = x + dockWidth / 2;
-  const cy = y + dockHeight / 2;
-  const distances: Record<OpenEdge, number> = {
-    top: cy,
-    left: cx,
-    right: width - cx,
+const MAGNET = 168;
+
+function edgeDistances(x: number, y: number, dockWidth: number, width: number): Record<OpenEdge, number> {
+  return {
+    top: Math.max(0, y),
+    left: Math.max(0, x),
+    right: Math.max(0, width - (x + dockWidth)),
   };
-  let edge: OpenEdge = "top";
-  let best = Infinity;
-  for (const side of ["top", "left", "right"] as const) {
-    if (distances[side] < best) {
+}
+
+function nearestEdge(x: number, y: number, dockWidth: number, width: number, current: OpenEdge): OpenEdge {
+  const distances = edgeDistances(x, y, dockWidth, width);
+  let edge = current;
+  let best = distances[current];
+  for (const side of ["left", "right", "top"] as const) {
+    if (distances[side] < best - 12) {
       best = distances[side];
       edge = side;
     }
@@ -52,8 +56,8 @@ function openEdgeFor(x: number, y: number, dockWidth: number, dockHeight: number
   return edge;
 }
 
-function snappedPos(edge: OpenEdge, width: number): { x: number; y: number } {
-  if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - LAUNCHER), y: EDGE_PAD };
+function snappedPos(edge: OpenEdge, width: number, dockWidth: number): { x: number; y: number } {
+  if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - dockWidth), y: EDGE_PAD };
   return { x: EDGE_PAD, y: EDGE_PAD };
 }
 
@@ -228,13 +232,22 @@ function AppFrame() {
   const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [navOpen, setNavOpen] = useState(false);
-  const [navPos, setNavPos] = useState({ x: 16, y: 16 });
+  const [navOpen, setNavOpen] = useState(true);
+  const [navPos, setNavPos] = useState({ x: EDGE_PAD, y: EDGE_PAD });
   const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
+  const [docked, setDocked] = useState(true);
+  const [dragging, setDragging] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [nearEdge, setNearEdge] = useState(false);
   const navPosRef = useRef(navPos);
-  const navOpenRef = useRef(false);
+  const navOpenRef = useRef(true);
+  const openEdgeRef = useRef<OpenEdge>("left");
+  const draggingRef = useRef(false);
+  const settleTimer = useRef(0);
   navPosRef.current = navPos;
   navOpenRef.current = navOpen;
+  openEdgeRef.current = openEdge;
+  draggingRef.current = dragging;
   const dockRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
@@ -256,8 +269,10 @@ function AppFrame() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
+
   useLayoutEffect(() => {
-    if (!navOpen) {
+    if (dragging || settling || !docked) {
       setInsets((current) =>
         current.left === 0 && current.right === 0 && current.top === 0 && current.bottom === 0
           ? current
@@ -266,14 +281,30 @@ function AppFrame() {
       return;
     }
     const dock = dockRef.current;
+    if (!dock) return;
+    const gap = 12;
+    if (!navOpen) {
+      const box = dock.getBoundingClientRect();
+      const next =
+        edge === "left"
+          ? { left: Math.ceil(box.right + gap), right: 0, top: 0, bottom: 0 }
+          : edge === "right"
+            ? { left: 0, right: Math.ceil(window.innerWidth - box.left + gap), top: 0, bottom: 0 }
+            : { left: 0, right: 0, top: Math.ceil(box.bottom + gap), bottom: 0 };
+      setInsets((current) =>
+        current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
+          ? current
+          : next,
+      );
+      return;
+    }
     const panel = panelRef.current;
-    if (!dock || !panel) return;
+    if (!panel) return;
     const logo = dock.getBoundingClientRect();
     const menu = panel.getBoundingClientRect();
     const left = Math.min(logo.left, menu.left);
     const right = Math.max(logo.right, menu.right);
     const bottom = Math.max(logo.bottom, menu.bottom);
-    const gap = 12;
     const next =
       edge === "left"
         ? { left: Math.ceil(right + gap), right: 0, top: 0, bottom: 0 }
@@ -285,42 +316,96 @@ function AppFrame() {
         ? current
         : next,
     );
-  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal]);
+  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked]);
 
   useLayoutEffect(() => {
-    if (openEdge !== "right") return;
-    const width = dockRef.current?.offsetWidth ?? LAUNCHER;
-    const x = Math.max(EDGE_PAD, viewport.width - EDGE_PAD - width);
-    setNavPos((pos) => (pos.x === x && pos.y === EDGE_PAD ? pos : { x, y: EDGE_PAD }));
-  }, [navOpen, openEdge, viewport.width]);
+    if (!docked || dragging || settling) return;
+    const measured = dockRef.current?.offsetWidth ?? LAUNCHER;
+    const next = snappedPos(edge, viewport.width, measured);
+    setNavPos((pos) => {
+      if (pos.x === next.x && pos.y === next.y) return pos;
+      navPosRef.current = next;
+      return next;
+    });
+  }, [navOpen, edge, viewport.width, docked, dragging, settling]);
 
   function placeOpen(from: { x: number; y: number }) {
     const dockBox = dockRef.current?.getBoundingClientRect();
-    const nextEdge = openEdgeFor(
-      from.x,
-      from.y,
-      dockBox?.width ?? LAUNCHER,
-      dockBox?.height ?? LAUNCHER,
-      window.innerWidth,
-    );
-    const next = snappedPos(nextEdge, window.innerWidth);
-    setOpenEdge(nextEdge);
+    const dockWidth = dockBox?.width ?? LAUNCHER;
+    const nextEdge = nearestEdge(from.x, from.y, dockWidth, window.innerWidth, openEdgeRef.current);
+    const next = snappedPos(nextEdge, window.innerWidth, dockWidth);
+    openEdgeRef.current = nextEdge;
     navPosRef.current = next;
+    setOpenEdge(nextEdge);
     setNavPos(next);
     setNavOpen(true);
+    setDocked(true);
+    setDragging(false);
+    setSettling(false);
+    setNearEdge(false);
   }
 
   function placeClosed() {
-    const next =
-      openEdge === "right"
-        ? { x: Math.max(EDGE_PAD, window.innerWidth - EDGE_PAD - LAUNCHER), y: EDGE_PAD }
-        : { x: EDGE_PAD, y: EDGE_PAD };
-    navPosRef.current = next;
-    setNavPos(next);
     setNavOpen(false);
+    setDocked(true);
+    setDragging(false);
+    setSettling(false);
+    setNearEdge(false);
   }
 
-  function beginNavDrag(event: ReactPointerEvent<HTMLButtonElement>) {
+  function armDocked() {
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => {
+      if (draggingRef.current) return;
+      setSettling(false);
+      setDocked(true);
+      setNearEdge(false);
+    }, 480);
+  }
+
+  function finishDrag(from: { x: number; y: number }) {
+    setDragging(false);
+    draggingRef.current = false;
+    const dockBox = dockRef.current?.getBoundingClientRect();
+    const dockWidth = dockBox?.width ?? LAUNCHER;
+    const candidate = nearestEdge(from.x, from.y, dockWidth, window.innerWidth, openEdgeRef.current);
+    const gap = edgeDistances(from.x, from.y, dockWidth, window.innerWidth)[candidate];
+    if (gap > MAGNET) {
+      window.clearTimeout(settleTimer.current);
+      setDocked(false);
+      setSettling(false);
+      setNearEdge(false);
+      return;
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setSettling(!reduce);
+    setOpenEdge(candidate);
+    openEdgeRef.current = candidate;
+    const seat = () => {
+      const measured = dockRef.current?.offsetWidth ?? dockWidth;
+      const next = snappedPos(candidate, window.innerWidth, measured);
+      const current = navPosRef.current;
+      if (reduce || (Math.abs(next.x - current.x) < 1 && Math.abs(next.y - current.y) < 1)) {
+        navPosRef.current = next;
+        setNavPos(next);
+        setSettling(false);
+        setDocked(true);
+        setNearEdge(false);
+        return;
+      }
+      navPosRef.current = next;
+      setNavPos(next);
+      armDocked();
+    };
+    if (reduce) {
+      seat();
+      return;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(seat));
+  }
+
+  function beginNavDrag(event: ReactPointerEvent<HTMLElement>) {
+    if (event.button !== 0) return;
     event.preventDefault();
     const startX = event.clientX;
     const startY = event.clientY;
@@ -330,8 +415,15 @@ function AppFrame() {
     function move(ev: { clientX: number; clientY: number }) {
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
-      if (Math.hypot(dx, dy) > 4) moved = true;
-      if (wasOpen) return;
+      if (!moved) {
+        if (Math.hypot(dx, dy) <= 4) return;
+        moved = true;
+        window.clearTimeout(settleTimer.current);
+        draggingRef.current = true;
+        setDragging(true);
+        setDocked(false);
+        setSettling(false);
+      }
       const bounds = dockRef.current?.getBoundingClientRect();
       const limitX = window.innerWidth - Math.ceil(bounds?.width ?? LAUNCHER) - 8;
       const limitY = window.innerHeight - Math.ceil(bounds?.height ?? LAUNCHER) - 8;
@@ -339,6 +431,10 @@ function AppFrame() {
       const y = Math.min(Math.max(8, origin.y + dy), Math.max(8, limitY));
       const next = { x, y };
       navPosRef.current = next;
+      const dockWidth = bounds?.width ?? LAUNCHER;
+      const candidate = nearestEdge(x, y, dockWidth, window.innerWidth, openEdgeRef.current);
+      const gap = edgeDistances(x, y, dockWidth, window.innerWidth)[candidate];
+      setNearEdge(gap <= MAGNET);
       setNavPos(next);
     }
     function up() {
@@ -346,14 +442,26 @@ function AppFrame() {
       window.removeEventListener("mousemove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("mouseup", up);
-      if (moved) return;
-      if (wasOpen) placeClosed();
-      else placeOpen(origin);
+      if (!moved) {
+        draggingRef.current = false;
+        setDragging(false);
+        if (wasOpen) placeClosed();
+        else placeOpen(origin);
+        return;
+      }
+      finishDrag(navPosRef.current);
     }
     window.addEventListener("pointermove", move);
     window.addEventListener("mousemove", move);
     window.addEventListener("pointerup", up);
     window.addEventListener("mouseup", up);
+  }
+
+  function onMenuPointerDown(event: ReactPointerEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest("a, input, select, textarea")) return;
+    if (target.closest("button") && !target.closest(".sequence-wordmark")) return;
+    beginNavDrag(event);
   }
 
   function closeSignup() {
@@ -373,7 +481,7 @@ function AppFrame() {
 
   return (
     <div
-      className={navOpen ? `lims-shell is-nav-open is-${edge}` : "lims-shell"}
+      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}`}
       style={
         {
           "--nav-left": `${insets.left}px`,
@@ -383,7 +491,20 @@ function AppFrame() {
         } as CSSProperties
       }
     >
-      <div ref={dockRef} className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}`} style={{ left: navPos.x, top: navPos.y }}>
+      <div
+        ref={dockRef}
+        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
+        style={{ left: navPos.x, top: navPos.y }}
+        onTransitionEnd={(event) => {
+          if (event.target !== dockRef.current) return;
+          if (event.propertyName !== "left" && event.propertyName !== "top") return;
+          if (draggingRef.current) return;
+          window.clearTimeout(settleTimer.current);
+          setSettling(false);
+          setDocked(true);
+          setNearEdge(false);
+        }}
+      >
         {navOpen ? null : (
         <button
           type="button"
@@ -400,9 +521,9 @@ function AppFrame() {
         </button>
       )}
       {navOpen ? (
-      <aside ref={panelRef} className="lims-sidebar" style={panelStyle}>
+      <aside ref={panelRef} className="lims-sidebar" style={panelStyle} onPointerDown={onMenuPointerDown}>
         <div className="lims-menu-brand">
-          <button type="button" className="sequence-wordmark" onClick={placeClosed}>
+          <button type="button" className="sequence-wordmark">
             Sequence
           </button>
         <div className="lims-site-block">
