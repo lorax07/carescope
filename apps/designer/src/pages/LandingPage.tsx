@@ -135,46 +135,163 @@ const MODULE_CHANGES: ModuleChange[] = [
   },
 ];
 
-function barWidth(value: number | null, max: number): string {
-  if (value == null || max <= 0) return "0%";
-  return `${Math.max(0, Math.min(100, (value / max) * 100))}%`;
+const COST_MAX = 6000;
+
+const COST_ROLES = [
+  { id: "consultants", label: "Consultants", published: true },
+  { id: "it", label: "Internal IT team", published: false },
+  { id: "pm", label: "Project manager", published: false },
+  { id: "lab", label: "Lab staff", published: false },
+] as const;
+
+function RoleName({ role }: { role: (typeof COST_ROLES)[number] }) {
+  if (role.id === "it") {
+    return (
+      <>
+        Internal IT<span className="lp-role-gap"> </span>
+        <span className="lp-role-break">team</span>
+      </>
+    );
+  }
+  if (role.id === "pm") {
+    return (
+      <>
+        Project<span className="lp-role-gap"> </span>
+        <span className="lp-role-break">manager</span>
+      </>
+    );
+  }
+  return role.label;
 }
 
-function CompareChart({
-  title,
-  unit,
-  traditional,
-  sequence,
-  traditionalValue,
-  sequenceValue,
-}: {
-  title: string;
-  unit: string;
-  traditional: ChangeBar;
-  sequence: ChangeBar;
-  traditionalValue: number;
-  sequenceValue: number | null;
-}) {
-  const max = Math.max(traditionalValue, sequenceValue ?? 0, 1);
+function costHeight(cost: number): string {
+  return `${Math.max(0, Math.min(100, (cost / COST_MAX) * 100))}%`;
+}
+
+function timeWidth(hours: number | null, maxHours: number): string {
+  if (hours == null || maxHours <= 0 || hours <= 0) return "0%";
+  const pct = Math.max(0, Math.min(100, (hours / maxHours) * 100));
+  return `max(10px, ${pct}%)`;
+}
+
+function RoleCostChart({ change }: { change: ModuleChange }) {
+  const maxHours = change.traditional.hours ?? 1;
+  const summary = [
+    `${change.change}.`,
+    `Traditional LIMS consultant cost ${change.traditional.costLabel}.`,
+    `Sequence consultant cost ${change.sequence.costLabel}.`,
+    "Internal IT team, project manager, and lab staff have no published dollar amount.",
+    `Example timeline: traditional ${change.traditional.timeLabel}, Sequence ${change.sequence.timeLabel}.`,
+  ].join(" ");
+
   return (
-    <figure className="lp-compare-chart">
-      <figcaption>{title}</figcaption>
-      <div className="lp-compare-plot">
-        <div className="lp-compare-row">
-          <span>Traditional LIMS</span>
-          <div className="lp-compare-track">
-            <div className="lp-compare-fill is-traditional" style={{ width: barWidth(traditionalValue, max) }} />
-          </div>
-          <strong>{unit === "cost" ? traditional.costLabel : traditional.timeLabel}</strong>
+    <figure className="lp-role" aria-label={summary}>
+      <div className="lp-role-top">
+        <div>
+          <p className="lp-role-kicker">Example change</p>
+          <h3 className="lp-compare-change">{change.change}</h3>
         </div>
-        <div className="lp-compare-row">
-          <span>Sequence</span>
-          <div className="lp-compare-track">
-            <div className="lp-compare-fill is-sequence" style={{ width: barWidth(sequenceValue, max) }} />
+        <ul className="lp-role-legend">
+          <li>
+            <i className="is-traditional" aria-hidden="true" />
+            Traditional LIMS
+          </li>
+          <li>
+            <i className="is-sequence" aria-hidden="true" />
+            Sequence
+          </li>
+        </ul>
+      </div>
+
+      <div className="lp-role-time">
+        <p className="lp-role-time-title">
+          <span>Example timeline</span>
+          <span>Calendar time for this change</span>
+        </p>
+        <div className="lp-role-time-row">
+          <span>Traditional LIMS</span>
+          <div className="lp-role-time-track">
+            <div className="lp-role-time-fill is-traditional" style={{ width: "100%" }} />
           </div>
-          <strong>{unit === "cost" ? sequence.costLabel : sequence.timeLabel}</strong>
+          <strong>{change.traditional.timeLabel}</strong>
+        </div>
+        <div className="lp-role-time-row">
+          <span>Sequence</span>
+          <div className="lp-role-time-track">
+            <div
+              className="lp-role-time-fill is-sequence"
+              style={{ width: timeWidth(change.sequence.hours, maxHours) }}
+            />
+          </div>
+          <strong>{change.sequence.timeLabel}</strong>
         </div>
       </div>
+
+      <div className="lp-role-plot" key={change.id}>
+        <div className="lp-role-yaxis">
+          <span className="lp-role-axis-name">Cost</span>
+          <div className="lp-role-yticks" aria-hidden="true">
+            <span>$6,000</span>
+            <span>$4,000</span>
+            <span>$2,000</span>
+            <span>$0</span>
+          </div>
+        </div>
+        <div className="lp-role-canvas">
+          <div className="lp-role-stage">
+            <div className="lp-role-grid" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="lp-role-groups">
+              {COST_ROLES.map((role) =>
+                role.published ? (
+                  <div className="lp-role-group" key={role.id}>
+                    <div className="lp-role-col">
+                      <span className="lp-role-val" style={{ bottom: `calc(${costHeight(change.traditional.cost)} + 0.35rem)` }}>
+                        {change.traditional.costLabel}
+                      </span>
+                      <div className="lp-role-bar is-traditional" style={{ height: costHeight(change.traditional.cost) }} />
+                    </div>
+                    <div className="lp-role-col">
+                      <span
+                        className="lp-role-val"
+                        style={{
+                          bottom: change.sequence.cost > 0 ? `calc(${costHeight(change.sequence.cost)} + 0.35rem)` : "calc(6px + 0.35rem)",
+                        }}
+                      >
+                        {change.sequence.costLabel}
+                      </span>
+                      <div
+                        className={change.sequence.cost > 0 ? "lp-role-bar is-sequence" : "lp-role-bar is-sequence is-zero"}
+                        style={change.sequence.cost > 0 ? { height: costHeight(change.sequence.cost) } : undefined}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="lp-role-group" key={role.id}>
+                    <span className="lp-role-empty" aria-hidden="true">
+                      —
+                    </span>
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+          <div className="lp-role-x">
+            {COST_ROLES.map((role) => (
+              <span key={role.id}>
+                <RoleName role={role} />
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <p className="lp-role-note">
+        Internal IT, the project manager, and lab staff have no published dollar amount for this change.
+      </p>
     </figure>
   );
 }
@@ -226,7 +343,7 @@ function WhatWeSolve() {
         <div className="lp-section-head lp-section-head-left">
           <h2>What we solve</h2>
           <p className="lp-compare-lede">
-            One change after go-live, for each module. The bars are published vendor fees and calendar times, not a survey average.
+            One published change after go-live, for each module. Consultant cost is the vendor fee. The timeline on the chart is that source’s calendar time. Adding a department is the 3–4 week example.
           </p>
         </div>
 
@@ -257,33 +374,20 @@ function WhatWeSolve() {
           id={`solve-panel-${active.id}`}
           aria-labelledby={`solve-tab-${active.id}`}
         >
-          <p className="lp-compare-change">{active.change}</p>
-          <div className="lp-compare-charts">
-            <CompareChart
-              title="Cost of the change"
-              unit="cost"
-              traditional={active.traditional}
-              sequence={active.sequence}
-              traditionalValue={active.traditional.cost}
-              sequenceValue={active.sequence.cost}
-            />
-            <CompareChart
-              title="Calendar time"
-              unit="time"
-              traditional={active.traditional}
-              sequence={active.sequence}
-              traditionalValue={active.traditional.hours ?? 0}
-              sequenceValue={active.sequence.hours}
-            />
-          </div>
+          <RoleCostChart change={active} />
           <p className="lp-compare-cite">Sources {active.sources.join(" and ")} below.</p>
         </div>
 
         <footer className="lp-solve-sources">
           <p>
-            Where a source gives a range, the bar reaches the long end and the label shows the range. The Sequence
-            bar is that source’s published self-configuration result for the same kind of change. It is not a survey
-            of Sequence customers. No source publishes an average for laboratories of 50 to 2,000 people.
+            The consultant column is the vendor fee published for that change. Internal IT, the project manager, and
+            lab staff are on the axis because a change needs them. No source publishes their dollar share, so those
+            columns stay open. The timeline is calendar time from the same source. Where a source gives a range, the
+            timeline bar reaches the long end and the label shows the range. Adding a laboratory department is the
+            3–4 week example: $3,600 and 3–4 weeks on a traditional LIMS, and $0 and 1 day when the laboratory
+            configures the department itself. The Sequence figure is that source’s published self-configuration
+            result, not a survey of Sequence customers. No source publishes an average for laboratories of 50 to
+            2,000 people.
           </p>
           <ol>
             <li>
