@@ -152,7 +152,9 @@ export function answerFromText(question: string, source: string): string {
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.index - b.index);
   if (ranked.length === 0) return NO_ANSWER;
+  const best = ranked[0].score;
   return ranked
+    .filter((item) => item.score === best)
     .slice(0, 2)
     .map((item) => item.paragraph)
     .join("\n\n");

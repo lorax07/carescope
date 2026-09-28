@@ -87,7 +87,7 @@ export function InsightsChatPage() {
         <div className="lims-kpi">
           <span>A/R</span>
           <strong>{money(snapshot.ar)}</strong>
-          <small>{snapshot.openDenials} open denials</small>
+          <small>{snapshot.openDenials === 1 ? "1 open denial" : `${snapshot.openDenials} open denials`}</small>
         </div>
       </div>
 

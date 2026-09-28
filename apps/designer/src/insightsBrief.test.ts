@@ -57,8 +57,15 @@ describe("business brief", () => {
   });
 
   it("answers from text the user provided", () => {
-    const source = "The pilot plant opens in October.";
-    expect(answerFromText("when does the pilot plant open", source)).toBe(source);
+    const source = "The pilot plant opens in October.\n\nOpen denials: 1.";
+    expect(answerFromText("when does the pilot plant open", source)).toBe("The pilot plant opens in October.");
+  });
+
+  it("returns two paragraphs when they match equally", () => {
+    const source = "Northwind Foods is On hold.\n\nAccession SCP-20488 for Northwind Foods is Peer review.";
+    const answer = answerFromText("Northwind Foods", source);
+    expect(answer).toContain("Northwind Foods is On hold.");
+    expect(answer).toContain("Accession SCP-20488 for Northwind Foods is Peer review.");
   });
 
   it("says when the text has no answer", () => {
