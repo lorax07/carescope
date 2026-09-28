@@ -112,19 +112,6 @@ const REPORT: ChangeExample = {
   sequenceTimeLabel: "1 hour",
 };
 
-const DEPARTMENT: ChangeExample = {
-  id: "department",
-  name: "Add a department",
-  cost: 3600,
-  costLabel: "$3,600",
-  hours: 4 * WEEK,
-  timeLabel: "3–4 weeks",
-  sequenceCost: 0,
-  sequenceCostLabel: "$0",
-  sequenceHours: 24,
-  sequenceTimeLabel: "1 day",
-};
-
 const TOPICS: Topic[] = [
   {
     id: "cost",
@@ -134,7 +121,7 @@ const TOPICS: Topic[] = [
     emphasis: "cost",
     sources: [1],
     note: "Each total is one custom change from CleverLAB. The cost bar is the consultant fee, which is the whole published price. The article says every change also needs project scope. It does not price internal IT, the project manager, or lab staff.",
-    examples: [REPORT, DEPARTMENT],
+    examples: [REPORT],
   },
   {
     id: "friction",
@@ -144,7 +131,7 @@ const TOPICS: Topic[] = [
     emphasis: "time",
     sources: [1],
     note: "The time total is calendar time for the whole change, not a sum of hours from each function. A range is drawn to its long end and labeled in full. Sequence is the lab configuring the change itself.",
-    examples: [REPORT, DEPARTMENT],
+    examples: [REPORT],
   },
   {
     id: "consultants",
@@ -154,7 +141,7 @@ const TOPICS: Topic[] = [
     emphasis: "cost",
     sources: [1],
     note: "CleverLAB prices a custom change as a programmer’s fee. That fee is the cost total. On Sequence the same change is self-configuration, so the consultant fee is $0.",
-    examples: [REPORT, DEPARTMENT],
+    examples: [REPORT],
   },
   {
     id: "integration",
@@ -495,15 +482,13 @@ function WhatWeSolve() {
             published fee. The time total is the published calendar time. The fee sits with the consultant or vendor.
             Neither source itemizes internal IT, the project manager, or lab staff, so those functions are named and
             not given a slice of the total. Sequence is the same source’s self-configuration result. Where a source
-            gives a range, the bar reaches the long end and the label shows the range. Adding a department is $3,600
-            and 3–4 weeks, or $0 and 1 day when the lab configures it. These figures are not a survey of Sequence
-            customers.
+            gives a range, the bar reaches the long end and the label shows the range. These figures are not a survey of
+            Sequence customers.
           </p>
           <ol>
             <li>
               CleverLAB, Piotr Płonka, “How We Reduced LIMS Costs by 90%,” 1 October 2025. A traditional new report
-              template is $2,000 and 2–3 weeks; self-configuration is $0 and 1 hour. Adding a laboratory department
-              is $3,600 and 3–4 weeks; self-configuration is $0 and 1 day.{" "}
+              template is $2,000 and 2–3 weeks; self-configuration is $0 and 1 hour.{" "}
               <a href="https://cleverlab.pl/lims_cost_reduction_en.html">cleverlab.pl/lims_cost_reduction_en.html</a>
             </li>
             <li>
