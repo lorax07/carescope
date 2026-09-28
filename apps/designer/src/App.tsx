@@ -15,7 +15,7 @@ const NAV = [
   { to: "/app/instruments", label: "Instrument Interface" },
   { to: "/app/connectivity", label: "Healthcare CRM" },
   { to: "/app/quality", label: "Quality & Compliance" },
-  { to: "/app/billing", label: "Billing & Revenue" },
+  { to: "/app/billing", label: "Sequence Revenue" },
   { to: "/app/insights", label: "Insights" },
 ] as const;
 
