@@ -14,11 +14,11 @@ import { OpsOverviewPage } from "./pages/OpsOverviewPage";
 import { SampleDetailPage } from "./pages/SampleDetailPage";
 import { SamplesPage } from "./pages/SamplesPage";
 import {
-  LimsModulePage,
   TestsPage,
   ResultsPage,
   InventoryPage,
 } from "./pages/ModulePages";
+import { QualityPage } from "./pages/QualityPage";
 import { InstrumentInterfacePage, InstrumentRecordPage } from "./pages/InstrumentInterfacePage";
 import { BillingPage } from "./pages/BillingPage";
 import { SequenceClientPage } from "./pages/SequenceClientPage";
@@ -80,7 +80,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="instruments" element={<InstrumentInterfacePage />} />
           <Route path="connectivity" element={<SequenceClientPage />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="quality" element={<LimsModulePage id="quality_compliance" />} />
+          <Route path="quality" element={<QualityPage />} />
           <Route path="billing" element={<BillingPage />} />
           <Route path="insights" element={<InsightsChatPage />} />
           <Route path="design" element={<WorkflowDesignPage />} />

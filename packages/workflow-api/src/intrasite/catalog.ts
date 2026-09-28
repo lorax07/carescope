@@ -41,7 +41,7 @@ export const LAB_MODULE_CATALOG = [
     label: "Sequence Compliance",
     positioning: "This is a quality and Compliance module",
     capabilities:
-      "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
+      "Deviation and nonconformance workflow, CAPA effectiveness checks, change control, document control, Part 11 electronic signatures, immutable audit trail",
   },
   {
     id: "billing_revenue",
