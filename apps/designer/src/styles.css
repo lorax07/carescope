@@ -1061,12 +1061,25 @@ a {
   font-size: 0.82rem;
 }
 
-.rcm-workbench {
+.rcm-workbench,
+.quality-workbench {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.9fr);
   gap: 0.85rem;
   margin-top: 0.85rem;
   align-items: start;
+}
+
+.quality-workbench {
+  grid-template-columns: minmax(0, 1.05fr) minmax(24rem, 0.95fr);
+}
+
+.quality-workbench tbody tr {
+  cursor: pointer;
+}
+
+.quality-case .account-facts {
+  grid-template-columns: 1fr 1fr;
 }
 
 .rcm-workbench tbody tr {
@@ -1268,9 +1281,169 @@ a {
   .client-record-grid,
   .account-facts,
   .rcm-workbench,
+  .quality-workbench,
   .rcm-aging {
     grid-template-columns: 1fr;
   }
+}
+
+.quality-types,
+.quality-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.quality-title {
+  margin: 0.8rem 1rem 0;
+  font-weight: 700;
+}
+
+.quality-copy {
+  margin: 0.4rem 1rem 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.quality-flow {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.quality-flow li {
+  border-left: 3px solid var(--border);
+  padding: 0.35rem 0.75rem;
+}
+
+.quality-flow li.is-done {
+  border-color: #15803d;
+}
+
+.quality-flow li.is-current {
+  border-color: #1b6ef3;
+  background: #f4f7fb;
+}
+
+.quality-flow b,
+.quality-flow small {
+  display: block;
+}
+
+.quality-flow small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.quality-sign,
+.quality-signs,
+.quality-record-audit {
+  margin: 0 1rem 1rem;
+}
+
+.quality-sign {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.quality-sign label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.quality-sign input,
+.quality-sign textarea,
+.quality-sign select,
+.quality-record-audit,
+.lims-panel-head input[aria-label="Search audit trail"] {
+  font: inherit;
+}
+
+.quality-sign textarea,
+.quality-sign input,
+.quality-sign select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+}
+
+.quality-sign textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.quality-sign p,
+.quality-legal {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.quality-legal {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.quality-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.quality-pin {
+  margin: 0 0 0.8rem;
+}
+
+.quality-actor {
+  font-size: 1.15rem !important;
+}
+
+.quality-signs,
+.quality-record-audit ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.quality-signs li,
+.quality-record-audit li {
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.quality-signs span,
+.quality-signs small,
+.quality-record-audit span,
+.quality-record-audit small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.quality-signs small.is-bound {
+  color: #15803d;
+}
+
+.quality-signs small.is-unbound {
+  color: var(--danger);
+}
+
+.quality-case {
+  min-width: 0;
 }
 
 .sr-only {
