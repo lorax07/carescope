@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { useSectionTabs } from "../sectionTabs";
+import { AccountLink } from "../components/AccountTable";
 import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { ReceiveSampleDialog } from "../components/ReceiveSampleDialog";
@@ -112,7 +113,7 @@ function cell(
     );
   }
   if (id === "received") return <span className="lims-mono muted">{sample.received}</span>;
-  if (id === "client") return sample.client;
+  if (id === "client") return <AccountLink name={sample.client} />;
   if (id === "matrix") return sample.matrix;
   if (id === "tests") return sample.tests;
   if (id === "priority") {
@@ -287,7 +288,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                         </button>
                       </b>
                       <small>
-                        {sample.client} · {sample.tests}
+                        <AccountLink name={sample.client} /> · {sample.tests}
                       </small>
                     </div>
                     {resultButton(sample)}

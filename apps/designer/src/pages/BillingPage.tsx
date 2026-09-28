@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CrmAccountList } from "../components/CrmAccountList";
+import { AccountTable } from "../components/AccountTable";
 
 type BillingArea = {
   label: string;
@@ -195,7 +195,7 @@ export function BillingPage() {
           <p className="lims-eyebrow">Revenue</p>
           <h1>Sequence Revenue</h1>
           <p className="lims-page-lede">
-            Capture charges, price tests, bill payers and clients, and follow claims through payment. Accounts are the Healthcare CRM account list.
+            Capture charges, price tests, bill payers and clients, and follow claims through payment. Accounts are the Sequence Client account table.
           </p>
         </div>
       </div>
@@ -270,8 +270,8 @@ export function BillingPage() {
         <div className="lims-panel-head">
           <h2>Accounts</h2>
         </div>
-        <p className="billing-note">The same account list used in Healthcare CRM.</p>
-        <CrmAccountList />
+        <p className="billing-note">The same account table used in Sequence Client and on sample work.</p>
+        <AccountTable />
       </section>
     </div>
   );
