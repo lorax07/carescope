@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
-import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { findInstrument } from "./instruments";
@@ -227,8 +227,6 @@ function AppFrame() {
   );
   const lims = readLimsSession();
   const labOps = useLabOperations();
-  const location = useLocation();
-  const activeSection = sectionFromPath(location.pathname);
   const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -474,10 +472,6 @@ function AppFrame() {
   }
 
   const panelStyle = panelPlacement(edge, navPos.x, navPos.y, viewport.width, viewport.height);
-  const closedIcons = [
-    ...labOps.menu.filter((item) => item.enabled && item.label.trim()).map((item) => item.view),
-    ...NAV.map((item) => sectionFromPath(item.to)),
-  ];
 
   return (
     <div
@@ -508,23 +502,19 @@ function AppFrame() {
         {navOpen ? null : (
         <button
           type="button"
-          className="lims-nav-launcher is-icons"
+          className="lims-nav-launcher is-logo"
           aria-expanded={false}
           aria-label="Expand navigation"
           onPointerDown={beginNavDrag}
         >
-          {closedIcons.map((name) => (
-            <span key={name} className={`lims-nav-icon${activeSection === name ? " is-current" : ""}`}>
-              <NavIcon name={name} />
-            </span>
-          ))}
+          <img src="/sequence-logo.png" alt="" />
         </button>
       )}
       {navOpen ? (
       <aside ref={panelRef} className="lims-sidebar" style={panelStyle} onPointerDown={onMenuPointerDown}>
         <div className="lims-menu-brand">
-          <button type="button" className="sequence-wordmark">
-            Sequence
+          <button type="button" className="sequence-wordmark" aria-expanded aria-label="Close navigation">
+            <img src="/sequence-logo.png" alt="" />
           </button>
         <div className="lims-site-block">
           <div className="lims-site">
