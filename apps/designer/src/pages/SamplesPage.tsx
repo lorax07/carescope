@@ -44,22 +44,22 @@ type SampleView = Exclude<LabMenuView, "overview">;
 
 const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: string }> = {
   home: {
-    eyebrow: "Lab operations",
+    eyebrow: "Sequence Operations",
     title: "Home",
     lede: "Receive, prioritize, and move samples. The list follows the priority order set in Workflow design.",
   },
   testing: {
-    eyebrow: "Lab operations",
+    eyebrow: "Sequence Operations",
     title: "Testing",
     lede: "Samples currently in testing.",
   },
   review: {
-    eyebrow: "Lab operations",
+    eyebrow: "Sequence Operations",
     title: "Review",
     lede: "Samples with results, ready for review. Complete Review opens the results, then authorize them.",
   },
   release: {
-    eyebrow: "Lab operations",
+    eyebrow: "Sequence Operations",
     title: "Release",
     lede: "Samples released from the laboratory.",
   },

@@ -42,7 +42,7 @@ export const MODULE_INTEGRATIONS: ModuleIntegration[] = [
   },
   {
     module: "instrument_integration",
-    label: "Instrument Integration",
+    label: "Sequence Instruments",
     description: "Instrument commands and data import",
     entityTypes: ["instrument", "instrument_run"],
     events: ["instrument.data_imported", "test.started", "test.completed"],

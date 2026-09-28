@@ -90,10 +90,10 @@ export function LabOperationsEditor() {
   return (
     <section className="lab-ops-editor">
       <div>
-        <h2>Lab operations</h2>
+        <h2>Sequence Operations</h2>
         <p>
           Drag to set the order the laboratory sees. Home lists samples from the top priority
-          downward. Menu items here are the options under Lab Operations. Column names and
+          downward. Menu items here are the options under Sequence Operations. Column names and
           visibility control the sample list. Matrix stays off until you show it. Drag buttons
           to place them, pick a color, or hide one. Create a batch starts on Testing.
         </p>

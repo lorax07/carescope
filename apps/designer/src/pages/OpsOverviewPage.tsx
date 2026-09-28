@@ -31,7 +31,7 @@ export function OpsOverviewPage() {
     <div className="lims-page">
       <div className="lims-page-header">
         <div>
-          <p className="lims-eyebrow">Lab operations</p>
+          <p className="lims-eyebrow">Sequence Operations</p>
           <h1>{title}</h1>
           <p className="lims-page-lede">
             Shift view of the queue, turnaround, and what is stuck. Sample work stays on Home.

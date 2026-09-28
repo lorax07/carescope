@@ -17,14 +17,14 @@ import type {
 export const LAB_MODULE_CATALOG = [
   {
     id: "lab_operations",
-    label: "Lab Operations",
+    label: "Sequence Operations",
     positioning: "The core LIMS",
     capabilities:
       "Orders, accessioning, specimens, tests, analyses, results, QC, workflows, queues, batching, TAT, reports, inventory, storage",
   },
   {
     id: "instrument_integration",
-    label: "Instrument Integration",
+    label: "Sequence Instruments",
     positioning: "Connect your instruments to Sequence",
     capabilities:
       "Instrument interfaces, bidirectional communication, result ingestion, worklists, instrument mapping, interface monitoring",
@@ -38,7 +38,7 @@ export const LAB_MODULE_CATALOG = [
   },
   {
     id: "quality_compliance",
-    label: "Quality & Compliance",
+    label: "Sequence Compliance",
     positioning: "Keep the laboratory controlled and traceable",
     capabilities:
       "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
@@ -52,7 +52,7 @@ export const LAB_MODULE_CATALOG = [
   },
   {
     id: "insights",
-    label: "Insights",
+    label: "Sequence Insights",
     positioning: "Turn laboratory data into operational intelligence",
     capabilities: "Dashboards, TAT analytics, productivity, quality metrics, custom reporting",
   },

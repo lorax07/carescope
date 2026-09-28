@@ -12,11 +12,11 @@ import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } 
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
-  { to: "/app/instruments", label: "Instrument Interface" },
+  { to: "/app/instruments", label: "Sequence Instruments" },
   { to: "/app/connectivity", label: "Sequence Client" },
-  { to: "/app/quality", label: "Quality & Compliance" },
+  { to: "/app/quality", label: "Sequence Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
-  { to: "/app/insights", label: "Insights" },
+  { to: "/app/insights", label: "Sequence Insights" },
 ] as const;
 
 function useLocalClock(): Date {
@@ -462,7 +462,7 @@ function AppFrame() {
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
-          <p className="lims-nav-label">Lab Operations</p>
+          <p className="lims-nav-label">Sequence Operations</p>
           {labOps.menu
             .filter((item) => item.enabled && item.label.trim())
             .map((item) => (
