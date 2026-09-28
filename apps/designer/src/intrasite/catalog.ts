@@ -64,8 +64,9 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
   {
     id: "insights",
     label: "Sequence Insights",
-    positioning: "Turn laboratory data into operational intelligence",
-    capabilities: "Dashboards, TAT analytics, productivity, quality metrics, custom reporting",
+    positioning: "Overall business data, with a chat that answers from the text provided",
+    capabilities:
+      "Business overview, accounts, revenue, laboratory work, pipeline, and a chat that answers from the briefing text",
   },
 ];
 

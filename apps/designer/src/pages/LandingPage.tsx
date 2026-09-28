@@ -394,7 +394,7 @@ const PLATFORM_PILLARS = [
   },
   {
     title: "Sequence Insights",
-    detail: "Turn laboratory data into operational intelligence",
+    detail: "Overall business data, with a chat that answers from the text provided",
     tone: "cyan",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
