@@ -438,8 +438,8 @@ function ChangeCase({ record, actor, system }: { record: ChangeControl; actor: s
       <p className="quality-title">{record.title}</p>
       <dl className="account-facts">
         <div><dt>Proposer</dt><dd>{record.proposer}</dd></div>
-        <div><dt>Validation</dt><dd>{record.validation || "Not assessed"}</dd></div>
-        <div><dt>Document</dt><dd>{document ? `${document.status}` : "Missing"}</dd></div>
+        <div><dt>Validation</dt><dd>{record.validation === "partial" ? "Partial validation" : record.validation === "full" ? "Full validation" : record.validation === "none" ? "No revalidation" : "Not assessed"}</dd></div>
+        <div><dt>Document</dt><dd>{document ? DOCUMENT_STAGES.find((stage) => stage.id === document.status)?.label ?? document.status : "Missing"}</dd></div>
       </dl>
       <p className="quality-copy">{record.description} {record.impact}</p>
       <Flow
