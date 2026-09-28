@@ -721,9 +721,81 @@ a {
   background: var(--bg-hover);
 }
 
+.lims-modal.settings-dialog {
+  width: min(820px, calc(100vw - 3rem));
+  min-height: 440px;
+}
+
+.settings-body {
+  display: flex;
+  padding: 0;
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 12.5rem minmax(0, 1fr);
+  flex: 1;
+  min-height: 100%;
+}
+
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.85rem;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.settings-menu .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.settings-menu .btn.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.settings-pane {
+  min-width: 0;
+  padding: 1rem 1.15rem 1.15rem;
+}
+
+.settings-pane .settings-pin-fields {
+  max-width: none;
+}
+
+.settings-pane .settings-pin-fields input {
+  width: 100%;
+}
+
 .settings-option h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
+}
+
+.settings-option p {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+}
+
+@container dialog (max-width: 640px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .settings-menu .btn {
+    width: auto;
+  }
 }
 
 .settings-pin-fields {
@@ -989,6 +1061,106 @@ a {
   font-size: 0.82rem;
 }
 
+.rcm-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.9fr);
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+  align-items: start;
+}
+
+.rcm-workbench tbody tr {
+  cursor: pointer;
+}
+
+.rcm-workbench h3 {
+  margin: 0.2rem 1rem 0.4rem;
+  font-size: 0.95rem;
+}
+
+.rcm-workbench .account-facts {
+  grid-template-columns: 1fr 1fr;
+}
+
+.rcm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0 1rem 1rem;
+}
+
+.rcm-actions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.lims-panel-head select,
+.rcm-actions input,
+.rcm-actions select,
+.rcm-price input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  color: var(--text);
+}
+
+.rcm-price input {
+  width: 6.5rem;
+}
+
+.rcm-edits {
+  margin: 0 1rem 0.85rem;
+  padding-left: 1.1rem;
+}
+
+.rcm-balance {
+  margin: 0.85rem 1rem 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.rcm-balance span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.rcm-aging {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0;
+}
+
+.rcm-aging div {
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.7rem 0.8rem;
+}
+
+.rcm-aging span {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.rcm-aging strong {
+  display: block;
+  margin-top: 0.2rem;
+}
+
 .account-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1094,7 +1266,9 @@ a {
 
 @media (max-width: 960px) {
   .client-record-grid,
-  .account-facts {
+  .account-facts,
+  .rcm-workbench,
+  .rcm-aging {
     grid-template-columns: 1fr;
   }
 }

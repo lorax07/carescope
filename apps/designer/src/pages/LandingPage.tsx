@@ -353,20 +353,8 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
-    title: "Sequence Client",
-    detail: "Accounts, pipeline, and lab work on one record",
-    tone: "violet",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <circle cx="16" cy="11" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M9.5 23.5c1.2-3 3.5-4.5 6.5-4.5s5.3 1.5 6.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M22 8.5h5M24.5 6v5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
     title: "Sequence Compliance",
-    detail: "Keep the laboratory controlled and traceable",
+    detail: "This is a quality and Compliance module",
     tone: "blue",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
@@ -382,23 +370,35 @@ const PLATFORM_PILLARS = [
     ),
   },
   {
+    title: "Sequence Client",
+    detail: "This is an RCM for accounts, pipeline, and lab work",
+    tone: "violet",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <circle cx="16" cy="11" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9.5 23.5c1.2-3 3.5-4.5 6.5-4.5s5.3 1.5 6.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M22 8.5h5M24.5 6v5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Sequence Revenue",
+    detail: "This is a robust revenue Cycle management system",
+    tone: "amber",
+    icon: (
+      <svg viewBox="0 0 32 32" width="28" height="28">
+        <rect x="8" y="5.5" width="16" height="21" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M12 12h8M12 16h8M12 20h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
     title: "Sequence Insights",
     detail: "Turn laboratory data into operational intelligence",
     tone: "cyan",
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">
         <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Revenue",
-    detail: "Invoice clients for completed laboratory work",
-    tone: "amber",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <rect x="8" y="5.5" width="16" height="21" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M12 12h8M12 16h8M12 20h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },

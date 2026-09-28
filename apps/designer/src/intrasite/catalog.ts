@@ -43,21 +43,21 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
   {
     id: "connectivity",
     label: "Sequence Client",
-    positioning: "Accounts, pipeline, and lab work on one record",
+    positioning: "This is an RCM for accounts, pipeline, and lab work",
     capabilities:
       "Shared account table, contacts, pipeline, activities, service agreements, laboratory work, revenue handoff",
   },
   {
     id: "quality_compliance",
     label: "Sequence Compliance",
-    positioning: "Keep the laboratory controlled and traceable",
+    positioning: "This is a quality and Compliance module",
     capabilities:
       "Audit trails, e-signatures, change control, validation, CAPA, nonconformance, document control",
   },
   {
     id: "billing_revenue",
     label: "Sequence Revenue",
-    positioning: "Invoice clients for completed laboratory work",
+    positioning: "This is a robust revenue Cycle management system",
     capabilities:
       "Charge capture, test pricing, client-specific pricing, insurance billing, CPT/HCPCS codes, ICD-10 codes, payer information, claim data, self-pay, client billing, billing edits/holds, rebilling, denials and exceptions, payment status, revenue reporting",
   },

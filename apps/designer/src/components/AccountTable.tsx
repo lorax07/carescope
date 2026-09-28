@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { CRM_ACCOUNTS, accountByName, type AccountHealth, type CrmAccount } from "../crmAccounts";
+import { accountRevenueLabel, useRevenue } from "../revenueCycle";
 import { useSamples } from "../samples";
 
 export function accountPath(accountId: string): string {
@@ -31,6 +32,7 @@ export function AccountTable({
   onSelect?: (account: CrmAccount) => void;
 }) {
   const samples = useSamples();
+  const ledger = useRevenue();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All" | "Active" | "On hold">("All");
   const openByName = useMemo(() => {
@@ -101,7 +103,7 @@ export function AccountTable({
                   <td>{account.owner}</td>
                   <td>{account.industry}</td>
                   <td>{openByName.get(account.name) ?? 0}</td>
-                  <td>{account.revenue}</td>
+                  <td>{accountRevenueLabel(ledger.charges, account.id)}</td>
                   <td>
                     <span className={`lims-badge${healthTone(account.health)}`}>{account.health}</span>
                   </td>
