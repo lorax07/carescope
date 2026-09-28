@@ -12,6 +12,14 @@ function validPin(pin: string): boolean {
   return /^\d{4,6}$/.test(pin);
 }
 
+const SECTIONS = [
+  { id: "profile", label: "Profile" },
+  { id: "password", label: "Password" },
+  { id: "pin", label: "Reviewer PIN" },
+] as const;
+
+type SettingsSection = (typeof SECTIONS)[number]["id"];
+
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const state = useReviewerPin();
   const [pin, setPin] = useState("");
@@ -23,6 +31,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSaved, setPasswordSaved] = useState(false);
+  const [section, setSection] = useState<SettingsSection>("profile");
   const expires = pinExpiresOn();
 
   function save() {
@@ -70,7 +79,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
   return (
     <div className="lims-modal-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="lims-modal"
+        className="lims-modal settings-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-title"
@@ -82,106 +91,128 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             Close
           </button>
         </div>
-        <div className="lims-modal-body">
-          <section className="settings-option">
-            <h3>Profile</h3>
-            <p>
-              {readLimsSession()?.username ?? "M. Chen"} ·{" "}
-              {readLimsSession() ? `${readLimsSession()?.clientName} LIMS` : "Lab Analyst"}
-            </p>
-          </section>
-          <section className="settings-option">
-            <h3>Password</h3>
-            <p>Resets the password used to enter this LIMS environment.</p>
-            <div className="settings-pin-fields">
-              <label>
-                Current password
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  aria-label="Current password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                />
-              </label>
-              <label>
-                New password
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  aria-label="New password"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                />
-              </label>
-              <label>
-                Confirm new password
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  aria-label="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                />
-              </label>
-              {passwordError ? <p className="settings-error">{passwordError}</p> : null}
-              {passwordSaved ? (
-                <p className="settings-saved">Password updated. Use it the next time you sign in.</p>
-              ) : null}
-              <button type="button" className="btn btn-primary" onClick={resetPassword}>
-                Reset password
-              </button>
-            </div>
-          </section>
-          <section className="settings-option">
-            <h3>Reviewer PIN</h3>
-            <p>Confirms your identity when you flag a result. A PIN lasts 90 days.</p>
-            {state === "active" && expires && !resetting ? (
-              <p>Current PIN expires {expires.toLocaleDateString()}.</p>
-            ) : null}
-            {state === "expired" ? <p>This PIN has expired. Set a new one.</p> : null}
-            {showForm ? (
-              <div className="settings-pin-fields">
-                <label>
-                  New PIN
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    autoComplete="new-password"
-                    aria-label="New PIN"
-                    value={pin}
-                    onChange={(event) => setPin(event.target.value)}
-                  />
-                </label>
-                <label>
-                  Confirm PIN
-                  <input
-                    type="password"
-                    inputMode="numeric"
-                    autoComplete="new-password"
-                    aria-label="Confirm PIN"
-                    value={again}
-                    onChange={(event) => setAgain(event.target.value)}
-                  />
-                </label>
-                {error ? <p className="settings-error">{error}</p> : null}
-                <button type="button" className="btn btn-primary" onClick={save}>
-                  Save PIN
+        <div className="lims-modal-body settings-body">
+          <div className="settings-layout">
+            <div className="settings-menu" role="tablist" aria-label="Settings">
+              {SECTIONS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={section === item.id}
+                  className={`btn${section === item.id ? " is-on" : ""}`}
+                  onClick={() => setSection(item.id)}
+                >
+                  {item.label}
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="btn"
-                onClick={() => {
-                  resetReviewerPin();
-                  setResetting(true);
-                }}
-              >
-                Reset PIN
-              </button>
-            )}
-          </section>
+              ))}
+            </div>
+            <div className="settings-pane" role="tabpanel">
+              {section === "profile" ? (
+                <section className="settings-option">
+                  <h3>Profile</h3>
+                  <p>
+                    {readLimsSession()?.username ?? "M. Chen"} ·{" "}
+                    {readLimsSession() ? `${readLimsSession()?.clientName} LIMS` : "Lab Analyst"}
+                  </p>
+                </section>
+              ) : null}
+              {section === "password" ? (
+                <section className="settings-option">
+                  <h3>Password</h3>
+                  <p>Resets the password used to enter this LIMS environment.</p>
+                  <div className="settings-pin-fields">
+                    <label>
+                      Current password
+                      <input
+                        type="password"
+                        autoComplete="current-password"
+                        aria-label="Current password"
+                        value={currentPassword}
+                        onChange={(event) => setCurrentPassword(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      New password
+                      <input
+                        type="password"
+                        autoComplete="new-password"
+                        aria-label="New password"
+                        value={newPassword}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                      />
+                    </label>
+                    <label>
+                      Confirm new password
+                      <input
+                        type="password"
+                        autoComplete="new-password"
+                        aria-label="Confirm new password"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                      />
+                    </label>
+                    {passwordError ? <p className="settings-error">{passwordError}</p> : null}
+                    {passwordSaved ? (
+                      <p className="settings-saved">Password updated. Use it the next time you sign in.</p>
+                    ) : null}
+                    <button type="button" className="btn btn-primary" onClick={resetPassword}>
+                      Reset password
+                    </button>
+                  </div>
+                </section>
+              ) : null}
+              {section === "pin" ? (
+                <section className="settings-option">
+                  <h3>Reviewer PIN</h3>
+                  <p>Confirms your identity when you flag a result. A PIN lasts 90 days.</p>
+                  {state === "active" && expires && !resetting ? <p>Current PIN expires {expires.toLocaleDateString()}.</p> : null}
+                  {state === "expired" ? <p>This PIN has expired. Set a new one.</p> : null}
+                  {showForm ? (
+                    <div className="settings-pin-fields">
+                      <label>
+                        New PIN
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          autoComplete="new-password"
+                          aria-label="New PIN"
+                          value={pin}
+                          onChange={(event) => setPin(event.target.value)}
+                        />
+                      </label>
+                      <label>
+                        Confirm PIN
+                        <input
+                          type="password"
+                          inputMode="numeric"
+                          autoComplete="new-password"
+                          aria-label="Confirm PIN"
+                          value={again}
+                          onChange={(event) => setAgain(event.target.value)}
+                        />
+                      </label>
+                      {error ? <p className="settings-error">{error}</p> : null}
+                      <button type="button" className="btn btn-primary" onClick={save}>
+                        Save PIN
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        resetReviewerPin();
+                        setResetting(true);
+                      }}
+                    >
+                      Reset PIN
+                    </button>
+                  )}
+                </section>
+              ) : null}
+            </div>
+          </div>
         </div>
       </div>
     </div>

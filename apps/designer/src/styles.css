@@ -721,9 +721,81 @@ a {
   background: var(--bg-hover);
 }
 
+.lims-modal.settings-dialog {
+  width: min(820px, calc(100vw - 3rem));
+  min-height: 440px;
+}
+
+.settings-body {
+  display: flex;
+  padding: 0;
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 12.5rem minmax(0, 1fr);
+  flex: 1;
+  min-height: 100%;
+}
+
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.85rem;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.settings-menu .btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.settings-menu .btn.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.settings-pane {
+  min-width: 0;
+  padding: 1rem 1.15rem 1.15rem;
+}
+
+.settings-pane .settings-pin-fields {
+  max-width: none;
+}
+
+.settings-pane .settings-pin-fields input {
+  width: 100%;
+}
+
 .settings-option h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
+}
+
+.settings-option p {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+}
+
+@container dialog (max-width: 640px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .settings-menu .btn {
+    width: auto;
+  }
 }
 
 .settings-pin-fields {
