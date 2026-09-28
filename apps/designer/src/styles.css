@@ -123,38 +123,38 @@ a {
 }
 
 .sequence-wordmark {
-  margin: 0.15rem 0.2rem 0;
+  display: block;
+  width: min(100%, 15.5rem);
+  margin: 0.1rem 0.15rem 0.2rem;
   padding: 0;
   border: 0;
   background: none;
-  font-family: "Bitec Sans", sans-serif;
-  font-weight: 700;
-  font-size: 1.45rem;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: #111;
+  line-height: 0;
   cursor: grab;
 }
 
-.lims-nav-launcher.is-icons {
+.sequence-wordmark img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lims-nav-dock.is-top .sequence-wordmark,
+.lims-nav-dock.is-bottom .sequence-wordmark {
+  width: 12.5rem;
+}
+
+.lims-nav-launcher.is-logo {
   width: auto;
   height: auto;
-  border-radius: 18px;
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  padding: 0.35rem 0.5rem 0.4rem;
+  border-radius: 16px;
 }
 
-.lims-nav-dock.is-top .lims-nav-launcher.is-icons {
-  flex-direction: row;
-}
-
-.lims-nav-launcher.is-icons .lims-nav-icon.is-current {
-  background: #1b6ef3;
-  border-color: #1b6ef3;
-  color: #fff;
+.lims-nav-launcher.is-logo img {
+  width: auto;
+  height: 2.7rem;
+  object-fit: contain;
 }
 
 .lims-nav-launcher img {
