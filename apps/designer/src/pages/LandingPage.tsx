@@ -144,6 +144,26 @@ const COST_ROLES = [
   { id: "lab", label: "Lab staff", published: false },
 ] as const;
 
+function RoleName({ role }: { role: (typeof COST_ROLES)[number] }) {
+  if (role.id === "it") {
+    return (
+      <>
+        Internal IT<span className="lp-role-gap"> </span>
+        <span className="lp-role-break">team</span>
+      </>
+    );
+  }
+  if (role.id === "pm") {
+    return (
+      <>
+        Project<span className="lp-role-gap"> </span>
+        <span className="lp-role-break">manager</span>
+      </>
+    );
+  }
+  return role.label;
+}
+
 function costHeight(cost: number): string {
   return `${Math.max(0, Math.min(100, (cost / COST_MAX) * 100))}%`;
 }
@@ -239,7 +259,7 @@ function RoleCostChart({ change }: { change: ModuleChange }) {
                       <span
                         className="lp-role-val"
                         style={{
-                          bottom: change.sequence.cost > 0 ? `calc(${costHeight(change.sequence.cost)} + 0.35rem)` : "calc(4px + 0.35rem)",
+                          bottom: change.sequence.cost > 0 ? `calc(${costHeight(change.sequence.cost)} + 0.35rem)` : "calc(6px + 0.35rem)",
                         }}
                       >
                         {change.sequence.costLabel}
@@ -252,7 +272,9 @@ function RoleCostChart({ change }: { change: ModuleChange }) {
                   </div>
                 ) : (
                   <div className="lp-role-group" key={role.id}>
-                    <p className="lp-role-unpublished">Not published</p>
+                    <span className="lp-role-empty" aria-hidden="true">
+                      —
+                    </span>
                   </div>
                 ),
               )}
@@ -260,11 +282,16 @@ function RoleCostChart({ change }: { change: ModuleChange }) {
           </div>
           <div className="lp-role-x">
             {COST_ROLES.map((role) => (
-              <span key={role.id}>{role.label}</span>
+              <span key={role.id}>
+                <RoleName role={role} />
+              </span>
             ))}
           </div>
         </div>
       </div>
+      <p className="lp-role-note">
+        Internal IT, the project manager, and lab staff have no published dollar amount for this change.
+      </p>
     </figure>
   );
 }
