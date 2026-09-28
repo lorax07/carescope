@@ -1155,75 +1155,246 @@
 }
 
 .lp-compare-change {
-  margin: 0 0 1rem;
+  margin: 0.15rem 0 0;
   font-family: var(--lp-display);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   letter-spacing: -0.03em;
 }
 
-.lp-compare-charts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-}
-
-.lp-compare-chart {
+.lp-role {
   margin: 0;
 }
 
-.lp-compare-chart figcaption {
-  margin-bottom: 0.75rem;
-  font-size: 0.75rem;
+.lp-role-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.lp-role-kicker {
+  margin: 0;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--lp-muted);
 }
 
-.lp-compare-plot {
+.lp-role-legend {
   display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.lp-compare-row {
+.lp-role-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lp-role-legend i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+}
+
+.lp-role-legend i.is-traditional,
+.lp-role-bar.is-traditional,
+.lp-role-time-fill.is-traditional {
+  background: linear-gradient(180deg, #31456f, #0b1f44);
+}
+
+.lp-role-legend i.is-sequence,
+.lp-role-bar.is-sequence,
+.lp-role-time-fill.is-sequence {
+  background: linear-gradient(180deg, #5b96f8, #1b6ef3);
+}
+
+.lp-role-time {
+  margin-top: 1rem;
+  padding: 0.85rem 0.95rem 0.95rem;
+  background: #f6f8fb;
+  border-radius: 14px;
+}
+
+.lp-role-time-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+.lp-role-time-row {
   display: grid;
-  grid-template-columns: 8.5rem minmax(0, 1fr) 7.5rem;
+  grid-template-columns: 9.2rem minmax(0, 1fr) 7.2rem;
   gap: 0.7rem;
   align-items: center;
 }
 
-.lp-compare-row span {
+.lp-role-time-row + .lp-role-time-row {
+  margin-top: 0.55rem;
+}
+
+.lp-role-time-row span {
   font-size: 0.86rem;
   font-weight: 600;
 }
 
-.lp-compare-row strong {
+.lp-role-time-row strong {
   font-family: var(--lp-display);
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   letter-spacing: -0.03em;
   text-align: right;
 }
 
-.lp-compare-track {
-  height: 14px;
+.lp-role-time-track {
+  height: 10px;
   border-radius: 999px;
-  background: #eef2f7;
+  background: #e6edf5;
   overflow: hidden;
 }
 
-.lp-compare-fill {
+.lp-role-time-fill {
   height: 100%;
   border-radius: inherit;
-  min-width: 0;
 }
 
-.lp-compare-fill.is-traditional {
-  background: linear-gradient(90deg, #0b1f44, #24365f);
+.lp-role-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 0.55rem;
+  margin-top: 1.15rem;
 }
 
-.lp-compare-fill.is-sequence {
-  background: linear-gradient(90deg, #1b6ef3, #4c8df7);
+.lp-role-yaxis {
+  display: grid;
+  grid-template-columns: auto 3.2rem;
+  gap: 0.35rem;
+  height: 240px;
+}
+
+.lp-role-axis-name {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  align-self: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+.lp-role-yticks {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #8b97a8;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.lp-role-stage {
+  position: relative;
+  height: 240px;
+}
+
+.lp-role-grid {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.lp-role-grid span {
+  display: block;
+  border-top: 1px solid #e8eef5;
+}
+
+.lp-role-grid span:last-child {
+  border-top-color: #cfd8e3;
+}
+
+.lp-role-groups {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lp-role-group {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.45rem;
+  height: 100%;
+}
+
+.lp-role-col {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 2.15rem;
+  height: 100%;
+}
+
+.lp-role-val {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--lp-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.lp-role-bar {
+  width: 100%;
+  border-radius: 8px 8px 3px 3px;
+  box-shadow: 0 8px 16px rgba(11, 31, 68, 0.08);
+}
+
+.lp-role-bar.is-zero {
+  height: 4px;
+  box-shadow: none;
+}
+
+.lp-role-unpublished {
+  margin: 0 0 1.4rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px dashed #d5dde8;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #8b97a8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.lp-role-x {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0.65rem;
+}
+
+.lp-role-x span {
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .lp-compare-cite {
@@ -1233,19 +1404,48 @@
 }
 
 @media (max-width: 800px) {
-  .lp-compare-charts,
-  .lp-compare-row {
-    grid-template-columns: 1fr;
+  .lp-role-top,
+  .lp-role-time-title {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .lp-compare-row strong {
+  .lp-role-time-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .lp-role-time-row strong {
     text-align: left;
+  }
+
+  .lp-role-axis-name {
+    display: none;
+  }
+
+  .lp-role-x span,
+  .lp-role-unpublished {
+    font-size: 0.68rem;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .lp-compare-fill {
-    transition: width 0.35s ease;
+  .lp-role-bar {
+    transform-origin: bottom;
+    animation: lp-bar-in 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lp-role-time-fill {
+    transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes lp-bar-in {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
   }
 }
 
