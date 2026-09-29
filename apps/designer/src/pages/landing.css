@@ -2481,7 +2481,7 @@ body:has(.lp) {
 
 img.lp-logo-sequence {
   display: block;
-  height: 52px;
+  height: calc(52px / 3);
   width: auto;
 }
 
@@ -2498,7 +2498,7 @@ img.lp-logo-sequence {
   }
 
   img.lp-logo-sequence {
-    height: 34px;
+    height: calc(34px / 3);
   }
 
   .lp-nav-actions {
