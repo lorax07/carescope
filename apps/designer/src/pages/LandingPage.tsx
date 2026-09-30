@@ -131,8 +131,8 @@ function WhatWeSolve() {
   return (
     <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
       <div className="lp-section-inner lp-solve-board">
+        <h2 className="lp-solve-side-heading">What we solve</h2>
         <div className="lp-solve-intro">
-          <p className="lp-solve-eyebrow">What we solve</p>
           <h2>Less friction. More science.</h2>
           <p>
             CareScope Sequence eliminates the biggest operational, technical and compliance challenges labs face—so
