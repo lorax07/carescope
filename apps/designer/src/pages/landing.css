@@ -1115,12 +1115,12 @@
 
 .lp-solve-side-heading {
   position: absolute;
-  top: 0;
+  top: 0.2rem;
   left: 0;
   margin: 0;
   color: #0b1f44;
   font-family: var(--lp-display);
-  font-size: clamp(1.4rem, 2.1vw, 2rem);
+  font-size: clamp(1.3rem, 1.8vw, 1.75rem);
   letter-spacing: -0.035em;
   line-height: 1.05;
 }
