@@ -165,8 +165,10 @@ a {
 }
 
 .lims-sidebar {
-  position: absolute;
+  position: relative;
   overflow: auto;
+  width: 280px;
+  max-height: calc(100vh - 8px);
   background: rgba(255, 255, 255, 0.96);
   color: var(--text);
   display: flex;
@@ -178,6 +180,108 @@ a {
   backdrop-filter: blur(14px);
   cursor: grab;
   touch-action: none;
+}
+
+.lims-icon-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  box-sizing: border-box;
+  width: 4.75rem;
+  max-height: 100vh;
+  padding: 0.5rem 0.4rem 0.65rem;
+  background: #1b2433;
+  color: #e7edf6;
+  overflow: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.lims-rail-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 2.7rem;
+  margin: 0;
+  padding: 0.35rem 0.35rem 0.3rem;
+  border: 0;
+  border-radius: 8px;
+  background: #f4f7fb;
+  cursor: grab;
+  touch-action: none;
+}
+
+.lims-rail-logo img {
+  display: block;
+  width: 3.7rem;
+  height: auto;
+}
+
+.lims-icon-rail .lims-nav {
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lims-icon-rail .lims-nav-item {
+  width: 2.45rem;
+  height: 2.45rem;
+  padding: 0;
+  border-radius: 8px;
+  justify-content: center;
+  color: #e7edf6;
+}
+
+.lims-icon-rail .lims-nav-icon {
+  width: 2.45rem;
+  height: 2.45rem;
+  border-radius: 8px;
+  background: #2a3548;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e8eef7;
+}
+
+.lims-icon-rail .lims-nav-item:hover .lims-nav-icon {
+  background: #354258;
+}
+
+.lims-icon-rail .lims-nav-item.active .lims-nav-icon {
+  background: #3d4e68;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.lims-nav-dock.is-top .lims-icon-rail {
+  flex-direction: row;
+  align-items: center;
+  width: max-content;
+  max-height: none;
+  max-width: 100vw;
+  padding: 0.4rem 0.55rem;
+}
+
+.lims-nav-dock.is-top .lims-rail-logo {
+  width: auto;
+}
+
+.lims-nav-dock.is-top .lims-icon-rail .lims-nav {
+  flex: none;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  width: max-content;
+}
+
+.lims-nav-dock.is-top .lims-icon-rail .lims-nav-item,
+.lims-nav-dock.is-right .lims-icon-rail .lims-nav-item {
+  flex-direction: row;
+  width: 2.45rem;
+  padding: 0;
+  font-size: inherit;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .lims-sidebar a,
@@ -192,6 +296,8 @@ a {
   align-items: center;
   align-content: center;
   gap: 0.35rem 0.5rem;
+  width: min(960px, 100vw);
+  max-height: 46vh;
 }
 
 .lims-nav-dock.is-top .lims-nav,
@@ -876,6 +982,7 @@ a {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 100vh;
 }
 
 .lims-shell.is-left .lims-main {

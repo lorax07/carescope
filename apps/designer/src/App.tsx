@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
@@ -30,21 +30,21 @@ function useLocalClock(): Date {
 
 type OpenEdge = "left" | "right" | "top";
 
-const LAUNCHER = 52;
-const EDGE_PAD = 16;
+const LAUNCHER = 64;
+const EDGE_PAD = 0;
 
 const MAGNET = 168;
 
-function edgeDistances(x: number, y: number, dockWidth: number, width: number): Record<OpenEdge, number> {
+function pointerDistances(x: number, y: number, width: number): Record<OpenEdge, number> {
   return {
     top: Math.max(0, y),
     left: Math.max(0, x),
-    right: Math.max(0, width - (x + dockWidth)),
+    right: Math.max(0, width - x),
   };
 }
 
-function nearestEdge(x: number, y: number, dockWidth: number, width: number, current: OpenEdge): OpenEdge {
-  const distances = edgeDistances(x, y, dockWidth, width);
+function nearestEdge(x: number, y: number, width: number, current: OpenEdge): OpenEdge {
+  const distances = pointerDistances(x, y, width);
   let edge = current;
   let best = distances[current];
   for (const side of ["left", "right", "top"] as const) {
@@ -59,26 +59,6 @@ function nearestEdge(x: number, y: number, dockWidth: number, width: number, cur
 function snappedPos(edge: OpenEdge, width: number, dockWidth: number): { x: number; y: number } {
   if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - dockWidth), y: EDGE_PAD };
   return { x: EDGE_PAD, y: EDGE_PAD };
-}
-
-function panelPlacement(edge: OpenEdge, x: number, y: number, width: number, height: number): CSSProperties {
-  if (edge === "left" || edge === "right") {
-    const room = Math.max(180, height - y - 12);
-    return {
-      top: 0,
-      width: 280,
-      maxHeight: room,
-      ...(edge === "left" ? { left: 0 } : { right: 0 }),
-    };
-  }
-  const room = Math.max(280, width - x - 12);
-  return {
-    top: 0,
-    left: 0,
-    width: room,
-    maxWidth: room,
-    maxHeight: Math.round(height * 0.46),
-  };
 }
 
 function utcOffsetLabel(date: Date): string {
@@ -230,7 +210,7 @@ function AppFrame() {
   const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [navOpen, setNavOpen] = useState(true);
+  const [navOpen, setNavOpen] = useState(false);
   const [navPos, setNavPos] = useState({ x: EDGE_PAD, y: EDGE_PAD });
   const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
   const [docked, setDocked] = useState(true);
@@ -238,16 +218,14 @@ function AppFrame() {
   const [settling, setSettling] = useState(false);
   const [nearEdge, setNearEdge] = useState(false);
   const navPosRef = useRef(navPos);
-  const navOpenRef = useRef(true);
   const openEdgeRef = useRef<OpenEdge>("left");
   const draggingRef = useRef(false);
   const settleTimer = useRef(0);
   navPosRef.current = navPos;
-  navOpenRef.current = navOpen;
   openEdgeRef.current = openEdge;
   draggingRef.current = dragging;
   const dockRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
+  const suppressClick = useRef(false);
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
   const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const now = useLocalClock();
@@ -269,6 +247,15 @@ function AppFrame() {
 
   useEffect(() => () => window.clearTimeout(settleTimer.current), []);
 
+  const [dockTick, setDockTick] = useState(0);
+  useEffect(() => {
+    const dock = dockRef.current;
+    if (!dock) return;
+    const observer = new ResizeObserver(() => setDockTick((tick) => tick + 1));
+    observer.observe(dock);
+    return () => observer.disconnect();
+  }, [navOpen, edge]);
+
   useLayoutEffect(() => {
     if (dragging || settling || !docked) {
       setInsets((current) =>
@@ -280,41 +267,20 @@ function AppFrame() {
     }
     const dock = dockRef.current;
     if (!dock) return;
-    const gap = 12;
-    if (!navOpen) {
-      const box = dock.getBoundingClientRect();
-      const next =
-        edge === "left"
-          ? { left: Math.ceil(box.right + gap), right: 0, top: 0, bottom: 0 }
-          : edge === "right"
-            ? { left: 0, right: Math.ceil(window.innerWidth - box.left + gap), top: 0, bottom: 0 }
-            : { left: 0, right: 0, top: Math.ceil(box.bottom + gap), bottom: 0 };
-      setInsets((current) =>
-        current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
-          ? current
-          : next,
-      );
-      return;
-    }
-    const panel = panelRef.current;
-    if (!panel) return;
-    const logo = dock.getBoundingClientRect();
-    const menu = panel.getBoundingClientRect();
-    const left = Math.min(logo.left, menu.left);
-    const right = Math.max(logo.right, menu.right);
-    const bottom = Math.max(logo.bottom, menu.bottom);
+    const gap = navOpen ? 12 : 0;
+    const box = dock.getBoundingClientRect();
     const next =
       edge === "left"
-        ? { left: Math.ceil(right + gap), right: 0, top: 0, bottom: 0 }
+        ? { left: Math.ceil(box.right + gap), right: 0, top: 0, bottom: 0 }
         : edge === "right"
-          ? { left: 0, right: Math.ceil(window.innerWidth - left + gap), top: 0, bottom: 0 }
-          : { left: 0, right: 0, top: Math.ceil(bottom + gap), bottom: 0 };
+          ? { left: 0, right: Math.ceil(window.innerWidth - box.left + gap), top: 0, bottom: 0 }
+          : { left: 0, right: 0, top: Math.ceil(box.bottom + gap), bottom: 0 };
     setInsets((current) =>
       current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
         ? current
         : next,
     );
-  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked]);
+  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
     if (!docked || dragging || settling) return;
@@ -325,31 +291,7 @@ function AppFrame() {
       navPosRef.current = next;
       return next;
     });
-  }, [navOpen, edge, viewport.width, docked, dragging, settling]);
-
-  function placeOpen(from: { x: number; y: number }) {
-    const dockBox = dockRef.current?.getBoundingClientRect();
-    const dockWidth = dockBox?.width ?? LAUNCHER;
-    const nextEdge = nearestEdge(from.x, from.y, dockWidth, window.innerWidth, openEdgeRef.current);
-    const next = snappedPos(nextEdge, window.innerWidth, dockWidth);
-    openEdgeRef.current = nextEdge;
-    navPosRef.current = next;
-    setOpenEdge(nextEdge);
-    setNavPos(next);
-    setNavOpen(true);
-    setDocked(true);
-    setDragging(false);
-    setSettling(false);
-    setNearEdge(false);
-  }
-
-  function placeClosed() {
-    setNavOpen(false);
-    setDocked(true);
-    setDragging(false);
-    setSettling(false);
-    setNearEdge(false);
-  }
+  }, [navOpen, edge, viewport.width, docked, dragging, settling, dockTick]);
 
   function armDocked() {
     window.clearTimeout(settleTimer.current);
@@ -361,13 +303,13 @@ function AppFrame() {
     }, 480);
   }
 
-  function finishDrag(from: { x: number; y: number }) {
+  function finishDrag(pointer: { x: number; y: number }) {
     setDragging(false);
     draggingRef.current = false;
     const dockBox = dockRef.current?.getBoundingClientRect();
     const dockWidth = dockBox?.width ?? LAUNCHER;
-    const candidate = nearestEdge(from.x, from.y, dockWidth, window.innerWidth, openEdgeRef.current);
-    const gap = edgeDistances(from.x, from.y, dockWidth, window.innerWidth)[candidate];
+    const candidate = nearestEdge(pointer.x, pointer.y, window.innerWidth, openEdgeRef.current);
+    const gap = pointerDistances(pointer.x, pointer.y, window.innerWidth)[candidate];
     if (gap > MAGNET) {
       window.clearTimeout(settleTimer.current);
       setDocked(false);
@@ -402,15 +344,40 @@ function AppFrame() {
     requestAnimationFrame(() => requestAnimationFrame(seat));
   }
 
-  function beginNavDrag(event: ReactPointerEvent<HTMLElement>) {
+  function returnToLastEdge() {
+    const side = openEdgeRef.current;
+    const measured = dockRef.current?.offsetWidth ?? LAUNCHER;
+    const next = snappedPos(side, window.innerWidth, measured);
+    const current = navPosRef.current;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const same = Math.abs(next.x - current.x) < 1 && Math.abs(next.y - current.y) < 1;
+    if (reduce || same) {
+      navPosRef.current = next;
+      setNavPos(next);
+      setSettling(false);
+      setDocked(true);
+      setNearEdge(false);
+      return;
+    }
+    setSettling(true);
+    navPosRef.current = next;
+    setNavPos(next);
+    armDocked();
+  }
+
+  function beginNavDrag(event: ReactPointerEvent<HTMLElement>, options?: { toggle?: boolean }) {
     if (event.button !== 0) return;
-    event.preventDefault();
+    const target = event.target as HTMLElement;
+    if (!target.closest("a")) event.preventDefault();
     const startX = event.clientX;
     const startY = event.clientY;
     const origin = navPosRef.current;
-    const wasOpen = navOpenRef.current;
     let moved = false;
+    let pointerX = startX;
+    let pointerY = startY;
     function move(ev: { clientX: number; clientY: number }) {
+      pointerX = ev.clientX;
+      pointerY = ev.clientY;
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
       if (!moved) {
@@ -425,13 +392,12 @@ function AppFrame() {
       const bounds = dockRef.current?.getBoundingClientRect();
       const limitX = window.innerWidth - Math.ceil(bounds?.width ?? LAUNCHER) - 8;
       const limitY = window.innerHeight - Math.ceil(bounds?.height ?? LAUNCHER) - 8;
-      const x = Math.min(Math.max(8, origin.x + dx), Math.max(8, limitX));
-      const y = Math.min(Math.max(8, origin.y + dy), Math.max(8, limitY));
+      const x = Math.min(Math.max(0, origin.x + dx), Math.max(0, limitX));
+      const y = Math.min(Math.max(0, origin.y + dy), Math.max(0, limitY));
       const next = { x, y };
       navPosRef.current = next;
-      const dockWidth = bounds?.width ?? LAUNCHER;
-      const candidate = nearestEdge(x, y, dockWidth, window.innerWidth, openEdgeRef.current);
-      const gap = edgeDistances(x, y, dockWidth, window.innerWidth)[candidate];
+      const candidate = nearestEdge(ev.clientX, ev.clientY, window.innerWidth, openEdgeRef.current);
+      const gap = pointerDistances(ev.clientX, ev.clientY, window.innerWidth)[candidate];
       setNearEdge(gap <= MAGNET);
       setNavPos(next);
     }
@@ -443,11 +409,11 @@ function AppFrame() {
       if (!moved) {
         draggingRef.current = false;
         setDragging(false);
-        if (wasOpen) placeClosed();
-        else placeOpen(origin);
+        if (options?.toggle) setNavOpen((open) => !open);
         return;
       }
-      finishDrag(navPosRef.current);
+      suppressClick.current = true;
+      finishDrag({ x: pointerX, y: pointerY });
     }
     window.addEventListener("pointermove", move);
     window.addEventListener("mousemove", move);
@@ -459,7 +425,25 @@ function AppFrame() {
     const target = event.target as HTMLElement;
     if (target.closest("a, input, select, textarea")) return;
     if (target.closest("button") && !target.closest(".sequence-wordmark")) return;
-    beginNavDrag(event);
+    beginNavDrag(event, { toggle: true });
+  }
+
+  function onRailPointerDown(event: ReactPointerEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    beginNavDrag(event, { toggle: Boolean(target.closest(".lims-rail-logo")) });
+  }
+
+  function onShellClickCapture(event: ReactMouseEvent) {
+    if (!suppressClick.current) return;
+    suppressClick.current = false;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function onWorkspaceClick(event: ReactMouseEvent) {
+    if (docked || draggingRef.current) return;
+    if (dockRef.current?.contains(event.target as Node)) return;
+    returnToLastEdge();
   }
 
   function closeSignup() {
@@ -471,7 +455,7 @@ function AppFrame() {
     }
   }
 
-  const panelStyle = panelPlacement(edge, navPos.x, navPos.y, viewport.width, viewport.height);
+  const operationLinks = labOps.menu.filter((item) => item.enabled && item.label.trim());
 
   return (
     <div
@@ -484,6 +468,8 @@ function AppFrame() {
           "--nav-bottom": `${insets.bottom}px`,
         } as CSSProperties
       }
+      onClickCapture={onShellClickCapture}
+      onClick={onWorkspaceClick}
     >
       <div
         ref={dockRef}
@@ -500,18 +486,45 @@ function AppFrame() {
         }}
       >
         {navOpen ? null : (
-        <button
-          type="button"
-          className="lims-nav-launcher is-logo"
-          aria-expanded={false}
-          aria-label="Expand navigation"
-          onPointerDown={beginNavDrag}
-        >
-          <img src="/sequence-logo.png" alt="" />
-        </button>
-      )}
+          <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
+            <button type="button" className="lims-rail-logo" aria-expanded={false} aria-label="Expand navigation">
+              <img src="/sequence-logo.png" alt="" />
+            </button>
+            <nav className="lims-nav" aria-label="LIMS modules">
+              {operationLinks.map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={labMenuPath(item.view)}
+                  end={item.view === "overview"}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(item.view)}
+                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={item.view} />
+                  </span>
+                </NavLink>
+              ))}
+              {NAV.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
+                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={sectionFromPath(item.to)} />
+                  </span>
+                </NavLink>
+              ))}
+            </nav>
+          </div>
+        )}
       {navOpen ? (
-      <aside ref={panelRef} className="lims-sidebar" style={panelStyle} onPointerDown={onMenuPointerDown}>
+      <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
         <div className="lims-menu-brand">
           <button type="button" className="sequence-wordmark" aria-expanded aria-label="Close navigation">
             <img src="/sequence-logo.png" alt="" />
@@ -574,9 +587,7 @@ function AppFrame() {
 
         <nav className="lims-nav" aria-label="LIMS modules">
           <p className="lims-nav-label">Sequence Operations</p>
-          {labOps.menu
-            .filter((item) => item.enabled && item.label.trim())
-            .map((item) => (
+          {operationLinks.map((item) => (
               <NavLink
                 key={item.id}
                 to={labMenuPath(item.view)}
