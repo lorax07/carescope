@@ -144,7 +144,7 @@ const SOLVE_IMAGES: Record<string, { src: string; alt: string }> = {
 function TopicInfographic({ id }: { id: Topic["id"] }) {
   if (id === "cost") return <CostInfographic />;
   const image = SOLVE_IMAGES[id];
-  return image ? <img className="lp-solve-supplied-image" src={image.src} alt={image.alt} decoding="async" /> : null;
+  return image ? <img className="lp-solve-supplied-image" src={image.src} alt={image.alt} decoding="sync" /> : null;
 }
 
 function WhatWeSolve() {
@@ -153,6 +153,14 @@ function WhatWeSolve() {
   const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
   const active = TOPICS[activeIndex] ?? TOPICS[0];
   const suppliedImage = active.id !== "cost";
+
+  useEffect(() => {
+    Object.values(SOLVE_IMAGES).forEach(({ src }) => {
+      const image = new Image();
+      image.src = src;
+      void image.decode().catch(() => undefined);
+    });
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;

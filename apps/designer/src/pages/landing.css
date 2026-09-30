@@ -1266,7 +1266,7 @@
 
 .lp-solve-supplied-image {
   display: block;
-  width: min(100%, 29rem);
+  width: min(100%, 24rem);
   height: auto;
   margin: 0 auto;
   border-radius: 14px;
