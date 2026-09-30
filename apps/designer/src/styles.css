@@ -69,6 +69,10 @@ a {
   background: var(--bg);
 }
 
+.lims-shell.is-nav-dragging {
+  user-select: none;
+}
+
 .lims-nav-dock {
   position: fixed;
   z-index: 30;

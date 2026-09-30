@@ -423,6 +423,7 @@ function AppFrame() {
         return;
       }
       suppressClick.current = true;
+      window.getSelection()?.removeAllRanges();
       finishDrag({ x: pointerX, y: pointerY });
     }
     window.addEventListener("pointermove", move);
@@ -502,7 +503,7 @@ function AppFrame() {
               <NavIcon name="overview" />
             </button>
             <nav className="lims-nav" aria-label="LIMS modules">
-              {operationLinks.map((item) => (
+              {operationLinks.filter((item) => item.view !== "overview").map((item) => (
                 <NavLink
                   key={item.id}
                   to={labMenuPath(item.view)}
