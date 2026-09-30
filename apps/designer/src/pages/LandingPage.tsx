@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
@@ -44,7 +44,6 @@ type Topic = {
   label: string;
   description: string;
   visual: string;
-  imagePosition: string;
   outcome: string;
   icon: string;
 };
@@ -55,7 +54,6 @@ const TOPICS: Topic[] = [
     label: "The Cost of Change",
     description: "Even small changes can turn into large, time-consuming projects—with multiple teams, systems and approvals.",
     visual: "Illustrative annual cost model",
-    imagePosition: "0% center",
     outcome: "Make changes in hours, not weeks.",
     icon: "↯",
   },
@@ -64,7 +62,6 @@ const TOPICS: Topic[] = [
     label: "Operational Friction",
     description: "Disconnected systems, manual steps and waiting points slow your lab down and increase the risk of errors.",
     visual: "Traditional LIMS compared with Sequence",
-    imagePosition: "25% center",
     outcome: "Keep your workflow moving.",
     icon: "⌘",
   },
@@ -73,7 +70,6 @@ const TOPICS: Topic[] = [
     label: "Consultant Dependency",
     description: "Traditional LIMS changes require multiple teams and external consultants, adding time, cost and complexity.",
     visual: "Traditional lifecycle compared with Sequence",
-    imagePosition: "50% center",
     outcome: "Put control back in your hands.",
     icon: "♟",
   },
@@ -82,7 +78,6 @@ const TOPICS: Topic[] = [
     label: "Integration Complexity",
     description: "Multiple systems, interfaces and vendors create a fragile ecosystem that’s hard to manage and scale.",
     visual: "Legacy LIMS compared with Sequence",
-    imagePosition: "75% center",
     outcome: "Fewer integrations. Greater control.",
     icon: "⌕",
   },
@@ -91,14 +86,155 @@ const TOPICS: Topic[] = [
     label: "Compliance Friction",
     description: "Every change requires documentation, approvals and validation—slowing down innovation and operations.",
     visual: "Controlled and compliant by design",
-    imagePosition: "100% center",
     outcome: "Stay compliant, move faster.",
     icon: "♢",
   },
 ];
 
+const FLOW = ["Order", "Accession", "Testing", "Result", "Report"];
+const CONSULTANT_FLOW = ["Lab request", "Consultant", "IT", "Project mgr", "Testing", "Validation", "Deployment"];
+const CONFIG_FLOW = ["Draft", "Review", "Test", "Approve", "Deploy"];
+const COMPLIANCE_FLOW = ["Change request", "Test", "Validate", "Document", "Approve", "Release"];
+const INTEGRATIONS = ["EMR", "Instruments", "Billing", "Reporting", "Other systems", "Portals", "Files"];
+
+function Flow({ items, tone = "traditional" }: { items: string[]; tone?: "traditional" | "sequence" }) {
+  return (
+    <div className={`lp-native-flow is-${tone}`}>
+      {items.map((item, index) => (
+        <div className="lp-native-flow-item" key={item}>
+          <span>{index + 1}</span>
+          <b>{item}</b>
+          {index < items.length - 1 ? <i aria-hidden="true">→</i> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CostInfographic() {
+  const costs = [
+    ["Vendor customization", "$142K", 49],
+    ["Integrations", "$61K", 21],
+    ["Internal IT", "$38K", 13],
+    ["Lab staff", "$27K", 9],
+    ["Validation/QA", "$19K", 7],
+  ] as const;
+  return (
+    <div className="lp-native-cost">
+      <div className="lp-native-total">
+        <span>Illustrative annual cost model</span>
+        <strong>$287K</strong>
+        <small>Total annual cost of change</small>
+      </div>
+      <div className="lp-native-bars">
+        {costs.map(([label, value, percent], index) => (
+          <div className={`lp-native-bar is-${index + 1}`} key={label}>
+            <div>
+              <b>{label}</b>
+              <span>{value} <small>({percent}%)</small></span>
+            </div>
+            <i style={{ width: `${percent * 1.82}%` }} />
+          </div>
+        ))}
+      </div>
+      <p>Figures are an illustrative annual cost model, not an industry average.</p>
+    </div>
+  );
+}
+
+function OperationalInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={FLOW} />
+        <p className="lp-native-warning">Workarounds · handoffs · waiting</p>
+      </section>
+      <section>
+        <h5>Sequence</h5>
+        <Flow items={FLOW} tone="sequence" />
+        <p className="lp-native-good">A unified workflow with no disconnected handoffs</p>
+      </section>
+    </div>
+  );
+}
+
+function ConsultantInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={CONSULTANT_FLOW} />
+        <p className="lp-native-warning">Multiple handoffs. Extended timelines.</p>
+      </section>
+      <section>
+        <h5>Sequence configuration lifecycle</h5>
+        <Flow items={CONFIG_FLOW} tone="sequence" />
+        <p className="lp-native-good">The lab retains control from draft through deployment</p>
+      </section>
+    </div>
+  );
+}
+
+function IntegrationMap({ sequence = false }: { sequence?: boolean }) {
+  return (
+    <div className={`lp-native-hub${sequence ? " is-sequence" : ""}`}>
+      <strong>{sequence ? "Sequence" : "LIMS"}</strong>
+      {INTEGRATIONS.map((item, index) => (
+        <span key={item} style={{ "--hub-index": index } as CSSProperties}>{item}</span>
+      ))}
+    </div>
+  );
+}
+
+function IntegrationInfographic() {
+  return (
+    <div className="lp-native-comparison lp-native-integration">
+      <section>
+        <h5>Legacy LIMS</h5>
+        <IntegrationMap />
+      </section>
+      <section>
+        <h5>Sequence</h5>
+        <IntegrationMap sequence />
+        <p className="lp-native-good">Reduce integration dependency</p>
+      </section>
+    </div>
+  );
+}
+
+function ComplianceInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={COMPLIANCE_FLOW} />
+        <p className="lp-native-warning">Slow, manual and high risk</p>
+      </section>
+      <section>
+        <h5>Sequence · controlled and compliant by design</h5>
+        <Flow items={COMPLIANCE_FLOW} tone="sequence" />
+        <div className="lp-native-features">
+          {["Audit trail", "Electronic signatures", "Versioning", "Traceability"].map((item) => <span key={item}>{item}</span>)}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TopicInfographic({ id }: { id: Topic["id"] }) {
+  if (id === "cost") return <CostInfographic />;
+  if (id === "friction") return <OperationalInfographic />;
+  if (id === "consultants") return <ConsultantInfographic />;
+  if (id === "integration") return <IntegrationInfographic />;
+  return <ComplianceInfographic />;
+}
+
 function WhatWeSolve() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [activeId, setActiveId] = useState(TOPICS[0].id);
+  const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
+  const active = TOPICS[activeIndex] ?? TOPICS[0];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -128,6 +264,18 @@ function WhatWeSolve() {
     };
   }, []);
 
+  function moveTab(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    let next = activeIndex;
+    if (event.key === "ArrowRight") next = (activeIndex + 1) % TOPICS.length;
+    if (event.key === "ArrowLeft") next = (activeIndex - 1 + TOPICS.length) % TOPICS.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = TOPICS.length - 1;
+    setActiveId(TOPICS[next].id);
+    document.getElementById(`solve-tab-${TOPICS[next].id}`)?.focus();
+  }
+
   return (
     <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
       <div className="lp-section-inner lp-solve-board">
@@ -140,41 +288,50 @@ function WhatWeSolve() {
           </p>
         </div>
 
-        <nav className="lp-solve-jumps" aria-label="What we solve topics">
+        <div className="lp-solve-jumps" role="tablist" aria-label="What we solve topics" onKeyDown={moveTab}>
           {TOPICS.map((item) => (
-            <a key={item.id} href={`#solve-${item.id}`}>
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`solve-tab-${item.id}`}
+              aria-selected={item.id === active.id}
+              aria-controls="solve-active-panel"
+              tabIndex={item.id === active.id ? 0 : -1}
+              className={item.id === active.id ? "is-on" : undefined}
+              onClick={() => setActiveId(item.id)}
+            >
               {item.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="lp-solve-grid">
-          {TOPICS.map((item, index) => (
-            <article className="lp-solve-card" id={`solve-${item.id}`} key={item.id}>
-              <div className="lp-solve-card-head">
-                <span>{index + 1}</span>
-                <h3>{item.label}</h3>
-                <p>{item.description}</p>
-              </div>
-              <figure className="lp-solve-visual">
-                <figcaption>{item.visual}</figcaption>
-                <div
-                  className="lp-solve-visual-image"
-                  role="img"
-                  aria-label={`${item.label} infographic from the supplied reference`}
-                  style={{ backgroundPosition: item.imagePosition }}
-                />
-              </figure>
-              <div className="lp-solve-outcome">
-                <span aria-hidden="true">{item.icon}</span>
-                <div>
-                  <p>How Sequence helps</p>
-                  <h4>{item.outcome}</h4>
-                </div>
-              </div>
-            </article>
+            </button>
           ))}
         </div>
+
+        <article
+          className="lp-solve-card"
+          id="solve-active-panel"
+          role="tabpanel"
+          aria-labelledby={`solve-tab-${active.id}`}
+          key={active.id}
+        >
+          <div className="lp-solve-card-head">
+            <span>{activeIndex + 1}</span>
+            <div>
+              <h3>{active.label}</h3>
+              <p>{active.description}</p>
+            </div>
+          </div>
+          <figure className="lp-solve-visual">
+            <figcaption>{active.visual}</figcaption>
+            <TopicInfographic id={active.id} />
+          </figure>
+          <div className="lp-solve-outcome">
+            <span aria-hidden="true">{active.icon}</span>
+            <div>
+              <p>How Sequence helps</p>
+              <h4>{active.outcome}</h4>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
   );
