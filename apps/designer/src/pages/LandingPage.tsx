@@ -1,40 +1,13 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
+import { MARKETING_MODULES } from "./marketingModules";
+import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
 export function LandingPage() {
   return (
     <div className="lp-page">
-        <header className="lp-nav">
-          <div className="lp-nav-bar">
-          <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
-            <img
-              className="lp-header-logo"
-              src="/carescope-header-logo.png"
-              width={224}
-              height={56}
-              alt="CareScope. Building Better Healthcare for Everyone."
-            />
-            <span className="lp-logo-rule" aria-hidden="true" />
-            <img className="lp-logo-sequence" src="/sequence-logo.png" width={1400} height={318} alt="Sequence" />
-          </Link>
-
-          <div className="lp-nav-actions">
-            <nav className="lp-nav-links" aria-label="Primary">
-              <a href="#capabilities">What we solve</a>
-              <a href="#modules">Modules</a>
-              <a href="#compliance">About</a>
-            </nav>
-            <span className="lp-nav-divider" aria-hidden="true" />
-            <Link to="/intrasite" className="lp-nav-text">
-              Sign in
-            </Link>
-            <Link to="/app?signup=1" className="lp-btn lp-btn-demo">
-              Request a Demo
-            </Link>
-          </div>
-          </div>
-        </header>
+        <SiteHeader />
 
         <div className="lp">
         <PlatformBand />
@@ -99,9 +72,9 @@ type Topic = {
 
 const WEEK = 7 * 24;
 
-const REPORT: ChangeExample = {
-  id: "report",
-  name: "New report template",
+const CUSTOM_CHANGE: ChangeExample = {
+  id: "change",
+  name: "Custom change",
   cost: 2000,
   costLabel: "$2,000",
   hours: 3 * WEEK,
@@ -112,26 +85,39 @@ const REPORT: ChangeExample = {
   sequenceTimeLabel: "1 hour",
 };
 
+const INTERFACE_CHANGE: ChangeExample = {
+  id: "interface",
+  name: "Custom instrument connection",
+  cost: 5000,
+  costLabel: "About $3,000–$5,000",
+  hours: 2 * WEEK,
+  timeLabel: "1–2 weeks",
+  sequenceCost: null,
+  sequenceCostLabel: "Not published",
+  sequenceHours: null,
+  sequenceTimeLabel: "Not published",
+};
+
 const TOPICS: Topic[] = [
   {
     id: "cost",
     label: "The Cost of Change",
     kicker: "Custom change",
-    title: "Total cost of a priced change",
+    title: "Total cost of one custom change",
     emphasis: "cost",
     sources: [1],
-    note: "Each total is one custom change from CleverLAB. The cost bar is the consultant fee, which is the whole published price. The article says every change also needs project scope. It does not price internal IT, the project manager, or lab staff.",
-    examples: [REPORT],
+    note: "The total is the published fee for one custom change. That fee is drawn on Consultants. Internal IT team and Project manager/Lab admin take part, and the source does not price them, so those bands are named and left unpriced. On Sequence the same change is $0.",
+    examples: [CUSTOM_CHANGE],
   },
   {
     id: "friction",
     label: "Operational Friction",
     kicker: "Custom change",
-    title: "Total calendar time for that change",
+    title: "Total calendar time for one custom change",
     emphasis: "time",
     sources: [1],
-    note: "The time total is calendar time for the whole change, not a sum of hours from each function. A range is drawn to its long end and labeled in full. Sequence is the lab configuring the change itself.",
-    examples: [REPORT],
+    note: "The time total is calendar time for the whole change, not a sum of hours from each team. A range is drawn to its long end and labeled in full. Sequence is one hour when the laboratory configures the change.",
+    examples: [CUSTOM_CHANGE],
   },
   {
     id: "consultants",
@@ -140,78 +126,36 @@ const TOPICS: Topic[] = [
     title: "The consultant fee is the published total",
     emphasis: "cost",
     sources: [1],
-    note: "CleverLAB prices a custom change as a programmer’s fee. That fee is the cost total. On Sequence the same change is self-configuration, so the consultant fee is $0.",
-    examples: [REPORT],
+    note: "The source prices a custom change as a programmer’s fee. That fee is the Consultants band. The other two teams are on the change and are not given a dollar slice. On Sequence the published total for this change is $0.",
+    examples: [CUSTOM_CHANGE],
   },
   {
     id: "integration",
     label: "Integration Complexity",
-    kicker: "Custom interface",
-    title: "Total cost and time to connect an instrument",
+    kicker: "Custom change",
+    title: "Total cost of a custom instrument connection",
     emphasis: "cost",
     sources: [2],
-    note: "Bika prices a new interface as vendor customisation, built with help from the lab during testing. The cost total is that vendor fee. The time total is one to two weeks, including testing. An interface already in the catalogue is free, and its turn-on time is not published.",
-    examples: [
-      {
-        id: "uni",
-        name: "Unidirectional interface",
-        cost: 3000,
-        costLabel: "About $3,000",
-        hours: 2 * WEEK,
-        timeLabel: "1–2 weeks",
-        sequenceCost: null,
-        sequenceCostLabel: "Not published",
-        sequenceHours: null,
-        sequenceTimeLabel: "Not published",
-      },
-      {
-        id: "bi",
-        name: "Bidirectional interface",
-        cost: 5000,
-        costLabel: "About $5,000",
-        hours: 2 * WEEK,
-        timeLabel: "1–2 weeks",
-        sequenceCost: null,
-        sequenceCostLabel: "Not published",
-        sequenceHours: null,
-        sequenceTimeLabel: "Not published",
-      },
-      {
-        id: "exists",
-        name: "Already in the catalogue",
-        cost: 0,
-        costLabel: "$0",
-        hours: null,
-        timeLabel: "Not published",
-        sequenceCost: 0,
-        sequenceCostLabel: "$0",
-        sequenceHours: null,
-        sequenceTimeLabel: "Not published",
-      },
-    ],
+    note: "Bika prices a new instrument connection as vendor customisation: about $3,000 one way and about $5,000 both ways, over 1–2 weeks, with help from the lab during testing. The bar reaches the long end of that range. The fee sits with the vendor. The other two teams are not itemized.",
+    examples: [INTERFACE_CHANGE],
   },
   {
     id: "compliance",
     label: "Compliance Friction",
-    kicker: "Custom report",
-    title: "A new report template, priced as one change",
+    kicker: "Custom change",
+    title: "One custom change, on the compliance calendar",
     emphasis: "time",
     sources: [1],
-    note: "CleverLAB’s priced custom report is a new report template: $2,000 and 2–3 weeks with a programmer, or $0 and 1 hour when the lab configures it. The article does not publish a second price for a compliance-only tweak.",
-    examples: [REPORT],
+    note: "The source does not publish a separate price for a compliance-only tweak. This is the same custom change: a published fee and 2–3 weeks, or $0 and 1 hour when the laboratory configures it.",
+    examples: [CUSTOM_CHANGE],
   },
 ];
 
-const ROLES = [
+const TEAMS = [
   { id: "consultants", label: "Consultants" },
-  { id: "it", label: "Internal IT" },
-  { id: "pm", label: "Project manager" },
-  { id: "lab", label: "Lab staff" },
+  { id: "it", label: "Internal IT team" },
+  { id: "pm", label: "Project manager/Lab admin" },
 ] as const;
-
-function money(value: number): string {
-  return `$${value.toLocaleString("en-US")}`;
-}
 
 function stackWidth(value: number | null, max: number): string {
   if (value == null || max <= 0 || value <= 0) return "0%";
@@ -233,29 +177,44 @@ function StackBar({ segments, max }: { segments: StackSegment[]; max: number }) 
   );
 }
 
-function traditionalRoles(example: ChangeExample): StackSegment[] {
-  if (example.cost <= 0) return [];
-  return [{ id: "consultants", label: "Consultants", value: example.cost }];
-}
+type TeamBand = {
+  id: string;
+  label: string;
+  value: number;
+  display: string;
+  unpublished?: boolean;
+};
 
-function sequenceRoles(example: ChangeExample): StackSegment[] {
-  if (example.sequenceCost == null || example.sequenceCost <= 0) return [];
-  return [{ id: "lab", label: "Lab staff", value: example.sequenceCost }];
-}
-
-function roleCosts(example: ChangeExample): { id: string; label: string; cost: string }[] {
+function traditionalBands(example: ChangeExample): TeamBand[] {
   return [
-    { id: "consultants", label: "Consultants", cost: example.costLabel },
-    { id: "it", label: "Internal IT", cost: "Not published" },
-    { id: "pm", label: "Project manager", cost: "Not published" },
-    { id: "lab", label: "Lab staff", cost: example.sequenceCostLabel },
+    { id: "consultants", label: "Consultants", value: example.cost, display: example.costLabel },
+    { id: "it", label: "Internal IT team", value: 0, display: "Not published", unpublished: true },
+    { id: "pm", label: "Project manager/Lab admin", value: 0, display: "Not published", unpublished: true },
   ];
+}
+
+function sequenceBands(example: ChangeExample): TeamBand[] {
+  const unpublished = example.sequenceCost == null;
+  const display = unpublished ? "Not published" : example.sequenceCostLabel;
+  return TEAMS.map((team) => ({
+    id: team.id,
+    label: team.label,
+    value: 0,
+    display,
+    unpublished,
+  }));
 }
 
 function timeSegments(hours: number | null, sequence: boolean): StackSegment[] {
   if (hours == null || hours <= 0) return [];
-  if (sequence) return [{ id: "lab", label: "Lab staff", value: hours }];
-  return [{ id: "calendar", label: "", value: hours }];
+  return [{ id: sequence ? "sequence" : "calendar", label: "", value: hours }];
+}
+
+const BAND_PX = 148;
+
+function bandHeight(value: number, max: number): string {
+  if (max <= 0 || value <= 0) return "0px";
+  return `${Math.max(72, Math.round((value / max) * BAND_PX))}px`;
 }
 
 function VerticalRoleStack({
@@ -266,23 +225,29 @@ function VerticalRoleStack({
 }: {
   total: string;
   caption: string;
-  segments: StackSegment[];
+  segments: TeamBand[];
   max: number;
 }) {
-  const sum = segments.reduce((totalValue, segment) => totalValue + segment.value, 0);
-  const pct = max <= 0 || sum <= 0 ? 0 : Math.max(18, Math.min(100, (sum / max) * 100));
-  const quiet = total === "Not published";
+  const quiet = total === "Not published" || total === "$0";
   return (
     <div className="lp-vcol">
       <strong className={quiet ? "is-quiet" : undefined}>{total}</strong>
       <div className="lp-vplot" aria-hidden="true">
-        <div className="lp-vbar" style={pct === 0 ? undefined : { height: `${pct}%` }}>
-          {segments.map((segment) => (
-            <i key={segment.id} className={`is-${segment.id}`} style={{ flex: `${segment.value} 1 0` }}>
-              <span>{segment.label}</span>
-              <b>{money(segment.value)}</b>
-            </i>
-          ))}
+        <div className="lp-vstack">
+          {segments.map((segment) => {
+            const zero = segment.display === "$0";
+            const open = Boolean(segment.unpublished) || zero;
+            return (
+              <i
+                key={segment.id}
+                className={`is-${segment.id}${segment.unpublished ? " is-unpublished" : ""}${zero ? " is-zero" : ""}`}
+                style={open ? undefined : { height: bandHeight(segment.value, max) }}
+              >
+                <span>{segment.label}</span>
+                <b>{segment.display}</b>
+              </i>
+            );
+          })}
         </div>
       </div>
       <em>{caption}</em>
@@ -299,8 +264,8 @@ function ChangeInfographic({ topic }: { topic: Topic }) {
   const summary = [
     topic.title,
     ...topic.examples.map((item) => {
-      const roles = roleCosts(item)
-        .map((role) => `${role.label} ${role.cost}`)
+      const roles = traditionalBands(item)
+        .map((role) => `${role.label} ${role.display}`)
         .join(", ");
       return `${item.name}: ${roles}. Time ${item.timeLabel}, Sequence ${item.sequenceTimeLabel}`;
     }),
@@ -314,7 +279,7 @@ function ChangeInfographic({ topic }: { topic: Topic }) {
           <h3 className="lp-compare-change">{topic.title}</h3>
         </div>
         <ul className="lp-info-legend">
-          {ROLES.map((role) => (
+          {TEAMS.map((role) => (
             <li key={role.id}>
               <i className={`is-${role.id}`} aria-hidden="true" />
               {role.label}
@@ -335,22 +300,22 @@ function ChangeInfographic({ topic }: { topic: Topic }) {
                 <VerticalRoleStack
                   total={example.costLabel}
                   caption="Traditional"
-                  segments={traditionalRoles(example)}
+                  segments={traditionalBands(example)}
                   max={costMax}
                 />
                 <VerticalRoleStack
                   total={example.sequenceCostLabel}
                   caption="Sequence"
-                  segments={sequenceRoles(example)}
+                  segments={sequenceBands(example)}
                   max={costMax}
                 />
               </div>
-              <ul className="lp-role-key">
-                {roleCosts(example).map((role) => (
+              <ul className="lp-role-key" aria-label="Traditional cost by team">
+                {traditionalBands(example).map((role) => (
                   <li key={role.id}>
                     <i className={`is-${role.id}`} aria-hidden="true" />
                     <span>{role.label}</span>
-                    <b className={role.cost === "Not published" ? "is-quiet" : undefined}>{role.cost}</b>
+                    <b className={role.display === "Not published" ? "is-quiet" : undefined}>{role.display}</b>
                   </li>
                 ))}
               </ul>
@@ -478,24 +443,26 @@ function WhatWeSolve() {
 
         <footer className="lp-solve-sources">
           <p>
-            Custom change totals come from CleverLAB. Instrument interfaces come from Bika. The cost total is the
-            published fee. The time total is the published calendar time. The fee sits with the consultant or vendor.
-            Neither source itemizes internal IT, the project manager, or lab staff, so those functions are named and
-            not given a slice of the total. Sequence is the same source’s self-configuration result. Where a source
-            gives a range, the bar reaches the long end and the label shows the range. These figures are not a survey of
+            Each chart is one custom change. Cost totals come from CleverLAB, except the instrument connection, which
+            comes from Bika. The cost total is the published fee, drawn on Consultants. Internal IT team and Project
+            manager/Lab admin are on the change. Neither source prices those two teams, so their bands say “Not
+            published” and are not a slice of the fee. Where Sequence publishes $0, that total is repeated on each team
+            because the source does not split it. The time total is the published calendar time. Where a source gives a
+            range, the bar reaches the long end and the label shows the range. These figures are not a survey of
             Sequence customers.
           </p>
           <ol>
             <li>
-              CleverLAB, Piotr Płonka, “How We Reduced LIMS Costs by 90%,” 1 October 2025. A traditional new report
-              template is $2,000 and 2–3 weeks; self-configuration is $0 and 1 hour.{" "}
+              CleverLAB, Piotr Płonka, “How We Reduced LIMS Costs by 90%,” 1 October 2025. One custom change is $2,000
+              and 2–3 weeks; self-configuration is $0 and 1 hour. The article illustrates that priced change with a new
+              report template.{" "}
               <a href="https://cleverlab.pl/lims_cost_reduction_en.html">cleverlab.pl/lims_cost_reduction_en.html</a>
             </li>
             <li>
               Bika Lab Systems, “A Realistic Timeline and Cost Breakdown for Implementing Bika LIMS.” A unidirectional
-              instrument interface is about $3,000 and a bidirectional interface is about $5,000. Either takes one to
-              two weeks, including testing with help from the lab. An interface that already exists is free. The
-              article does not say how long an existing interface takes to turn on.{" "}
+              instrument connection is about $3,000 and a bidirectional connection is about $5,000. Either takes one to
+              two weeks, including testing with help from the lab. A connection that already exists is free. The
+              article does not say how long an existing connection takes to turn on.{" "}
               <a href="https://www.bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims">
                 bikalims.org/blog/a-realistic-timeline-and-cost-breakdown-for-implementing-bika-lims
               </a>
@@ -558,13 +525,15 @@ function PlatformBand() {
         </p>
         </div>
         <ul className="lp-cols">
-          {PLATFORM_PILLARS.map((pillar) => (
-            <li key={pillar.title}>
-              <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
-                {pillar.icon}
-              </span>
-              <strong>{pillar.title}</strong>
-              <span>{pillar.detail}</span>
+          {MARKETING_MODULES.map((pillar) => (
+            <li key={pillar.slug}>
+              <Link to={`/modules/${pillar.slug}`} className="lp-platform-card">
+                <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
+                  {pillar.icon}
+                </span>
+                <strong>{pillar.title}</strong>
+                <span>{pillar.detail}</span>
+              </Link>
             </li>
           ))}
         </ul>
@@ -640,86 +609,3 @@ function ComplianceSection() {
     </section>
   );
 }
-
-const PLATFORM_PILLARS = [
-  {
-    title: "Sequence Operations",
-    detail: "The core LIMS",
-    tone: "blue",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <path
-          d="M12 5h8M13.5 5v8.2L8.2 24.2A4.2 4.2 0 0 0 12 30h8a4.2 4.2 0 0 0 3.8-5.8L18.5 13.2V5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path d="M11 21h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Instruments",
-    detail: "Connect your instruments to Sequence",
-    tone: "green",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <rect x="6" y="8" width="14" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M10 13h6M10 17h6M20 12h6M20 16h6M20 20h4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Compliance",
-    detail: "This is a quality and Compliance module",
-    tone: "blue",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <path
-          d="M16 5.5 7.5 9v6.2c0 5.2 3.4 8.8 8.5 10.8 5.1-2 8.5-5.6 8.5-10.8V9L16 5.5Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-        <path d="m12.2 16.2 2.6 2.6 5-5.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Client",
-    detail: "This is an RCM for accounts, pipeline, and lab work",
-    tone: "violet",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <circle cx="16" cy="11" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M9.5 23.5c1.2-3 3.5-4.5 6.5-4.5s5.3 1.5 6.5 4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M22 8.5h5M24.5 6v5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Revenue",
-    detail: "This is a robust revenue Cycle management system",
-    tone: "amber",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <rect x="8" y="5.5" width="16" height="21" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-        <path d="M12 12h8M12 16h8M12 20h5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Sequence Insights",
-    detail: "Overall business data, with a chat that answers from the text provided",
-    tone: "cyan",
-    icon: (
-      <svg viewBox="0 0 32 32" width="28" height="28">
-        <path d="M7 24V14M13 24V8M19 24v-6M25 24V11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-] as const;
-
