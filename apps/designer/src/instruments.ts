@@ -8,6 +8,8 @@ export type InstrumentDoc = {
 
 export type InstrumentRecord = {
   id: string;
+  clientId: string;
+  labId: string;
   name: string;
   model: string;
   status: "Online" | "Idle" | "Cal due" | "Offline";
@@ -27,6 +29,8 @@ const EVENT = "carescope-instruments";
 export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   {
     id: "inst-hplc",
+    clientId: "client-apex",
+    labId: "lab-north",
     name: "Agilent 1260 HPLC",
     model: "1260 Infinity II",
     status: "Online",
@@ -45,6 +49,8 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
   {
     id: "inst-orbitrap",
+    clientId: "client-apex",
+    labId: "lab-north",
     name: "Thermo Orbitrap Exploris",
     model: "Exploris 120",
     status: "Idle",
@@ -62,6 +68,8 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
   {
     id: "inst-bact",
+    clientId: "client-apex",
+    labId: "lab-north",
     name: "BioMérieux BacT/ALERT",
     model: "BacT/ALERT 3D",
     status: "Online",
@@ -79,6 +87,8 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
   {
     id: "inst-titrando",
+    clientId: "client-apex",
+    labId: "lab-east",
     name: "Metrohm Titrando 907",
     model: "907 Titrando",
     status: "Cal due",
@@ -93,6 +103,8 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
   {
     id: "inst-icp",
+    clientId: "client-apex",
+    labId: "lab-north",
     name: "Agilent 7900 ICP-MS",
     model: "7900",
     status: "Online",
@@ -110,6 +122,8 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
   {
     id: "inst-ftir",
+    clientId: "client-apex",
+    labId: "lab-east",
     name: "Thermo Nicolet FTIR",
     model: "iS50",
     status: "Idle",
@@ -129,7 +143,13 @@ function readAdded(): InstrumentRecord[] {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as InstrumentRecord[];
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed)
+      ? parsed.map((item) => ({
+          ...item,
+          clientId: item.clientId ?? "client-apex",
+          labId: item.labId ?? (item.site?.toLowerCase().includes("east") ? "lab-east" : "lab-north"),
+        }))
+      : [];
   } catch {
     return [];
   }
@@ -158,9 +178,13 @@ export function addInstrument(input: {
   model: string;
   interfaceType: string;
   site: string;
+  clientId?: string;
+  labId?: string;
 }): InstrumentRecord {
   const record: InstrumentRecord = {
     id: `inst-${Date.now()}`,
+    clientId: input.clientId ?? "client-apex",
+    labId: input.labId ?? (input.site.toLowerCase().includes("east") ? "lab-east" : "lab-north"),
     name: input.name.trim(),
     model: input.model.trim(),
     status: "Idle",

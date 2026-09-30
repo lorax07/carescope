@@ -211,6 +211,10 @@ export function useSamples(): SampleRecord[] {
   return rows;
 }
 
+export function getSamples(): SampleRecord[] {
+  return samples;
+}
+
 export const SAMPLE_ACCOUNT = ACCOUNT;
 
 export function nextSampleId(accountId: string): number {

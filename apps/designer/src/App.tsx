@@ -7,8 +7,10 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
-import { findSample } from "./samples";
+import { findSample, getSamples } from "./samples";
 import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { findRunSequence, RunSequenceView } from "./testingRuns";
+import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -179,6 +181,13 @@ function PinnedScreen({ tab }: { tab: PinnedTab }) {
   if (tab.kind === "sample") {
     const sample = findSample(tab.recordId);
     return sample ? <SampleDetailBody sample={sample} /> : null;
+  }
+  if (tab.kind === "run") {
+    const run = findRunSequence(tab.recordId);
+    return run ? <RunSequenceView run={run} /> : null;
+  }
+  if (tab.kind === "testing") {
+    return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received")} /></section></div>;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;

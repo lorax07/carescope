@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
-import { CreateBatchDialog } from "../components/CreateBatchDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { ReceiveSampleDialog } from "../components/ReceiveSampleDialog";
 import { ResultWindow } from "../components/ResultWindow";
+import { StartTestingWorkflow } from "../components/StartTestingWorkflow";
+import { CURRENT_RUNS } from "../testingRuns";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
 import {
   approveSamples,
-  assignBatch,
   isResulted,
   reviewStatus,
   STATUS_LABEL,
@@ -21,7 +21,7 @@ import {
   type SampleRecord,
 } from "../samples";
 
-type QuickFilter = "all" | "stat" | "testing" | "review" | "hold";
+type QuickFilter = "all" | "stat" | "testing" | "review" | "hold" | `priority:${string}`;
 type ReviewFilter = "individual" | "batch";
 
 const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
@@ -34,10 +34,85 @@ const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
 
 function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean {
   if (filter === "all") return true;
+  if (filter.startsWith("priority:")) return sample.priority === filter.slice("priority:".length);
   if (filter === "stat") return sample.priority === "STAT";
   if (filter === "testing") return sample.status === "testing";
   if (filter === "review") return sample.status === "review" || sample.status === "approval";
   return sample.status === "hold";
+}
+
+function wildcardMatch(text: string, query: string): boolean {
+  const cleaned = query.trim();
+  if (!cleaned) return true;
+  const escaped = cleaned.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(escaped, "i").test(text);
+}
+
+function SearchableFilter({
+  label,
+  options = [],
+  value,
+  query,
+  onSelect,
+  onQuery,
+  active = false,
+}: {
+  label: string;
+  options?: string[];
+  value?: string;
+  query: string;
+  onSelect?: (value: string) => void;
+  onQuery: (value: string) => void;
+  active?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+  const matching = options.filter((option) => wildcardMatch(option, query));
+
+  return (
+    <div className="sample-search-filter">
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={query}
+          aria-label={`${label} wildcard search`}
+          placeholder={`${label} wildcard search`}
+          onChange={(event) => onQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" || event.key === "Enter") setEditing(false);
+          }}
+          onBlur={() => window.setTimeout(() => setEditing(false), 120)}
+        />
+      ) : (
+        <button
+          type="button"
+          className={`lims-filter${active || value || query ? " active" : ""}`}
+          aria-expanded={options.length ? open : undefined}
+          title={`Double-click to wildcard search ${label.toLowerCase()}`}
+          onClick={() => options.length && setOpen((current) => !current)}
+          onDoubleClick={() => {
+            setOpen(false);
+            setEditing(true);
+          }}
+        >
+          {value || (query ? `${label}: ${query}` : label)}
+          {options.length ? <span aria-hidden="true">⌄</span> : null}
+        </button>
+      )}
+      {open ? (
+        <div className="sample-filter-menu" role="listbox" aria-label={label}>
+          <button type="button" onClick={() => { onSelect?.(""); onQuery(""); setOpen(false); }}>{label}</button>
+          {matching.map((option) => (
+            <button type="button" key={option} onClick={() => { onSelect?.(option); onQuery(""); setOpen(false); }}>{option}</button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 type SampleView = Exclude<LabMenuView, "overview">;
@@ -69,7 +144,7 @@ function matchesView(sample: SampleRecord, status: SampleRecord["status"], view:
   if (view === "home") return true;
   if (view === "testing") return status === "testing";
   if (view === "review") return status === "review" && isResulted(sample);
-  return status === "released";
+  return status === "approval" || status === "released";
 }
 
 function FolderIcon() {
@@ -148,8 +223,11 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
   const [testFilter, setTestFilter] = useState("");
-  const [batchOpen, setBatchOpen] = useState(false);
-  const [batchFromSelection, setBatchFromSelection] = useState(false);
+  const [testQuery, setTestQuery] = useState("");
+  const [clientFilter, setClientFilter] = useState("");
+  const [clientQuery, setClientQuery] = useState("");
+  const [rowQuery, setRowQuery] = useState("");
+  const [testingOpen, setTestingOpen] = useState(false);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
@@ -158,9 +236,14 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     return matchesView(sample, status, view);
   });
   const testOptions = [...new Set(contextRows.flatMap(testNames))].sort();
+  const clientOptions = [...new Set(contextRows.map((sample) => sample.client))].sort();
   const rows = contextRows
-    .filter((sample) => view === "review" || matchesQuickFilter(sample, filter))
+    .filter((sample) => matchesQuickFilter(sample, filter))
     .filter((sample) => !testFilter || testNames(sample).includes(testFilter))
+    .filter((sample) => wildcardMatch(testNames(sample).join(" "), testQuery))
+    .filter((sample) => !clientFilter || sample.client === clientFilter)
+    .filter((sample) => wildcardMatch(sample.client, clientQuery))
+    .filter((sample) => wildcardMatch(Object.values(sample).join(" "), rowQuery))
     .sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
   const reviewRows =
     reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
@@ -208,8 +291,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   function runButton(id: string) {
     if (id === "receive") setReceiveOpen(true);
     if (id === "createBatch") {
-      setBatchFromSelection(listed.some((sample) => checked.has(sample.accessionId)));
-      setBatchOpen(true);
+      setTestingOpen(true);
     }
     if (id === "completeReview" && approveTarget.length > 0) {
       setResultWindow({ samples: approveTarget, authorize: true });
@@ -236,6 +318,15 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       rows: open.filter((sample) => sample.status === "hold"),
     },
   ];
+  const quickFilters =
+    view === "release"
+      ? [{ id: "all" as QuickFilter, label: "Ready for Release" }, ...priorities.map((priority) => ({ id: `priority:${priority}` as QuickFilter, label: priority }))]
+      : view === "testing"
+        ? [{ id: "all" as QuickFilter, label: "In Testing" }]
+        : view === "home"
+          ? QUICK_FILTERS
+          : [];
+  const statusSearchLabel = view === "release" ? "Ready for Release" : view === "testing" ? "In Testing" : view === "review" ? "In Review" : "All open";
 
   return (
     <div className="lims-page">
@@ -256,7 +347,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               disabled={button.id === "completeReview" && approveTarget.length === 0}
               onClick={() => runButton(button.id)}
             >
-              {button.label}
+              {view === "testing" && button.id === "createBatch" ? "Start Testing" : button.label}
             </button>
           ))}
           </div>
@@ -305,17 +396,14 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       ) : null}
 
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
-        <label className="lims-test-filter">
-          Tests
-          <select aria-label="Tests" value={testFilter} onChange={(event) => setTestFilter(event.target.value)}>
-            <option value="">All tests</option>
-            {testOptions.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SearchableFilter label="Tests" options={testOptions} value={testFilter} query={testQuery} onSelect={setTestFilter} onQuery={setTestQuery} />
+        <SearchableFilter label="Clients" options={clientOptions} value={clientFilter} query={clientQuery} onSelect={setClientFilter} onQuery={setClientQuery} />
+        {view === "review" ? (
+          <SearchableFilter label="In Review" query={rowQuery} onQuery={setRowQuery} active />
+        ) : null}
+        {view !== "review" ? (
+          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} active={filter === "all"} />
+        ) : null}
         {view === "review"
           ? (["individual", "batch"] as const).map((item) => (
               <button
@@ -328,7 +416,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 {item === "individual" ? "Individual" : "Batch"}
               </button>
             ))
-          : QUICK_FILTERS.map((item) => (
+          : quickFilters.filter((item) => item.id !== "all").map((item) => (
               <button
                 key={item.id}
                 type="button"
@@ -340,6 +428,32 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               </button>
             ))}
       </div>
+
+      {view === "testing" ? (
+        <section className="lims-panel current-runs-panel">
+          <div className="lims-panel-head">
+            <div>
+              <p className="lims-eyebrow">Live instrument work</p>
+              <h2>Current run sequences <span className="lims-count">{CURRENT_RUNS.length}</span></h2>
+            </div>
+          </div>
+          <div className="current-run-list">
+            {CURRENT_RUNS.map((run) => (
+              <button
+                type="button"
+                key={run.id}
+                onClick={() => sectionTabs.pin({ kind: "run", recordId: run.id, title: run.id })}
+              >
+                <span className="run-live-dot" aria-hidden="true" />
+                <b>{run.id}</b>
+                <span>{run.method}</span>
+                <span>{run.sampleIds.length} sample{run.sampleIds.length === 1 ? "" : "s"}</span>
+                <strong>{run.steps[run.currentStep]}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="lims-panel">
         <div className="lims-table-wrap">
@@ -486,18 +600,19 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         </div>
       ) : null}
 
-      {batchOpen ? (
-        <CreateBatchDialog
-          fromSelection={batchFromSelection}
-          pool={
-            batchFromSelection ? listed.filter((sample) => checked.has(sample.accessionId)) : listed
-          }
-          onClose={() => setBatchOpen(false)}
-          onCreate={(samples) => {
-            assignBatch(samples.map((sample) => sample.accessionId));
-            setBatchOpen(false);
-          }}
-        />
+      {testingOpen ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setTestingOpen(false)}>
+          <div className="lims-modal lims-modal-wide start-testing-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <StartTestingWorkflow
+              pool={samples.filter((sample) => sample.status === "received" || sample.status === "testing")}
+              onClose={() => setTestingOpen(false)}
+              onTab={() => {
+                sectionTabs.pin({ kind: "testing", recordId: "new", title: "Start Testing" });
+                setTestingOpen(false);
+              }}
+            />
+          </div>
+        </div>
       ) : null}
 
       {resultWindow ? (

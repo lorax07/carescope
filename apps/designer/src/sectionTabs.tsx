@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 export type PinnedTab = {
   id: string;
   title: string;
-  kind: "sample" | "instrument";
+  kind: "sample" | "instrument" | "run" | "testing";
   recordId: string;
 };
 
@@ -103,7 +103,7 @@ function TabGlyph({ name }: { name: "main" | PinnedTab["kind"] }) {
       </svg>
     );
   }
-  if (name === "instrument") {
+  if (name === "instrument" || name === "run" || name === "testing") {
     return (
       <svg {...common}>
         <rect x="1.8" y="3.2" width="12.4" height="8" rx="1.4" />
