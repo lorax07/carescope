@@ -1286,6 +1286,8 @@
 @media (max-width: 1100px) {
   .lp-solve-jumps {
     display: flex;
+    max-width: 100%;
+    padding-bottom: 0.2rem;
     overflow-x: auto;
   }
 
@@ -1307,6 +1309,14 @@
 }
 
 @media (max-width: 700px) {
+  .lp-solve-board {
+    overflow: hidden;
+  }
+
+  .lp-solve-intro {
+    padding-top: 0.75rem;
+  }
+
   .lp-solve-grid {
     grid-template-columns: 1fr;
   }
@@ -1321,6 +1331,12 @@
 
   .lp-solve-visual-image {
     background-size: 500% auto;
+  }
+
+  .lp-solve-jumps {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
