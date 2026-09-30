@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
@@ -91,26 +91,6 @@ const TOPICS: Topic[] = [
   },
 ];
 
-const FLOW = ["Order", "Accession", "Testing", "Result", "Report"];
-const CONSULTANT_FLOW = ["Lab request", "Consultant", "IT", "Project mgr", "Testing", "Validation", "Deployment"];
-const CONFIG_FLOW = ["Draft", "Review", "Test", "Approve", "Deploy"];
-const COMPLIANCE_FLOW = ["Change request", "Test", "Validate", "Document", "Approve", "Release"];
-const INTEGRATIONS = ["EMR", "Instruments", "Billing", "Reporting", "Other systems", "Portals", "Files"];
-
-function Flow({ items, tone = "traditional" }: { items: string[]; tone?: "traditional" | "sequence" }) {
-  return (
-    <div className={`lp-native-flow is-${tone}`}>
-      {items.map((item, index) => (
-        <div className="lp-native-flow-item" key={item}>
-          <span>{index + 1}</span>
-          <b>{item}</b>
-          {index < items.length - 1 ? <i aria-hidden="true">→</i> : null}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function CostInfographic() {
   const costs = [
     ["Vendor customization", "$142K", 49],
@@ -142,92 +122,29 @@ function CostInfographic() {
   );
 }
 
-function OperationalInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={FLOW} />
-        <p className="lp-native-warning">Workarounds · handoffs · waiting</p>
-      </section>
-      <section>
-        <h5>Sequence</h5>
-        <Flow items={FLOW} tone="sequence" />
-        <p className="lp-native-good">A unified workflow with no disconnected handoffs</p>
-      </section>
-    </div>
-  );
-}
-
-function ConsultantInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={CONSULTANT_FLOW} />
-        <p className="lp-native-warning">Multiple handoffs. Extended timelines.</p>
-      </section>
-      <section>
-        <h5>Sequence configuration lifecycle</h5>
-        <Flow items={CONFIG_FLOW} tone="sequence" />
-        <p className="lp-native-good">The lab retains control from draft through deployment</p>
-      </section>
-    </div>
-  );
-}
-
-function IntegrationMap({ sequence = false }: { sequence?: boolean }) {
-  return (
-    <div className={`lp-native-hub${sequence ? " is-sequence" : ""}`}>
-      <strong>{sequence ? "Sequence" : "LIMS"}</strong>
-      {INTEGRATIONS.map((item, index) => (
-        <span key={item} style={{ "--hub-index": index } as CSSProperties}>{item}</span>
-      ))}
-    </div>
-  );
-}
-
-function IntegrationInfographic() {
-  return (
-    <div className="lp-native-comparison lp-native-integration">
-      <section>
-        <h5>Legacy LIMS</h5>
-        <IntegrationMap />
-      </section>
-      <section>
-        <h5>Sequence</h5>
-        <IntegrationMap sequence />
-        <p className="lp-native-good">Reduce integration dependency</p>
-      </section>
-    </div>
-  );
-}
-
-function ComplianceInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={COMPLIANCE_FLOW} />
-        <p className="lp-native-warning">Slow, manual and high risk</p>
-      </section>
-      <section>
-        <h5>Sequence · controlled and compliant by design</h5>
-        <Flow items={COMPLIANCE_FLOW} tone="sequence" />
-        <div className="lp-native-features">
-          {["Audit trail", "Electronic signatures", "Versioning", "Traceability"].map((item) => <span key={item}>{item}</span>)}
-        </div>
-      </section>
-    </div>
-  );
-}
+const SOLVE_IMAGES: Record<string, { src: string; alt: string }> = {
+  friction: {
+    src: "/solve-operational-friction.png",
+    alt: "Operational Friction: traditional LIMS waiting points compared with the connected Sequence workflow",
+  },
+  consultants: {
+    src: "/solve-consultant-dependency.png",
+    alt: "Consultant Dependency: traditional consultant handoffs compared with the Sequence configuration lifecycle",
+  },
+  integration: {
+    src: "/solve-integration-complexity.png",
+    alt: "Integration Complexity: a legacy LIMS integration hub compared with the simpler Sequence integration model",
+  },
+  compliance: {
+    src: "/solve-compliance-friction.png",
+    alt: "Compliance Friction: traditional approvals compared with Sequence controlled and compliant workflows",
+  },
+};
 
 function TopicInfographic({ id }: { id: Topic["id"] }) {
   if (id === "cost") return <CostInfographic />;
-  if (id === "friction") return <OperationalInfographic />;
-  if (id === "consultants") return <ConsultantInfographic />;
-  if (id === "integration") return <IntegrationInfographic />;
-  return <ComplianceInfographic />;
+  const image = SOLVE_IMAGES[id];
+  return image ? <img className="lp-solve-supplied-image" src={image.src} alt={image.alt} decoding="sync" /> : null;
 }
 
 function WhatWeSolve() {
@@ -235,6 +152,15 @@ function WhatWeSolve() {
   const [activeId, setActiveId] = useState(TOPICS[0].id);
   const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
   const active = TOPICS[activeIndex] ?? TOPICS[0];
+  const suppliedImage = active.id !== "cost";
+
+  useEffect(() => {
+    Object.values(SOLVE_IMAGES).forEach(({ src }) => {
+      const image = new Image();
+      image.src = src;
+      void image.decode().catch(() => undefined);
+    });
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -307,30 +233,38 @@ function WhatWeSolve() {
         </div>
 
         <article
-          className="lp-solve-card"
+          className={`lp-solve-card${suppliedImage ? " is-supplied" : ""}`}
           id="solve-active-panel"
           role="tabpanel"
           aria-labelledby={`solve-tab-${active.id}`}
           key={active.id}
         >
-          <div className="lp-solve-card-head">
-            <span>{activeIndex + 1}</span>
-            <div>
-              <h3>{active.label}</h3>
-              <p>{active.description}</p>
-            </div>
-          </div>
-          <figure className="lp-solve-visual">
-            <figcaption>{active.visual}</figcaption>
-            <TopicInfographic id={active.id} />
-          </figure>
-          <div className="lp-solve-outcome">
-            <span aria-hidden="true">{active.icon}</span>
-            <div>
-              <p>How Sequence helps</p>
-              <h4>{active.outcome}</h4>
-            </div>
-          </div>
+          {suppliedImage ? (
+            <figure className="lp-solve-supplied">
+              <TopicInfographic id={active.id} />
+            </figure>
+          ) : (
+            <>
+              <div className="lp-solve-card-head">
+                <span>{activeIndex + 1}</span>
+                <div>
+                  <h3>{active.label}</h3>
+                  <p>{active.description}</p>
+                </div>
+              </div>
+              <figure className="lp-solve-visual">
+                <figcaption>{active.visual}</figcaption>
+                <TopicInfographic id={active.id} />
+              </figure>
+              <div className="lp-solve-outcome">
+                <span aria-hidden="true">{active.icon}</span>
+                <div>
+                  <p>How Sequence helps</p>
+                  <h4>{active.outcome}</h4>
+                </div>
+              </div>
+            </>
+          )}
         </article>
       </div>
     </section>
