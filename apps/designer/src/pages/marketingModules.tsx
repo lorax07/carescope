@@ -18,7 +18,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "operations",
     title: "Sequence Operations",
-    detail: "The core LIMS",
+    detail: "The core LIMS for the laboratory queue",
     tone: "blue",
     appPath: "/app",
     problemTitle: "The queue lives in too many places",
@@ -49,7 +49,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "instruments",
     title: "Sequence Instruments",
-    detail: "Connect your instruments to Sequence",
+    detail: "Instrument connectivity, with status and the live sequence",
     tone: "green",
     appPath: "/app/instruments",
     problemTitle: "A new instrument waits on someone else",
@@ -73,7 +73,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "compliance",
     title: "Sequence Compliance",
-    detail: "Quality and compliance",
+    detail: "Quality and compliance for regulated laboratories",
     tone: "blue",
     appPath: "/app/quality",
     problemTitle: "The inspection file is rebuilt at the end",
@@ -103,7 +103,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "client",
     title: "Sequence Client",
-    detail: "Accounts, pipeline, and lab work",
+    detail: "A state-of-the-art CRM, tailor-made for the healthcare industry",
     tone: "violet",
     appPath: "/app/connectivity",
     problemTitle: "The account and the lab work are different systems",
@@ -128,7 +128,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "revenue",
     title: "Sequence Revenue",
-    detail: "Revenue cycle on the same work",
+    detail: "Laboratory RCM, from charge capture through payment",
     tone: "amber",
     appPath: "/app/billing",
     problemTitle: "Billing starts after the science is finished",
@@ -152,7 +152,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   {
     slug: "insights",
     title: "Sequence Insights",
-    detail: "The operating picture, answered from your text",
+    detail: "Operational intelligence, answered from your own laboratory text",
     tone: "cyan",
     appPath: "/app/insights",
     problemTitle: "The number waits on the person who knows where it lives",
