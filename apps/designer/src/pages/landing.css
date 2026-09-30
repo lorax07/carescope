@@ -1851,6 +1851,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.35rem 0.75rem;
+  max-width: 20rem;
   margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
@@ -2453,6 +2454,7 @@ body:has(.lp) {
 
 .lp-nav {
   display: block;
+  overflow: visible;
   background: #fff;
   border-bottom: 1px solid #e6e6e6;
 }
@@ -2901,5 +2903,13 @@ img.lp-logo-sequence {
   .lp-modules-menu {
     left: auto;
     right: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .lp-modules-menu {
+    left: 0;
+    right: auto;
+    width: min(16.5rem, calc(100vw - 1.5rem));
   }
 }
