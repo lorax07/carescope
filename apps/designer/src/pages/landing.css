@@ -1109,22 +1109,26 @@
 }
 
 .lp-solve-board {
+  position: relative;
   max-width: 1440px;
+}
+
+.lp-solve-side-heading {
+  position: absolute;
+  top: 0.2rem;
+  left: 0;
+  margin: 0;
+  color: #0b1f44;
+  font-family: var(--lp-display);
+  font-size: clamp(1.3rem, 1.8vw, 1.75rem);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
 }
 
 .lp-solve-intro {
   max-width: 720px;
   margin: 0 auto;
   text-align: center;
-}
-
-.lp-solve-eyebrow {
-  margin: 0 0 0.45rem;
-  color: #3f51b5;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 
 .lp-solve-intro h2 {
@@ -1284,6 +1288,11 @@
 }
 
 @media (max-width: 1100px) {
+  .lp-solve-side-heading {
+    position: static;
+    margin-bottom: 1.25rem;
+  }
+
   .lp-solve-jumps {
     display: flex;
     max-width: 100%;
