@@ -102,7 +102,6 @@ function CostInfographic() {
   return (
     <div className="lp-native-cost">
       <div className="lp-native-total">
-        <span>Illustrative annual cost model</span>
         <strong>$287K</strong>
         <small>Total annual cost of change</small>
       </div>
