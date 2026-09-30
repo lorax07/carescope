@@ -35,16 +35,16 @@ const EDGE_PAD = 0;
 
 const MAGNET = 168;
 
-function edgeDistances(x: number, y: number, dockWidth: number, width: number): Record<OpenEdge, number> {
+function pointerDistances(x: number, y: number, width: number): Record<OpenEdge, number> {
   return {
     top: Math.max(0, y),
     left: Math.max(0, x),
-    right: Math.max(0, width - (x + dockWidth)),
+    right: Math.max(0, width - x),
   };
 }
 
-function nearestEdge(x: number, y: number, dockWidth: number, width: number, current: OpenEdge): OpenEdge {
-  const distances = edgeDistances(x, y, dockWidth, width);
+function nearestEdge(x: number, y: number, width: number, current: OpenEdge): OpenEdge {
+  const distances = pointerDistances(x, y, width);
   let edge = current;
   let best = distances[current];
   for (const side of ["left", "right", "top"] as const) {
@@ -247,6 +247,15 @@ function AppFrame() {
 
   useEffect(() => () => window.clearTimeout(settleTimer.current), []);
 
+  const [dockTick, setDockTick] = useState(0);
+  useEffect(() => {
+    const dock = dockRef.current;
+    if (!dock) return;
+    const observer = new ResizeObserver(() => setDockTick((tick) => tick + 1));
+    observer.observe(dock);
+    return () => observer.disconnect();
+  }, [navOpen, edge]);
+
   useLayoutEffect(() => {
     if (dragging || settling || !docked) {
       setInsets((current) =>
@@ -271,7 +280,7 @@ function AppFrame() {
         ? current
         : next,
     );
-  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked]);
+  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
     if (!docked || dragging || settling) return;
@@ -282,7 +291,7 @@ function AppFrame() {
       navPosRef.current = next;
       return next;
     });
-  }, [navOpen, edge, viewport.width, docked, dragging, settling]);
+  }, [navOpen, edge, viewport.width, docked, dragging, settling, dockTick]);
 
   function armDocked() {
     window.clearTimeout(settleTimer.current);
@@ -294,13 +303,13 @@ function AppFrame() {
     }, 480);
   }
 
-  function finishDrag(from: { x: number; y: number }) {
+  function finishDrag(pointer: { x: number; y: number }) {
     setDragging(false);
     draggingRef.current = false;
     const dockBox = dockRef.current?.getBoundingClientRect();
     const dockWidth = dockBox?.width ?? LAUNCHER;
-    const candidate = nearestEdge(from.x, from.y, dockWidth, window.innerWidth, openEdgeRef.current);
-    const gap = edgeDistances(from.x, from.y, dockWidth, window.innerWidth)[candidate];
+    const candidate = nearestEdge(pointer.x, pointer.y, window.innerWidth, openEdgeRef.current);
+    const gap = pointerDistances(pointer.x, pointer.y, window.innerWidth)[candidate];
     if (gap > MAGNET) {
       window.clearTimeout(settleTimer.current);
       setDocked(false);
@@ -364,7 +373,11 @@ function AppFrame() {
     const startY = event.clientY;
     const origin = navPosRef.current;
     let moved = false;
+    let pointerX = startX;
+    let pointerY = startY;
     function move(ev: { clientX: number; clientY: number }) {
+      pointerX = ev.clientX;
+      pointerY = ev.clientY;
       const dx = ev.clientX - startX;
       const dy = ev.clientY - startY;
       if (!moved) {
@@ -383,9 +396,8 @@ function AppFrame() {
       const y = Math.min(Math.max(0, origin.y + dy), Math.max(0, limitY));
       const next = { x, y };
       navPosRef.current = next;
-      const dockWidth = bounds?.width ?? LAUNCHER;
-      const candidate = nearestEdge(x, y, dockWidth, window.innerWidth, openEdgeRef.current);
-      const gap = edgeDistances(x, y, dockWidth, window.innerWidth)[candidate];
+      const candidate = nearestEdge(ev.clientX, ev.clientY, window.innerWidth, openEdgeRef.current);
+      const gap = pointerDistances(ev.clientX, ev.clientY, window.innerWidth)[candidate];
       setNearEdge(gap <= MAGNET);
       setNavPos(next);
     }
@@ -401,7 +413,7 @@ function AppFrame() {
         return;
       }
       suppressClick.current = true;
-      finishDrag(navPosRef.current);
+      finishDrag({ x: pointerX, y: pointerY });
     }
     window.addEventListener("pointermove", move);
     window.addEventListener("mousemove", move);
