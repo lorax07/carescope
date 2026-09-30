@@ -1252,29 +1252,6 @@
   text-transform: uppercase;
 }
 
-.lp-solve-card.is-supplied {
-  display: block;
-  min-height: 0;
-  padding: clamp(1rem, 2.5vw, 2rem);
-  background: #f7f9ff;
-  text-align: center;
-}
-
-.lp-solve-supplied {
-  margin: 0;
-}
-
-.lp-solve-supplied-image {
-  display: block;
-  width: min(100%, 24rem);
-  height: auto;
-  margin: 0 auto;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 18px 48px rgba(31, 46, 82, 0.12);
-  image-rendering: auto;
-}
-
 .lp-solve-outcome {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr);
