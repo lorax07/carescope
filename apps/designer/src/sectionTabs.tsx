@@ -81,26 +81,64 @@ export function useSectionTabs(): SectionTabsValue {
   return value;
 }
 
-/** Parked screens, shown on the right of the main workflow so the list stays available. */
-export function SectionTabStrip() {
+function TabGlyph({ name }: { name: "main" | PinnedTab["kind"] }) {
+  const common = {
+    viewBox: "0 0 16 16",
+    width: 15,
+    height: 15,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.4,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  if (name === "main") {
+    return (
+      <svg {...common}>
+        <rect x="1.6" y="1.6" width="5" height="5" rx="1" />
+        <rect x="9.4" y="1.6" width="5" height="5" rx="1" />
+        <rect x="1.6" y="9.4" width="5" height="5" rx="1" />
+        <rect x="9.4" y="9.4" width="5" height="5" rx="1" />
+      </svg>
+    );
+  }
+  if (name === "instrument") {
+    return (
+      <svg {...common}>
+        <rect x="1.8" y="3.2" width="12.4" height="8" rx="1.4" />
+        <path d="M5 3.2V2.2h6v1M5 11.2v1.2M11 11.2v1.2" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <path d="M3 3.2h10M3 6.6h10M3 10h7M3 13.2h5" />
+    </svg>
+  );
+}
+
+/** The section stays the first tab. Tab Screen adds the next one. */
+export function SectionTabStrip({ mainLabel }: { mainLabel: string }) {
   const tabs = useSectionTabs();
   if (tabs.tabs.length === 0) return null;
+  const mainOn = tabs.activeId == null;
 
   return (
-    <div className="lims-tabs lims-tabs-inline lims-tabs-parked" role="tablist" aria-label="Tabbed screens">
+    <div className="lims-screen-tabs" role="tablist" aria-label="Tabbed screens">
+      <button type="button" role="tab" aria-selected={mainOn} className={mainOn ? "is-on" : undefined} onClick={() => tabs.showSection()}>
+        <TabGlyph name="main" />
+        {mainLabel}
+      </button>
       {tabs.tabs.map((tab) => {
         const selected = tabs.activeId === tab.id;
         return (
-          <div key={tab.id} className={`lims-tab${selected ? " active" : ""}`}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => (selected ? tabs.showSection() : tabs.select(tab.id))}
-            >
+          <div key={tab.id} className={`lims-screen-tab${selected ? " is-on" : ""}`}>
+            <button type="button" role="tab" aria-selected={selected} onClick={() => tabs.select(tab.id)}>
+              <TabGlyph name={tab.kind} />
               {tab.title}
             </button>
-            <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => tabs.close(tab.id)}>
+            <button type="button" className="lims-screen-tab-close" aria-label={`Close ${tab.title}`} onClick={() => tabs.close(tab.id)}>
               ×
             </button>
           </div>

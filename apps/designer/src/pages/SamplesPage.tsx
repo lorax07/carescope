@@ -246,7 +246,6 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <p className="lims-page-lede">{copy.lede}</p>
         </div>
         <div className="lims-header-side">
-          <SectionTabStrip />
           <div className="lims-page-actions">
           {pageButtons.map((button) => (
             <button
@@ -263,6 +262,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           </div>
         </div>
       </div>
+      <SectionTabStrip mainLabel={title} />
 
       {view === "home" ? (
         <div className="sample-work-grid">
