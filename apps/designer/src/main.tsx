@@ -9,6 +9,7 @@ import { IntrasiteClientsPage } from "./intrasite/ClientsPage";
 import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
 import { LandingPage } from "./pages/LandingPage";
+import { ModuleStoryPage } from "./pages/ModuleStoryPage";
 import { LimsEnvironmentPage } from "./pages/LimsEnvironmentPage";
 import { OpsOverviewPage } from "./pages/OpsOverviewPage";
 import { SampleDetailPage } from "./pages/SampleDetailPage";
@@ -56,6 +57,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<LandingPage />} />
+        <Route path="modules/:slug" element={<ModuleStoryPage />} />
         <Route path="intrasite" element={<IntrasiteRoot />}>
           <Route path="login" element={<IntrasiteLoginPage />} />
           <Route element={<IntrasiteShell />}>
