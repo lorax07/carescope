@@ -202,6 +202,9 @@ export function AppShell() {
 
 function AppFrame() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [dockWidth, setDockWidth] = useState(440);
+  const [resizingDock, setResizingDock] = useState(false);
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
@@ -666,22 +669,72 @@ function AppFrame() {
             <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        <div className={`lims-workspace${sectionTabs.activeId ? " has-dock" : ""}`}>
+        <div
+          ref={workspaceRef}
+          className={`lims-workspace${sectionTabs.activeId ? " has-dock" : ""}${resizingDock ? " is-resizing" : ""}`}
+          style={{ "--screen-dock-width": `${dockWidth}px` } as CSSProperties}
+        >
           <div className="lims-content">
             <Outlet />
           </div>
           {sectionTabs.tabs
             .filter((tab) => tab.id === sectionTabs.activeId)
             .map((tab) => (
-              <aside key={tab.id} className="lims-screen-dock" aria-label={tab.title}>
-                <div className="lims-screen-dock-head">
-                  <strong>{tab.title}</strong>
-                  <button type="button" className="btn" onClick={() => sectionTabs.showSection()}>
-                    Main screen
-                  </button>
+              <div key={tab.id} className="lims-screen-dock-wrap">
+                <div
+                  className="lims-screen-resizer"
+                  role="separator"
+                  aria-label="Resize tabbed screen"
+                  aria-orientation="vertical"
+                  aria-valuemin={320}
+                  aria-valuenow={Math.round(dockWidth)}
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                    event.preventDefault();
+                    const workspaceWidth = workspaceRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+                    const minMain = Math.min(520, workspaceWidth * 0.42);
+                    const maxDock = Math.max(320, workspaceWidth - minMain);
+                    const change = event.key === "ArrowLeft" ? 32 : -32;
+                    setDockWidth((current) => Math.min(maxDock, Math.max(320, current + change)));
+                  }}
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return;
+                    event.preventDefault();
+                    const handle = event.currentTarget;
+                    handle.setPointerCapture(event.pointerId);
+                    setResizingDock(true);
+                    const resize = (clientX: number) => {
+                      const rect = workspaceRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      const minMain = Math.min(520, rect.width * 0.42);
+                      const maxDock = Math.max(320, rect.width - minMain);
+                      setDockWidth(Math.min(maxDock, Math.max(320, rect.right - clientX)));
+                    };
+                    const onMove = (moveEvent: PointerEvent) => resize(moveEvent.clientX);
+                    const onEnd = () => {
+                      handle.removeEventListener("pointermove", onMove);
+                      handle.removeEventListener("pointerup", onEnd);
+                      handle.removeEventListener("pointercancel", onEnd);
+                      setResizingDock(false);
+                    };
+                    handle.addEventListener("pointermove", onMove);
+                    handle.addEventListener("pointerup", onEnd);
+                    handle.addEventListener("pointercancel", onEnd);
+                  }}
+                >
+                  <span />
                 </div>
-                <PinnedScreen tab={tab} />
-              </aside>
+                <aside className="lims-screen-dock" aria-label={tab.title}>
+                  <div className="lims-screen-dock-head">
+                    <strong>{tab.title}</strong>
+                    <button type="button" className="btn" onClick={() => sectionTabs.showSection()}>
+                      Main screen
+                    </button>
+                  </div>
+                  <PinnedScreen tab={tab} />
+                </aside>
+              </div>
             ))}
         </div>
       </div>

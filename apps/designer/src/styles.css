@@ -1753,16 +1753,81 @@ a {
   min-width: 0;
 }
 
-.lims-screen-dock {
+.lims-screen-dock-wrap {
   position: sticky;
   top: 0;
-  flex: 0 0 min(440px, 42vw);
+  display: flex;
+  flex: 0 0 var(--screen-dock-width, 440px);
   align-self: flex-start;
   height: 100vh;
+  min-width: 320px;
+  max-width: calc(100% - 420px);
+}
+
+.lims-screen-resizer {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 10px;
+  width: 10px;
+  margin-left: -5px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.lims-screen-resizer span {
+  position: absolute;
+  inset: 0 4px;
+  background: var(--border);
+  transition: inset 120ms ease, background 120ms ease;
+}
+
+.lims-screen-resizer:hover span,
+.lims-screen-resizer:focus-visible span,
+.lims-workspace.is-resizing .lims-screen-resizer span {
+  inset: 0 2px;
+  background: var(--accent);
+}
+
+.lims-screen-resizer:focus-visible {
+  outline: none;
+}
+
+.lims-workspace.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+.lims-workspace.is-resizing iframe {
+  pointer-events: none;
+}
+
+.lims-screen-dock {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
   overflow: auto;
-  border-left: 1px solid var(--border);
   background: #fff;
   box-shadow: -12px 0 32px rgba(15, 23, 36, 0.06);
+}
+
+.lims-screen-dock .lims-page {
+  min-width: 0;
+  padding-inline: clamp(0.8rem, 2vw, 1.35rem);
+}
+
+.lims-screen-dock .sample-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.lims-screen-dock .sample-detail-fields > div {
+  grid-template-columns: minmax(7.2rem, 38%) minmax(0, 1fr);
+}
+
+.lims-screen-dock .sample-detail-fields dd,
+.lims-screen-dock .sample-detail-fields a,
+.lims-screen-dock .instrument-record {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .lims-screen-dock-head {
@@ -1857,12 +1922,22 @@ a {
     flex-direction: column;
   }
 
-  .lims-screen-dock {
+  .lims-screen-dock-wrap {
     position: static;
     flex: none;
     width: 100%;
+    min-width: 0;
+    max-width: none;
     height: auto;
     max-height: none;
+  }
+
+  .lims-screen-resizer {
+    display: none;
+  }
+
+  .lims-screen-dock {
+    width: 100%;
     border-left: 0;
     border-top: 1px solid var(--border);
   }
