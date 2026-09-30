@@ -50,11 +50,11 @@ export function InstrumentInterfacePage() {
           <p className="lims-page-lede">Integrated instruments, their status, and whether a sequence is running.</p>
         </div>
       </div>
+      <SectionTabStrip mainLabel="Instruments" />
 
       <section className="lims-panel instrument-workflow">
         <div className="lims-panel-head">
           <h2>Add an instrument</h2>
-          <SectionTabStrip />
         </div>
         <ol className="instrument-steps">
           {STEPS.map((label, index) => (
