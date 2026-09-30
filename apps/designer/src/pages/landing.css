@@ -1113,6 +1113,10 @@
   max-width: 1440px;
 }
 
+#capabilities {
+  scroll-margin-top: 5.25rem;
+}
+
 .lp-solve-side-heading {
   position: absolute;
   top: 0.2rem;
