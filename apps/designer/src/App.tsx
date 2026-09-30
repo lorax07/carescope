@@ -235,6 +235,13 @@ function AppFrame() {
   const edge = openEdge;
   const horizontal = edge === "top";
   const signedInName = lims?.username ?? "M. Chen";
+  const railInitials =
+    signedInName
+      .split(/\s+/)
+      .map((part) => part.replace(/[^a-z0-9]/gi, "").charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "MC";
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
@@ -416,6 +423,7 @@ function AppFrame() {
         return;
       }
       suppressClick.current = true;
+      window.getSelection()?.removeAllRanges();
       finishDrag({ x: pointerX, y: pointerY });
     }
     window.addEventListener("pointermove", move);
@@ -433,6 +441,7 @@ function AppFrame() {
 
   function onRailPointerDown(event: ReactPointerEvent<HTMLElement>) {
     const target = event.target as HTMLElement;
+    if (target.closest(".lims-rail-user")) return;
     beginNavDrag(event, { toggle: Boolean(target.closest(".lims-rail-logo")) });
   }
 
@@ -476,7 +485,7 @@ function AppFrame() {
     >
       <div
         ref={dockRef}
-        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
+        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${docked ? " is-docked" : " is-floating"}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
         style={{ left: navPos.x, top: navPos.y }}
         onTransitionEnd={(event) => {
           if (event.target !== dockRef.current) return;
@@ -491,10 +500,10 @@ function AppFrame() {
         {navOpen ? null : (
           <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
             <button type="button" className="lims-rail-logo" aria-expanded={false} aria-label="Expand navigation">
-              <img src="/sequence-logo.png" alt="" />
+              <NavIcon name="overview" />
             </button>
             <nav className="lims-nav" aria-label="LIMS modules">
-              {operationLinks.map((item) => (
+              {operationLinks.filter((item) => item.view !== "overview").map((item) => (
                 <NavLink
                   key={item.id}
                   to={labMenuPath(item.view)}
@@ -524,6 +533,9 @@ function AppFrame() {
                 </NavLink>
               ))}
             </nav>
+            <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
+              {railInitials}
+            </button>
           </div>
         )}
       {navOpen ? (
