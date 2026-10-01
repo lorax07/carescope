@@ -3462,8 +3462,39 @@ a {
 
 .system-workflow-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 0.85rem;
+}
+
+.system-workflow-modules {
+  display: grid;
+  gap: 1rem;
+}
+
+.system-workflow-module {
+  padding: 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.system-workflow-module-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.system-workflow-module-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.system-workflow-module-head span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .system-workflow-card {
@@ -3576,6 +3607,49 @@ a {
   font-weight: 800;
 }
 
+.workflow-preview-screen-label {
+  display: block;
+  margin-top: 1.2rem;
+}
+
+.workflow-preview-screen-list {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.workflow-preview-screen-list button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.workflow-preview-screen-list button:hover,
+.workflow-preview-screen-list button.is-active {
+  border-color: #b9d2f8;
+  background: #fff;
+  color: var(--accent);
+}
+
+.workflow-preview-screen-list button span {
+  font-weight: 800;
+}
+
+.workflow-preview-notice {
+  margin: 0.75rem 0 0;
+  color: var(--success) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .workflow-screen-preview {
   padding: 1.25rem;
 }
@@ -3645,6 +3719,109 @@ a {
 
 .workflow-preview-fields textarea {
   min-height: 7rem;
+}
+
+.template-path-dialog {
+  width: min(880px, calc(100vw - 2rem));
+}
+
+.template-path-body {
+  padding: 1rem;
+}
+
+.template-path-body > p {
+  margin-top: 0;
+  color: var(--text-muted);
+}
+
+.template-path-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.template-path-options > button {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+.template-path-options > button:hover,
+.template-path-options > button.is-selected {
+  border-color: #7eacf2;
+  background: #f4f8ff;
+  box-shadow: 0 0 0 2px rgba(27, 110, 243, 0.08);
+}
+
+.template-path-options > button > span {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.template-path-options > button div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.template-path-options small {
+  color: var(--text-muted);
+}
+
+.template-branch-panel {
+  margin-top: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.template-branch-panel h3,
+.template-branch-panel p {
+  margin: 0.25rem 0;
+}
+
+.template-branch-panel > p:not(.lims-eyebrow) {
+  color: var(--text-muted);
+}
+
+.template-branch-panel > .btn {
+  margin-top: 0.75rem;
+}
+
+.template-branch-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.template-branch-fields label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.template-branch-fields select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.template-branch-hint {
+  margin-top: 0.65rem !important;
+  font-size: 0.75rem;
 }
 
 .tag-row {
@@ -3743,6 +3920,40 @@ a {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-dim);
+}
+
+.workflow-designer-sidebar-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.7rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #fff;
+}
+
+.workflow-designer-sidebar-head .btn {
+  flex: none;
+  padding-inline: 0.35rem;
+}
+
+.workflow-designer-sidebar-head > div {
+  min-width: 0;
+  padding-top: 0.2rem;
+}
+
+.workflow-designer-sidebar-head h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.workflow-designer-sidebar-head p {
+  margin: 0.18rem 0 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
 }
 
 .palette-search {

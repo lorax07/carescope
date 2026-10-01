@@ -400,9 +400,13 @@ export function DesignerPage() {
   return (
     <div className={`designer-layout${designerMode === "screens" ? " is-screen-designer" : ""}`}>
       {designerMode === "workflow" ? (
-        <NodePalette plugins={plugins} />
+        <NodePalette plugins={plugins} workflowName={workflow.name} />
       ) : (
         <aside className="workflow-screen-list">
+          <div className="workflow-designer-sidebar-head">
+            <Link to="/app/workflows" className="btn btn-ghost">← Workflows</Link>
+            <div><h2>Workflow Designer</h2><p>{workflow.name}</p></div>
+          </div>
           <div className="workflow-screen-list-head">
             <div><p className="lims-eyebrow">Workflow UI</p><h2>Screens</h2></div>
             <button type="button" className="btn btn-primary" onClick={addScreen}>Add screen</button>
@@ -418,10 +422,6 @@ export function DesignerPage() {
       )}
       <div className="canvas-area">
         <div className="canvas-toolbar">
-          <Link to="/app/workflows" className="btn btn-ghost">
-            ← Workflows
-          </Link>
-          <span className="wf-title">{workflow.name}</span>
           <span className={`badge badge-${workflow.status}`}>{workflow.status}</span>
           <span className="badge">v{workflow.version}</span>
           <div className="workflow-designer-mode" role="group" aria-label="Designer mode">

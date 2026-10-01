@@ -191,6 +191,50 @@ export const workflowService = {
     persist();
     return instance;
   },
+  addTemplateBranch(workflowId: string, templateId: string, connectNodeId: string) {
+    const current = getBrowserPlatform().store.get(workflowId, TENANT);
+    const template = getBrowserPlatform().store.get(templateId, TENANT);
+    if (!current || !template || !current.nodes.some((node) => node.id === connectNodeId)) return undefined;
+    const source = current.nodes.find((node) => node.id === connectNodeId)!;
+    const templateNodes = template.nodes.filter((node) => node.type !== "start");
+    if (!templateNodes.length) return undefined;
+    const idMap = new Map(templateNodes.map((node) => [node.id, crypto.randomUUID()]));
+    const branchNodes = templateNodes.map((node, index) => ({
+      ...node,
+      id: idMap.get(node.id)!,
+      position: {
+        x: source.position.x + 240 + index * 190,
+        y: source.position.y + 170,
+      },
+    }));
+    const branchEdges = template.edges
+      .filter((edge) => idMap.has(edge.source) && idMap.has(edge.target))
+      .map((edge) => ({
+        ...edge,
+        id: crypto.randomUUID(),
+        source: idMap.get(edge.source)!,
+        target: idMap.get(edge.target)!,
+      }));
+    const templateStart = template.nodes.find((node) => node.type === "start");
+    const firstTemplateId =
+      template.edges.find((edge) => edge.source === templateStart?.id && idMap.has(edge.target))?.target ??
+      templateNodes[0]!.id;
+    const updated = this.updateDraft(workflowId, {
+      nodes: [...current.nodes, ...branchNodes],
+      edges: [
+        ...current.edges,
+        ...branchEdges,
+        {
+          id: crypto.randomUUID(),
+          source: connectNodeId,
+          target: idMap.get(firstTemplateId)!,
+          label: template.name,
+        },
+      ],
+    });
+    persist();
+    return updated;
+  },
   versions(id: string) {
     const def = getBrowserPlatform().store.get(id, TENANT);
     if (!def) return [];
