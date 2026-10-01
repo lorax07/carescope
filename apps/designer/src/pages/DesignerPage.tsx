@@ -106,7 +106,7 @@ function toFlowNodes(def: WorkflowDefinition, plugins: ReturnType<typeof workflo
         label: n.label,
         nodeType: n.type,
         description: n.description,
-        color: plugin?.color ?? n.style?.color,
+        color: n.style?.color ?? plugin?.color,
         config: n.config,
       },
     };
@@ -114,14 +114,17 @@ function toFlowNodes(def: WorkflowDefinition, plugins: ReturnType<typeof workflo
 }
 
 function toFlowEdges(def: WorkflowDefinition): Edge[] {
-  return def.edges.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-    label: e.label,
-    markerEnd: { type: MarkerType.ArrowClosed, color: "#5a7366" },
-    style: { stroke: "#5a7366" },
-  }));
+  return def.edges.map((e) => {
+    const color = def.nodes.find((node) => node.id === e.target)?.style?.color ?? "#5a7366";
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      label: e.label,
+      markerEnd: { type: MarkerType.ArrowClosed, color },
+      style: { stroke: color },
+    };
+  });
 }
 
 function fromFlow(

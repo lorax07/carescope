@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type PointerEvent as ReactPointerEvent,
+  type SetStateAction,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { workflowService } from "../platform";
 
@@ -124,6 +131,34 @@ const WORKFLOW_TUTORIALS = [
   },
 ] as const;
 
+type DialogPosition = { x: number; y: number };
+
+function beginDialogDrag(
+  event: ReactPointerEvent<HTMLDivElement>,
+  position: DialogPosition,
+  setPosition: Dispatch<SetStateAction<DialogPosition>>,
+) {
+  if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
+  event.preventDefault();
+  const handle = event.currentTarget;
+  handle.setPointerCapture(event.pointerId);
+  const pointer = { x: event.clientX, y: event.clientY };
+  const move = (moveEvent: PointerEvent) => {
+    setPosition({
+      x: position.x + moveEvent.clientX - pointer.x,
+      y: position.y + moveEvent.clientY - pointer.y,
+    });
+  };
+  const finish = () => {
+    handle.removeEventListener("pointermove", move);
+    handle.removeEventListener("pointerup", finish);
+    handle.removeEventListener("pointercancel", finish);
+  };
+  handle.addEventListener("pointermove", move);
+  handle.addEventListener("pointerup", finish);
+  handle.addEventListener("pointercancel", finish);
+}
+
 export function LibraryPage() {
   const navigate = useNavigate();
   const [tick, setTick] = useState(0);
@@ -137,6 +172,9 @@ export function LibraryPage() {
   const [tutorialId, setTutorialId] = useState<string | null>(null);
   const [tutorialFrame, setTutorialFrame] = useState(0);
   const [tutorialPlaying, setTutorialPlaying] = useState(false);
+  const [previewDialogPosition, setPreviewDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
+  const [templateDialogPosition, setTemplateDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
+  const [tutorialDialogPosition, setTutorialDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
   const workflows = useMemo(() => {
     void tick;
     return workflowService.list();
@@ -170,10 +208,10 @@ export function LibraryPage() {
 
   const preview = SYSTEM_WORKFLOWS.find((workflow) => workflow.id === previewId);
   const previewScreen = preview?.screens[previewScreenIndex] ?? preview?.screens[0];
-  const selectedCurrentWorkflow = definitions.find((workflow) => workflow.id === currentWorkflowId);
+  const selectedCurrentWorkflow = currentWorkflowId ? workflowService.get(currentWorkflowId) : undefined;
 
-  const openSystemWorkflow = (systemWorkflow: (typeof SYSTEM_WORKFLOWS)[number]) => {
-    const existing = workflows.find((workflow) => !workflow.isTemplate && workflow.name === systemWorkflow.name);
+  const materializeSystemWorkflow = (systemWorkflow: (typeof SYSTEM_WORKFLOWS)[number]) => {
+    const existing = workflowService.list().find((workflow) => !workflow.isTemplate && workflow.name === systemWorkflow.name);
     const created = existing ?? workflowService.create({ name: systemWorkflow.name, description: systemWorkflow.description });
     const stageNodes = systemWorkflow.stages.map((stage, index) => ({
       id: crypto.randomUUID(),
@@ -202,6 +240,12 @@ export function LibraryPage() {
       primaryAction: index === systemWorkflow.screens.length - 1 ? "Complete" : "Continue",
     }));
     localStorage.setItem(`carescope.workflowScreens.${updated.id}`, JSON.stringify(screens));
+    setTick((value) => value + 1);
+    return updated;
+  };
+
+  const openSystemWorkflow = (systemWorkflow: (typeof SYSTEM_WORKFLOWS)[number]) => {
+    const updated = materializeSystemWorkflow(systemWorkflow);
     navigate(`/app/workflows/${updated.id}`);
   };
 
@@ -209,6 +253,28 @@ export function LibraryPage() {
     setPreviewId(id);
     setPreviewScreenIndex(0);
     setPreviewNotice("");
+    setPreviewDialogPosition({ x: 0, y: 0 });
+  };
+
+  const selectCurrentWorkflow = (value: string) => {
+    setConnectNodeId("");
+    if (value.startsWith("system:")) {
+      const systemWorkflow = SYSTEM_WORKFLOWS.find((workflow) => workflow.id === value.slice("system:".length));
+      if (systemWorkflow) setCurrentWorkflowId(materializeSystemWorkflow(systemWorkflow).id);
+      return;
+    }
+    setCurrentWorkflowId(value);
+  };
+
+  const branchDescription = (nodeId: string) => {
+    if (!selectedCurrentWorkflow) return "";
+    const node = selectedCurrentWorkflow.nodes.find((item) => item.id === nodeId);
+    if (!node) return "";
+    const targets = selectedCurrentWorkflow.edges
+      .filter((edge) => edge.source === nodeId)
+      .map((edge) => selectedCurrentWorkflow.nodes.find((item) => item.id === edge.target)?.label)
+      .filter(Boolean);
+    return targets.length ? `${node.label} → ${targets.join(", ")}` : `${node.label} → new branch`;
   };
 
   const closeTemplatePrompt = () => {
@@ -350,6 +416,7 @@ export function LibraryPage() {
                   setTemplateBranch(null);
                   setCurrentWorkflowId("");
                   setConnectNodeId("");
+                  setTemplateDialogPosition({ x: 0, y: 0 });
                 }}
               >
                 Use template
@@ -381,6 +448,7 @@ export function LibraryPage() {
                 setTutorialId(item.id);
                 setTutorialFrame(0);
                 setTutorialPlaying(true);
+                setTutorialDialogPosition({ x: 0, y: 0 });
               }}
             >
               <span className={`workflow-training-thumb training-tone-${index + 1}`}>
@@ -399,8 +467,8 @@ export function LibraryPage() {
 
       {tutorial ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>
-          <div className="lims-modal lims-modal-wide workflow-training-dialog" role="dialog" aria-modal="true" aria-labelledby="workflow-training-title" onClick={(event) => event.stopPropagation()}>
-            <div className="lims-dialog-bar">
+          <div className="lims-modal lims-modal-wide workflow-training-dialog" style={{ transform: `translate(${tutorialDialogPosition.x}px, ${tutorialDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="workflow-training-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, tutorialDialogPosition, setTutorialDialogPosition)}>
               <div><p className="lims-eyebrow">{tutorial.level} · {tutorial.duration}</p><h2 id="workflow-training-title">{tutorial.title}</h2></div>
               <button type="button" className="btn" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>Close</button>
             </div>
@@ -454,8 +522,8 @@ export function LibraryPage() {
 
       {preview ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
-          <div className="lims-modal lims-modal-wide workflow-module-preview" role="dialog" aria-modal="true" aria-labelledby="workflow-preview-title" onClick={(event) => event.stopPropagation()}>
-            <div className="lims-dialog-bar">
+          <div className="lims-modal lims-modal-wide workflow-module-preview" style={{ transform: `translate(${previewDialogPosition.x}px, ${previewDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="workflow-preview-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, previewDialogPosition, setPreviewDialogPosition)}>
               <div>
                 <p className="lims-eyebrow">{preview.module}</p>
                 <h2 id="workflow-preview-title">{preview.name}</h2>
@@ -464,16 +532,17 @@ export function LibraryPage() {
             </div>
             <div className="workflow-preview-layout">
               <aside>
-                <b>Workflow stages</b>
-                <ol>{preview.stages.map((stage, index) => <li className={index === previewScreenIndex ? "is-active" : undefined} key={stage}><span>{index + 1}</span>{stage}</li>)}</ol>
-                <b className="workflow-preview-screen-label">Screens</b>
-                <div className="workflow-preview-screen-list">
-                  {preview.screens.map((screen, index) => (
-                    <button type="button" className={index === previewScreenIndex ? "is-active" : undefined} key={screen} onClick={() => { setPreviewScreenIndex(index); setPreviewNotice(""); }}>
-                      <span>{index + 1}</span>{screen}
-                    </button>
+                <b>Workflow Stages Screens</b>
+                <ol className="workflow-stage-screen-list">
+                  {preview.stages.map((stage, index) => (
+                    <li className={index === previewScreenIndex ? "is-active" : undefined} key={stage}>
+                      <button type="button" onClick={() => { setPreviewScreenIndex(index); setPreviewNotice(""); }}>
+                        <span>{index + 1}</span>
+                        <div><b>{stage}</b><small>{preview.screens[index] ?? "Workflow screen"}</small></div>
+                      </button>
+                    </li>
                   ))}
-                </div>
+                </ol>
               </aside>
               <section className="workflow-screen-preview">
                 <div className="workflow-screen-browser">
@@ -515,8 +584,8 @@ export function LibraryPage() {
 
       {templatePrompt ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={closeTemplatePrompt}>
-          <div className="lims-modal lims-modal-wide template-path-dialog" role="dialog" aria-modal="true" aria-labelledby="template-path-title" onClick={(event) => event.stopPropagation()}>
-            <div className="lims-dialog-bar"><h2 id="template-path-title">Use {templatePrompt.name}</h2><button type="button" className="btn" onClick={closeTemplatePrompt}>Close</button></div>
+          <div className="lims-modal lims-modal-wide template-path-dialog" style={{ transform: `translate(${templateDialogPosition.x}px, ${templateDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="template-path-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, templateDialogPosition, setTemplateDialogPosition)}><h2 id="template-path-title">Use {templatePrompt.name}</h2><button type="button" className="btn" onClick={closeTemplatePrompt}>Close</button></div>
             <div className="template-path-body">
               <p>Choose how this template should enter your workflow library.</p>
               <div className="template-path-options">
@@ -540,9 +609,41 @@ export function LibraryPage() {
                   <p className="lims-eyebrow">Current workflow branch</p>
                   <h3>Select the workflow and connection branch</h3>
                   <div className="template-branch-fields">
-                    <label>Current workflow<select value={currentWorkflowId} onChange={(event) => { setCurrentWorkflowId(event.target.value); setConnectNodeId(""); }}><option value="">Select workflow</option>{definitions.map((workflow) => <option key={workflow.id} value={workflow.id}>{workflow.name} · v{workflow.version}</option>)}</select></label>
-                    <label>Connect template after<select value={connectNodeId} disabled={!selectedCurrentWorkflow} onChange={(event) => setConnectNodeId(event.target.value)}><option value="">Select branch</option>{selectedCurrentWorkflow?.nodes.filter((node) => node.type !== "end").map((node) => <option key={node.id} value={node.id}>{node.label} · {node.type}</option>)}</select></label>
+                    <label>
+                      Current workflow
+                      <select value={currentWorkflowId} onChange={(event) => selectCurrentWorkflow(event.target.value)}>
+                        <option value="">Select any workflow</option>
+                        <optgroup label="System workflows">
+                          {SYSTEM_WORKFLOWS.map((systemWorkflow) => {
+                            const existing = definitions.find((workflow) => workflow.name === systemWorkflow.name);
+                            return <option key={systemWorkflow.id} value={existing?.id ?? `system:${systemWorkflow.id}`}>{systemWorkflow.module} · {systemWorkflow.name}</option>;
+                          })}
+                        </optgroup>
+                        <optgroup label="Your workflows">
+                          {definitions
+                            .filter((workflow) => !SYSTEM_WORKFLOWS.some((systemWorkflow) => systemWorkflow.name === workflow.name))
+                            .map((workflow) => <option key={workflow.id} value={workflow.id}>{workflow.name} · v{workflow.version} · {workflow.status}</option>)}
+                        </optgroup>
+                      </select>
+                    </label>
+                    <label>
+                      Connect template after
+                      <select value={connectNodeId} disabled={!selectedCurrentWorkflow} onChange={(event) => setConnectNodeId(event.target.value)}>
+                        <option value="">Select any connection branch</option>
+                        {selectedCurrentWorkflow?.nodes.map((node, index) => <option key={node.id} value={node.id}>{String(index + 1).padStart(2, "0")} · {branchDescription(node.id)} · {node.type}</option>)}
+                      </select>
+                    </label>
                   </div>
+                  {selectedCurrentWorkflow ? (
+                    <div className="template-branch-map" aria-label="Available connection branches">
+                      {selectedCurrentWorkflow.nodes.map((node, index) => (
+                        <button type="button" className={connectNodeId === node.id ? "is-selected" : undefined} key={node.id} onClick={() => setConnectNodeId(node.id)}>
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          <div><b>{node.label}</b><small>{branchDescription(node.id)} · {node.type}</small></div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                   <p className="template-branch-hint">{connectNodeId ? "Branch selected. The template can now be added and edited in the designer." : "Select a branch connection before opening the designer."}</p>
                   <button type="button" className="btn btn-primary" disabled={!currentWorkflowId || !connectNodeId} onClick={addTemplateToCurrent}>Add to Current workflow</button>
                 </section>

@@ -202,6 +202,7 @@ export const workflowService = {
     const branchNodes = templateNodes.map((node, index) => ({
       ...node,
       id: idMap.get(node.id)!,
+      style: { ...node.style, color: "#1b6ef3" },
       position: {
         x: source.position.x + 240 + index * 190,
         y: source.position.y + 170,
@@ -220,7 +221,10 @@ export const workflowService = {
       template.edges.find((edge) => edge.source === templateStart?.id && idMap.has(edge.target))?.target ??
       templateNodes[0]!.id;
     const updated = this.updateDraft(workflowId, {
-      nodes: [...current.nodes, ...branchNodes],
+      nodes: [
+        ...current.nodes.map((node) => ({ ...node, style: { ...node.style, color: "#94a3b8" } })),
+        ...branchNodes,
+      ],
       edges: [
         ...current.edges,
         ...branchEdges,
