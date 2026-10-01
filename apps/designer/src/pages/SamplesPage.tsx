@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
@@ -51,30 +51,53 @@ function wildcardMatch(text: string, query: string): boolean {
 function SearchableFilter({
   label,
   options = [],
-  value,
+  selected = [],
   query,
-  onSelect,
+  open = false,
+  onOpenChange,
+  onToggle,
+  onClear,
+  onActivate,
   onQuery,
+  sortDirection = "asc",
+  onSortDirection,
   active = false,
 }: {
   label: string;
   options?: string[];
-  value?: string;
+  selected?: string[];
   query: string;
-  onSelect?: (value: string) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onToggle?: (value: string) => void;
+  onClear?: () => void;
+  onActivate?: () => void;
   onQuery: (value: string) => void;
+  sortDirection?: "asc" | "desc";
+  onSortDirection?: (direction: "asc" | "desc") => void;
   active?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (editing) inputRef.current?.focus();
   }, [editing]);
-  const matching = options.filter((option) => wildcardMatch(option, query));
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!filterRef.current?.contains(event.target as Node)) onOpenChange?.(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [open, onOpenChange]);
+  const matching = options
+    .filter((option) => wildcardMatch(option, query))
+    .sort((a, b) => sortDirection === "asc" ? a.localeCompare(b) : b.localeCompare(a));
+  const displayLabel = selected.length === 0 ? label : selected.length === 1 ? selected[0] : `${label} (${selected.length})`;
 
   return (
-    <div className="sample-search-filter">
+    <div className="sample-search-filter" ref={filterRef}>
       {editing ? (
         <input
           ref={inputRef}
@@ -90,24 +113,57 @@ function SearchableFilter({
       ) : (
         <button
           type="button"
-          className={`lims-filter${active || value || query ? " active" : ""}`}
+          className={`lims-filter filter-trigger${active || selected.length || query ? " active" : ""}`}
           aria-expanded={options.length ? open : undefined}
           title={`Double-click to wildcard search ${label.toLowerCase()}`}
-          onClick={() => options.length && setOpen((current) => !current)}
+          onClick={() => options.length ? onOpenChange?.(!open) : onActivate?.()}
           onDoubleClick={() => {
-            setOpen(false);
+            onOpenChange?.(false);
             setEditing(true);
           }}
         >
-          {value || (query ? `${label}: ${query}` : label)}
-          {options.length ? <span aria-hidden="true">⌄</span> : null}
+          <span>{query ? `${label}: ${query}` : displayLabel}</span>
+          {options.length ? (
+            <svg className={`filter-chevron${open ? " is-open" : ""}`} viewBox="0 0 16 16" aria-hidden="true">
+              <path d="m4 6 4 4 4-4" />
+            </svg>
+          ) : null}
         </button>
       )}
       {open ? (
-        <div className="sample-filter-menu" role="listbox" aria-label={label}>
-          <button type="button" onClick={() => { onSelect?.(""); onQuery(""); setOpen(false); }}>{label}</button>
+        <div className="sample-filter-menu" role="listbox" aria-label={label} aria-multiselectable="true">
+          <div className="sample-filter-menu-head">
+            <span>{selected.length ? `${selected.length} selected` : `All ${label.toLowerCase()}`}</span>
+            <button
+              type="button"
+              className="sample-filter-sort"
+              aria-label={`Sort ${label.toLowerCase()} ${sortDirection === "asc" ? "descending" : "ascending"}`}
+              title={`Sort ${sortDirection === "asc" ? "Z–A" : "A–Z"}`}
+              onClick={() => onSortDirection?.(sortDirection === "asc" ? "desc" : "asc")}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d={sortDirection === "asc" ? "M8 12V4m0 0L5 7m3-3 3 3" : "M8 4v8m0 0 3-3m-3 3-3-3"} />
+              </svg>
+              {sortDirection === "asc" ? "A–Z" : "Z–A"}
+            </button>
+          </div>
+          <button className="sample-filter-clear" type="button" onClick={() => { onClear?.(); onQuery(""); }}>
+            Clear selection
+          </button>
           {matching.map((option) => (
-            <button type="button" key={option} onClick={() => { onSelect?.(option); onQuery(""); setOpen(false); }}>{option}</button>
+            <button
+              type="button"
+              role="option"
+              aria-selected={selected.includes(option)}
+              className={selected.includes(option) ? "is-selected" : undefined}
+              key={option}
+              onClick={() => onToggle?.(option)}
+            >
+              <span className="filter-option-check" aria-hidden="true">
+                {selected.includes(option) ? <svg viewBox="0 0 12 12"><path d="m2.2 6.2 2.3 2.3 5.3-5.3" /></svg> : null}
+              </span>
+              {option}
+            </button>
           ))}
         </div>
       ) : null}
@@ -222,11 +278,13 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
-  const [testFilter, setTestFilter] = useState("");
+  const [testFilters, setTestFilters] = useState<string[]>([]);
   const [testQuery, setTestQuery] = useState("");
-  const [clientFilter, setClientFilter] = useState("");
+  const [clientFilters, setClientFilters] = useState<string[]>([]);
   const [clientQuery, setClientQuery] = useState("");
   const [rowQuery, setRowQuery] = useState("");
+  const [openFilter, setOpenFilter] = useState<"tests" | "clients" | null>(null);
+  const [tableSort, setTableSort] = useState<{ field: "tests" | "clients"; direction: "asc" | "desc" } | null>(null);
   const [testingOpen, setTestingOpen] = useState(false);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
@@ -239,12 +297,17 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const clientOptions = [...new Set(contextRows.map((sample) => sample.client))].sort();
   const rows = contextRows
     .filter((sample) => matchesQuickFilter(sample, filter))
-    .filter((sample) => !testFilter || testNames(sample).includes(testFilter))
+    .filter((sample) => testFilters.length === 0 || testFilters.some((test) => testNames(sample).includes(test)))
     .filter((sample) => wildcardMatch(testNames(sample).join(" "), testQuery))
-    .filter((sample) => !clientFilter || sample.client === clientFilter)
+    .filter((sample) => clientFilters.length === 0 || clientFilters.includes(sample.client))
     .filter((sample) => wildcardMatch(sample.client, clientQuery))
     .filter((sample) => wildcardMatch(Object.values(sample).join(" "), rowQuery))
-    .sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+    .sort((a, b) => {
+      if (!tableSort) return priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities);
+      const aValue = tableSort.field === "tests" ? a.tests : a.client;
+      const bValue = tableSort.field === "tests" ? b.tests : b.client;
+      return aValue.localeCompare(bValue) * (tableSort.direction === "asc" ? 1 : -1);
+    });
   const reviewRows =
     reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
   const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
@@ -270,6 +333,22 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       }
       return next;
     });
+  }
+
+  function toggleFilterValue(value: string, setter: Dispatch<SetStateAction<string[]>>) {
+    setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  }
+
+  function resetTableFilters() {
+    setFilter("all");
+    setReviewFilter("individual");
+    setTestFilters([]);
+    setClientFilters([]);
+    setTestQuery("");
+    setClientQuery("");
+    setRowQuery("");
+    setOpenFilter(null);
+    setTableSort(null);
   }
   const pageButtons = buttons.filter((button) => button.enabled && button.views.includes(view) && button.id !== "viewResults");
   const viewResultsButton = buttons.find((button) => button.id === "viewResults");
@@ -396,13 +475,37 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       ) : null}
 
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
-        <SearchableFilter label="Tests" options={testOptions} value={testFilter} query={testQuery} onSelect={setTestFilter} onQuery={setTestQuery} />
-        <SearchableFilter label="Clients" options={clientOptions} value={clientFilter} query={clientQuery} onSelect={setClientFilter} onQuery={setClientQuery} />
+        <SearchableFilter
+          label="Tests"
+          options={testOptions}
+          selected={testFilters}
+          query={testQuery}
+          open={openFilter === "tests"}
+          onOpenChange={(open) => setOpenFilter(open ? "tests" : null)}
+          onToggle={(value) => toggleFilterValue(value, setTestFilters)}
+          onClear={() => setTestFilters([])}
+          onQuery={setTestQuery}
+          sortDirection={tableSort?.field === "tests" ? tableSort.direction : "asc"}
+          onSortDirection={(direction) => setTableSort({ field: "tests", direction })}
+        />
+        <SearchableFilter
+          label="Clients"
+          options={clientOptions}
+          selected={clientFilters}
+          query={clientQuery}
+          open={openFilter === "clients"}
+          onOpenChange={(open) => setOpenFilter(open ? "clients" : null)}
+          onToggle={(value) => toggleFilterValue(value, setClientFilters)}
+          onClear={() => setClientFilters([])}
+          onQuery={setClientQuery}
+          sortDirection={tableSort?.field === "clients" ? tableSort.direction : "asc"}
+          onSortDirection={(direction) => setTableSort({ field: "clients", direction })}
+        />
         {view === "review" ? (
-          <SearchableFilter label="In Review" query={rowQuery} onQuery={setRowQuery} active />
+          <SearchableFilter label="In Review" query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active />
         ) : null}
         {view !== "review" ? (
-          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} active={filter === "all"} />
+          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active={filter === "all"} />
         ) : null}
         {view === "review"
           ? (["individual", "batch"] as const).map((item) => (
@@ -422,7 +525,10 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 type="button"
                 className={`lims-filter${filter === item.id ? " active" : ""}`}
                 aria-pressed={filter === item.id}
-                onClick={() => setFilter(item.id)}
+                onClick={() => {
+                  setOpenFilter(null);
+                  setFilter(item.id);
+                }}
               >
                 {item.label}
               </button>
