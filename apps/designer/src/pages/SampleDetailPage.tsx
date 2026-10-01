@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import { AccountLink } from "../components/AccountTable";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
-import { useSectionTabs } from "../sectionTabs";
 
 function FolderIcon() {
   return (
@@ -16,34 +15,112 @@ function FolderIcon() {
   );
 }
 
-export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleRecord; withTabs?: boolean }) {
-  const sectionTabs = useSectionTabs();
+type CustodyEvent = {
+  title: string;
+  detail: string;
+  actor: string;
+  minutes: number;
+};
+
+function eventTime(received: string, minutes: number): string {
+  const parsed = new Date(received.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return received;
+  parsed.setMinutes(parsed.getMinutes() + minutes);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+}
+
+function custodyEvents(sample: SampleRecord): CustodyEvent[] {
+  const rank = { received: 0, hold: 0, testing: 1, review: 2, approval: 3, released: 4 }[sample.status];
+  const events: CustodyEvent[] = [
+    {
+      title: "Sample logged",
+      detail: `Electronic or manual order verified at ${sample.site}`,
+      actor: "M. Chen",
+      minutes: 0,
+    },
+  ];
+  if (rank >= 1) {
+    events.push({
+      title: "Testing started",
+      detail: `Sample assigned for ${sample.tests}`,
+      actor: "J. Patel",
+      minutes: 40,
+    });
+  }
+  if (rank >= 2) {
+    events.push(
+      {
+        title: "Testing complete",
+        detail: "Results and instrument records attached",
+        actor: "J. Patel",
+        minutes: 120,
+      },
+      {
+        title: "Review started",
+        detail: "Results routed for peer review",
+        actor: "A. Rivera",
+        minutes: 135,
+      },
+    );
+  }
+  if (rank >= 3) {
+    events.push({
+      title: "Review complete",
+      detail: "Peer review completed and routed to QA",
+      actor: "A. Rivera",
+      minutes: 210,
+    });
+  }
+  if (rank >= 4) {
+    events.push({
+      title: "Sample released",
+      detail: "Final result and certificate released",
+      actor: "M. Chen",
+      minutes: 260,
+    });
+  }
+  if (sample.status === "hold") {
+    events.push({
+      title: "Sample placed on hold",
+      detail: sample.custody,
+      actor: "R. Alvarez",
+      minutes: 25,
+    });
+  }
+  const movementMinute = rank >= 4 ? 270 : rank >= 3 ? 200 : rank >= 2 ? 125 : rank >= 1 ? 30 : 15;
+  events.push({
+    title: "Location updated",
+    detail: `${sample.site} · ${sample.custody}`,
+    actor: rank >= 2 ? "A. Rivera" : "R. Alvarez",
+    minutes: movementMinute,
+  });
+  return events.sort((a, b) => a.minutes - b.minutes);
+}
+
+export function SampleDetailBody({
+  sample,
+  showBack = true,
+  showTitle = true,
+}: {
+  sample: SampleRecord;
+  showBack?: boolean;
+  showTitle?: boolean;
+}) {
   const [attachmentOpen, setAttachmentOpen] = useState(false);
+  const events = custodyEvents(sample);
   return (
     <div className="lims-page">
-      <div className="sample-tab-row">
-        <Link className="btn sample-back" to="/app/ops/home">
-          Back to Home
-        </Link>
-        {withTabs ? (
-          <div className="lims-tabs lims-tabs-inline" role="tablist" aria-label="Screens for this section">
-            {sectionTabs.tabs.map((tab) => (
-              <div key={tab.id} className={`lims-tab${sectionTabs.activeId === tab.id ? " active" : ""}`}>
-                <button type="button" role="tab" aria-selected={sectionTabs.activeId === tab.id} onClick={() => sectionTabs.select(tab.id)}>
-                  {tab.title}
-                </button>
-                <button type="button" className="lims-tab-close" aria-label={`Close ${tab.title}`} onClick={() => sectionTabs.close(tab.id)}>
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </div>
+      {showBack ? (
+        <div className="sample-tab-row">
+          <Link className="btn sample-back" to="/app/ops/home">Back to Home</Link>
+        </div>
+      ) : null}
       <div className="lims-page-header">
-        <p className="lims-page-lede">
-          {sample.client} · {sample.tests}
-        </p>
+        <div>
+          {showTitle ? <h1>Sample Details</h1> : null}
+          <p className="lims-page-lede">{sample.client} · {sample.tests}</p>
+        </div>
       </div>
 
       <div className="sample-detail-grid">
@@ -100,7 +177,7 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
               <dd>{STATUS_LABEL[sample.status]}</dd>
             </div>
             <div>
-              <dt>Custody</dt>
+              <dt>Location</dt>
               <dd>{sample.custody}</dd>
             </div>
             <div>
@@ -132,6 +209,30 @@ export function SampleDetailBody({ sample, withTabs = false }: { sample: SampleR
               <dd className="lims-mono">{sample.batchId ?? "—"}</dd>
             </div>
           </dl>
+        </section>
+
+        <section className="lims-panel sample-detail-panel chain-of-custody-panel">
+          <div className="lims-panel-head">
+            <div>
+              <h2>Chain of custody</h2>
+              <p>Chronological sample activity, location changes, and responsible personnel.</p>
+            </div>
+          </div>
+          <ol className="custody-timeline">
+            {events.map((event) => (
+              <li key={`${event.title}-${event.minutes}`}>
+                <span className="custody-marker" aria-hidden="true" />
+                <div>
+                  <b>{event.title}</b>
+                  <p>{event.detail}</p>
+                </div>
+                <div className="custody-event-meta">
+                  <time>{eventTime(sample.received, event.minutes)}</time>
+                  <span>{event.actor}</span>
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
       </div>
       {attachmentOpen ? <ReceiptFormDialog sample={sample} onClose={() => setAttachmentOpen(false)} /> : null}

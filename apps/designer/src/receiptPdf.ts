@@ -16,7 +16,7 @@ export function receiptPdfDocument(sample: SampleRecord): string {
     ["Tests", sample.tests],
     ["Priority", sample.priority],
     ["Site", sample.site],
-    ["Custody", sample.custody],
+    ["Location", sample.custody],
   ];
   const draw = [
     "0.96 0.94 0.90 rg",

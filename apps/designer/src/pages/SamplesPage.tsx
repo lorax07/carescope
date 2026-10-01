@@ -215,12 +215,21 @@ function FolderIcon() {
   );
 }
 
+function workflowTime(received: string, minutesAfterReceipt: number): string {
+  const parsed = new Date(received.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return received;
+  parsed.setMinutes(parsed.getMinutes() + minutesAfterReceipt);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+}
+
 function cell(
   sample: SampleRecord,
   id: SampleColumnId,
   status = sample.status,
   onOpen?: (sample: SampleRecord) => void,
   onReceipt?: (sample: SampleRecord) => void,
+  view: SampleView = "home",
 ) {
   if (id === "accessionId") {
     return (
@@ -244,7 +253,15 @@ function cell(
       </span>
     );
   }
-  if (id === "received") return <span className="lims-mono muted">{sample.received}</span>;
+  if (id === "received") {
+    const time =
+      view === "review"
+        ? workflowTime(sample.received, 120)
+        : view === "release"
+          ? workflowTime(sample.received, 210)
+          : sample.received;
+    return <span className="lims-mono muted">{time}</span>;
+  }
   if (id === "client") return <AccountLink name={sample.client} />;
   if (id === "matrix") return sample.matrix;
   if (id === "tests") return sample.tests;
@@ -396,7 +413,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     },
     {
       title: "Blocked",
-      hint: "On hold until custody or the deviation clears",
+      hint: "On hold until the location issue or deviation clears",
       rows: open.filter((sample) => sample.status === "hold"),
     },
   ];
@@ -579,7 +596,13 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 </th>
                 {view === "review" && reviewFilter === "batch" ? <th>Batch</th> : null}
                 {visible.map((column) => (
-                  <th key={column.id}>{column.label}</th>
+                  <th key={column.id}>
+                    {column.id === "received" && view === "review"
+                      ? "Test Complete"
+                      : column.id === "received" && view === "release"
+                        ? "Review"
+                        : column.label}
+                  </th>
                 ))}
                 {view === "review" ? <th>Flag</th> : null}
                 <th />
@@ -630,7 +653,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                               </td>
                             ) : null}
                             {visible.map((column) => (
-                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
+                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
                             ))}
                             <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
@@ -661,7 +684,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                           />
                         </td>
                         {visible.map((column) => (
-                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
+                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
                         ))}
                         {view === "review" ? (
                           <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
@@ -700,6 +723,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenSample(null)}>
           <div className="lims-modal lims-modal-wide" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <div className="lims-dialog-bar">
+              <h2>Sample Details</h2>
               <button
                 type="button"
                 className="btn btn-primary"
@@ -714,7 +738,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 Close
               </button>
             </div>
-            <SampleDetailBody sample={openSample} />
+            <SampleDetailBody sample={openSample} showBack={false} showTitle={false} />
           </div>
         </div>
       ) : null}

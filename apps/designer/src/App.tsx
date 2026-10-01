@@ -195,7 +195,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
 function PinnedScreen({ tab }: { tab: PinnedTab }) {
   if (tab.kind === "sample") {
     const sample = findSample(tab.recordId);
-    return sample ? <SampleDetailBody sample={sample} /> : null;
+    return sample ? <SampleDetailBody sample={sample} showBack={false} /> : null;
   }
   if (tab.kind === "run") {
     const run = findRunSequence(tab.recordId);

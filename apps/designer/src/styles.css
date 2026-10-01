@@ -753,6 +753,76 @@ a {
   margin: 0;
 }
 
+.chain-of-custody-panel {
+  grid-column: 1 / -1;
+}
+
+.chain-of-custody-panel .lims-panel-head p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.custody-timeline {
+  margin: 0;
+  padding: 0 1rem 0.5rem;
+  list-style: none;
+}
+
+.custody-timeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.custody-timeline li:last-child {
+  border-bottom: 0;
+}
+
+.custody-timeline li:not(:last-child)::before {
+  position: absolute;
+  top: 1.55rem;
+  bottom: -0.8rem;
+  left: 0.34rem;
+  width: 1px;
+  background: #c9d8ed;
+  content: "";
+}
+
+.custody-marker {
+  position: relative;
+  z-index: 1;
+  width: 0.72rem;
+  height: 0.72rem;
+  margin-top: 0.2rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px #bad1f6;
+}
+
+.custody-timeline p {
+  margin: 0.2rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.custody-event-meta {
+  display: grid;
+  justify-items: end;
+  gap: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.custody-event-meta span {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .sample-account-panel {
   background: #f8fafc;
 }
