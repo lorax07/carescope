@@ -2067,13 +2067,55 @@ a {
   background: #fff;
 }
 
-.lims-screen-tabs {
+.lims-screen-tabs-row {
   display: flex;
   align-items: flex-end;
-  gap: 1.45rem;
+  gap: 1rem;
   margin: -0.35rem 0 1.15rem;
   border-bottom: 1px solid #e6e7eb;
+}
+
+.lims-screen-tabs {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: flex-end;
+  gap: 1.45rem;
+  min-width: 0;
+  margin: 0;
+  border-bottom: 0;
   overflow-x: auto;
+}
+
+.screen-view-toggle {
+  display: inline-flex;
+  flex: none;
+  gap: 0.15rem;
+  margin: 0 0 0.4rem;
+  padding: 0.16rem;
+  border: 1px solid #d7dee8;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.screen-view-toggle button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.38rem 0.7rem;
+}
+
+.screen-view-toggle button.is-on {
+  background: #1b6ef3;
+  color: #fff;
+}
+
+.screen-view-body > .lims-page {
+  padding: 0;
 }
 
 .lims-screen-tabs > button[role="tab"],

@@ -8,7 +8,7 @@ import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
-import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
@@ -174,6 +174,21 @@ function NavIcon({ name }: { name: string }) {
       <path d="M4 16.5 9 12l3 2.5 6-7" />
       <path d="M14 7.5h4.5V12" />
     </svg>
+  );
+}
+
+function workspaceTabLabel(section: string, menu: { view: string; label: string }[]): string {
+  if (section === "instruments") return "Instruments";
+  return (
+    menu.find((item) => item.view === section)?.label ??
+    {
+      design: "Workflow design",
+      connectivity: "Sequence Client",
+      quality: "Sequence Compliance",
+      billing: "Sequence Revenue",
+      insights: "Sequence Insights",
+    }[section] ??
+    "Workspace"
   );
 }
 
@@ -692,13 +707,29 @@ function AppFrame() {
         </header>
         <div
           ref={workspaceRef}
-          className={`lims-workspace${sectionTabs.activeId ? " has-dock" : ""}${resizingDock ? " is-resizing" : ""}`}
+          className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}`}
           style={{ "--screen-dock-width": `${dockWidth}px` } as CSSProperties}
         >
-          <div className="lims-content">
-            <Outlet />
-          </div>
-          {sectionTabs.tabs
+          {sectionTabs.presentation === "screen" && sectionTabs.activeId ? (
+            <div className="lims-content">
+              <div className="lims-page screen-view-page">
+                <SectionTabStrip mainLabel={workspaceTabLabel(sectionTabs.section, labOps.menu)} />
+                <div className="screen-view-body">
+                  {sectionTabs.tabs
+                    .filter((tab) => tab.id === sectionTabs.activeId)
+                    .map((tab) => (
+                      <PinnedScreen key={tab.id} tab={tab} />
+                    ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="lims-content">
+              <Outlet />
+            </div>
+          )}
+          {sectionTabs.presentation === "tab"
+            ? sectionTabs.tabs
             .filter((tab) => tab.id === sectionTabs.activeId)
             .map((tab) => (
               <div key={tab.id} className="lims-screen-dock-wrap">
@@ -756,7 +787,8 @@ function AppFrame() {
                   <PinnedScreen tab={tab} />
                 </aside>
               </div>
-            ))}
+            ))
+            : null}
         </div>
       </div>
 
