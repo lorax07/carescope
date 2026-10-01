@@ -4835,8 +4835,8 @@ button.palette-category-title {
 .wf-node {
   min-width: 160px;
   max-width: 220px;
-  background: #fff;
-  border: 1.5px solid var(--border);
+  background: color-mix(in srgb, var(--node-color, #94a3b8) 7%, #fff);
+  border: 1.5px solid color-mix(in srgb, var(--node-color, #94a3b8) 65%, #fff);
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(15, 23, 36, 0.08);
   font-size: 0.75rem;
@@ -4853,7 +4853,7 @@ button.palette-category-title {
   gap: 0.4rem;
   padding: 0.45rem 0.6rem;
   border-bottom: 1px solid var(--border-subtle);
-  background: #f8fafc;
+  background: color-mix(in srgb, var(--node-color, #94a3b8) 14%, #fff);
   border-radius: 7px 7px 0 0;
 }
 
