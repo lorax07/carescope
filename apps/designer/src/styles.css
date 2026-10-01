@@ -3559,8 +3559,269 @@ a {
   font-weight: 800;
 }
 
-.workflow-operations-config {
+.workflow-training-section {
   margin-top: 2rem;
+}
+
+.workflow-training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.7rem;
+}
+
+.workflow-training-card {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.workflow-training-card:hover {
+  transform: translateY(-2px);
+  border-color: #a8c7f5;
+  box-shadow: 0 10px 22px rgba(15, 23, 36, 0.08);
+}
+
+.workflow-training-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 4.2rem;
+  overflow: hidden;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #0b1f44, #2677ea);
+}
+
+.workflow-training-thumb::before,
+.workflow-training-thumb::after {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+  content: "";
+}
+
+.workflow-training-thumb::before {
+  inset: 0.65rem 1rem 1.75rem 0.65rem;
+}
+
+.workflow-training-thumb::after {
+  inset: 2.05rem 0.65rem 0.65rem 1.6rem;
+}
+
+.training-tone-2 {
+  background: linear-gradient(145deg, #073b4c, #18a999);
+}
+
+.training-tone-3 {
+  background: linear-gradient(145deg, #3f245f, #8b5cf6);
+}
+
+.training-tone-4 {
+  background: linear-gradient(145deg, #5a3212, #e78a2e);
+}
+
+.workflow-training-play {
+  position: relative;
+  z-index: 1;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+}
+
+.workflow-training-play::after {
+  position: absolute;
+  top: 0.48rem;
+  left: 0.68rem;
+  border-top: 0.38rem solid transparent;
+  border-bottom: 0.38rem solid transparent;
+  border-left: 0.55rem solid #fff;
+  content: "";
+}
+
+.workflow-training-thumb small {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.3rem;
+  z-index: 1;
+  padding: 0.08rem 0.25rem;
+  border-radius: 4px;
+  background: rgba(7, 18, 38, 0.72);
+  color: #fff;
+  font-size: 0.58rem;
+}
+
+.workflow-training-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.18rem;
+}
+
+.workflow-training-copy > small {
+  color: var(--accent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.workflow-training-copy > b {
+  font-size: 0.84rem;
+}
+
+.workflow-training-copy > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.workflow-training-dialog {
+  width: min(900px, calc(100vw - 2rem));
+}
+
+.workflow-training-player {
+  background: #071326;
+  color: #fff;
+}
+
+.workflow-training-stage {
+  margin: 1rem 1rem 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f4f7fb;
+  color: var(--text);
+  aspect-ratio: 16 / 8.2;
+}
+
+.training-player-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid #dfe5ed;
+  background: #fff;
+}
+
+.training-player-topbar span {
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  background: #cad3df;
+}
+
+.training-player-topbar b {
+  margin-left: 0.35rem;
+  font-size: 0.7rem;
+}
+
+.training-player-scene {
+  position: relative;
+  display: grid;
+  align-content: center;
+  height: calc(100% - 2.15rem);
+  padding: 2rem clamp(2rem, 8vw, 6rem);
+  background:
+    radial-gradient(circle at 85% 18%, rgba(27, 110, 243, 0.12), transparent 28%),
+    linear-gradient(135deg, #fff, #edf4ff);
+}
+
+.training-player-step {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  color: rgba(27, 110, 243, 0.15);
+  font-size: 4.5rem;
+  font-weight: 900;
+}
+
+.training-player-scene h3 {
+  position: relative;
+  margin: 0.2rem 0;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.training-player-scene > p:not(.lims-eyebrow) {
+  position: relative;
+  max-width: 38rem;
+  color: var(--text-muted);
+}
+
+.training-player-demo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.training-player-demo span {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #bfd3ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #234f8f;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.training-player-demo i {
+  width: 2.5rem;
+  height: 1px;
+  background: #8aaedf;
+}
+
+.workflow-training-controls {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.65rem 1rem;
+}
+
+.workflow-training-controls span {
+  color: #b7c4d8;
+  font-size: 0.7rem;
+}
+
+.workflow-training-controls input {
+  width: 100%;
+  accent-color: #4b91f7;
+}
+
+.training-play-control {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #40516d;
+  border-radius: 50%;
+  background: #132541;
+  color: #fff;
+}
+
+.workflow-training-caption {
+  min-height: 4.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid #20324e;
+}
+
+.workflow-training-caption p {
+  margin: 0.25rem 0 0;
+  color: #b7c4d8;
+  font-size: 0.78rem;
 }
 
 .workflow-module-preview {

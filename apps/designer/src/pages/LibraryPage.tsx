@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LabOperationsEditor } from "../components/LabOperationsEditor";
 import { workflowService } from "../platform";
 
 const SYSTEM_WORKFLOWS = [
@@ -70,6 +69,61 @@ const SYSTEM_WORKFLOWS = [
   },
 ] as const;
 
+const WORKFLOW_TUTORIALS = [
+  {
+    id: "first-workflow",
+    title: "Build your first workflow",
+    duration: "2:10",
+    level: "Getting started",
+    summary: "Create a workflow, connect stages, and publish a valid draft.",
+    frames: [
+      ["Start from the workflow library", "Choose New workflow or open a system workflow that already matches your process."],
+      ["Build the workflow logic", "Drag tasks, reviews, approvals, and conditions into the Workflow Designer."],
+      ["Connect and configure", "Connect each branch, then select a stage to configure roles, instructions, and rules."],
+      ["Validate and publish", "Resolve validation findings, preview the workflow, and publish the approved version."],
+    ],
+  },
+  {
+    id: "screen-design",
+    title: "Design workflow screens",
+    duration: "1:45",
+    level: "Screen design",
+    summary: "Build user-facing task screens and preview each interaction.",
+    frames: [
+      ["Open Screen design", "Switch from Workflow logic to Screen design without leaving the workflow."],
+      ["Add the task screens", "Create one screen for each point where a user needs to review or enter information."],
+      ["Configure fields and actions", "Set the title, instructions, fields, and primary action for every screen."],
+      ["Preview the user experience", "Use the live preview and full preview dialog before publishing."],
+    ],
+  },
+  {
+    id: "template-branch",
+    title: "Add a template branch",
+    duration: "1:20",
+    level: "Templates",
+    summary: "Add a reusable template to an existing workflow branch.",
+    frames: [
+      ["Choose Use template", "Select a validated laboratory template from the workflow home screen."],
+      ["Add to Current workflow", "Choose the workflow that should receive the reusable process branch."],
+      ["Select the connection branch", "Choose the exact stage where the template should connect."],
+      ["Review the combined canvas", "The new branch opens in the designer ready for configuration and validation."],
+    ],
+  },
+  {
+    id: "preview-publish",
+    title: "Preview, validate, and publish",
+    duration: "1:55",
+    level: "Release controls",
+    summary: "Test workflow logic and screens before releasing a version.",
+    frames: [
+      ["Preview every screen", "Move through every task screen and confirm labels, fields, and actions."],
+      ["Simulate the workflow", "Run representative sample data through conditions and branches."],
+      ["Validate the draft", "Check for disconnected stages, missing roles, and incomplete configuration."],
+      ["Publish a controlled version", "Publish the validated workflow while retaining its prior version history."],
+    ],
+  },
+] as const;
+
 export function LibraryPage() {
   const navigate = useNavigate();
   const [tick, setTick] = useState(0);
@@ -80,6 +134,9 @@ export function LibraryPage() {
   const [templateBranch, setTemplateBranch] = useState<"new" | "current" | null>(null);
   const [currentWorkflowId, setCurrentWorkflowId] = useState("");
   const [connectNodeId, setConnectNodeId] = useState("");
+  const [tutorialId, setTutorialId] = useState<string | null>(null);
+  const [tutorialFrame, setTutorialFrame] = useState(0);
+  const [tutorialPlaying, setTutorialPlaying] = useState(false);
   const workflows = useMemo(() => {
     void tick;
     return workflowService.list();
@@ -87,6 +144,21 @@ export function LibraryPage() {
 
   const templates = workflows.filter((w) => w.isTemplate);
   const definitions = workflows.filter((w) => !w.isTemplate);
+  const tutorial = WORKFLOW_TUTORIALS.find((item) => item.id === tutorialId);
+
+  useEffect(() => {
+    if (!tutorialPlaying || !tutorial) return;
+    const timer = window.setInterval(() => {
+      setTutorialFrame((current) => {
+        if (current >= tutorial.frames.length - 1) {
+          setTutorialPlaying(false);
+          return current;
+        }
+        return current + 1;
+      });
+    }, 2200);
+    return () => window.clearInterval(timer);
+  }, [tutorial, tutorialPlaying]);
 
   const createNew = () => {
     const wf = workflowService.create({
@@ -290,15 +362,95 @@ export function LibraryPage() {
         ))}
       </div>
 
-      <section className="workflow-operations-config">
+      <section className="workflow-training-section">
         <div className="workflow-section-heading">
           <div>
-            <p className="lims-eyebrow">Operations configuration</p>
-            <h2>Workflow UI settings</h2>
+            <p className="lims-eyebrow">Learn in minutes</p>
+            <h2>Workflow video tutorials</h2>
+            <p>Short, focused training for building, previewing, and publishing workflows.</p>
+          </div>
+          <span className="lims-count">{WORKFLOW_TUTORIALS.length} tutorials</span>
+        </div>
+        <div className="workflow-training-grid">
+          {WORKFLOW_TUTORIALS.map((item, index) => (
+            <button
+              type="button"
+              className="workflow-training-card"
+              key={item.id}
+              onClick={() => {
+                setTutorialId(item.id);
+                setTutorialFrame(0);
+                setTutorialPlaying(true);
+              }}
+            >
+              <span className={`workflow-training-thumb training-tone-${index + 1}`}>
+                <i className="workflow-training-play" aria-hidden="true" />
+                <small>{item.duration}</small>
+              </span>
+              <span className="workflow-training-copy">
+                <small>{item.level}</small>
+                <b>{item.title}</b>
+                <span>{item.summary}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {tutorial ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>
+          <div className="lims-modal lims-modal-wide workflow-training-dialog" role="dialog" aria-modal="true" aria-labelledby="workflow-training-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar">
+              <div><p className="lims-eyebrow">{tutorial.level} · {tutorial.duration}</p><h2 id="workflow-training-title">{tutorial.title}</h2></div>
+              <button type="button" className="btn" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>Close</button>
+            </div>
+            <div className={`workflow-training-player${tutorialPlaying ? " is-playing" : ""}`}>
+              <div className="workflow-training-stage">
+                <div className="training-player-topbar"><span /><span /><span /><b>Sequence Workflow Design</b></div>
+                <div className="training-player-scene">
+                  <div className="training-player-step">{String(tutorialFrame + 1).padStart(2, "0")}</div>
+                  <p className="lims-eyebrow">Tutorial step {tutorialFrame + 1} of {tutorial.frames.length}</p>
+                  <h3>{tutorial.frames[tutorialFrame]?.[0]}</h3>
+                  <p>{tutorial.frames[tutorialFrame]?.[1]}</p>
+                  <div className="training-player-demo">
+                    <span>Start</span><i /><span>{tutorial.frames[tutorialFrame]?.[0]}</span><i /><span>Complete</span>
+                  </div>
+                </div>
+              </div>
+              <div className="workflow-training-controls">
+                <button
+                  type="button"
+                  className="training-play-control"
+                  aria-label={tutorialPlaying ? "Pause tutorial" : "Play tutorial"}
+                  onClick={() => {
+                    if (!tutorialPlaying && tutorialFrame === tutorial.frames.length - 1) setTutorialFrame(0);
+                    setTutorialPlaying((playing) => !playing);
+                  }}
+                >
+                  {tutorialPlaying ? "Ⅱ" : "▶"}
+                </button>
+                <span>{tutorialFrame + 1} / {tutorial.frames.length}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={tutorial.frames.length - 1}
+                  value={tutorialFrame}
+                  aria-label="Tutorial progress"
+                  onChange={(event) => {
+                    setTutorialFrame(Number(event.target.value));
+                    setTutorialPlaying(false);
+                  }}
+                />
+                <span>{tutorial.duration}</span>
+              </div>
+              <div className="workflow-training-caption" aria-live="polite">
+                <b>{tutorial.frames[tutorialFrame]?.[0]}</b>
+                <p>{tutorial.frames[tutorialFrame]?.[1]}</p>
+              </div>
+            </div>
           </div>
         </div>
-        <LabOperationsEditor />
-      </section>
+      ) : null}
 
       {preview ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
