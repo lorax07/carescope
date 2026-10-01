@@ -2689,6 +2689,23 @@ a {
   margin-left: 0;
 }
 
+.review-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #526174;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.review-type.is-batch {
+  background: #eaf2ff;
+  color: #1c5fbf;
+}
+
 .sample-search-filter {
   position: relative;
 }
@@ -3416,6 +3433,220 @@ a {
   margin-top: 0.15rem;
 }
 
+.system-workflow-section {
+  margin-bottom: 2rem;
+}
+
+.workflow-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.1rem 0 0.8rem;
+}
+
+.workflow-section-heading h2,
+.workflow-section-heading p {
+  margin: 0;
+}
+
+.workflow-section-heading h2 {
+  font-size: 1.15rem;
+}
+
+.workflow-section-heading > div > p:last-child {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.system-workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.85rem;
+}
+
+.system-workflow-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.system-workflow-card-head {
+  display: flex;
+  justify-content: space-between;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.system-workflow-card-head b {
+  color: var(--text-muted);
+}
+
+.system-workflow-card h3,
+.system-workflow-card p {
+  margin: 0;
+}
+
+.system-workflow-card p {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.system-workflow-card ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.system-workflow-card li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #536276;
+  font-size: 0.73rem;
+}
+
+.system-workflow-card li span {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: #eaf2ff;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.workflow-operations-config {
+  margin-top: 2rem;
+}
+
+.workflow-module-preview {
+  width: min(960px, calc(100vw - 2rem));
+}
+
+.workflow-preview-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 34rem;
+}
+
+.workflow-preview-layout > aside {
+  padding: 1rem;
+  border-right: 1px solid var(--border-subtle);
+  background: #f7f9fc;
+}
+
+.workflow-preview-layout aside ol {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workflow-preview-layout aside li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.workflow-preview-layout aside li.is-active {
+  background: #eaf2ff;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.workflow-preview-layout aside li span {
+  font-weight: 800;
+}
+
+.workflow-screen-preview {
+  padding: 1.25rem;
+}
+
+.workflow-screen-preview h3 {
+  margin: 0.2rem 0;
+}
+
+.workflow-screen-preview > p {
+  color: var(--text-muted);
+}
+
+.workflow-screen-browser {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.2rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #edf1f6;
+}
+
+.workflow-screen-browser > span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #bdc7d4;
+}
+
+.workflow-screen-browser b {
+  margin-left: 0.5rem;
+  font-size: 0.72rem;
+}
+
+.workflow-preview-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.workflow-preview-fields label,
+.workflow-screen-editor-fields label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.workflow-preview-fields input,
+.workflow-preview-fields textarea,
+.workflow-screen-editor-fields input,
+.workflow-screen-editor-fields textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+
+.workflow-preview-fields .is-wide,
+.workflow-screen-editor-fields .is-wide {
+  grid-column: 1 / -1;
+}
+
+.workflow-preview-fields textarea {
+  min-height: 7rem;
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;
@@ -3638,6 +3869,216 @@ button.palette-category-title {
 .canvas-host {
   flex: 1;
   min-height: 0;
+}
+
+.workflow-designer-mode {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.16rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f5f7fa;
+}
+
+.workflow-designer-mode button {
+  padding: 0.3rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.workflow-designer-mode button.is-on {
+  background: #fff;
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgba(15, 23, 36, 0.12);
+}
+
+.workflow-screen-list,
+.workflow-live-preview {
+  min-width: 0;
+  overflow: auto;
+  border-color: var(--border-subtle);
+  background: #f8fafc;
+}
+
+.workflow-screen-list {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.workflow-live-preview {
+  border-left: 1px solid var(--border-subtle);
+}
+
+.workflow-screen-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.workflow-screen-list-head h2,
+.workflow-screen-list-head p,
+.workflow-live-preview h2,
+.workflow-live-preview p {
+  margin: 0;
+}
+
+.workflow-screen-list-items {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.55rem;
+}
+
+.workflow-screen-list-items > button {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.workflow-screen-list-items > button:hover,
+.workflow-screen-list-items > button.is-active {
+  border-color: #bad2f6;
+  background: #fff;
+}
+
+.workflow-screen-list-items > button > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #e7eef9;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.workflow-screen-list-items div {
+  display: grid;
+  min-width: 0;
+}
+
+.workflow-screen-list-items small {
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-screen-editor {
+  height: 100%;
+  padding: 1.25rem;
+  overflow: auto;
+  background: #f4f7fb;
+}
+
+.workflow-screen-editor-head {
+  margin-bottom: 1rem;
+}
+
+.workflow-screen-editor-head h2,
+.workflow-screen-editor-head p {
+  margin: 0;
+}
+
+.workflow-screen-editor-head span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.workflow-screen-editor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.workflow-screen-editor-fields textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.workflow-screen-editor-fields label small {
+  font-weight: 400;
+}
+
+.workflow-live-preview .props-header {
+  background: #fff;
+}
+
+.workflow-screen-mock {
+  margin: 0.8rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 36, 0.08);
+}
+
+.workflow-screen-mock-body {
+  padding: 1rem;
+}
+
+.workflow-screen-mock-body h2,
+.workflow-screen-mock-body > p {
+  margin: 0.2rem 0;
+}
+
+.workflow-screen-mock-body > p:not(.lims-eyebrow) {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.workflow-screen-mock-fields {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.workflow-screen-mock-fields label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.workflow-screen-mock-fields input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+}
+
+.workflow-screen-mock-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.workflow-screen-preview-modal {
+  width: min(820px, calc(100vw - 2rem));
+}
+
+.workflow-screen-preview-modal > .workflow-screen-mock {
+  margin: 1rem;
 }
 
 .props-empty {

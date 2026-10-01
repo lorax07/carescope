@@ -23,7 +23,7 @@ import {
 } from "../samples";
 
 type QuickFilter = "all" | "stat" | "testing" | "review" | "hold" | `priority:${string}`;
-type ReviewFilter = "individual" | "batch";
+type ReviewFilter = "all" | "individual" | "batch";
 
 const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
   { id: "all", label: "All open" },
@@ -200,7 +200,7 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
 function matchesView(sample: SampleRecord, status: SampleRecord["status"], view: SampleView): boolean {
   if (view === "home") return true;
   if (view === "testing") return status === "testing";
-  if (view === "review") return status === "review" && isResulted(sample);
+  if (view === "review") return (status === "review" || status === "approval") && isResulted(sample);
   return status === "approval" || status === "released";
 }
 
@@ -294,7 +294,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [filter, setFilter] = useState<QuickFilter>("all");
-  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
   const [testFilters, setTestFilters] = useState<string[]>([]);
@@ -328,7 +328,11 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       return aValue.localeCompare(bValue) * (tableSort.direction === "asc" ? 1 : -1);
     });
   const reviewRows =
-    reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
+    reviewFilter === "all"
+      ? rows
+      : reviewFilter === "individual"
+        ? rows.filter((sample) => !sample.batchId)
+        : rows.filter((sample) => sample.batchId);
   const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
   const listed = view === "review" ? reviewRows : rows;
   const approveTarget = view === "review" ? listed.filter((sample) => checked.has(sample.accessionId)) : [];
@@ -360,7 +364,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
 
   function resetTableFilters() {
     setFilter("all");
-    setReviewFilter("individual");
+    setReviewFilter("all");
     setTestFilters([]);
     setClientFilters([]);
     setTestQuery("");
@@ -494,6 +498,32 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         </div>
       ) : null}
 
+      {view === "testing" ? (
+        <section className="lims-panel current-runs-panel">
+          <div className="lims-panel-head">
+            <div>
+              <p className="lims-eyebrow">Live instrument work</p>
+              <h2>Current run sequences <span className="lims-count">{CURRENT_RUNS.length}</span></h2>
+            </div>
+          </div>
+          <div className="current-run-list">
+            {CURRENT_RUNS.map((run) => (
+              <button
+                type="button"
+                key={run.id}
+                onClick={() => sectionTabs.pin({ kind: "run", recordId: run.id, title: run.id })}
+              >
+                <span className="run-live-dot" aria-hidden="true" />
+                <b>{run.id}</b>
+                <span>{run.method}</span>
+                <span>{run.sampleIds.length} sample{run.sampleIds.length === 1 ? "" : "s"}</span>
+                <strong>{run.steps[run.currentStep]}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
         <SearchableFilter
           label="Tests"
@@ -555,32 +585,6 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
             ))}
       </div>
 
-      {view === "testing" ? (
-        <section className="lims-panel current-runs-panel">
-          <div className="lims-panel-head">
-            <div>
-              <p className="lims-eyebrow">Live instrument work</p>
-              <h2>Current run sequences <span className="lims-count">{CURRENT_RUNS.length}</span></h2>
-            </div>
-          </div>
-          <div className="current-run-list">
-            {CURRENT_RUNS.map((run) => (
-              <button
-                type="button"
-                key={run.id}
-                onClick={() => sectionTabs.pin({ kind: "run", recordId: run.id, title: run.id })}
-              >
-                <span className="run-live-dot" aria-hidden="true" />
-                <b>{run.id}</b>
-                <span>{run.method}</span>
-                <span>{run.sampleIds.length} sample{run.sampleIds.length === 1 ? "" : "s"}</span>
-                <strong>{run.steps[run.currentStep]}</strong>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
       <section className="lims-panel">
         <div className="lims-table-wrap">
           <table className="lims-table">
@@ -594,7 +598,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                     onChange={() => toggleMany(listed.map((sample) => sample.accessionId), !allListedChecked)}
                   />
                 </th>
-                {view === "review" && reviewFilter === "batch" ? <th>Batch</th> : null}
+                {view === "review" ? <th>Review type</th> : null}
                 {visible.map((column) => (
                   <th key={column.id}>
                     {column.id === "received" && view === "review"
@@ -649,7 +653,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                                     )
                                   }
                                 />
-                                {batchId}
+                                Batch · {batchId}
                               </td>
                             ) : null}
                             {visible.map((column) => (
@@ -664,7 +668,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                   ? (
                     <tr>
                       <td className="lims-empty" colSpan={(visible.length || 1) + 2}>
-                        {view === "review" ? "No individual samples are ready for review." : "No samples match this filter."}
+                        {view === "review" ? "No completed samples are ready for review." : "No samples match this filter."}
                       </td>
                     </tr>
                   )
@@ -683,6 +687,13 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                             onChange={() => toggleChecked(sample.accessionId)}
                           />
                         </td>
+                        {view === "review" ? (
+                          <td>
+                            <span className={`review-type ${sample.batchId ? "is-batch" : "is-individual"}`}>
+                              {sample.batchId ? `Batch · ${sample.batchId}` : "Individual"}
+                            </span>
+                          </td>
+                        ) : null}
                         {visible.map((column) => (
                           <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
                         ))}

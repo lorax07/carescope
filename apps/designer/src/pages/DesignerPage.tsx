@@ -30,6 +30,71 @@ import { WorkflowNode as WfNodeView, type WfFlowNode } from "../components/Workf
 
 const nodeTypes: NodeTypes = { workflow: WfNodeView };
 
+type WorkflowScreen = {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  fields: string;
+  primaryAction: string;
+};
+
+function defaultScreens(workflowName: string): WorkflowScreen[] {
+  return [
+    {
+      id: "request",
+      name: "Request",
+      title: `Start ${workflowName}`,
+      description: "Capture the information required to begin this workflow.",
+      fields: "Requestor\nPriority\nDescription",
+      primaryAction: "Submit",
+    },
+    {
+      id: "review",
+      name: "Review",
+      title: "Review and confirm",
+      description: "Verify the record before routing it to the next workflow stage.",
+      fields: "Assigned role\nReview notes\nDecision",
+      primaryAction: "Continue",
+    },
+  ];
+}
+
+function readScreens(workflowId: string, workflowName: string): WorkflowScreen[] {
+  try {
+    const raw = localStorage.getItem(`carescope.workflowScreens.${workflowId}`);
+    if (raw) {
+      const parsed = JSON.parse(raw) as WorkflowScreen[];
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  } catch {
+    // Fall back to useful starter screens.
+  }
+  return defaultScreens(workflowName);
+}
+
+function WorkflowScreenMock({ screen }: { screen: WorkflowScreen }) {
+  return (
+    <div className="workflow-screen-mock">
+      <div className="workflow-screen-browser"><span /><span /><span /><b>{screen.name}</b></div>
+      <div className="workflow-screen-mock-body">
+        <p className="lims-eyebrow">Workflow task</p>
+        <h2>{screen.title}</h2>
+        <p>{screen.description}</p>
+        <div className="workflow-screen-mock-fields">
+          {screen.fields.split("\n").filter(Boolean).map((field) => (
+            <label key={field}>{field}<input placeholder={`Enter ${field.toLowerCase()}`} readOnly /></label>
+          ))}
+        </div>
+        <div className="workflow-screen-mock-actions">
+          <button type="button" className="btn">Save draft</button>
+          <button type="button" className="btn btn-primary">{screen.primaryAction}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function toFlowNodes(def: WorkflowDefinition, plugins: ReturnType<typeof workflowService.nodePlugins>): WfFlowNode[] {
   return def.nodes.map((n) => {
     const plugin = plugins.find((p) => p.type === n.type);
@@ -94,6 +159,10 @@ export function DesignerPage() {
   const [drawer, setDrawer] = useState<"none" | "validate" | "simulate" | "history">("none");
   const [statusMsg, setStatusMsg] = useState("");
   const [saving, setSaving] = useState(false);
+  const [designerMode, setDesignerMode] = useState<"workflow" | "screens">("workflow");
+  const [screens, setScreens] = useState<WorkflowScreen[]>([]);
+  const [selectedScreenId, setSelectedScreenId] = useState("");
+  const [screenPreviewOpen, setScreenPreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -105,6 +174,9 @@ export function DesignerPage() {
     setWorkflow(def);
     setNodes(toFlowNodes(def, plugins));
     setEdges(toFlowEdges(def));
+    const savedScreens = readScreens(def.id, def.name);
+    setScreens(savedScreens);
+    setSelectedScreenId(savedScreens[0]?.id ?? "");
   }, [id, navigate, plugins, setNodes, setEdges]);
 
   const selected = useMemo(
@@ -115,6 +187,32 @@ export function DesignerPage() {
     () => plugins.find((p) => p.type === selected?.data.nodeType),
     [plugins, selected]
   );
+  const selectedScreen = screens.find((screen) => screen.id === selectedScreenId) ?? screens[0];
+
+  const persistScreens = (next: WorkflowScreen[]) => {
+    if (!workflow) return;
+    setScreens(next);
+    localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(next));
+  };
+
+  const updateScreen = (patch: Partial<WorkflowScreen>) => {
+    if (!selectedScreen) return;
+    persistScreens(screens.map((screen) => screen.id === selectedScreen.id ? { ...screen, ...patch } : screen));
+  };
+
+  const addScreen = () => {
+    const screen: WorkflowScreen = {
+      id: crypto.randomUUID(),
+      name: `Screen ${screens.length + 1}`,
+      title: "New workflow screen",
+      description: "Explain what the user needs to do at this stage.",
+      fields: "Field label",
+      primaryAction: "Continue",
+    };
+    persistScreens([...screens, screen]);
+    setSelectedScreenId(screen.id);
+    setDesignerMode("screens");
+  };
 
   const persistCanvas = useCallback(
     (nextNodes: WfFlowNode[], nextEdges: Edge[], triggers?: WorkflowTrigger[]) => {
@@ -300,8 +398,24 @@ export function DesignerPage() {
   }
 
   return (
-    <div className="designer-layout">
-      <NodePalette plugins={plugins} />
+    <div className={`designer-layout${designerMode === "screens" ? " is-screen-designer" : ""}`}>
+      {designerMode === "workflow" ? (
+        <NodePalette plugins={plugins} />
+      ) : (
+        <aside className="workflow-screen-list">
+          <div className="workflow-screen-list-head">
+            <div><p className="lims-eyebrow">Workflow UI</p><h2>Screens</h2></div>
+            <button type="button" className="btn btn-primary" onClick={addScreen}>Add screen</button>
+          </div>
+          <div className="workflow-screen-list-items">
+            {screens.map((screen, index) => (
+              <button type="button" className={selectedScreen?.id === screen.id ? "is-active" : undefined} key={screen.id} onClick={() => setSelectedScreenId(screen.id)}>
+                <span>{index + 1}</span><div><b>{screen.name}</b><small>{screen.title}</small></div>
+              </button>
+            ))}
+          </div>
+        </aside>
+      )}
       <div className="canvas-area">
         <div className="canvas-toolbar">
           <Link to="/app/workflows" className="btn btn-ghost">
@@ -310,66 +424,76 @@ export function DesignerPage() {
           <span className="wf-title">{workflow.name}</span>
           <span className={`badge badge-${workflow.status}`}>{workflow.status}</span>
           <span className="badge">v{workflow.version}</span>
+          <div className="workflow-designer-mode" role="group" aria-label="Designer mode">
+            <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
+            <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>
+          </div>
           <span className="spacer" />
           {statusMsg ? <span style={{ color: "var(--accent)", fontSize: "0.75rem" }}>{statusMsg}</span> : null}
-          <button type="button" className="btn" onClick={handleSave} disabled={saving}>
-            Save
-          </button>
-          <button type="button" className="btn" onClick={handleValidate}>
-            Validate
-          </button>
-          <button type="button" className="btn" onClick={handleSimulate}>
-            Simulate
-          </button>
-          <button type="button" className="btn" onClick={handleClone}>
-            Clone
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handlePublish}
-            disabled={workflow.status === "published"}
-          >
-            Publish
-          </button>
+          {designerMode === "workflow" ? (
+            <>
+              <button type="button" className="btn" onClick={handleSave} disabled={saving}>Save</button>
+              <button type="button" className="btn" onClick={handleValidate}>Validate</button>
+              <button type="button" className="btn" onClick={handleSimulate}>Simulate</button>
+              <button type="button" className="btn" onClick={handleClone}>Clone</button>
+              <button type="button" className="btn btn-primary" onClick={handlePublish} disabled={workflow.status === "published"}>Publish</button>
+            </>
+          ) : (
+            <button type="button" className="btn btn-primary" disabled={!selectedScreen} onClick={() => setScreenPreviewOpen(true)}>Preview screen</button>
+          )}
         </div>
         <div className="canvas-host">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={(changes) => {
-              onNodesChange(changes);
-            }}
-            onEdgesChange={(changes) => {
-              onEdgesChange(changes);
-            }}
-            onNodeDragStop={() => persistCanvas(nodes, edges)}
-            onConnect={onConnect}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            onSelectionChange={({ nodes: sel }) => setSelectedId(sel[0]?.id ?? null)}
-            nodeTypes={nodeTypes}
-            fitView
-            deleteKeyCode={["Backspace", "Delete"]}
-            proOptions={{ hideAttribution: true }}
-          >
-            <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#2a3a32" />
-            <Controls />
-            <MiniMap
-              nodeColor={(n) => (n.data as WfFlowNode["data"])?.color ?? "#2dd4a8"}
-              maskColor="rgba(15,23,20,0.7)"
-            />
-          </ReactFlow>
+          {designerMode === "workflow" ? (
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={(changes) => onNodesChange(changes)}
+              onEdgesChange={(changes) => onEdgesChange(changes)}
+              onNodeDragStop={() => persistCanvas(nodes, edges)}
+              onConnect={onConnect}
+              onDrop={onDrop}
+              onDragOver={onDragOver}
+              onSelectionChange={({ nodes: sel }) => setSelectedId(sel[0]?.id ?? null)}
+              nodeTypes={nodeTypes}
+              fitView
+              deleteKeyCode={["Backspace", "Delete"]}
+              proOptions={{ hideAttribution: true }}
+            >
+              <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#2a3a32" />
+              <Controls />
+              <MiniMap nodeColor={(n) => (n.data as WfFlowNode["data"])?.color ?? "#2dd4a8"} maskColor="rgba(15,23,20,0.7)" />
+            </ReactFlow>
+          ) : selectedScreen ? (
+            <div className="workflow-screen-editor">
+              <div className="workflow-screen-editor-head"><p className="lims-eyebrow">Screen editor</p><h2>{selectedScreen.name}</h2><span>Changes save automatically</span></div>
+              <div className="workflow-screen-editor-fields">
+                <label>Screen name<input value={selectedScreen.name} onChange={(event) => updateScreen({ name: event.target.value })} /></label>
+                <label>Page title<input value={selectedScreen.title} onChange={(event) => updateScreen({ title: event.target.value })} /></label>
+                <label className="is-wide">Instructions<textarea value={selectedScreen.description} onChange={(event) => updateScreen({ description: event.target.value })} /></label>
+                <label className="is-wide">Fields <small>One field per line</small><textarea value={selectedScreen.fields} onChange={(event) => updateScreen({ fields: event.target.value })} /></label>
+                <label>Primary button<input value={selectedScreen.primaryAction} onChange={(event) => updateScreen({ primaryAction: event.target.value })} /></label>
+              </div>
+            </div>
+          ) : <div className="empty-state"><h2>Add a screen</h2><p>Create the first user-facing screen for this workflow.</p></div>}
         </div>
       </div>
-      <PropertiesPanel
-        selected={selected}
-        plugin={selectedPlugin}
-        triggers={workflow.triggers}
-        onChangeNode={onChangeNode}
-        onChangeTriggers={onChangeTriggers}
-        onDeleteNode={onDeleteNode}
-      />
+      {designerMode === "workflow" ? (
+        <PropertiesPanel selected={selected} plugin={selectedPlugin} triggers={workflow.triggers} onChangeNode={onChangeNode} onChangeTriggers={onChangeTriggers} onDeleteNode={onDeleteNode} />
+      ) : (
+        <aside className="workflow-live-preview">
+          <div className="props-header"><p className="lims-eyebrow">Live preview</p><h2>User screen</h2></div>
+          {selectedScreen ? <WorkflowScreenMock screen={selectedScreen} /> : null}
+        </aside>
+      )}
+
+      {screenPreviewOpen && selectedScreen ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setScreenPreviewOpen(false)}>
+          <div className="lims-modal lims-modal-wide workflow-screen-preview-modal" role="dialog" aria-modal="true" aria-label={`${selectedScreen.name} preview`} onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar"><h2>{selectedScreen.name} preview</h2><button type="button" className="btn" onClick={() => setScreenPreviewOpen(false)}>Close preview</button></div>
+            <WorkflowScreenMock screen={selectedScreen} />
+          </div>
+        </div>
+      ) : null}
 
       {drawer !== "none" && (
         <div className="drawer" onClick={() => setDrawer("none")}>
