@@ -27,7 +27,7 @@ export type SampleColumn = {
   enabled: boolean;
 };
 
-export type LabButtonId = "scan" | "receive" | "createBatch" | "completeReview" | "viewResults";
+export type LabButtonId = "receive" | "logSample" | "createBatch" | "completeReview" | "viewResults";
 
 export type LabButton = {
   id: LabButtonId;
@@ -69,8 +69,8 @@ export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
     { id: "matrix", label: "Matrix", enabled: false },
   ],
   buttons: [
-    { id: "scan", label: "Scan barcode", enabled: true, color: "#ffffff", views: ["home", "testing", "release"] },
-    { id: "receive", label: "Receive sample", enabled: true, color: "#1b6ef3", views: ["home", "testing", "release"] },
+    { id: "receive", label: "Receive sample", enabled: true, color: "#1b6ef3", views: ["home", "testing", "review", "release"] },
+    { id: "logSample", label: "Log sample", enabled: true, color: "#ffffff", views: ["home", "testing", "review", "release"] },
     { id: "createBatch", label: "Create a batch", enabled: true, color: "#0b1f44", views: ["testing"] },
     { id: "completeReview", label: "Complete Review", enabled: true, color: "#1b6ef3", views: ["review"] },
     { id: "viewResults", label: "View Results", enabled: true, color: "#ffffff", views: ["home", "testing", "review", "release"] },
@@ -83,17 +83,19 @@ function mergeButtons(saved: LabButton[] | undefined): LabButton[] {
   const known = (saved ?? []).filter((button) => BUTTON_IDS.has(button.id));
   const seen = new Set(known.map((button) => button.id));
   const missing = DEFAULT_LAB_OPERATIONS.buttons.filter((button) => !seen.has(button.id));
-  return [...known, ...missing].map((button) => {
+  const merged = [...known, ...missing].map((button) => {
     const fallback = DEFAULT_LAB_OPERATIONS.buttons.find((item) => item.id === button.id)!;
     const color = /^#[0-9a-fA-F]{6}$/.test(button.color) ? button.color : fallback.color;
     return {
       id: button.id,
-      label: button.label?.trim() ? button.label : fallback.label,
+      label: button.id === "receive" || button.id === "logSample" ? fallback.label : button.label?.trim() ? button.label : fallback.label,
       enabled: Boolean(button.enabled),
       color,
       views: fallback.views,
     };
   });
+  const intake = (["receive", "logSample"] as const).map((id) => merged.find((button) => button.id === id)!);
+  return [...intake, ...merged.filter((button) => button.id !== "receive" && button.id !== "logSample")];
 }
 
 export function buttonStyle(color: string): { background: string; borderColor: string; color: string } {

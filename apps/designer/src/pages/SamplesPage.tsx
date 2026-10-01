@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
+import { ElectronicOrdersDialog } from "../components/ElectronicOrdersDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
-import { ReceiveSampleDialog } from "../components/ReceiveSampleDialog";
+import { LogSampleDialog } from "../components/ReceiveSampleDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { StartTestingWorkflow } from "../components/StartTestingWorkflow";
 import { CURRENT_RUNS } from "../testingRuns";
@@ -274,6 +275,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
   const [receiptSample, setReceiptSample] = useState<SampleRecord | null>(null);
   const [receiveOpen, setReceiveOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
@@ -369,6 +371,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
 
   function runButton(id: string) {
     if (id === "receive") setReceiveOpen(true);
+    if (id === "logSample") setLogOpen(true);
     if (id === "createBatch") {
       setTestingOpen(true);
     }
@@ -672,10 +675,20 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       </section>
 
       {receiveOpen ? (
-        <ReceiveSampleDialog
+        <ElectronicOrdersDialog
           onClose={() => setReceiveOpen(false)}
-          onLogged={(sample) => {
+          onReceived={(received) => {
             setReceiveOpen(false);
+            setOpenSample(received.at(-1) ?? null);
+          }}
+        />
+      ) : null}
+
+      {logOpen ? (
+        <LogSampleDialog
+          onClose={() => setLogOpen(false)}
+          onLogged={(sample) => {
+            setLogOpen(false);
             setOpenSample(sample);
           }}
         />

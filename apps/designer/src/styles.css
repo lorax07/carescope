@@ -848,6 +848,88 @@ a {
   color: var(--text);
 }
 
+.electronic-orders-modal {
+  width: min(1000px, calc(100vw - 2rem));
+}
+
+.intake-workflow-steps {
+  padding: 0 1rem;
+}
+
+.electronic-orders-body {
+  min-height: 22rem;
+  padding: 0 1rem 1rem;
+  overflow: auto;
+}
+
+.electronic-orders-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.electronic-orders-heading h3,
+.electronic-orders-heading p {
+  margin-top: 0;
+}
+
+.electronic-order-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.electronic-order-list > label {
+  display: grid;
+  grid-template-columns: auto minmax(8rem, 0.75fr) minmax(10rem, 1fr) minmax(14rem, 1.4fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.electronic-order-list > label:hover,
+.electronic-order-list > label.is-selected {
+  border-color: #8ab7fa;
+  background: #f5f9ff;
+}
+
+.electronic-order-list > label.is-selected {
+  box-shadow: 0 0 0 2px rgba(27, 110, 243, 0.1);
+}
+
+.electronic-order-list label > span:not(.lims-badge) {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.electronic-order-list b,
+.electronic-order-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.electronic-order-list small {
+  color: var(--text-muted);
+}
+
+.receipt-check {
+  display: flex !important;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.receipt-check input {
+  width: auto;
+}
+
 .instrument-fields input,
 .instrument-fields select {
   border: 1px solid var(--border);
