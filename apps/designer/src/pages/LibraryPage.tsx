@@ -10,7 +10,7 @@ const SYSTEM_WORKFLOWS = [
     name: "Sample Intake & Accessioning",
     description: "Receive electronic orders, document condition, assign accessions, and route samples.",
     stages: ["Electronic order selected", "Receipt condition verified", "Accession assigned", "Location recorded", "Route to testing"],
-    screens: ["Electronic order queue", "Receipt details", "Accession confirmation", "Sample details"],
+    screens: ["Electronic order queue", "Receipt details", "Accession confirmation", "Sample details", "Testing route"],
   },
   {
     id: "instrument-testing",

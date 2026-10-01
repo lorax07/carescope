@@ -3884,7 +3884,7 @@ a {
 /* Designer layout */
 .designer-layout {
   display: grid;
-  grid-template-columns: 230px 1fr 290px;
+  grid-template-columns: 260px 1fr 290px;
   height: calc(100vh - 62px);
   overflow: hidden;
   background: #fff;
