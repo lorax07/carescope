@@ -39,6 +39,39 @@ type WorkflowScreen = {
   primaryAction: string;
 };
 
+type DesignerHistoryEntry = {
+  nodes: WfFlowNode[];
+  edges: Edge[];
+  screens: WorkflowScreen[];
+  label: string;
+  timestamp: number;
+};
+
+type DesignerHistory = {
+  entries: DesignerHistoryEntry[];
+  index: number;
+};
+
+function cloneNodes(nodes: WfFlowNode[]): WfFlowNode[] {
+  return nodes.map((node) => ({
+    ...node,
+    position: { ...node.position },
+    data: { ...node.data, config: { ...(node.data.config ?? {}) } },
+  }));
+}
+
+function cloneEdges(edges: Edge[]): Edge[] {
+  return edges.map((edge) => ({
+    ...edge,
+    style: edge.style ? { ...edge.style } : undefined,
+    markerEnd: typeof edge.markerEnd === "object" ? { ...edge.markerEnd } : edge.markerEnd,
+  }));
+}
+
+function cloneScreens(screens: WorkflowScreen[]): WorkflowScreen[] {
+  return screens.map((screen) => ({ ...screen }));
+}
+
 function defaultScreens(workflowName: string): WorkflowScreen[] {
   return [
     {
@@ -139,6 +172,7 @@ function fromFlow(
     description: n.data.description,
     position: n.position,
     config: n.data.config ?? {},
+    style: _base.nodes.find((node) => node.id === n.id)?.style,
   }));
   const wfEdges = edges.map((e) => ({
     id: e.id,
@@ -166,6 +200,7 @@ export function DesignerPage() {
   const [screens, setScreens] = useState<WorkflowScreen[]>([]);
   const [selectedScreenId, setSelectedScreenId] = useState("");
   const [screenPreviewOpen, setScreenPreviewOpen] = useState(false);
+  const [designerHistory, setDesignerHistory] = useState<DesignerHistory>({ entries: [], index: -1 });
 
   useEffect(() => {
     if (!id) return;
@@ -180,6 +215,16 @@ export function DesignerPage() {
     const savedScreens = readScreens(def.id, def.name);
     setScreens(savedScreens);
     setSelectedScreenId(savedScreens[0]?.id ?? "");
+    setDesignerHistory({
+      entries: [{
+        nodes: cloneNodes(toFlowNodes(def, plugins)),
+        edges: cloneEdges(toFlowEdges(def)),
+        screens: cloneScreens(savedScreens),
+        label: "Workflow opened",
+        timestamp: Date.now(),
+      }],
+      index: 0,
+    });
   }, [id, navigate, plugins, setNodes, setEdges]);
 
   const selected = useMemo(
@@ -192,15 +237,47 @@ export function DesignerPage() {
   );
   const selectedScreen = screens.find((screen) => screen.id === selectedScreenId) ?? screens[0];
 
-  const persistScreens = (next: WorkflowScreen[]) => {
+  const recordHistory = (
+    nextNodes: WfFlowNode[],
+    nextEdges: Edge[],
+    nextScreens: WorkflowScreen[],
+    label: string,
+    coalesce = false,
+  ) => {
+    const now = Date.now();
+    const entry: DesignerHistoryEntry = {
+      nodes: cloneNodes(nextNodes),
+      edges: cloneEdges(nextEdges),
+      screens: cloneScreens(nextScreens),
+      label,
+      timestamp: now,
+    };
+    setDesignerHistory((current) => {
+      const active = current.entries.slice(0, current.index + 1);
+      const last = active.at(-1);
+      const next =
+        coalesce && last && last.label === label && now - last.timestamp < 900
+          ? [...active.slice(0, -1), entry]
+          : [...active, entry];
+      const limited = next.slice(-6);
+      return { entries: limited, index: limited.length - 1 };
+    });
+  };
+
+  const persistScreens = (next: WorkflowScreen[], label: string, coalesce = false) => {
     if (!workflow) return;
     setScreens(next);
     localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(next));
+    recordHistory(nodes, edges, next, label, coalesce);
   };
 
   const updateScreen = (patch: Partial<WorkflowScreen>) => {
     if (!selectedScreen) return;
-    persistScreens(screens.map((screen) => screen.id === selectedScreen.id ? { ...screen, ...patch } : screen));
+    persistScreens(
+      screens.map((screen) => screen.id === selectedScreen.id ? { ...screen, ...patch } : screen),
+      `Edited screen: ${selectedScreen.name}`,
+      true,
+    );
   };
 
   const addScreen = () => {
@@ -212,7 +289,7 @@ export function DesignerPage() {
       fields: "Field label",
       primaryAction: "Continue",
     };
-    persistScreens([...screens, screen]);
+    persistScreens([...screens, screen], `Added screen: ${screen.name}`);
     setSelectedScreenId(screen.id);
     setDesignerMode("screens");
   };
@@ -238,6 +315,56 @@ export function DesignerPage() {
     [workflow, navigate]
   );
 
+  const restoreHistory = useCallback((index: number) => {
+    const entry = designerHistory.entries[index];
+    if (!entry || !workflow) return;
+    const restoredNodes = cloneNodes(entry.nodes);
+    const restoredEdges = cloneEdges(entry.edges);
+    const restoredScreens = cloneScreens(entry.screens);
+    setNodes(restoredNodes);
+    setEdges(restoredEdges);
+    setScreens(restoredScreens);
+    localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(restoredScreens));
+    persistCanvas(restoredNodes, restoredEdges);
+    setDesignerHistory((current) => ({ ...current, index }));
+    setSelectedId((current) => restoredNodes.some((node) => node.id === current) ? current : null);
+    setSelectedScreenId((current) => restoredScreens.some((screen) => screen.id === current) ? current : (restoredScreens[0]?.id ?? ""));
+    setStatusMsg(index < designerHistory.index ? `Undid to: ${entry.label}` : `Redid: ${entry.label}`);
+  }, [designerHistory, persistCanvas, setEdges, setNodes, workflow]);
+
+  const undoHistory = useCallback(() => {
+    if (designerHistory.index > 0) restoreHistory(designerHistory.index - 1);
+  }, [designerHistory.index, restoreHistory]);
+
+  const redoHistory = useCallback(() => {
+    if (designerHistory.index < designerHistory.entries.length - 1) {
+      restoreHistory(designerHistory.index + 1);
+    }
+  }, [designerHistory, restoreHistory]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.matches("input, textarea, select") ||
+        target?.isContentEditable ||
+        !(event.metaKey || event.ctrlKey)
+      ) return;
+      if (event.key.toLowerCase() === "z" && event.shiftKey) {
+        event.preventDefault();
+        redoHistory();
+      } else if (event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        redoHistory();
+      } else if (event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undoHistory();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [redoHistory, undoHistory]);
+
   const onConnect: OnConnect = useCallback(
     (connection: Connection) => {
       setEdges((eds) => {
@@ -251,10 +378,11 @@ export function DesignerPage() {
           eds
         );
         persistCanvas(nodes, next);
+        recordHistory(nodes, next, screens, "Connected workflow stages");
         return next;
       });
     },
-    [nodes, persistCanvas, setEdges]
+    [nodes, persistCanvas, screens, setEdges]
   );
 
   const onDragOver = useCallback((event: DragEvent) => {
@@ -295,11 +423,12 @@ export function DesignerPage() {
       setNodes((nds) => {
         const next = nds.concat(newNode);
         persistCanvas(next, edges);
+        recordHistory(next, edges, screens, `Added node: ${newNode.data.label}`);
         return next;
       });
       setSelectedId(newNode.id);
     },
-    [edges, persistCanvas, setNodes]
+    [edges, persistCanvas, screens, setNodes]
   );
 
   const onChangeNode = (
@@ -321,6 +450,8 @@ export function DesignerPage() {
           : n
       );
       persistCanvas(next, edges);
+      const editedNode = next.find((node) => node.id === nodeId);
+      recordHistory(next, edges, screens, `Edited node: ${editedNode?.data.label ?? "stage"}`, true);
       return next;
     });
   };
@@ -331,6 +462,7 @@ export function DesignerPage() {
       setEdges((eds) => {
         const nextEdges = eds.filter((e) => e.source !== nodeId && e.target !== nodeId);
         persistCanvas(next, nextEdges);
+        recordHistory(next, nextEdges, screens, `Deleted node: ${nds.find((node) => node.id === nodeId)?.data.label ?? "stage"}`);
         return nextEdges;
       });
       return next;
@@ -396,6 +528,14 @@ export function DesignerPage() {
     if (cloned) navigate(`/app/workflows/${cloned.id}`);
   };
 
+  const canUndo = designerHistory.index > 0;
+  const canRedo = designerHistory.index >= 0 && designerHistory.index < designerHistory.entries.length - 1;
+  const previousHistory = designerHistory.entries
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ index }) => index < designerHistory.index)
+    .reverse()
+    .slice(0, 5);
+
   if (!workflow) {
     return <div className="page">Loading…</div>;
   }
@@ -431,6 +571,25 @@ export function DesignerPage() {
             <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
             <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>
           </div>
+          <div className="workflow-history-controls" role="group" aria-label="Workflow edit history">
+            <button type="button" className="btn" onClick={undoHistory} disabled={!canUndo} title="Undo (Ctrl/Command + Z)">↶ Undo</button>
+            <button type="button" className="btn" onClick={redoHistory} disabled={!canRedo} title="Redo (Ctrl/Command + Shift + Z)">↷ Redo</button>
+            <select
+              aria-label="Undo history"
+              value=""
+              onChange={(event) => {
+                if (event.target.value) restoreHistory(Number(event.target.value));
+              }}
+              disabled={!previousHistory.length}
+            >
+              <option value="">Previous changes</option>
+              {previousHistory.map(({ entry, index }) => (
+                <option key={`${entry.timestamp}-${index}`} value={index}>
+                  {entry.label} · {new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </option>
+              ))}
+            </select>
+          </div>
           <span className="spacer" />
           {statusMsg ? <span style={{ color: "var(--accent)", fontSize: "0.75rem" }}>{statusMsg}</span> : null}
           {designerMode === "workflow" ? (
@@ -452,7 +611,29 @@ export function DesignerPage() {
               edges={edges}
               onNodesChange={(changes) => onNodesChange(changes)}
               onEdgesChange={(changes) => onEdgesChange(changes)}
-              onNodeDragStop={() => persistCanvas(nodes, edges)}
+              onNodeDragStop={(_, draggedNode) => {
+                const next = nodes.map((node) => node.id === draggedNode.id ? { ...node, position: { ...draggedNode.position } } : node);
+                setNodes(next);
+                persistCanvas(next, edges);
+                recordHistory(next, edges, screens, `Moved node: ${(draggedNode.data as WfFlowNode["data"]).label}`);
+              }}
+              onDelete={({ nodes: deletedNodes, edges: deletedEdges }) => {
+                const deletedNodeIds = new Set(deletedNodes.map((node) => node.id));
+                const deletedEdgeIds = new Set(deletedEdges.map((edge) => edge.id));
+                const nextNodes = nodes.filter((node) => !deletedNodeIds.has(node.id));
+                const nextEdges = edges.filter((edge) =>
+                  !deletedEdgeIds.has(edge.id) &&
+                  !deletedNodeIds.has(edge.source) &&
+                  !deletedNodeIds.has(edge.target)
+                );
+                persistCanvas(nextNodes, nextEdges);
+                recordHistory(
+                  nextNodes,
+                  nextEdges,
+                  screens,
+                  deletedNodes.length ? `Deleted ${deletedNodes.length} workflow stage${deletedNodes.length === 1 ? "" : "s"}` : "Deleted workflow connection"
+                );
+              }}
               onConnect={onConnect}
               onDrop={onDrop}
               onDragOver={onDragOver}
