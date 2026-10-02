@@ -273,9 +273,19 @@ export function DesignerPage() {
 
   const updateScreen = (patch: Partial<WorkflowScreen>) => {
     if (!selectedScreen) return;
+    const field = Object.keys(patch)[0];
+    const fieldLabel = field === "name"
+      ? "screen name"
+      : field === "title"
+        ? "page title"
+        : field === "description"
+          ? "screen instructions"
+          : field === "fields"
+            ? "screen fields"
+            : "primary action";
     persistScreens(
       screens.map((screen) => screen.id === selectedScreen.id ? { ...screen, ...patch } : screen),
-      `Edited screen: ${selectedScreen.name}`,
+      `Edited ${fieldLabel}`,
       true,
     );
   };
@@ -450,8 +460,7 @@ export function DesignerPage() {
           : n
       );
       persistCanvas(next, edges);
-      const editedNode = next.find((node) => node.id === nodeId);
-      recordHistory(next, edges, screens, `Edited node: ${editedNode?.data.label ?? "stage"}`, true);
+      recordHistory(next, edges, screens, "Edited workflow stage", true);
       return next;
     });
   };
