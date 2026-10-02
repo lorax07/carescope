@@ -7,8 +7,10 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
-import { findSample } from "./samples";
-import { SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { findSample, getSamples } from "./samples";
+import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { findRunSequence, RunSequenceView } from "./testingRuns";
+import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -175,10 +177,32 @@ function NavIcon({ name }: { name: string }) {
   );
 }
 
+function workspaceTabLabel(section: string, menu: { view: string; label: string }[]): string {
+  if (section === "instruments") return "Instruments";
+  return (
+    menu.find((item) => item.view === section)?.label ??
+    {
+      design: "Workflow design",
+      connectivity: "Sequence Client",
+      quality: "Sequence Compliance",
+      billing: "Sequence Revenue",
+      insights: "Sequence Insights",
+    }[section] ??
+    "Workspace"
+  );
+}
+
 function PinnedScreen({ tab }: { tab: PinnedTab }) {
   if (tab.kind === "sample") {
     const sample = findSample(tab.recordId);
-    return sample ? <SampleDetailBody sample={sample} /> : null;
+    return sample ? <SampleDetailBody sample={sample} showBack={false} /> : null;
+  }
+  if (tab.kind === "run") {
+    const run = findRunSequence(tab.recordId);
+    return run ? <RunSequenceView run={run} /> : null;
+  }
+  if (tab.kind === "testing") {
+    return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received")} /></section></div>;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
@@ -497,11 +521,23 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
+        <button
+          type="button"
+          className="sequence-nav-toggle"
+          aria-expanded={navOpen}
+          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            beginNavDrag(event, { toggle: true });
+          }}
+        >
+          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
+          <span className="sequence-dot-mark" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
+          </span>
+        </button>
         {navOpen ? null : (
           <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
-            <button type="button" className="lims-rail-logo" aria-expanded={false} aria-label="Expand navigation">
-              <NavIcon name="overview" />
-            </button>
             <nav className="lims-nav" aria-label="LIMS modules">
               {operationLinks.filter((item) => item.view !== "overview").map((item) => (
                 <NavLink
@@ -541,9 +577,6 @@ function AppFrame() {
       {navOpen ? (
       <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
         <div className="lims-menu-brand">
-          <button type="button" className="sequence-wordmark" aria-expanded aria-label="Close navigation">
-            <img src="/sequence-logo.png" alt="" />
-          </button>
         <div className="lims-site-block">
           <div className="lims-site">
             <span className="lims-site-dot" />
@@ -683,13 +716,29 @@ function AppFrame() {
         </header>
         <div
           ref={workspaceRef}
-          className={`lims-workspace${sectionTabs.activeId ? " has-dock" : ""}${resizingDock ? " is-resizing" : ""}`}
+          className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}`}
           style={{ "--screen-dock-width": `${dockWidth}px` } as CSSProperties}
         >
-          <div className="lims-content">
-            <Outlet />
-          </div>
-          {sectionTabs.tabs
+          {sectionTabs.presentation === "screen" && sectionTabs.activeId ? (
+            <div className="lims-content">
+              <div className="lims-page screen-view-page">
+                <SectionTabStrip mainLabel={workspaceTabLabel(sectionTabs.section, labOps.menu)} />
+                <div className="screen-view-body">
+                  {sectionTabs.tabs
+                    .filter((tab) => tab.id === sectionTabs.activeId)
+                    .map((tab) => (
+                      <PinnedScreen key={tab.id} tab={tab} />
+                    ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="lims-content">
+              <Outlet />
+            </div>
+          )}
+          {sectionTabs.presentation === "tab"
+            ? sectionTabs.tabs
             .filter((tab) => tab.id === sectionTabs.activeId)
             .map((tab) => (
               <div key={tab.id} className="lims-screen-dock-wrap">
@@ -747,7 +796,8 @@ function AppFrame() {
                   <PinnedScreen tab={tab} />
                 </aside>
               </div>
-            ))}
+            ))
+            : null}
         </div>
       </div>
 

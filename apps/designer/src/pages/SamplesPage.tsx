@@ -1,17 +1,18 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
-import { CreateBatchDialog } from "../components/CreateBatchDialog";
+import { ElectronicOrdersDialog } from "../components/ElectronicOrdersDialog";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
-import { ReceiveSampleDialog } from "../components/ReceiveSampleDialog";
+import { LogSampleDialog } from "../components/ReceiveSampleDialog";
 import { ResultWindow } from "../components/ResultWindow";
+import { StartTestingWorkflow } from "../components/StartTestingWorkflow";
+import { CURRENT_RUNS } from "../testingRuns";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
 import {
   approveSamples,
-  assignBatch,
   isResulted,
   reviewStatus,
   STATUS_LABEL,
@@ -21,8 +22,8 @@ import {
   type SampleRecord,
 } from "../samples";
 
-type QuickFilter = "all" | "stat" | "testing" | "review" | "hold";
-type ReviewFilter = "individual" | "batch";
+type QuickFilter = "all" | "stat" | "testing" | "review" | "hold" | `priority:${string}`;
+type ReviewFilter = "all" | "individual" | "batch";
 
 const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
   { id: "all", label: "All open" },
@@ -34,10 +35,141 @@ const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
 
 function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean {
   if (filter === "all") return true;
+  if (filter.startsWith("priority:")) return sample.priority === filter.slice("priority:".length);
   if (filter === "stat") return sample.priority === "STAT";
   if (filter === "testing") return sample.status === "testing";
   if (filter === "review") return sample.status === "review" || sample.status === "approval";
   return sample.status === "hold";
+}
+
+function wildcardMatch(text: string, query: string): boolean {
+  const cleaned = query.trim();
+  if (!cleaned) return true;
+  const escaped = cleaned.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(escaped, "i").test(text);
+}
+
+function SearchableFilter({
+  label,
+  options = [],
+  selected = [],
+  query,
+  open = false,
+  onOpenChange,
+  onToggle,
+  onClear,
+  onActivate,
+  onQuery,
+  sortDirection = "asc",
+  onSortDirection,
+  active = false,
+}: {
+  label: string;
+  options?: string[];
+  selected?: string[];
+  query: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onToggle?: (value: string) => void;
+  onClear?: () => void;
+  onActivate?: () => void;
+  onQuery: (value: string) => void;
+  sortDirection?: "asc" | "desc";
+  onSortDirection?: (direction: "asc" | "desc") => void;
+  active?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!filterRef.current?.contains(event.target as Node)) onOpenChange?.(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [open, onOpenChange]);
+  const matching = options
+    .filter((option) => wildcardMatch(option, query))
+    .sort((a, b) => sortDirection === "asc" ? a.localeCompare(b) : b.localeCompare(a));
+  const displayLabel = selected.length === 0 ? label : selected.length === 1 ? selected[0] : `${label} (${selected.length})`;
+
+  return (
+    <div className="sample-search-filter" ref={filterRef}>
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={query}
+          aria-label={`${label} wildcard search`}
+          placeholder={`${label} wildcard search`}
+          onChange={(event) => onQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" || event.key === "Enter") setEditing(false);
+          }}
+          onBlur={() => window.setTimeout(() => setEditing(false), 120)}
+        />
+      ) : (
+        <button
+          type="button"
+          className={`lims-filter filter-trigger${active || selected.length || query ? " active" : ""}`}
+          aria-expanded={options.length ? open : undefined}
+          title={`Double-click to wildcard search ${label.toLowerCase()}`}
+          onClick={() => options.length ? onOpenChange?.(!open) : onActivate?.()}
+          onDoubleClick={() => {
+            onOpenChange?.(false);
+            setEditing(true);
+          }}
+        >
+          <span>{query ? `${label}: ${query}` : displayLabel}</span>
+          {options.length ? (
+            <svg className={`filter-chevron${open ? " is-open" : ""}`} viewBox="0 0 16 16" aria-hidden="true">
+              <path d="m4 6 4 4 4-4" />
+            </svg>
+          ) : null}
+        </button>
+      )}
+      {open ? (
+        <div className="sample-filter-menu" role="listbox" aria-label={label} aria-multiselectable="true">
+          <div className="sample-filter-menu-head">
+            <span>{selected.length ? `${selected.length} selected` : `All ${label.toLowerCase()}`}</span>
+            <button
+              type="button"
+              className="sample-filter-sort"
+              aria-label={`Sort ${label.toLowerCase()} ${sortDirection === "asc" ? "descending" : "ascending"}`}
+              title={`Sort ${sortDirection === "asc" ? "Z–A" : "A–Z"}`}
+              onClick={() => onSortDirection?.(sortDirection === "asc" ? "desc" : "asc")}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d={sortDirection === "asc" ? "M8 12V4m0 0L5 7m3-3 3 3" : "M8 4v8m0 0 3-3m-3 3-3-3"} />
+              </svg>
+              {sortDirection === "asc" ? "A–Z" : "Z–A"}
+            </button>
+          </div>
+          <button className="sample-filter-clear" type="button" onClick={() => { onClear?.(); onQuery(""); }}>
+            Clear selection
+          </button>
+          {matching.map((option) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={selected.includes(option)}
+              className={selected.includes(option) ? "is-selected" : undefined}
+              key={option}
+              onClick={() => onToggle?.(option)}
+            >
+              <span className="filter-option-check" aria-hidden="true">
+                {selected.includes(option) ? <svg viewBox="0 0 12 12"><path d="m2.2 6.2 2.3 2.3 5.3-5.3" /></svg> : null}
+              </span>
+              {option}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 type SampleView = Exclude<LabMenuView, "overview">;
@@ -68,8 +200,8 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
 function matchesView(sample: SampleRecord, status: SampleRecord["status"], view: SampleView): boolean {
   if (view === "home") return true;
   if (view === "testing") return status === "testing";
-  if (view === "review") return status === "review" && isResulted(sample);
-  return status === "released";
+  if (view === "review") return (status === "review" || status === "approval") && isResulted(sample);
+  return status === "approval" || status === "released";
 }
 
 function FolderIcon() {
@@ -83,12 +215,21 @@ function FolderIcon() {
   );
 }
 
+function workflowTime(received: string, minutesAfterReceipt: number): string {
+  const parsed = new Date(received.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return received;
+  parsed.setMinutes(parsed.getMinutes() + minutesAfterReceipt);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}`;
+}
+
 function cell(
   sample: SampleRecord,
   id: SampleColumnId,
   status = sample.status,
   onOpen?: (sample: SampleRecord) => void,
   onReceipt?: (sample: SampleRecord) => void,
+  view: SampleView = "home",
 ) {
   if (id === "accessionId") {
     return (
@@ -112,7 +253,15 @@ function cell(
       </span>
     );
   }
-  if (id === "received") return <span className="lims-mono muted">{sample.received}</span>;
+  if (id === "received") {
+    const time =
+      view === "review"
+        ? workflowTime(sample.received, 120)
+        : view === "release"
+          ? workflowTime(sample.received, 210)
+          : sample.received;
+    return <span className="lims-mono muted">{time}</span>;
+  }
   if (id === "client") return <AccountLink name={sample.client} />;
   if (id === "matrix") return sample.matrix;
   if (id === "tests") return sample.tests;
@@ -143,13 +292,19 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
   const [receiptSample, setReceiptSample] = useState<SampleRecord | null>(null);
   const [receiveOpen, setReceiveOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const [filter, setFilter] = useState<QuickFilter>("all");
-  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("individual");
+  const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
-  const [testFilter, setTestFilter] = useState("");
-  const [batchOpen, setBatchOpen] = useState(false);
-  const [batchFromSelection, setBatchFromSelection] = useState(false);
+  const [testFilters, setTestFilters] = useState<string[]>([]);
+  const [testQuery, setTestQuery] = useState("");
+  const [clientFilters, setClientFilters] = useState<string[]>([]);
+  const [clientQuery, setClientQuery] = useState("");
+  const [rowQuery, setRowQuery] = useState("");
+  const [openFilter, setOpenFilter] = useState<"tests" | "clients" | null>(null);
+  const [tableSort, setTableSort] = useState<{ field: "tests" | "clients"; direction: "asc" | "desc" } | null>(null);
+  const [testingOpen, setTestingOpen] = useState(false);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
   const visible = columns.filter((column) => column.enabled && column.label.trim());
@@ -158,12 +313,26 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     return matchesView(sample, status, view);
   });
   const testOptions = [...new Set(contextRows.flatMap(testNames))].sort();
+  const clientOptions = [...new Set(contextRows.map((sample) => sample.client))].sort();
   const rows = contextRows
-    .filter((sample) => view === "review" || matchesQuickFilter(sample, filter))
-    .filter((sample) => !testFilter || testNames(sample).includes(testFilter))
-    .sort((a, b) => priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities));
+    .filter((sample) => matchesQuickFilter(sample, filter))
+    .filter((sample) => testFilters.length === 0 || testFilters.some((test) => testNames(sample).includes(test)))
+    .filter((sample) => wildcardMatch(testNames(sample).join(" "), testQuery))
+    .filter((sample) => clientFilters.length === 0 || clientFilters.includes(sample.client))
+    .filter((sample) => wildcardMatch(sample.client, clientQuery))
+    .filter((sample) => wildcardMatch(Object.values(sample).join(" "), rowQuery))
+    .sort((a, b) => {
+      if (!tableSort) return priorityRank(a.priority, priorities) - priorityRank(b.priority, priorities);
+      const aValue = tableSort.field === "tests" ? a.tests : a.client;
+      const bValue = tableSort.field === "tests" ? b.tests : b.client;
+      return aValue.localeCompare(bValue) * (tableSort.direction === "asc" ? 1 : -1);
+    });
   const reviewRows =
-    reviewFilter === "individual" ? rows.filter((sample) => !sample.batchId) : rows.filter((sample) => sample.batchId);
+    reviewFilter === "all"
+      ? rows
+      : reviewFilter === "individual"
+        ? rows.filter((sample) => !sample.batchId)
+        : rows.filter((sample) => sample.batchId);
   const batches = [...new Set(reviewRows.map((sample) => sample.batchId).filter(Boolean))] as string[];
   const listed = view === "review" ? reviewRows : rows;
   const approveTarget = view === "review" ? listed.filter((sample) => checked.has(sample.accessionId)) : [];
@@ -188,6 +357,22 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       return next;
     });
   }
+
+  function toggleFilterValue(value: string, setter: Dispatch<SetStateAction<string[]>>) {
+    setter((current) => current.includes(value) ? current.filter((item) => item !== value) : [...current, value]);
+  }
+
+  function resetTableFilters() {
+    setFilter("all");
+    setReviewFilter("all");
+    setTestFilters([]);
+    setClientFilters([]);
+    setTestQuery("");
+    setClientQuery("");
+    setRowQuery("");
+    setOpenFilter(null);
+    setTableSort(null);
+  }
   const pageButtons = buttons.filter((button) => button.enabled && button.views.includes(view) && button.id !== "viewResults");
   const viewResultsButton = buttons.find((button) => button.id === "viewResults");
 
@@ -207,9 +392,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
 
   function runButton(id: string) {
     if (id === "receive") setReceiveOpen(true);
+    if (id === "logSample") setLogOpen(true);
     if (id === "createBatch") {
-      setBatchFromSelection(listed.some((sample) => checked.has(sample.accessionId)));
-      setBatchOpen(true);
+      setTestingOpen(true);
     }
     if (id === "completeReview" && approveTarget.length > 0) {
       setResultWindow({ samples: approveTarget, authorize: true });
@@ -232,10 +417,19 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     },
     {
       title: "Blocked",
-      hint: "On hold until custody or the deviation clears",
+      hint: "On hold until the location issue or deviation clears",
       rows: open.filter((sample) => sample.status === "hold"),
     },
   ];
+  const quickFilters =
+    view === "release"
+      ? [{ id: "all" as QuickFilter, label: "Ready for Release" }, ...priorities.map((priority) => ({ id: `priority:${priority}` as QuickFilter, label: priority }))]
+      : view === "testing"
+        ? [{ id: "all" as QuickFilter, label: "In Testing" }]
+        : view === "home"
+          ? QUICK_FILTERS
+          : [];
+  const statusSearchLabel = view === "release" ? "Ready for Release" : view === "testing" ? "In Testing" : view === "review" ? "In Review" : "All open";
 
   return (
     <div className="lims-page">
@@ -256,7 +450,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               disabled={button.id === "completeReview" && approveTarget.length === 0}
               onClick={() => runButton(button.id)}
             >
-              {button.label}
+              {view === "testing" && button.id === "createBatch" ? "Start Testing" : button.label}
             </button>
           ))}
           </div>
@@ -304,18 +498,65 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         </div>
       ) : null}
 
-      <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
-        <label className="lims-test-filter">
-          Tests
-          <select aria-label="Tests" value={testFilter} onChange={(event) => setTestFilter(event.target.value)}>
-            <option value="">All tests</option>
-            {testOptions.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
+      {view === "testing" ? (
+        <section className="lims-panel current-runs-panel">
+          <div className="lims-panel-head">
+            <div>
+              <p className="lims-eyebrow">Live instrument work</p>
+              <h2>Current run sequences <span className="lims-count">{CURRENT_RUNS.length}</span></h2>
+            </div>
+          </div>
+          <div className="current-run-list">
+            {CURRENT_RUNS.map((run) => (
+              <button
+                type="button"
+                key={run.id}
+                onClick={() => sectionTabs.pin({ kind: "run", recordId: run.id, title: run.id })}
+              >
+                <span className="run-live-dot" aria-hidden="true" />
+                <b>{run.id}</b>
+                <span>{run.method}</span>
+                <span>{run.sampleIds.length} sample{run.sampleIds.length === 1 ? "" : "s"}</span>
+                <strong>{run.steps[run.currentStep]}</strong>
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </section>
+      ) : null}
+
+      <div className="lims-filter-bar" role="toolbar" aria-label="Quick filters">
+        <SearchableFilter
+          label="Tests"
+          options={testOptions}
+          selected={testFilters}
+          query={testQuery}
+          open={openFilter === "tests"}
+          onOpenChange={(open) => setOpenFilter(open ? "tests" : null)}
+          onToggle={(value) => toggleFilterValue(value, setTestFilters)}
+          onClear={() => setTestFilters([])}
+          onQuery={setTestQuery}
+          sortDirection={tableSort?.field === "tests" ? tableSort.direction : "asc"}
+          onSortDirection={(direction) => setTableSort({ field: "tests", direction })}
+        />
+        <SearchableFilter
+          label="Clients"
+          options={clientOptions}
+          selected={clientFilters}
+          query={clientQuery}
+          open={openFilter === "clients"}
+          onOpenChange={(open) => setOpenFilter(open ? "clients" : null)}
+          onToggle={(value) => toggleFilterValue(value, setClientFilters)}
+          onClear={() => setClientFilters([])}
+          onQuery={setClientQuery}
+          sortDirection={tableSort?.field === "clients" ? tableSort.direction : "asc"}
+          onSortDirection={(direction) => setTableSort({ field: "clients", direction })}
+        />
+        {view === "review" ? (
+          <SearchableFilter label="In Review" query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active />
+        ) : null}
+        {view !== "review" ? (
+          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active={filter === "all"} />
+        ) : null}
         {view === "review"
           ? (["individual", "batch"] as const).map((item) => (
               <button
@@ -328,13 +569,16 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 {item === "individual" ? "Individual" : "Batch"}
               </button>
             ))
-          : QUICK_FILTERS.map((item) => (
+          : quickFilters.filter((item) => item.id !== "all").map((item) => (
               <button
                 key={item.id}
                 type="button"
                 className={`lims-filter${filter === item.id ? " active" : ""}`}
                 aria-pressed={filter === item.id}
-                onClick={() => setFilter(item.id)}
+                onClick={() => {
+                  setOpenFilter(null);
+                  setFilter(item.id);
+                }}
               >
                 {item.label}
               </button>
@@ -354,9 +598,15 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                     onChange={() => toggleMany(listed.map((sample) => sample.accessionId), !allListedChecked)}
                   />
                 </th>
-                {view === "review" && reviewFilter === "batch" ? <th>Batch</th> : null}
+                {view === "review" ? <th>Review type</th> : null}
                 {visible.map((column) => (
-                  <th key={column.id}>{column.label}</th>
+                  <th key={column.id}>
+                    {column.id === "received" && view === "review"
+                      ? "Test Complete"
+                      : column.id === "received" && view === "release"
+                        ? "Review"
+                        : column.label}
+                  </th>
                 ))}
                 {view === "review" ? <th>Flag</th> : null}
                 <th />
@@ -403,11 +653,11 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                                     )
                                   }
                                 />
-                                {batchId}
+                                Batch · {batchId}
                               </td>
                             ) : null}
                             {visible.map((column) => (
-                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
+                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
                             ))}
                             <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
@@ -418,7 +668,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                   ? (
                     <tr>
                       <td className="lims-empty" colSpan={(visible.length || 1) + 2}>
-                        {view === "review" ? "No individual samples are ready for review." : "No samples match this filter."}
+                        {view === "review" ? "No completed samples are ready for review." : "No samples match this filter."}
                       </td>
                     </tr>
                   )
@@ -437,8 +687,15 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                             onChange={() => toggleChecked(sample.accessionId)}
                           />
                         </td>
+                        {view === "review" ? (
+                          <td>
+                            <span className={`review-type ${sample.batchId ? "is-batch" : "is-individual"}`}>
+                              {sample.batchId ? `Batch · ${sample.batchId}` : "Individual"}
+                            </span>
+                          </td>
+                        ) : null}
                         {visible.map((column) => (
-                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample)}</td>
+                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
                         ))}
                         {view === "review" ? (
                           <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
@@ -452,10 +709,20 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       </section>
 
       {receiveOpen ? (
-        <ReceiveSampleDialog
+        <ElectronicOrdersDialog
           onClose={() => setReceiveOpen(false)}
-          onLogged={(sample) => {
+          onReceived={(received) => {
             setReceiveOpen(false);
+            setOpenSample(received.at(-1) ?? null);
+          }}
+        />
+      ) : null}
+
+      {logOpen ? (
+        <LogSampleDialog
+          onClose={() => setLogOpen(false)}
+          onLogged={(sample) => {
+            setLogOpen(false);
             setOpenSample(sample);
           }}
         />
@@ -467,6 +734,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setOpenSample(null)}>
           <div className="lims-modal lims-modal-wide" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <div className="lims-dialog-bar">
+              <h2>Sample Details</h2>
               <button
                 type="button"
                 className="btn btn-primary"
@@ -481,23 +749,24 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 Close
               </button>
             </div>
-            <SampleDetailBody sample={openSample} />
+            <SampleDetailBody sample={openSample} showBack={false} showTitle={false} />
           </div>
         </div>
       ) : null}
 
-      {batchOpen ? (
-        <CreateBatchDialog
-          fromSelection={batchFromSelection}
-          pool={
-            batchFromSelection ? listed.filter((sample) => checked.has(sample.accessionId)) : listed
-          }
-          onClose={() => setBatchOpen(false)}
-          onCreate={(samples) => {
-            assignBatch(samples.map((sample) => sample.accessionId));
-            setBatchOpen(false);
-          }}
-        />
+      {testingOpen ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setTestingOpen(false)}>
+          <div className="lims-modal lims-modal-wide start-testing-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <StartTestingWorkflow
+              pool={samples.filter((sample) => sample.status === "received" || sample.status === "testing")}
+              onClose={() => setTestingOpen(false)}
+              onTab={() => {
+                sectionTabs.pin({ kind: "testing", recordId: "new", title: "Start Testing" });
+                setTestingOpen(false);
+              }}
+            />
+          </div>
+        </div>
       ) : null}
 
       {resultWindow ? (

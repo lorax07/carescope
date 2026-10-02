@@ -3,7 +3,7 @@ import { logSample, nextAccessionId, SAMPLE_ACCOUNT, useSamples, type SampleReco
 
 const SITES = ["North Lab", "East Lab"] as const;
 
-export function ReceiveSampleDialog({
+export function LogSampleDialog({
   onClose,
   onLogged,
 }: {
@@ -38,13 +38,13 @@ export function ReceiveSampleDialog({
 
   return (
     <div className="lims-modal-backdrop" role="presentation" onClick={onClose}>
-      <div className="lims-modal" role="dialog" aria-modal="true" aria-labelledby="receive-sample-title" onClick={(event) => event.stopPropagation()}>
+      <div className="lims-modal" role="dialog" aria-modal="true" aria-labelledby="log-sample-title" onClick={(event) => event.stopPropagation()}>
         <form onSubmit={submit}>
           <div className="receipt-form">
-            <p className="lims-eyebrow">Log a sample</p>
-            <h2 id="receive-sample-title">Receive sample</h2>
+            <p className="lims-eyebrow">Manual intake</p>
+            <h2 id="log-sample-title">Log sample</h2>
             <p className="receipt-form-lede">
-              Accession {nextId} is next for {SAMPLE_ACCOUNT.name}. North Lab and East Lab share this sequence.
+              Manually create a sample when no electronic order exists. Accession {nextId} is next for {SAMPLE_ACCOUNT.name}.
             </p>
             <div className="receive-fields">
               <label>

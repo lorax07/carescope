@@ -1,11 +1,114 @@
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type PointerEvent as ReactPointerEvent,
+  type SetStateAction,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LabOperationsEditor } from "../components/LabOperationsEditor";
 import { workflowService } from "../platform";
+import { SYSTEM_WORKFLOWS, type SystemWorkflowDefinition } from "../systemWorkflows";
+
+const WORKFLOW_TUTORIALS = [
+  {
+    id: "first-workflow",
+    title: "Build your first workflow",
+    duration: "2:10",
+    level: "Getting started",
+    summary: "Create a workflow, connect stages, and publish a valid draft.",
+    frames: [
+      ["Start from the workflow library", "Choose New workflow or open a system workflow that already matches your process."],
+      ["Build the workflow logic", "Drag tasks, reviews, approvals, and conditions into the Workflow Designer."],
+      ["Connect and configure", "Connect each branch, then select a stage to configure roles, instructions, and rules."],
+      ["Validate and publish", "Resolve validation findings, preview the workflow, and publish the approved version."],
+    ],
+  },
+  {
+    id: "screen-design",
+    title: "Design workflow screens",
+    duration: "1:45",
+    level: "Screen design",
+    summary: "Build user-facing task screens and preview each interaction.",
+    frames: [
+      ["Open Screen design", "Switch from Workflow logic to Screen design without leaving the workflow."],
+      ["Add the task screens", "Create one screen for each point where a user needs to review or enter information."],
+      ["Configure fields and actions", "Set the title, instructions, fields, and primary action for every screen."],
+      ["Preview the user experience", "Use the live preview and full preview dialog before publishing."],
+    ],
+  },
+  {
+    id: "template-branch",
+    title: "Add a template branch",
+    duration: "1:20",
+    level: "Templates",
+    summary: "Add a reusable template to an existing workflow branch.",
+    frames: [
+      ["Choose Use template", "Select a validated laboratory template from the workflow home screen."],
+      ["Add to Current workflow", "Choose the workflow that should receive the reusable process branch."],
+      ["Select the connection branch", "Choose the exact stage where the template should connect."],
+      ["Review the combined canvas", "The new branch opens in the designer ready for configuration and validation."],
+    ],
+  },
+  {
+    id: "preview-publish",
+    title: "Preview, validate, and publish",
+    duration: "1:55",
+    level: "Release controls",
+    summary: "Test workflow logic and screens before releasing a version.",
+    frames: [
+      ["Preview every screen", "Move through every task screen and confirm labels, fields, and actions."],
+      ["Simulate the workflow", "Run representative sample data through conditions and branches."],
+      ["Validate the draft", "Check for disconnected stages, missing roles, and incomplete configuration."],
+      ["Publish a controlled version", "Publish the validated workflow while retaining its prior version history."],
+    ],
+  },
+] as const;
+
+type DialogPosition = { x: number; y: number };
+
+function beginDialogDrag(
+  event: ReactPointerEvent<HTMLDivElement>,
+  position: DialogPosition,
+  setPosition: Dispatch<SetStateAction<DialogPosition>>,
+) {
+  if (event.button !== 0 || (event.target as HTMLElement).closest("button")) return;
+  event.preventDefault();
+  const handle = event.currentTarget;
+  handle.setPointerCapture(event.pointerId);
+  const pointer = { x: event.clientX, y: event.clientY };
+  const move = (moveEvent: PointerEvent) => {
+    setPosition({
+      x: position.x + moveEvent.clientX - pointer.x,
+      y: position.y + moveEvent.clientY - pointer.y,
+    });
+  };
+  const finish = () => {
+    handle.removeEventListener("pointermove", move);
+    handle.removeEventListener("pointerup", finish);
+    handle.removeEventListener("pointercancel", finish);
+  };
+  handle.addEventListener("pointermove", move);
+  handle.addEventListener("pointerup", finish);
+  handle.addEventListener("pointercancel", finish);
+}
 
 export function LibraryPage() {
   const navigate = useNavigate();
   const [tick, setTick] = useState(0);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [previewScreenIndex, setPreviewScreenIndex] = useState(0);
+  const [previewNotice, setPreviewNotice] = useState("");
+  const [templatePrompt, setTemplatePrompt] = useState<{ id: string; name: string } | null>(null);
+  const [templateBranch, setTemplateBranch] = useState<"new" | "current" | null>(null);
+  const [currentWorkflowId, setCurrentWorkflowId] = useState("");
+  const [connectNodeId, setConnectNodeId] = useState("");
+  const [tutorialId, setTutorialId] = useState<string | null>(null);
+  const [tutorialFrame, setTutorialFrame] = useState(0);
+  const [tutorialPlaying, setTutorialPlaying] = useState(false);
+  const [previewDialogPosition, setPreviewDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
+  const [templateDialogPosition, setTemplateDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
+  const [tutorialDialogPosition, setTutorialDialogPosition] = useState<DialogPosition>({ x: 0, y: 0 });
   const workflows = useMemo(() => {
     void tick;
     return workflowService.list();
@@ -13,6 +116,21 @@ export function LibraryPage() {
 
   const templates = workflows.filter((w) => w.isTemplate);
   const definitions = workflows.filter((w) => !w.isTemplate);
+  const tutorial = WORKFLOW_TUTORIALS.find((item) => item.id === tutorialId);
+
+  useEffect(() => {
+    if (!tutorialPlaying || !tutorial) return;
+    const timer = window.setInterval(() => {
+      setTutorialFrame((current) => {
+        if (current >= tutorial.frames.length - 1) {
+          setTutorialPlaying(false);
+          return current;
+        }
+        return current + 1;
+      });
+    }, 2200);
+    return () => window.clearInterval(timer);
+  }, [tutorial, tutorialPlaying]);
 
   const createNew = () => {
     const wf = workflowService.create({
@@ -22,9 +140,115 @@ export function LibraryPage() {
     navigate(`/app/workflows/${wf.id}`);
   };
 
-  const useTemplate = (id: string, name: string) => {
-    const instance = workflowService.createFromTemplate(id, `${name}`);
+  const preview = SYSTEM_WORKFLOWS.find((workflow) => workflow.id === previewId);
+  const previewStage = preview?.stages[previewScreenIndex] ?? preview?.stages[0];
+  const previewScreen = previewStage?.screen;
+  const selectedCurrentWorkflow = currentWorkflowId ? workflowService.get(currentWorkflowId) : undefined;
+
+  const materializeSystemWorkflow = (systemWorkflow: SystemWorkflowDefinition) => {
+    const existing = workflowService.list().find((workflow) => !workflow.isTemplate && workflow.name === systemWorkflow.name);
+    const created = existing ?? workflowService.create({ name: systemWorkflow.name, description: systemWorkflow.description });
+    const stageNodes = systemWorkflow.stages.map((stage, index) => ({
+      id: `${systemWorkflow.id}-${stage.id}`,
+      type: stage.type ?? (/review/i.test(stage.label) ? "review" : /approval|authorization|promote/i.test(stage.label) ? "approval" : "task"),
+      label: stage.label,
+      description: stage.description,
+      position: { x: 80 + (index % 4) * 280, y: 100 + Math.floor(index / 4) * 190 },
+      config: {
+        instructions: stage.description,
+        screenId: `${systemWorkflow.id}-${stage.id}`,
+        clickTrigger: systemWorkflow.edges?.filter((edge) => edge.source === stage.id).map((edge) => edge.label).filter(Boolean) ?? [],
+        ...(stage.type === "review" ? { reviewerRole: "reviewer" } : {}),
+      },
+    }));
+    const nodes = stageNodes;
+    const graphEdges = systemWorkflow.edges?.map((edge, index) => ({
+      id: `${systemWorkflow.id}-edge-${index}`,
+      source: `${systemWorkflow.id}-${edge.source}`,
+      target: `${systemWorkflow.id}-${edge.target}`,
+      label: edge.label,
+      condition: edge.condition,
+      edgeType: edge.condition ? "conditional" as const : "default" as const,
+    })) ?? nodes.slice(0, -1).map((node, index) => ({
+      id: `${systemWorkflow.id}-edge-${index}`,
+      source: node.id,
+      target: nodes[index + 1]!.id,
+    }));
+    const updated = workflowService.updateDraft(created.id, {
+      name: systemWorkflow.name,
+      description: systemWorkflow.description,
+      nodes,
+      edges: graphEdges,
+      triggers: systemWorkflow.triggers?.map((trigger, index) => ({
+        id: `${systemWorkflow.id}-trigger-${index}`,
+        type: trigger.eventType === "workflow.manual_trigger" ? "manual" as const : "event" as const,
+        eventType: trigger.eventType,
+        enabled: true,
+        module: trigger.module,
+      })) ?? [],
+      modules: systemWorkflow.modules ?? [],
+      entityTypes: systemWorkflow.module === "Sequence Operations" ? ["sample", "test", "result", "instrument_run"] : [],
+      tags: [systemWorkflow.module, "system-workflow", systemWorkflow.id],
+    }) ?? created;
+    const screens = systemWorkflow.stages.map((stage) => ({
+      id: `${systemWorkflow.id}-${stage.id}`,
+      ...stage.screen,
+    }));
+    localStorage.setItem(`carescope.workflowScreens.${updated.id}`, JSON.stringify(screens));
+    setTick((value) => value + 1);
+    return updated;
+  };
+
+  const openSystemWorkflow = (systemWorkflow: (typeof SYSTEM_WORKFLOWS)[number]) => {
+    const updated = materializeSystemWorkflow(systemWorkflow);
+    navigate(`/app/workflows/${updated.id}`);
+  };
+
+  const openPreview = (id: string) => {
+    setPreviewId(id);
+    setPreviewScreenIndex(0);
+    setPreviewNotice("");
+    setPreviewDialogPosition({ x: 0, y: 0 });
+  };
+
+  const selectCurrentWorkflow = (value: string) => {
+    setConnectNodeId("");
+    if (value.startsWith("system:")) {
+      const systemWorkflow = SYSTEM_WORKFLOWS.find((workflow) => workflow.id === value.slice("system:".length));
+      if (systemWorkflow) setCurrentWorkflowId(materializeSystemWorkflow(systemWorkflow).id);
+      return;
+    }
+    setCurrentWorkflowId(value);
+  };
+
+  const branchDescription = (nodeId: string) => {
+    if (!selectedCurrentWorkflow) return "";
+    const node = selectedCurrentWorkflow.nodes.find((item) => item.id === nodeId);
+    if (!node) return "";
+    const targets = selectedCurrentWorkflow.edges
+      .filter((edge) => edge.source === nodeId)
+      .map((edge) => selectedCurrentWorkflow.nodes.find((item) => item.id === edge.target)?.label)
+      .filter(Boolean);
+    return targets.length ? `${node.label} → ${targets.join(", ")}` : `${node.label} → new branch`;
+  };
+
+  const closeTemplatePrompt = () => {
+    setTemplatePrompt(null);
+    setTemplateBranch(null);
+    setCurrentWorkflowId("");
+    setConnectNodeId("");
+  };
+
+  const createFromSelectedTemplate = () => {
+    if (!templatePrompt) return;
+    const instance = workflowService.createFromTemplate(templatePrompt.id, templatePrompt.name);
     if (instance) navigate(`/app/workflows/${instance.id}`);
+  };
+
+  const addTemplateToCurrent = () => {
+    if (!templatePrompt || !currentWorkflowId || !connectNodeId) return;
+    const updated = workflowService.addTemplateBranch(currentWorkflowId, templatePrompt.id, connectNodeId);
+    if (updated) navigate(`/app/workflows/${updated.id}`);
   };
 
   return (
@@ -43,7 +267,42 @@ export function LibraryPage() {
         </button>
       </div>
 
-      <LabOperationsEditor />
+      <section className="system-workflow-section">
+        <div className="workflow-section-heading">
+          <div>
+            <p className="lims-eyebrow">Already operating</p>
+            <h2>System workflows</h2>
+            <p>Start with the workflows already represented across installed Sequence modules.</p>
+          </div>
+          <span className="lims-count">{SYSTEM_WORKFLOWS.length} workflows</span>
+        </div>
+        <div className="system-workflow-modules">
+          {[...new Set(SYSTEM_WORKFLOWS.map((workflow) => workflow.module))].map((module) => (
+            <section className="system-workflow-module" key={module}>
+              <div className="system-workflow-module-head">
+                <h3>{module}</h3>
+                <span>{SYSTEM_WORKFLOWS.filter((workflow) => workflow.module === module).length} workflow{SYSTEM_WORKFLOWS.filter((workflow) => workflow.module === module).length === 1 ? "" : "s"}</span>
+              </div>
+              <div className="system-workflow-grid">
+                {SYSTEM_WORKFLOWS.filter((workflow) => workflow.module === module).map((workflow) => (
+                  <article className="system-workflow-card" key={workflow.id}>
+                    <div className="system-workflow-card-head"><span>Built in application</span><b>{workflow.stages.length} stages</b></div>
+                    <h3>{workflow.name}</h3>
+                    <p>{workflow.description}</p>
+                    <ol>
+                      {workflow.stages.map((stage, index) => <li key={stage.id}><span>{index + 1}</span>{stage.label}</li>)}
+                    </ol>
+                    <div className="wf-card-actions">
+                      <button type="button" className="btn btn-primary" onClick={() => openSystemWorkflow(workflow)}>View workflows</button>
+                      <button type="button" className="btn" onClick={() => openPreview(workflow.id)}>Preview screens</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
 
       <h2 style={{ fontSize: "1rem", color: "var(--text-muted)", fontWeight: 600 }}>
         Your workflows
@@ -107,7 +366,13 @@ export function LibraryPage() {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => useTemplate(wf.id, wf.name)}
+                onClick={() => {
+                  setTemplatePrompt({ id: wf.id, name: wf.name });
+                  setTemplateBranch(null);
+                  setCurrentWorkflowId("");
+                  setConnectNodeId("");
+                  setTemplateDialogPosition({ x: 0, y: 0 });
+                }}
               >
                 Use template
               </button>
@@ -118,6 +383,233 @@ export function LibraryPage() {
           </article>
         ))}
       </div>
+
+      <section className="workflow-training-section">
+        <div className="workflow-section-heading">
+          <div>
+            <p className="lims-eyebrow">Learn in minutes</p>
+            <h2>Workflow video tutorials</h2>
+            <p>Short, focused training for building, previewing, and publishing workflows.</p>
+          </div>
+          <span className="lims-count">{WORKFLOW_TUTORIALS.length} tutorials</span>
+        </div>
+        <div className="workflow-training-grid">
+          {WORKFLOW_TUTORIALS.map((item, index) => (
+            <button
+              type="button"
+              className="workflow-training-card"
+              key={item.id}
+              onClick={() => {
+                setTutorialId(item.id);
+                setTutorialFrame(0);
+                setTutorialPlaying(true);
+                setTutorialDialogPosition({ x: 0, y: 0 });
+              }}
+            >
+              <span className={`workflow-training-thumb training-tone-${index + 1}`}>
+                <i className="workflow-training-play" aria-hidden="true" />
+                <small>{item.duration}</small>
+              </span>
+              <span className="workflow-training-copy">
+                <small>{item.level}</small>
+                <b>{item.title}</b>
+                <span>{item.summary}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {tutorial ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>
+          <div className="lims-modal lims-modal-wide workflow-training-dialog" style={{ transform: `translate(${tutorialDialogPosition.x}px, ${tutorialDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="workflow-training-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, tutorialDialogPosition, setTutorialDialogPosition)}>
+              <div><p className="lims-eyebrow">{tutorial.level} · {tutorial.duration}</p><h2 id="workflow-training-title">{tutorial.title}</h2></div>
+              <button type="button" className="btn" onClick={() => { setTutorialId(null); setTutorialPlaying(false); }}>Close</button>
+            </div>
+            <div className={`workflow-training-player${tutorialPlaying ? " is-playing" : ""}`}>
+              <div className="workflow-training-stage">
+                <div className="training-player-topbar"><span /><span /><span /><b>Sequence Workflow Design</b></div>
+                <div className="training-player-scene">
+                  <div className="training-player-step">{String(tutorialFrame + 1).padStart(2, "0")}</div>
+                  <p className="lims-eyebrow">Tutorial step {tutorialFrame + 1} of {tutorial.frames.length}</p>
+                  <h3>{tutorial.frames[tutorialFrame]?.[0]}</h3>
+                  <p>{tutorial.frames[tutorialFrame]?.[1]}</p>
+                  <div className="training-player-demo">
+                    <span>Start</span><i /><span>{tutorial.frames[tutorialFrame]?.[0]}</span><i /><span>Complete</span>
+                  </div>
+                </div>
+              </div>
+              <div className="workflow-training-controls">
+                <button
+                  type="button"
+                  className="training-play-control"
+                  aria-label={tutorialPlaying ? "Pause tutorial" : "Play tutorial"}
+                  onClick={() => {
+                    if (!tutorialPlaying && tutorialFrame === tutorial.frames.length - 1) setTutorialFrame(0);
+                    setTutorialPlaying((playing) => !playing);
+                  }}
+                >
+                  {tutorialPlaying ? "Ⅱ" : "▶"}
+                </button>
+                <span>{tutorialFrame + 1} / {tutorial.frames.length}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={tutorial.frames.length - 1}
+                  value={tutorialFrame}
+                  aria-label="Tutorial progress"
+                  onChange={(event) => {
+                    setTutorialFrame(Number(event.target.value));
+                    setTutorialPlaying(false);
+                  }}
+                />
+                <span>{tutorial.duration}</span>
+              </div>
+              <div className="workflow-training-caption" aria-live="polite">
+                <b>{tutorial.frames[tutorialFrame]?.[0]}</b>
+                <p>{tutorial.frames[tutorialFrame]?.[1]}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {preview ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setPreviewId(null)}>
+          <div className="lims-modal lims-modal-wide workflow-module-preview" style={{ transform: `translate(${previewDialogPosition.x}px, ${previewDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="workflow-preview-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, previewDialogPosition, setPreviewDialogPosition)}>
+              <div>
+                <p className="lims-eyebrow">{preview.module}</p>
+                <h2 id="workflow-preview-title">{preview.name}</h2>
+              </div>
+              <button type="button" className="btn" onClick={() => setPreviewId(null)}>Close</button>
+            </div>
+            <div className="workflow-preview-layout">
+              <aside>
+                <b>Workflow Stages Screens</b>
+                <ol className="workflow-stage-screen-list">
+                  {preview.stages.map((stage, index) => (
+                    <li className={index === previewScreenIndex ? "is-active" : undefined} key={stage.id}>
+                      <button type="button" onClick={() => { setPreviewScreenIndex(index); setPreviewNotice(""); }}>
+                        <span>{index + 1}</span>
+                        <div><b>{stage.label}</b><small>{stage.screen.name}</small></div>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </aside>
+              <section className="workflow-screen-preview">
+                <div className="workflow-screen-browser">
+                  <span /><span /><span />
+                  <b>{previewScreen?.name}</b>
+                </div>
+                <p className="lims-eyebrow">Screen preview</p>
+                <h3>{previewScreen?.title}</h3>
+                <p>{previewScreen?.description}</p>
+                <div className="workflow-preview-fields" key={previewScreen?.name}>
+                  {previewScreen?.fields.split("\n").filter(Boolean).map((field, index) => (
+                    <label className={index > 1 ? "is-wide" : undefined} key={field}>
+                      {field}
+                      {index > 1 ? <textarea defaultValue={`Enter ${field.toLowerCase()}`} /> : <input defaultValue="" placeholder={`Enter ${field.toLowerCase()}`} />}
+                    </label>
+                  ))}
+                </div>
+                {previewNotice ? <p className="workflow-preview-notice" role="status">{previewNotice}</p> : null}
+                <div className="lims-modal-actions">
+                  <button type="button" className="btn" disabled={previewScreenIndex === 0} onClick={() => setPreviewScreenIndex((index) => Math.max(0, index - 1))}>Back</button>
+                  <button type="button" className="btn" onClick={() => setPreviewNotice(`${previewScreen?.name} draft saved`)}>Save draft</button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      if (previewScreenIndex < preview.stages.length - 1) {
+                        setPreviewScreenIndex((index) => index + 1);
+                        setPreviewNotice("");
+                      } else {
+                        setPreviewNotice("Preview complete");
+                      }
+                    }}
+                  >
+                    {previewScreen?.primaryAction ?? (previewScreenIndex === preview.stages.length - 1 ? "Complete preview" : "Continue")}
+                  </button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {templatePrompt ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={closeTemplatePrompt}>
+          <div className="lims-modal lims-modal-wide template-path-dialog" style={{ transform: `translate(${templateDialogPosition.x}px, ${templateDialogPosition.y}px)` }} role="dialog" aria-modal="true" aria-labelledby="template-path-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar is-draggable" onPointerDown={(event) => beginDialogDrag(event, templateDialogPosition, setTemplateDialogPosition)}><h2 id="template-path-title">Use {templatePrompt.name}</h2><button type="button" className="btn" onClick={closeTemplatePrompt}>Close</button></div>
+            <div className="template-path-body">
+              <p>Choose how this template should enter your workflow library.</p>
+              <div className="template-path-options">
+                <button type="button" className={templateBranch === "new" ? "is-selected" : undefined} onClick={() => { setTemplateBranch("new"); setCurrentWorkflowId(""); setConnectNodeId(""); }}>
+                  <span>01</span><div><b>New Workflow</b><small>Build a brand-new editable workflow from this template.</small></div>
+                </button>
+                <button type="button" className={templateBranch === "current" ? "is-selected" : undefined} onClick={() => setTemplateBranch("current")}>
+                  <span>02</span><div><b>Add to Current workflow</b><small>Add the template as a branch on an existing workflow.</small></div>
+                </button>
+              </div>
+              {templateBranch === "new" ? (
+                <section className="template-branch-panel">
+                  <p className="lims-eyebrow">New workflow branch</p>
+                  <h3>Create from {templatePrompt.name}</h3>
+                  <p>A new draft will include every node, condition, and screen from the template.</p>
+                  <button type="button" className="btn btn-primary" onClick={createFromSelectedTemplate}>Create New Workflow</button>
+                </section>
+              ) : null}
+              {templateBranch === "current" ? (
+                <section className="template-branch-panel">
+                  <p className="lims-eyebrow">Current workflow branch</p>
+                  <h3>Select the workflow and connection branch</h3>
+                  <div className="template-branch-fields">
+                    <label>
+                      Current workflow
+                      <select value={currentWorkflowId} onChange={(event) => selectCurrentWorkflow(event.target.value)}>
+                        <option value="">Select any workflow</option>
+                        <optgroup label="System workflows">
+                          {SYSTEM_WORKFLOWS.map((systemWorkflow) => {
+                            const existing = definitions.find((workflow) => workflow.name === systemWorkflow.name);
+                            return <option key={systemWorkflow.id} value={existing?.id ?? `system:${systemWorkflow.id}`}>{systemWorkflow.module} · {systemWorkflow.name}</option>;
+                          })}
+                        </optgroup>
+                        <optgroup label="Your workflows">
+                          {definitions
+                            .filter((workflow) => !SYSTEM_WORKFLOWS.some((systemWorkflow) => systemWorkflow.name === workflow.name))
+                            .map((workflow) => <option key={workflow.id} value={workflow.id}>{workflow.name} · v{workflow.version} · {workflow.status}</option>)}
+                        </optgroup>
+                      </select>
+                    </label>
+                    <label>
+                      Connect template after
+                      <select value={connectNodeId} disabled={!selectedCurrentWorkflow} onChange={(event) => setConnectNodeId(event.target.value)}>
+                        <option value="">Select any connection branch</option>
+                        {selectedCurrentWorkflow?.nodes.map((node, index) => <option key={node.id} value={node.id}>{String(index + 1).padStart(2, "0")} · {branchDescription(node.id)} · {node.type}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                  {selectedCurrentWorkflow ? (
+                    <div className="template-branch-map" aria-label="Available connection branches">
+                      {selectedCurrentWorkflow.nodes.map((node, index) => (
+                        <button type="button" className={connectNodeId === node.id ? "is-selected" : undefined} key={node.id} onClick={() => setConnectNodeId(node.id)}>
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          <div><b>{node.label}</b><small>{branchDescription(node.id)} · {node.type}</small></div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                  <p className="template-branch-hint">{connectNodeId ? "Branch selected. The template can now be added and edited in the designer." : "Select a branch connection before opening the designer."}</p>
+                  <button type="button" className="btn btn-primary" disabled={!currentWorkflowId || !connectNodeId} onClick={addTemplateToCurrent}>Add to Current workflow</button>
+                </section>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -40,7 +40,7 @@ export function SiteHeader() {
 
         <div className="lp-nav-actions">
           <nav className="lp-nav-links" aria-label="Primary">
-            <a href="/#capabilities">What we solve</a>
+            <a href="/#modules">Platform</a>
             <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
               <button
                 type="button"
@@ -50,7 +50,7 @@ export function SiteHeader() {
                 aria-controls={menuId}
                 onClick={() => setOpen((current) => !current)}
               >
-                Modules
+                Products
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
                   <path d="M2.2 4.2 6 8l3.8-3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -68,14 +68,16 @@ export function SiteHeader() {
                 </ul>
               ) : null}
             </div>
-            <a href="/#compliance">About</a>
+            <a href="/#industries">Industries</a>
+            <a href="/#capabilities">Solutions</a>
+            <a href="/#compliance">Trust</a>
           </nav>
           <span className="lp-nav-divider" aria-hidden="true" />
           <Link to="/intrasite" className="lp-nav-text">
             Sign in
           </Link>
           <Link to="/app?signup=1" className="lp-btn lp-btn-demo">
-            Request a Demo
+            Book a demo
           </Link>
         </div>
       </div>
