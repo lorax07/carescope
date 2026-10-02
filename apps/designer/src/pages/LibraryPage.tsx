@@ -8,73 +8,7 @@ import {
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { workflowService } from "../platform";
-
-const SYSTEM_WORKFLOWS = [
-  {
-    id: "sample-intake",
-    module: "Sequence Operations",
-    name: "Sample Intake & Accessioning",
-    description: "Receive electronic orders, document condition, assign accessions, and route samples.",
-    stages: ["Electronic order selected", "Receipt condition verified", "Accession assigned", "Location recorded", "Route to testing"],
-    screens: ["Electronic order queue", "Receipt details", "Accession confirmation", "Sample details", "Testing route"],
-  },
-  {
-    id: "instrument-testing",
-    module: "Sequence Instruments",
-    name: "Instrument Run & Testing",
-    description: "Configure samples, method, instrument, solutions, controls, and monitor the current run.",
-    stages: ["Select samples", "Configure instrument", "Method & solutions", "Review setup", "Run sequence"],
-    screens: ["Select samples", "Instrument setup", "Method & solutions", "Review run", "Live run sequence"],
-  },
-  {
-    id: "results-release",
-    module: "Sequence Operations",
-    name: "Results Review & Release",
-    description: "Complete testing, review individual or batch results, authorize, and release.",
-    stages: ["Testing complete", "Individual or batch review", "Result authorization", "QA approval", "Release"],
-    screens: ["In Review queue", "Result review", "Batch review", "Authorization", "Ready for Release"],
-  },
-  {
-    id: "quality-capa",
-    module: "Sequence Compliance",
-    name: "Deviation & CAPA",
-    description: "Report deviations, contain impact, investigate root cause, implement CAPA, and verify effectiveness.",
-    stages: ["Report", "Containment", "Investigation", "CAPA", "QA close"],
-    screens: ["Deviation report", "Containment", "Investigation", "CAPA plan", "Effectiveness check"],
-  },
-  {
-    id: "instrument-qualification",
-    module: "Sequence Instruments",
-    name: "Instrument Qualification & Calibration",
-    description: "Add instruments, qualify interfaces, schedule calibration, and retain maintenance evidence.",
-    stages: ["Identity", "Interface", "Qualification", "Calibration", "In service"],
-    screens: ["Instrument identity", "Interface setup", "Qualification record", "Calibration evidence", "Instrument record"],
-  },
-  {
-    id: "revenue-cycle",
-    module: "Sequence Revenue",
-    name: "Laboratory Revenue Cycle",
-    description: "Create charges from completed testing, resolve exceptions, and route approved billing.",
-    stages: ["Charge capture", "Coding", "Exception review", "Approval", "Invoice"],
-    screens: ["Charge review", "Coding", "Exception worklist", "Approval", "Invoice preview"],
-  },
-  {
-    id: "client-environment",
-    module: "Sequence Client",
-    name: "Client & Lab Environment Setup",
-    description: "Create a client, configure laboratories and environments, assign modules, and promote an installation.",
-    stages: ["Create client", "Add laboratory", "Configure environment", "Assign modules", "Promote"],
-    screens: ["Client details", "Laboratory setup", "Environment configuration", "Module assignment", "Promotion review"],
-  },
-  {
-    id: "insight-escalation",
-    module: "Sequence Insights",
-    name: "Operational Insight Escalation",
-    description: "Detect an operational signal, assemble supporting records, assign an owner, and track resolution.",
-    stages: ["Signal detected", "Evidence assembled", "Owner assigned", "Action tracked", "Resolved"],
-    screens: ["Insight alert", "Evidence review", "Assignment", "Action plan", "Resolution"],
-  },
-] as const;
+import { SYSTEM_WORKFLOWS, type SystemWorkflowDefinition } from "../systemWorkflows";
 
 const WORKFLOW_TUTORIALS = [
   {
@@ -207,37 +141,58 @@ export function LibraryPage() {
   };
 
   const preview = SYSTEM_WORKFLOWS.find((workflow) => workflow.id === previewId);
-  const previewScreen = preview?.screens[previewScreenIndex] ?? preview?.screens[0];
+  const previewStage = preview?.stages[previewScreenIndex] ?? preview?.stages[0];
+  const previewScreen = previewStage?.screen;
   const selectedCurrentWorkflow = currentWorkflowId ? workflowService.get(currentWorkflowId) : undefined;
 
-  const materializeSystemWorkflow = (systemWorkflow: (typeof SYSTEM_WORKFLOWS)[number]) => {
+  const materializeSystemWorkflow = (systemWorkflow: SystemWorkflowDefinition) => {
     const existing = workflowService.list().find((workflow) => !workflow.isTemplate && workflow.name === systemWorkflow.name);
     const created = existing ?? workflowService.create({ name: systemWorkflow.name, description: systemWorkflow.description });
     const stageNodes = systemWorkflow.stages.map((stage, index) => ({
-      id: crypto.randomUUID(),
-      type: /review/i.test(stage) ? "review" : /approval|authorization|promote/i.test(stage) ? "approval" : "task",
-      label: stage,
-      description: `${stage} in the ${systemWorkflow.name} workflow`,
-      position: { x: 300 + index * 230, y: 220 },
-      config: /review/i.test(stage) ? { reviewerRole: "reviewer" } : { instructions: stage, autoComplete: false },
+      id: `${systemWorkflow.id}-${stage.id}`,
+      type: stage.type ?? (/review/i.test(stage.label) ? "review" : /approval|authorization|promote/i.test(stage.label) ? "approval" : "task"),
+      label: stage.label,
+      description: stage.description,
+      position: { x: 80 + (index % 4) * 280, y: 100 + Math.floor(index / 4) * 190 },
+      config: {
+        instructions: stage.description,
+        screenId: `${systemWorkflow.id}-${stage.id}`,
+        clickTrigger: systemWorkflow.edges?.filter((edge) => edge.source === stage.id).map((edge) => edge.label).filter(Boolean) ?? [],
+        ...(stage.type === "review" ? { reviewerRole: "reviewer" } : {}),
+      },
     }));
-    const start = { id: crypto.randomUUID(), type: "start", label: "Start", position: { x: 60, y: 220 }, config: {} };
-    const end = { id: crypto.randomUUID(), type: "end", label: "Complete", position: { x: 300 + stageNodes.length * 230, y: 220 }, config: { outcome: "success" } };
-    const nodes = [start, ...stageNodes, end];
+    const nodes = stageNodes;
+    const graphEdges = systemWorkflow.edges?.map((edge, index) => ({
+      id: `${systemWorkflow.id}-edge-${index}`,
+      source: `${systemWorkflow.id}-${edge.source}`,
+      target: `${systemWorkflow.id}-${edge.target}`,
+      label: edge.label,
+      condition: edge.condition,
+      edgeType: edge.condition ? "conditional" as const : "default" as const,
+    })) ?? nodes.slice(0, -1).map((node, index) => ({
+      id: `${systemWorkflow.id}-edge-${index}`,
+      source: node.id,
+      target: nodes[index + 1]!.id,
+    }));
     const updated = workflowService.updateDraft(created.id, {
       name: systemWorkflow.name,
       description: systemWorkflow.description,
       nodes,
-      edges: nodes.slice(0, -1).map((node, index) => ({ id: crypto.randomUUID(), source: node.id, target: nodes[index + 1]!.id })),
-      tags: [systemWorkflow.module, "system-workflow"],
+      edges: graphEdges,
+      triggers: systemWorkflow.triggers?.map((trigger, index) => ({
+        id: `${systemWorkflow.id}-trigger-${index}`,
+        type: trigger.eventType === "workflow.manual_trigger" ? "manual" as const : "event" as const,
+        eventType: trigger.eventType,
+        enabled: true,
+        module: trigger.module,
+      })) ?? [],
+      modules: systemWorkflow.modules ?? [],
+      entityTypes: systemWorkflow.module === "Sequence Operations" ? ["sample", "test", "result", "instrument_run"] : [],
+      tags: [systemWorkflow.module, "system-workflow", systemWorkflow.id],
     }) ?? created;
-    const screens = systemWorkflow.screens.map((screen, index) => ({
-      id: `${systemWorkflow.id}-${index}`,
-      name: screen,
-      title: systemWorkflow.stages[index] ?? screen,
-      description: `${screen} for ${systemWorkflow.description.charAt(0).toLowerCase()}${systemWorkflow.description.slice(1)}`,
-      fields: screen.includes("Review") ? "Assigned reviewer\nReview notes\nDecision" : screen.includes("Instrument") ? "Instrument\nMethod\nOperating parameters" : "Owner\nStatus\nNotes",
-      primaryAction: index === systemWorkflow.screens.length - 1 ? "Complete" : "Continue",
+    const screens = systemWorkflow.stages.map((stage) => ({
+      id: `${systemWorkflow.id}-${stage.id}`,
+      ...stage.screen,
     }));
     localStorage.setItem(`carescope.workflowScreens.${updated.id}`, JSON.stringify(screens));
     setTick((value) => value + 1);
@@ -335,7 +290,7 @@ export function LibraryPage() {
                     <h3>{workflow.name}</h3>
                     <p>{workflow.description}</p>
                     <ol>
-                      {workflow.stages.map((stage, index) => <li key={stage}><span>{index + 1}</span>{stage}</li>)}
+                      {workflow.stages.map((stage, index) => <li key={stage.id}><span>{index + 1}</span>{stage.label}</li>)}
                     </ol>
                     <div className="wf-card-actions">
                       <button type="button" className="btn btn-primary" onClick={() => openSystemWorkflow(workflow)}>View workflows</button>
@@ -535,10 +490,10 @@ export function LibraryPage() {
                 <b>Workflow Stages Screens</b>
                 <ol className="workflow-stage-screen-list">
                   {preview.stages.map((stage, index) => (
-                    <li className={index === previewScreenIndex ? "is-active" : undefined} key={stage}>
+                    <li className={index === previewScreenIndex ? "is-active" : undefined} key={stage.id}>
                       <button type="button" onClick={() => { setPreviewScreenIndex(index); setPreviewNotice(""); }}>
                         <span>{index + 1}</span>
-                        <div><b>{stage}</b><small>{preview.screens[index] ?? "Workflow screen"}</small></div>
+                        <div><b>{stage.label}</b><small>{stage.screen.name}</small></div>
                       </button>
                     </li>
                   ))}
@@ -547,25 +502,28 @@ export function LibraryPage() {
               <section className="workflow-screen-preview">
                 <div className="workflow-screen-browser">
                   <span /><span /><span />
-                  <b>{previewScreen}</b>
+                  <b>{previewScreen?.name}</b>
                 </div>
                 <p className="lims-eyebrow">Screen preview</p>
-                <h3>{preview.stages[previewScreenIndex] ?? previewScreen}</h3>
-                <p>{preview.description}</p>
-                <div className="workflow-preview-fields" key={previewScreen}>
-                  <label>Assigned role<input defaultValue={previewScreen?.includes("Review") ? "Laboratory reviewer" : "Laboratory analyst"} /></label>
-                  <label>Workflow status<input defaultValue={preview.stages[previewScreenIndex] ?? previewScreen} /></label>
-                  <label className="is-wide">Instructions<textarea defaultValue={`Complete ${(preview.stages[previewScreenIndex] ?? previewScreen ?? "").toLowerCase()} and continue to ${(preview.stages[previewScreenIndex + 1] ?? "the next step").toLowerCase()}.`} /></label>
+                <h3>{previewScreen?.title}</h3>
+                <p>{previewScreen?.description}</p>
+                <div className="workflow-preview-fields" key={previewScreen?.name}>
+                  {previewScreen?.fields.split("\n").filter(Boolean).map((field, index) => (
+                    <label className={index > 1 ? "is-wide" : undefined} key={field}>
+                      {field}
+                      {index > 1 ? <textarea defaultValue={`Enter ${field.toLowerCase()}`} /> : <input defaultValue="" placeholder={`Enter ${field.toLowerCase()}`} />}
+                    </label>
+                  ))}
                 </div>
                 {previewNotice ? <p className="workflow-preview-notice" role="status">{previewNotice}</p> : null}
                 <div className="lims-modal-actions">
                   <button type="button" className="btn" disabled={previewScreenIndex === 0} onClick={() => setPreviewScreenIndex((index) => Math.max(0, index - 1))}>Back</button>
-                  <button type="button" className="btn" onClick={() => setPreviewNotice(`${previewScreen} draft saved`)}>Save draft</button>
+                  <button type="button" className="btn" onClick={() => setPreviewNotice(`${previewScreen?.name} draft saved`)}>Save draft</button>
                   <button
                     type="button"
                     className="btn btn-primary"
                     onClick={() => {
-                      if (previewScreenIndex < preview.screens.length - 1) {
+                      if (previewScreenIndex < preview.stages.length - 1) {
                         setPreviewScreenIndex((index) => index + 1);
                         setPreviewNotice("");
                       } else {
@@ -573,7 +531,7 @@ export function LibraryPage() {
                       }
                     }}
                   >
-                    {previewScreenIndex === preview.screens.length - 1 ? "Complete preview" : "Continue"}
+                    {previewScreen?.primaryAction ?? (previewScreenIndex === preview.stages.length - 1 ? "Complete preview" : "Continue")}
                   </button>
                 </div>
               </section>
