@@ -521,11 +521,23 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
+        <button
+          type="button"
+          className="sequence-nav-toggle"
+          aria-expanded={navOpen}
+          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            beginNavDrag(event, { toggle: true });
+          }}
+        >
+          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
+          <span className="sequence-dot-mark" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
+          </span>
+        </button>
         {navOpen ? null : (
           <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
-            <button type="button" className="lims-rail-logo" aria-expanded={false} aria-label="Expand navigation">
-              <NavIcon name="overview" />
-            </button>
             <nav className="lims-nav" aria-label="LIMS modules">
               {operationLinks.filter((item) => item.view !== "overview").map((item) => (
                 <NavLink
@@ -565,9 +577,6 @@ function AppFrame() {
       {navOpen ? (
       <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
         <div className="lims-menu-brand">
-          <button type="button" className="sequence-wordmark" aria-expanded aria-label="Close navigation">
-            <img src="/sequence-logo.png" alt="" />
-          </button>
         <div className="lims-site-block">
           <div className="lims-site">
             <span className="lims-site-dot" />

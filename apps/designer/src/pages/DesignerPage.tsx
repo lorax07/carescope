@@ -9,6 +9,7 @@ import {
   useNodesState,
   useEdgesState,
   BackgroundVariant,
+  ConnectionLineType,
   type Connection,
   type Edge,
   type NodeTypes,
@@ -24,8 +25,7 @@ import type {
   WorkflowTrigger,
 } from "@carescope/workflow-core";
 import { workflowService } from "../platform";
-import { NodePalette } from "../components/NodePalette";
-import { PropertiesPanel } from "../components/PropertiesPanel";
+import { NodeDetailsPanel, type NewNodeConnection, type NodeConnectionType } from "../components/NodeDetailsPanel";
 import { WorkflowNode as WfNodeView, type WfFlowNode } from "../components/WorkflowNode";
 
 const nodeTypes: NodeTypes = { workflow: WfNodeView };
@@ -168,6 +168,11 @@ function toFlowEdges(def: WorkflowDefinition): Edge[] {
       source: e.source,
       target: e.target,
       label: e.label,
+      type: "step",
+      data: {
+        connectionType: e.edgeType === "conditional" ? "Decision tree" : e.label === "End" ? "End" : "Trigger",
+        condition: e.condition,
+      },
       markerEnd: { type: MarkerType.ArrowClosed, color },
       style: { stroke: color },
     };
@@ -193,6 +198,8 @@ function fromFlow(
     source: e.source,
     target: e.target,
     label: typeof e.label === "string" ? e.label : undefined,
+    edgeType: (e.data?.connectionType === "Decision tree" ? "conditional" : "default") as "conditional" | "default",
+    condition: typeof e.data?.condition === "string" ? e.data.condition : undefined,
   }));
   return { nodes: wfNodes, edges: wfEdges };
 }
@@ -205,6 +212,9 @@ export function DesignerPage() {
   const [nodes, setNodes, onNodesChange] = useNodesState<WfFlowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [nodePanelTab, setNodePanelTab] = useState<"details" | "connections">("details");
+  const [pendingConnection, setPendingConnection] = useState<{ source: string; type: NodeConnectionType } | null>(null);
+  const [nodeContextMenu, setNodeContextMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
   const [drawer, setDrawer] = useState<"none" | "validate" | "simulate" | "history">("none");
@@ -258,10 +268,6 @@ export function DesignerPage() {
   const selected = useMemo(
     () => nodes.find((n) => n.id === selectedId) ?? null,
     [nodes, selectedId]
-  );
-  const selectedPlugin = useMemo(
-    () => plugins.find((p) => p.type === selected?.data.nodeType),
-    [plugins, selected]
   );
   const selectedScreen = screens.find((screen) => screen.id === selectedScreenId) ?? screens[0];
 
@@ -474,6 +480,9 @@ export function DesignerPage() {
           {
             ...connection,
             id: crypto.randomUUID(),
+            type: "step",
+            label: "Trigger",
+            data: { connectionType: "Trigger" },
             markerEnd: { type: MarkerType.ArrowClosed, color: "#5a7366" },
             style: { stroke: "#5a7366" },
           },
@@ -557,24 +566,44 @@ export function DesignerPage() {
     });
   };
 
-  const onDeleteNode = (nodeId: string) => {
-    setNodes((nds) => {
-      const next = nds.filter((n) => n.id !== nodeId);
-      setEdges((eds) => {
-        const nextEdges = eds.filter((e) => e.source !== nodeId && e.target !== nodeId);
-        persistCanvas(next, nextEdges);
-        recordHistory(next, nextEdges, screens, `Deleted node: ${nds.find((node) => node.id === nodeId)?.data.label ?? "stage"}`);
-        return nextEdges;
-      });
-      return next;
-    });
-    setSelectedId(null);
+  const addNodeConnection = (connection: NewNodeConnection) => {
+    const sourceNode = nodes.find((node) => node.id === connection.source);
+    const targetNode = nodes.find((node) => node.id === connection.target);
+    if (!sourceNode || !targetNode || connection.source === connection.target) return;
+    const label =
+      connection.connectionType === "Trigger"
+        ? connection.triggerAction ?? "Update Status"
+        : connection.connectionType === "Decision tree"
+          ? `Decision tree · ${connection.decisions?.length ?? 1}`
+          : "End";
+    const nextEdge: Edge = {
+      id: crypto.randomUUID(),
+      source: connection.source,
+      target: connection.target,
+      type: "step",
+      label,
+      data: {
+        connectionType: connection.connectionType,
+        triggerAction: connection.triggerAction,
+        condition: connection.decisions ? JSON.stringify(connection.decisions) : undefined,
+      },
+      markerEnd: { type: MarkerType.ArrowClosed, color: targetNode.data.color ?? "#5a7366" },
+      style: { stroke: targetNode.data.color ?? "#5a7366" },
+    };
+    const nextEdges = [...edges, nextEdge];
+    setEdges(nextEdges);
+    persistCanvas(nodes, nextEdges);
+    recordHistory(nodes, nextEdges, screens, `${connection.connectionType} connection: ${sourceNode.data.label} → ${targetNode.data.label}`);
+    setPendingConnection(null);
+    setNodeContextMenu(null);
+    setStatusMsg(`Connected ${sourceNode.data.label} to ${targetNode.data.label}`);
   };
 
-  const onChangeTriggers = (triggers: WorkflowTrigger[]) => {
-    if (!workflow) return;
-    setWorkflow({ ...workflow, triggers });
-    persistCanvas(nodes, edges, triggers);
+  const deleteNodeConnection = (edgeId: string) => {
+    const nextEdges = edges.filter((edge) => edge.id !== edgeId);
+    setEdges(nextEdges);
+    persistCanvas(nodes, nextEdges);
+    recordHistory(nodes, nextEdges, screens, "Removed node connection");
   };
 
   const handleSave = () => {
@@ -652,13 +681,17 @@ export function DesignerPage() {
   return (
     <div className={`designer-layout${designerMode === "screens" ? " is-screen-designer" : ""}`}>
       {designerMode === "workflow" ? (
-        <NodePalette plugins={plugins} workflowName={workflow.name} />
+        <NodeDetailsPanel
+          selected={selected}
+          nodes={nodes}
+          edges={edges}
+          initialTab={nodePanelTab}
+          onChangeNode={onChangeNode}
+          onAddConnection={addNodeConnection}
+          onDeleteConnection={deleteNodeConnection}
+        />
       ) : (
         <aside className="workflow-screen-list">
-          <div className="workflow-designer-sidebar-head">
-            <Link to="/app/workflows" className="btn btn-ghost">← Workflows</Link>
-            <div><h2>Workflow Designer</h2><p>{workflow.name}</p></div>
-          </div>
           <div className="workflow-screen-list-head">
             <div><p className="lims-eyebrow">Workflow UI</p><h2>Screens</h2></div>
             <button type="button" className="btn btn-primary" onClick={addScreen}>Add screen</button>
@@ -674,6 +707,7 @@ export function DesignerPage() {
       )}
       <div className="canvas-area">
         <div className="canvas-toolbar">
+          <div className="workflow-toolbar-brand"><Link to="/app/workflows" aria-label="Back to workflows">←</Link><div><span>Workflow Designer</span><b>{workflow.name}</b></div></div>
           <div className="workflow-designer-mode" role="group" aria-label="Designer mode">
             <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
             <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>
@@ -759,8 +793,26 @@ export function DesignerPage() {
               onConnect={onConnect}
               onDrop={onDrop}
               onDragOver={onDragOver}
-              onSelectionChange={({ nodes: sel }) => setSelectedId(sel[0]?.id ?? null)}
+              onNodeDoubleClick={(_, node) => {
+                setSelectedId(node.id);
+                setNodePanelTab("details");
+                setNodeContextMenu(null);
+              }}
+              onNodeContextMenu={(event, node) => {
+                event.preventDefault();
+                setSelectedId(node.id);
+                setNodePanelTab("connections");
+                setNodeContextMenu({ nodeId: node.id, x: event.clientX, y: event.clientY });
+              }}
+              onNodeClick={(_, node) => {
+                if (pendingConnection && pendingConnection.source !== node.id) {
+                  addNodeConnection({ source: pendingConnection.source, target: node.id, connectionType: pendingConnection.type });
+                }
+              }}
+              onPaneClick={() => setNodeContextMenu(null)}
               nodeTypes={nodeTypes}
+              defaultEdgeOptions={{ type: "step" }}
+              connectionLineType={ConnectionLineType.Step}
               fitView
               deleteKeyCode={["Backspace", "Delete"]}
               proOptions={{ hideAttribution: true }}
@@ -783,14 +835,21 @@ export function DesignerPage() {
           ) : <div className="empty-state"><h2>Add a screen</h2><p>Create the first user-facing screen for this workflow.</p></div>}
         </div>
       </div>
-      {designerMode === "workflow" ? (
-        <PropertiesPanel selected={selected} plugin={selectedPlugin} triggers={workflow.triggers} onChangeNode={onChangeNode} onChangeTriggers={onChangeTriggers} onDeleteNode={onDeleteNode} />
-      ) : (
-        <aside className="workflow-live-preview">
-          <div className="props-header"><p className="lims-eyebrow">Live preview</p><h2>User screen</h2></div>
-          {selectedScreen ? <WorkflowScreenMock screen={selectedScreen} /> : null}
-        </aside>
-      )}
+
+      {nodeContextMenu ? (
+        <div className="node-context-menu" style={{ left: nodeContextMenu.x, top: nodeContextMenu.y }}>
+          <p>Add node connection</p>
+          {(["Trigger", "Decision tree", "End"] as NodeConnectionType[]).map((type) => (
+            <button type="button" key={type} onClick={() => {
+              setPendingConnection({ source: nodeContextMenu.nodeId, type });
+              setNodeContextMenu(null);
+              setStatusMsg(`Select the destination node for the ${type.toLowerCase()} connection`);
+            }}>{type}<span>→</span></button>
+          ))}
+        </div>
+      ) : null}
+
+      {pendingConnection ? <div className="connection-mode-banner"><span>Connection mode</span>Select the destination node<button type="button" onClick={() => setPendingConnection(null)}>Cancel</button></div> : null}
 
       {screenPreviewOpen && selectedScreen ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setScreenPreviewOpen(false)}>
