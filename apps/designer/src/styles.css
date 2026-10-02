@@ -4280,6 +4280,14 @@ a {
   overflow: hidden;
 }
 
+.props-panel::before,
+.workflow-live-preview::before {
+  content: "";
+  flex: 0 0 53px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #fff;
+}
+
 .palette-header,
 .props-header,
 .canvas-toolbar {
@@ -4461,29 +4469,87 @@ button.palette-category-title {
   font-size: 0.72rem;
 }
 
-.workflow-history-controls select {
-  max-width: 180px;
-  height: 30px;
-  padding: 0 1.8rem 0 0.55rem;
+.designer-split-control {
+  position: relative;
+  display: inline-flex;
+}
+
+.designer-split-control > .btn:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.designer-split-control .split-chevron {
+  min-width: 26px;
+  margin-left: -1px;
+  padding-inline: 0.35rem;
+  border-radius: 0 7px 7px 0;
+}
+
+.designer-action-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  width: 250px;
+  padding: 0.4rem;
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: 10px;
   background: #fff;
+  box-shadow: 0 14px 34px rgba(15, 31, 68, 0.16);
+}
+
+.designer-action-menu > b {
+  display: block;
+  padding: 0.35rem 0.45rem 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.designer-action-menu > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.48rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
   color: var(--text);
-  font: inherit;
-  font-size: 0.72rem;
-  cursor: pointer;
+  text-align: left;
 }
 
-.workflow-history-controls select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-  outline: none;
+.designer-action-menu > button:hover {
+  background: var(--accent-soft);
 }
 
-.workflow-history-controls select:disabled {
-  color: var(--text-dim);
-  cursor: default;
-  opacity: 0.55;
+.designer-action-menu span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.designer-action-menu small {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.designer-action-menu p {
+  margin: 0;
+  padding: 0.55rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.save-control .designer-action-menu {
+  right: 0;
+  left: auto;
+}
+
+.save-menu {
+  width: 285px;
 }
 
 .canvas-host {
@@ -4530,6 +4596,8 @@ button.palette-category-title {
 
 .workflow-live-preview {
   border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
 }
 
 .workflow-screen-list-head {
@@ -4639,6 +4707,97 @@ button.palette-category-title {
 
 .workflow-live-preview .props-header {
   background: #fff;
+}
+
+.workflow-simulation-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.workflow-simulation-body > section {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.workflow-simulation-body h3 {
+  margin: 0 0 0.35rem;
+}
+
+.workflow-simulation-body p {
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.simulation-json-field,
+.workflow-confirm-body label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 1rem 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.simulation-json-field textarea {
+  min-height: 210px;
+  resize: vertical;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: 0.78rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.simulation-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.9rem 0;
+}
+
+.simulation-summary span {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.simulation-summary b {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.simulation-log {
+  max-height: 300px;
+  overflow: auto;
+}
+
+.workflow-confirm-dialog {
+  max-width: 540px;
+}
+
+.workflow-confirm-body {
+  padding: 1.15rem;
+}
+
+.workflow-confirm-body > p {
+  margin: 0 0 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.workflow-confirm-body input {
+  padding: 0.65rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
 }
 
 .workflow-screen-mock {

@@ -52,6 +52,20 @@ type DesignerHistory = {
   index: number;
 };
 
+type SavedWorkflowSnapshot = DesignerHistoryEntry & {
+  id: string;
+  triggers: WorkflowTrigger[];
+};
+
+function readSavedSnapshots(workflowId: string): SavedWorkflowSnapshot[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(`carescope.workflowSaves.${workflowId}`) ?? "[]") as SavedWorkflowSnapshot[];
+    return Array.isArray(parsed) ? parsed.slice(0, 10) : [];
+  } catch {
+    return [];
+  }
+}
+
 function cloneNodes(nodes: WfFlowNode[]): WfFlowNode[] {
   return nodes.map((node) => ({
     ...node,
@@ -201,6 +215,17 @@ export function DesignerPage() {
   const [selectedScreenId, setSelectedScreenId] = useState("");
   const [screenPreviewOpen, setScreenPreviewOpen] = useState(false);
   const [designerHistory, setDesignerHistory] = useState<DesignerHistory>({ entries: [], index: -1 });
+  const [historyMenu, setHistoryMenu] = useState<"undo" | "redo" | null>(null);
+  const [savedSnapshots, setSavedSnapshots] = useState<SavedWorkflowSnapshot[]>([]);
+  const [saveMenuOpen, setSaveMenuOpen] = useState(false);
+  const [restoreSave, setRestoreSave] = useState<SavedWorkflowSnapshot | null>(null);
+  const [simulateOpen, setSimulateOpen] = useState(false);
+  const [simulationRunning, setSimulationRunning] = useState(false);
+  const [simulationVariables, setSimulationVariables] = useState('{\n  "priority": "STAT",\n  "result": 1\n}');
+  const [simulationError, setSimulationError] = useState("");
+  const [cloneOpen, setCloneOpen] = useState(false);
+  const [cloneName, setCloneName] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -215,6 +240,9 @@ export function DesignerPage() {
     const savedScreens = readScreens(def.id, def.name);
     setScreens(savedScreens);
     setSelectedScreenId(savedScreens[0]?.id ?? "");
+    setSavedSnapshots(readSavedSnapshots(def.id));
+    setCloneName(`${def.name} copy`);
+    setIsDirty(false);
     setDesignerHistory({
       entries: [{
         nodes: cloneNodes(toFlowNodes(def, plugins)),
@@ -245,6 +273,7 @@ export function DesignerPage() {
     coalesce = false,
   ) => {
     const now = Date.now();
+    setIsDirty(true);
     const entry: DesignerHistoryEntry = {
       nodes: cloneNodes(nextNodes),
       edges: cloneEdges(nextEdges),
@@ -324,6 +353,71 @@ export function DesignerPage() {
     },
     [workflow, navigate]
   );
+
+  const saveCurrentSnapshot = useCallback((label = "Saved workflow") => {
+    if (!workflow) return;
+    persistCanvas(nodes, edges);
+    localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(screens));
+    const snapshot: SavedWorkflowSnapshot = {
+      id: crypto.randomUUID(),
+      nodes: cloneNodes(nodes),
+      edges: cloneEdges(edges),
+      screens: cloneScreens(screens),
+      triggers: workflow.triggers.map((trigger) => ({ ...trigger })),
+      label,
+      timestamp: Date.now(),
+    };
+    setSavedSnapshots((current) => {
+      const next = [snapshot, ...current].slice(0, 10);
+      localStorage.setItem(`carescope.workflowSaves.${workflow.id}`, JSON.stringify(next));
+      return next;
+    });
+    setIsDirty(false);
+    return snapshot;
+  }, [edges, nodes, persistCanvas, screens, workflow]);
+
+  useEffect(() => {
+    if (!workflow || !isDirty) return;
+    const saveBeforeClose = () => {
+      const snapshot: SavedWorkflowSnapshot = {
+        id: crypto.randomUUID(),
+        nodes: cloneNodes(nodes),
+        edges: cloneEdges(edges),
+        screens: cloneScreens(screens),
+        triggers: workflow.triggers.map((trigger) => ({ ...trigger })),
+        label: "Automatic save",
+        timestamp: Date.now(),
+      };
+      const next = [snapshot, ...readSavedSnapshots(workflow.id)].slice(0, 10);
+      localStorage.setItem(`carescope.workflowSaves.${workflow.id}`, JSON.stringify(next));
+      localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(screens));
+    };
+    window.addEventListener("beforeunload", saveBeforeClose);
+    return () => window.removeEventListener("beforeunload", saveBeforeClose);
+  }, [edges, isDirty, nodes, screens, workflow]);
+
+  const confirmRestoreSave = () => {
+    if (!restoreSave || !workflow) return;
+    saveCurrentSnapshot("Automatic save before restore");
+    const restoredNodes = cloneNodes(restoreSave.nodes);
+    const restoredEdges = cloneEdges(restoreSave.edges);
+    const restoredScreens = cloneScreens(restoreSave.screens);
+    setNodes(restoredNodes);
+    setEdges(restoredEdges);
+    setScreens(restoredScreens);
+    localStorage.setItem(`carescope.workflowScreens.${workflow.id}`, JSON.stringify(restoredScreens));
+    persistCanvas(restoredNodes, restoredEdges, restoreSave.triggers);
+    setDesignerHistory({
+      entries: [{ ...restoreSave, nodes: restoredNodes, edges: restoredEdges, screens: restoredScreens }],
+      index: 0,
+    });
+    setSelectedId(null);
+    setSelectedScreenId(restoredScreens[0]?.id ?? "");
+    setStatusMsg(`Restored save from ${new Date(restoreSave.timestamp).toLocaleString()}`);
+    setRestoreSave(null);
+    setSaveMenuOpen(false);
+    setIsDirty(false);
+  };
 
   const restoreHistory = useCallback((index: number) => {
     const entry = designerHistory.entries[index];
@@ -488,20 +582,12 @@ export function DesignerPage() {
   const handleSave = () => {
     if (!workflow) return;
     setSaving(true);
-    persistCanvas(nodes, edges);
+    saveCurrentSnapshot("Manual save");
     setStatusMsg("Saved");
     setTimeout(() => {
       setSaving(false);
       setStatusMsg("");
     }, 1200);
-  };
-
-  const handleValidate = () => {
-    if (!workflow) return;
-    persistCanvas(nodes, edges);
-    const result = workflowService.validate(workflow.id);
-    setValidation(result ?? null);
-    setDrawer("validate");
   };
 
   const handlePublish = () => {
@@ -521,20 +607,32 @@ export function DesignerPage() {
 
   const handleSimulate = async () => {
     if (!workflow) return;
+    setSimulationRunning(true);
     persistCanvas(nodes, edges);
-    const result = await workflowService.simulate(workflow.id, {
-      variables: { priority: "STAT", result: 1, quantity: 2, reorderLevel: 5 },
-      eventPayload: { priority: "STAT" },
-      entityData: { priority: "STAT", result: 1 },
-    });
-    setSimResult(result);
-    setDrawer("simulate");
+    try {
+      setSimulationError("");
+      const variables = JSON.parse(simulationVariables) as Record<string, unknown>;
+      const result = await workflowService.simulate(workflow.id, {
+        variables,
+        eventPayload: variables,
+        entityData: variables,
+      });
+      setSimResult(result);
+    } catch {
+      setSimulationError("Enter valid JSON simulation data before running.");
+    } finally {
+      setSimulationRunning(false);
+    }
   };
 
   const handleClone = () => {
-    if (!workflow) return;
-    const cloned = workflowService.clone(workflow.id);
-    if (cloned) navigate(`/app/workflows/${cloned.id}`);
+    if (!workflow || !cloneName.trim()) return;
+    const cloned = workflowService.clone(workflow.id, cloneName.trim());
+    if (cloned) {
+      localStorage.setItem(`carescope.workflowScreens.${cloned.id}`, JSON.stringify(cloneScreens(screens)));
+      setCloneOpen(false);
+      navigate(`/app/workflows/${cloned.id}`);
+    }
   };
 
   const canUndo = designerHistory.index > 0;
@@ -543,6 +641,10 @@ export function DesignerPage() {
     .map((entry, index) => ({ entry, index }))
     .filter(({ index }) => index < designerHistory.index)
     .reverse()
+    .slice(0, 5);
+  const redoHistoryEntries = designerHistory.entries
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ index }) => index > designerHistory.index)
     .slice(0, 5);
 
   if (!workflow) {
@@ -574,39 +676,52 @@ export function DesignerPage() {
       )}
       <div className="canvas-area">
         <div className="canvas-toolbar">
-          <span className={`badge badge-${workflow.status}`}>{workflow.status}</span>
-          <span className="badge">v{workflow.version}</span>
           <div className="workflow-designer-mode" role="group" aria-label="Designer mode">
             <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
             <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>
           </div>
           <div className="workflow-history-controls" role="group" aria-label="Workflow edit history">
-            <button type="button" className="btn" onClick={undoHistory} disabled={!canUndo} title="Undo (Ctrl/Command + Z)">↶ Undo</button>
-            <button type="button" className="btn" onClick={redoHistory} disabled={!canRedo} title="Redo (Ctrl/Command + Shift + Z)">↷ Redo</button>
-            <select
-              aria-label="Undo history"
-              value=""
-              onChange={(event) => {
-                if (event.target.value) restoreHistory(Number(event.target.value));
-              }}
-              disabled={!previousHistory.length}
-            >
-              <option value="">Previous changes</option>
-              {previousHistory.map(({ entry, index }) => (
-                <option key={`${entry.timestamp}-${index}`} value={index}>
-                  {entry.label} · {new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </option>
-              ))}
-            </select>
+            <div className="designer-split-control">
+              <button type="button" className="btn" onClick={undoHistory} disabled={!canUndo} title="Undo (Ctrl/Command + Z)">↶ Undo</button>
+              <button type="button" className="btn split-chevron" aria-label="Show undo history" disabled={!previousHistory.length} onClick={() => setHistoryMenu((current) => current === "undo" ? null : "undo")}>⌄</button>
+              {historyMenu === "undo" ? (
+                <div className="designer-action-menu">
+                  <b>Undo to</b>
+                  {previousHistory.map(({ entry, index }) => <button type="button" key={`${entry.timestamp}-${index}`} onClick={() => { restoreHistory(index); setHistoryMenu(null); }}><span>{entry.label}</span><small>{new Date(entry.timestamp).toLocaleTimeString()}</small></button>)}
+                </div>
+              ) : null}
+            </div>
+            <div className="designer-split-control">
+              <button type="button" className="btn" onClick={redoHistory} disabled={!canRedo} title="Redo (Ctrl/Command + Shift + Z)">↷ Redo</button>
+              <button type="button" className="btn split-chevron" aria-label="Show redo history" disabled={!redoHistoryEntries.length} onClick={() => setHistoryMenu((current) => current === "redo" ? null : "redo")}>⌄</button>
+              {historyMenu === "redo" ? (
+                <div className="designer-action-menu">
+                  <b>Redo to</b>
+                  {redoHistoryEntries.map(({ entry, index }) => <button type="button" key={`${entry.timestamp}-${index}`} onClick={() => { restoreHistory(index); setHistoryMenu(null); }}><span>{entry.label}</span><small>{new Date(entry.timestamp).toLocaleTimeString()}</small></button>)}
+                </div>
+              ) : null}
+            </div>
           </div>
           <span className="spacer" />
           {statusMsg ? <span style={{ color: "var(--accent)", fontSize: "0.75rem" }}>{statusMsg}</span> : null}
           {designerMode === "workflow" ? (
             <>
-              <button type="button" className="btn" onClick={handleSave} disabled={saving}>Save</button>
-              <button type="button" className="btn" onClick={handleValidate}>Validate</button>
-              <button type="button" className="btn" onClick={handleSimulate}>Simulate</button>
-              <button type="button" className="btn" onClick={handleClone}>Clone</button>
+              <div className="designer-split-control save-control">
+                <button type="button" className="btn" onClick={handleSave} disabled={saving}>Save</button>
+                <button type="button" className="btn split-chevron" aria-label="Show recent saves" onClick={() => setSaveMenuOpen((open) => !open)}>⌄</button>
+                {saveMenuOpen ? (
+                  <div className="designer-action-menu save-menu">
+                    <b>Recent saves</b>
+                    {savedSnapshots.length ? savedSnapshots.map((snapshot) => (
+                      <button type="button" key={snapshot.id} onClick={() => setRestoreSave(snapshot)}>
+                        <span>{snapshot.label}</span><small>{new Date(snapshot.timestamp).toLocaleString()}</small>
+                      </button>
+                    )) : <p>No saved versions yet</p>}
+                  </div>
+                ) : null}
+              </div>
+              <button type="button" className="btn" onClick={() => { setSimResult(null); setSimulateOpen(true); }}>Simulate</button>
+              <button type="button" className="btn" onClick={() => { setCloneName(`${workflow.name} copy`); setCloneOpen(true); }}>Clone</button>
               <button type="button" className="btn btn-primary" onClick={handlePublish} disabled={workflow.status === "published"}>Publish</button>
             </>
           ) : (
@@ -684,6 +799,60 @@ export function DesignerPage() {
           <div className="lims-modal lims-modal-wide workflow-screen-preview-modal" role="dialog" aria-modal="true" aria-label={`${selectedScreen.name} preview`} onClick={(event) => event.stopPropagation()}>
             <div className="lims-dialog-bar"><h2>{selectedScreen.name} preview</h2><button type="button" className="btn" onClick={() => setScreenPreviewOpen(false)}>Close preview</button></div>
             <WorkflowScreenMock screen={selectedScreen} />
+          </div>
+        </div>
+      ) : null}
+
+      {simulateOpen ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setSimulateOpen(false)}>
+          <div className="lims-modal lims-modal-wide workflow-simulation-dialog" role="dialog" aria-modal="true" aria-labelledby="simulate-workflow-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar"><div><p className="lims-eyebrow">Test workflow</p><h2 id="simulate-workflow-title">Simulate {workflow.name}</h2></div><button type="button" className="btn" onClick={() => setSimulateOpen(false)}>Close</button></div>
+            <div className="workflow-simulation-body">
+              <section>
+                <h3>Simulation data</h3>
+                <p>Enter representative workflow variables as JSON. The simulation does not change production records.</p>
+                <label className="simulation-json-field">Variables<textarea value={simulationVariables} onChange={(event) => setSimulationVariables(event.target.value)} spellCheck={false} /></label>
+                {simulationError ? <p className="workflow-preview-notice is-error" role="alert">{simulationError}</p> : null}
+                <button type="button" className="btn btn-primary" onClick={handleSimulate} disabled={simulationRunning}>{simulationRunning ? "Running…" : "Run simulation"}</button>
+              </section>
+              <section className="simulation-results">
+                <h3>Simulation result</h3>
+                {simResult ? (
+                  <>
+                    <div className="simulation-summary"><span>Outcome <b>{simResult.outcome}</b></span><span>Path <b>{simResult.path.length} stages</b></span><span>Status <b>{simResult.execution.status}</b></span></div>
+                    <div className="simulation-log">
+                      {simResult.logs.map((log) => <div key={log.id} className={`log-entry ${log.level}`}><span className="ts">{new Date(log.timestamp).toLocaleTimeString()} </span>[{log.event}] {log.message}</div>)}
+                    </div>
+                  </>
+                ) : <div className="empty-state"><h2>Ready to simulate</h2><p>Run the workflow to inspect its path, outcome, and execution log.</p></div>}
+              </section>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {cloneOpen ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setCloneOpen(false)}>
+          <div className="lims-modal workflow-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="clone-workflow-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar"><div><p className="lims-eyebrow">Clone entire workflow</p><h2 id="clone-workflow-title">Create a workflow copy</h2></div><button type="button" className="btn" onClick={() => setCloneOpen(false)}>Close</button></div>
+            <div className="workflow-confirm-body">
+              <p>This copies every node, branch, trigger, and screen from <b>{workflow.name}</b>. The copy will appear in the same module section.</p>
+              <label>New workflow name<input value={cloneName} onChange={(event) => setCloneName(event.target.value)} autoFocus /></label>
+              <div className="lims-modal-actions"><button type="button" className="btn" onClick={() => setCloneOpen(false)}>Cancel</button><button type="button" className="btn btn-primary" disabled={!cloneName.trim()} onClick={handleClone}>Clone workflow</button></div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {restoreSave ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setRestoreSave(null)}>
+          <div className="lims-modal workflow-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="restore-save-title" onClick={(event) => event.stopPropagation()}>
+            <div className="lims-dialog-bar"><div><p className="lims-eyebrow">Restore saved workflow</p><h2 id="restore-save-title">Return to a previous save?</h2></div><button type="button" className="btn" onClick={() => setRestoreSave(null)}>Close</button></div>
+            <div className="workflow-confirm-body">
+              <p>You are about to return to <b>{restoreSave.label}</b> from {new Date(restoreSave.timestamp).toLocaleString()}.</p>
+              <p>Your current workflow will be saved automatically with a timestamp before the previous save is restored.</p>
+              <div className="lims-modal-actions"><button type="button" className="btn" onClick={() => setRestoreSave(null)}>Cancel</button><button type="button" className="btn btn-primary" onClick={confirmRestoreSave}>Save current and restore</button></div>
+            </div>
           </div>
         </div>
       ) : null}
