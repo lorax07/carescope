@@ -367,11 +367,9 @@ export function DesignerPage() {
       label,
       timestamp: Date.now(),
     };
-    setSavedSnapshots((current) => {
-      const next = [snapshot, ...current].slice(0, 10);
-      localStorage.setItem(`carescope.workflowSaves.${workflow.id}`, JSON.stringify(next));
-      return next;
-    });
+    const next = [snapshot, ...readSavedSnapshots(workflow.id)].slice(0, 10);
+    localStorage.setItem(`carescope.workflowSaves.${workflow.id}`, JSON.stringify(next));
+    setSavedSnapshots(next);
     setIsDirty(false);
     return snapshot;
   }, [edges, nodes, persistCanvas, screens, workflow]);
