@@ -13,7 +13,7 @@ export function LandingPage() {
         <PlatformBand />
       <LimsFilm />
       <WhatWeSolve />
-      <WorkflowSection />
+      <IndustrySection />
       <ComplianceSection />
 
       <p className="lp-brand-lockup">
@@ -404,38 +404,77 @@ function PlatformBand() {
   );
 }
 
-const WORKFLOW_STEPS = [
-  { title: "Start", detail: "A sample, order, or schedule opens the path" },
-  { title: "Receive", detail: "Accession the work into the laboratory" },
-  { title: "Route", detail: "Send STAT and routine work to the right queue" },
-  { title: "Approve", detail: "Collect the review the method requires" },
-  { title: "Release", detail: "Publish the result, report, or certificate" },
+const INDUSTRIES = [
+  {
+    title: "Pharmaceutical",
+    detail: "Controlled testing, stability, release, and complete data integrity.",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=85",
+  },
+  {
+    title: "Agriculture",
+    detail: "Trace samples from field and soil through testing and reporting.",
+    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=900&q=85",
+  },
+  {
+    title: "Manufacturing",
+    detail: "Connect incoming material, in-process checks, and final quality release.",
+    image: "https://images.unsplash.com/photo-1567789884554-0b844b597180?auto=format&fit=crop&w=900&q=85",
+  },
+  {
+    title: "Chemicals / Petrochemicals",
+    detail: "Standardize methods, instrument runs, specifications, and certificates.",
+    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=900&q=85",
+  },
+  {
+    title: "Food & Beverage",
+    detail: "Move microbiology, chemistry, and safety testing through one workflow.",
+    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85",
+  },
+  {
+    title: "Environmental",
+    detail: "Manage high-volume sample intake, custody, analysis, and compliance reports.",
+    image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=900&q=85",
+  },
 ] as const;
 
-function WorkflowSection() {
+function IndustrySection() {
+  const railRef = useRef<HTMLDivElement>(null);
+
+  const advance = () => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 20;
+    rail.scrollTo({ left: atEnd ? 0 : rail.scrollLeft + Math.min(rail.clientWidth * 0.72, 760), behavior: "smooth" });
+  };
+
   return (
-    <section className="lp-section" id="workflows">
-      <div className="lp-section-inner">
-        <div className="lp-section-head">
-          <h2>Automate laboratory process by design.</h2>
-          <p>
-            A visual, no-code orchestration layer for approvals, instrument actions, notifications,
-            and compliance checks — configurable for every module above.
-          </p>
+    <section className="lp-industry-section" id="industries" aria-labelledby="industry-heading">
+      <div className="lp-industry-intro">
+        <div>
+          <p className="lp-industry-kicker">One platform. Every laboratory.</p>
+          <h2 id="industry-heading">The LIMS for your industry.</h2>
         </div>
-        <ul className="lp-cols lp-cols-5">
-          {WORKFLOW_STEPS.map((step) => (
-            <li key={step.title}>
-              <strong>{step.title}</strong>
-              <span>{step.detail}</span>
-            </li>
+        <div>
+          <p>
+            The operating system for laboratories testing products across regulated and
+            non-regulated industries. Configure each workflow without rebuilding your LIMS.
+          </p>
+          <Link to="/app?signup=1">Talk to our laboratory team <span aria-hidden="true">↗</span></Link>
+        </div>
+      </div>
+      <div className="lp-industry-stage">
+        <div className="lp-industry-rail" ref={railRef}>
+          {INDUSTRIES.map((industry, index) => (
+            <article className={`lp-industry-card industry-height-${(index % 3) + 1}`} key={industry.title}>
+              <img src={industry.image} alt="" loading="lazy" />
+              <div className="lp-industry-card-copy">
+                <h3>{industry.title}</h3>
+                <p>{industry.detail}</p>
+              </div>
+            </article>
           ))}
-        </ul>
-        <p className="lp-section-action">
-          <Link to="/app/workflows" className="lp-btn lp-btn-demo">
-            Open workflow designer
-          </Link>
-        </p>
+        </div>
+        <button type="button" className="lp-industry-next" onClick={advance} aria-label="Show more industries">→</button>
       </div>
     </section>
   );
