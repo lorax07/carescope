@@ -96,10 +96,14 @@ a {
   height: 26px;
   flex: 0 0 26px;
   line-height: 0;
+  transform: translateX(5px);
 }
 
 .lims-brand-mark svg {
   display: block;
+  filter: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .lims-brand strong {
