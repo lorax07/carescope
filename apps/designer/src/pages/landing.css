@@ -3400,6 +3400,11 @@ img.lp-logo-sequence {
   }
 }
 
+.lp-page .lp-platform,
+.lp-page .lp-section {
+  scroll-margin-top: 5.25rem;
+}
+
 .lp-page > .lp-nav {
   background: transparent;
   border-bottom-color: transparent;
@@ -3408,7 +3413,7 @@ img.lp-logo-sequence {
 }
 
 .lp-page > .lp-nav.is-solid {
-  background: rgba(255, 255, 255, 0.96);
+  background: #fff;
   border-bottom-color: #e6e6e6;
   box-shadow: 0 10px 28px rgba(11, 31, 68, 0.08);
   backdrop-filter: blur(14px);
