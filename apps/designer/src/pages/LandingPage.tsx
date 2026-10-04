@@ -10,10 +10,19 @@ const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
 }));
 
 export function LandingPage() {
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setHeaderScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="lp">
       <div className="lp-frame">
-        <header className="lp-nav">
+        <header className={`lp-nav${headerScrolled ? " lp-nav-scrolled" : ""}`}>
           <Link to="/" className="lp-logo" aria-label="CareScope home">
             <span className="lp-logo-mark" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
