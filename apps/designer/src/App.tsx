@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
-import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import {
+  AuthUser,
+  clearAuthUser,
+  initialsFor,
+  isSignedIn,
+  readAuthUser,
+} from "./auth";
+import { FeatureDemoCarousel } from "./components/FeatureDemoCarousel";
+import {
+  AuthModalMode,
+  SandboxSignupModal,
+} from "./components/SandboxSignupModal";
 
 const NAV = [
   { to: "/app", label: "Dashboard", end: true },
@@ -17,24 +28,78 @@ const NAV = [
 /** LIMS application shell */
 export function AppShell() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [signupOpen, setSignupOpen] = useState(
-    () => searchParams.get("signup") === "1"
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() => readAuthUser());
+  const [authMode, setAuthMode] = useState<AuthModalMode>(() =>
+    searchParams.get("signin") === "1" ? "signin" : "signup"
   );
+  const [authOpen, setAuthOpen] = useState(
+    () =>
+      !isSignedIn() &&
+      (searchParams.get("signup") === "1" || searchParams.get("signin") === "1")
+  );
+  const [demoCarouselOpen, setDemoCarouselOpen] = useState(false);
 
   useEffect(() => {
+    if (isSignedIn()) return;
     if (searchParams.get("signup") === "1") {
-      setSignupOpen(true);
+      setAuthMode("signup");
+      setAuthOpen(true);
+    } else if (searchParams.get("signin") === "1") {
+      setAuthMode("signin");
+      setAuthOpen(true);
     }
   }, [searchParams]);
 
-  function closeSignup() {
-    setSignupOpen(false);
-    if (searchParams.get("signup") === "1") {
+  function clearAuthParams() {
+    if (
+      searchParams.get("signup") === "1" ||
+      searchParams.get("signin") === "1"
+    ) {
       const next = new URLSearchParams(searchParams);
       next.delete("signup");
+      next.delete("signin");
       setSearchParams(next, { replace: true });
     }
   }
+
+  function closeAuth() {
+    setAuthOpen(false);
+    clearAuthParams();
+  }
+
+  function openAuth(mode: AuthModalMode) {
+    setAuthMode(mode);
+    setAuthOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete(mode === "signup" ? "signin" : "signup");
+    next.set(mode === "signup" ? "signup" : "signin", "1");
+    setSearchParams(next, { replace: true });
+  }
+
+  function handleAuthNotNow() {
+    setAuthOpen(false);
+    clearAuthParams();
+    setDemoCarouselOpen(true);
+  }
+
+  function closeDemoCarousel() {
+    setDemoCarouselOpen(false);
+    if (!isSignedIn()) {
+      openAuth(authMode);
+    }
+  }
+
+  function handleAuthenticated() {
+    setAuthUser(readAuthUser());
+  }
+
+  function handleSignOut() {
+    clearAuthUser();
+    setAuthUser(null);
+  }
+
+  const displayName = authUser?.name ?? "Guest";
+  const displayRole = authUser ? "Sandbox user" : "Not signed in";
 
   return (
     <div className="lims-shell">
@@ -81,12 +146,29 @@ export function AppShell() {
 
         <div className="lims-sidebar-foot">
           <div className="lims-user">
-            <span className="lims-avatar">MC</span>
+            <span className="lims-avatar">{initialsFor(displayName)}</span>
             <div>
-              <b>M. Chen</b>
-              <small>Lab Analyst</small>
+              <b>{displayName}</b>
+              <small>{displayRole}</small>
             </div>
           </div>
+          {authUser ? (
+            <button
+              type="button"
+              className="lims-auth-btn"
+              onClick={handleSignOut}
+            >
+              Sign out
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="lims-auth-btn"
+              onClick={() => openAuth("signin")}
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </aside>
 
@@ -110,7 +192,18 @@ export function AppShell() {
         </div>
       </div>
 
-      <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
+      <SandboxSignupModal
+        open={authOpen}
+        mode={authMode}
+        onClose={closeAuth}
+        onNotNow={handleAuthNotNow}
+        onAuthenticated={handleAuthenticated}
+        onSwitchMode={openAuth}
+      />
+      <FeatureDemoCarousel
+        open={demoCarouselOpen}
+        onClose={closeDemoCarousel}
+      />
     </div>
   );
 }

@@ -1,0 +1,209 @@
+/* Our Company — marketing page extensions on top of landing.css */
+
+.company .lp-nav-links a.is-active {
+  color: var(--lp-ink);
+}
+
+.company .lp-nav-links a.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.35rem;
+  height: 2px;
+  background: var(--lp-blue);
+  border-radius: 2px;
+}
+
+.company .lp-nav-links a:first-child::after {
+  content: none;
+}
+
+.company-hero {
+  padding: clamp(3.5rem, 8vw, 5.5rem) clamp(1.5rem, 4vw, 3rem)
+    clamp(3rem, 6vw, 4.5rem);
+  text-align: center;
+  background:
+    radial-gradient(ellipse 55% 70% at 50% 0%, rgba(27, 110, 243, 0.12), transparent 65%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.company-hero .lp-brand-lockup {
+  margin: 0 0 0.85rem;
+  font-size: clamp(2.6rem, 5.5vw, 3.9rem);
+}
+
+.company-hero-title {
+  margin: 0;
+  font-family: var(--lp-display);
+  font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--lp-ink);
+  animation: company-fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.company-hero-lede {
+  margin: 1rem auto 0;
+  max-width: 34rem;
+  color: var(--lp-muted);
+  font-size: 1.15rem;
+  line-height: 1.55;
+  animation: company-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+}
+
+.company-culture-lede,
+.company-team-lede {
+  max-width: 36rem;
+}
+
+.company-culture-list {
+  list-style: none;
+  margin: 2.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.75rem;
+}
+
+.company-culture-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--lp-line);
+  animation: company-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.company-culture-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.company-culture-index {
+  font-family: var(--lp-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--lp-blue);
+  line-height: 1.4;
+}
+
+.company-culture-item h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--lp-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.company-culture-item p {
+  margin: 0;
+  color: var(--lp-muted);
+  font-size: 1.02rem;
+  line-height: 1.55;
+  max-width: 40rem;
+}
+
+.company-team-list {
+  list-style: none;
+  margin: 2.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.5rem 1.25rem;
+}
+
+.company-team-person {
+  display: grid;
+  gap: 0.85rem;
+  animation: company-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.company-team-avatar {
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-family: var(--lp-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: #fff;
+  background:
+    linear-gradient(145deg, #1b6ef3 0%, #0f4fc0 100%);
+  box-shadow: 0 12px 28px rgba(27, 110, 243, 0.22);
+}
+
+.company-team-person:nth-child(2) .company-team-avatar {
+  background: linear-gradient(145deg, #0ea5e9 0%, #0369a1 100%);
+}
+
+.company-team-person:nth-child(3) .company-team-avatar {
+  background: linear-gradient(145deg, #16a34a 0%, #15803d 100%);
+}
+
+.company-team-person:nth-child(4) .company-team-avatar {
+  background: linear-gradient(145deg, #334155 0%, #0f172a 100%);
+}
+
+.company-team-person:nth-child(5) .company-team-avatar {
+  background: linear-gradient(145deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.company-team-person h3 {
+  margin: 0;
+  font-family: var(--lp-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.company-team-role {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--lp-blue);
+}
+
+.company-team-focus {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--lp-muted);
+}
+
+@keyframes company-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .company-team-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .company-culture-item {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .company-team-list {
+    grid-template-columns: 1fr;
+  }
+
+  .company-team-person {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+  }
+}
