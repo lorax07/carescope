@@ -51,12 +51,35 @@
 }
 
 .lp-nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.1rem 2.25rem;
-  border-bottom: 1px solid var(--lp-line);
+  width: 100%;
+  padding: 1.1rem max(2.25rem, calc((100% - 1472px) / 2));
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.lp-nav-scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom-color: rgba(27, 110, 243, 0.35);
+  box-shadow: 0 4px 18px rgba(15, 23, 36, 0.06);
+}
+
+.lp-frame {
+  padding-top: 0;
+}
+
+.lp-hero {
+  padding-top: 7rem;
 }
 
 .lp-logo {
@@ -1093,6 +1116,10 @@
 
   .lp-nav {
     padding: 0.9rem 1rem;
+  }
+
+  .lp-hero {
+    padding-top: 6rem;
   }
 
   .lp-hero {
