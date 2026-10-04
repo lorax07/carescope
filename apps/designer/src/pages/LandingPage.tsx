@@ -13,7 +13,7 @@ export function LandingPage() {
         <PlatformBand />
       <LimsFilm />
       <WhatWeSolve />
-      <IndustrySection />
+      <IndustrySpotlights />
       <ComplianceSection />
 
       <p className="lp-brand-lockup">
@@ -374,12 +374,8 @@ function PlatformBand() {
   return (
     <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
       <div className="lp-section-inner">
-        <div className="lp-section-head">
-        <h2 id="platform-heading">
-          The laboratory platform
-          <br />
-          that keeps you moving.
-        </h2>
+        <div className="lp-section-head lp-section-head-left">
+        <h2 id="platform-heading">The laboratory platform that keeps you moving.</h2>
         <p>
           CareScope Sequence brings your lab workflows, data and systems
           together — so you can make changes faster, reduce integrations, and
@@ -404,87 +400,124 @@ function PlatformBand() {
   );
 }
 
-const INDUSTRIES = [
+const INDUSTRY_SPOTLIGHTS = [
   {
     title: "Pharmaceutical",
-    detail: "Controlled testing, stability, release, and complete data integrity.",
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=900&q=85",
+    summary: "Control stability, release, and batch records from one governed laboratory workflow.",
+    points: ["Method and specification control", "Review, approval, and certificate release", "Complete audit history for every change"],
   },
   {
     title: "Agriculture",
-    detail: "Trace samples from field and soil through testing and reporting.",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=900&q=85",
+    summary: "Follow soil, crop, feed, and residue samples from the field through the reported result.",
+    points: ["Field-to-lab chain of custody", "High-volume accessioning", "Client-ready certificates"],
   },
   {
     title: "Manufacturing",
-    detail: "Connect incoming material, in-process checks, and final quality release.",
-    image: "https://images.unsplash.com/photo-1567789884554-0b844b597180?auto=format&fit=crop&w=900&q=85",
+    summary: "Connect incoming material, in-process checks, and final quality release without extra systems.",
+    points: ["Specification-driven routing", "Instrument and batch traceability", "Faster controlled changes"],
   },
   {
     title: "Chemicals / Petrochemicals",
-    detail: "Standardize methods, instrument runs, specifications, and certificates.",
-    image: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=900&q=85",
+    summary: "Standardize methods, solutions, instrument runs, and certificates across complex matrices.",
+    points: ["Run and reagent traceability", "Repeatable method setup", "Governed result release"],
   },
   {
     title: "Food & Beverage",
-    detail: "Move microbiology, chemistry, and safety testing through one workflow.",
-    image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=900&q=85",
+    summary: "Move microbiology, chemistry, and safety testing through one visible operating workflow.",
+    points: ["Priority and hold management", "Batch and individual review", "Release evidence in one record"],
   },
   {
     title: "Environmental",
-    detail: "Manage high-volume sample intake, custody, analysis, and compliance reports.",
-    image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=900&q=85",
+    summary: "Manage large sample intakes, custody movements, analysis, and compliance reporting together.",
+    points: ["Custody at every movement", "Multi-site operations", "Defensible reporting packages"],
+  },
+  {
+    title: "Clinical",
+    summary: "Keep accessioning, testing, review, and release aligned for diagnostic laboratory teams.",
+    points: ["Clear work queues", "Controlled authorization", "Protected operational history"],
+  },
+  {
+    title: "Cosmetics",
+    summary: "Coordinate formulation testing, stability, and quality release with less operational friction.",
+    points: ["Stability study tracking", "Review before release", "Versioned quality workflows"],
   },
 ] as const;
 
-function IndustrySection() {
-  const railRef = useRef<HTMLDivElement>(null);
+function IndustrySpotlights() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
 
-  const advance = () => {
-    const rail = railRef.current;
-    if (!rail) return;
-    const atEnd = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 20;
-    rail.scrollTo({ left: atEnd ? 0 : rail.scrollLeft + Math.min(rail.clientWidth * 0.72, 760), behavior: "smooth" });
-  };
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % INDUSTRY_SPOTLIGHTS.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [paused]);
 
   return (
-    <section className="lp-industry-section" id="industries" aria-labelledby="industry-heading">
-      <div className="lp-industry-intro">
-        <div>
-          <p className="lp-industry-kicker">One platform. Every laboratory.</p>
-          <h2 id="industry-heading">The LIMS for your industry.</h2>
+    <section
+      className="lp-section lp-industry-spotlights"
+      id="industries"
+      aria-labelledby="industry-spotlights-heading"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+          <h2 id="industry-spotlights-heading">Industry Spotlights</h2>
+          <p>See how Sequence supports the laboratories testing products across regulated and everyday industries.</p>
         </div>
-        <div>
-          <p>
-            The operating system for laboratories testing products across regulated and
-            non-regulated industries. Configure each workflow without rebuilding your LIMS.
-          </p>
-          <Link to="/app?signup=1">Talk to our laboratory team <span aria-hidden="true">↗</span></Link>
-        </div>
-      </div>
-      <div className="lp-industry-stage">
-        <div className="lp-industry-rail" ref={railRef}>
-          {INDUSTRIES.map((industry, index) => (
-            <article className={`lp-industry-card industry-height-${(index % 3) + 1}`} key={industry.title}>
-              <img src={industry.image} alt="" loading="lazy" />
-              <div className="lp-industry-card-copy">
+        <div className="lp-page-stage" aria-live="polite">
+          <div className="lp-page-track" style={{ transform: `translateX(-${index * 100}%)` }}>
+            {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
+              <article className="lp-page-card" key={industry.title} aria-hidden={industryIndex !== index}>
+                <header>
+                  <span>Page {String(industryIndex + 1).padStart(2, "0")}</span>
+                  <b>{industry.title}</b>
+                </header>
                 <h3>{industry.title}</h3>
-                <p>{industry.detail}</p>
-              </div>
-            </article>
+                <p>{industry.summary}</p>
+                <ul>
+                  {industry.points.map((point) => <li key={point}>{point}</li>)}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="lp-page-nav" role="tablist" aria-label="Industry spotlight pages">
+          {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
+            <button
+              type="button"
+              role="tab"
+              key={industry.title}
+              aria-selected={industryIndex === index}
+              aria-label={`Show ${industry.title}`}
+              className={industryIndex === index ? "is-on" : undefined}
+              onClick={() => setIndex(industryIndex)}
+            />
           ))}
         </div>
-        <button type="button" className="lp-industry-next" onClick={advance} aria-label="Show more industries">→</button>
       </div>
     </section>
   );
 }
 
-const TRUST_POINTS = [
-  { title: "Signatures", detail: "21 CFR Part 11–ready electronic signatures" },
-  { title: "Custody", detail: "Chain of custody with scan-verified transfers" },
-  { title: "Versions", detail: "Publish, roll back, and simulate every workflow" },
-  { title: "Sites", detail: "Tenant-isolated operations across laboratory sites" },
+const REGULATIONS = [
+  ["21 CFR 11", "Electronic records and signatures", "Controls for trustworthy electronic records, audit trails, and legally binding signatures."],
+  ["21 CFR 58", "Good Laboratory Practice", "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens."],
+  ["21 CFR 210", "Drug manufacturing practice", "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture."],
+  ["21 CFR 211", "Finished pharmaceuticals", "Production, laboratory control, record, and distribution requirements for finished drug products."],
+  ["21 CFR 820", "Quality system regulation", "Medical-device quality system requirements for design, production, and recorded evidence."],
+  ["ISO 17025", "Testing laboratory competence", "Requirements for impartial, technically competent testing and calibration laboratories."],
+  ["ISO 15189", "Medical laboratories", "Quality and competence requirements for clinical laboratory examination services."],
+  ["CLIA", "Clinical laboratory quality", "U.S. standards for accurate, reliable, and timely patient laboratory testing."],
+  ["CAP", "Laboratory accreditation", "Inspection expectations for quality management, analytical performance, and documentation."],
+  ["EU Annex 11", "Computerized systems", "European GMP expectations for validated systems, audit trails, and data integrity."],
+  ["ICH Q7", "API good manufacturing", "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems."],
+  ["HIPAA", "Protected health information", "Safeguards for patient information handled by clinical and diagnostic laboratory operations."],
 ] as const;
 
 function ComplianceSection() {
@@ -494,18 +527,18 @@ function ComplianceSection() {
         <div className="lp-section-head">
           <h2>Governed for regulated environments.</h2>
           <p>
-            Immutable execution logs, e-signatures, document control, and multi-site isolation so
-            audits are prepared continuously — not reconstructed later.
+            Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
           </p>
         </div>
-        <ul className="lp-cols lp-cols-4">
-          {TRUST_POINTS.map((point) => (
-            <li key={point.title}>
-              <strong>{point.title}</strong>
-              <span>{point.detail}</span>
-            </li>
+        <div className="lp-reg-grid">
+          {REGULATIONS.map(([code, name, detail]) => (
+            <article className="lp-reg-card" key={code} tabIndex={0}>
+              <b>{code}</b>
+              <small>{name}</small>
+              <p>{detail}</p>
+            </article>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   );

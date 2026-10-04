@@ -6,6 +6,14 @@ export function SiteHeader() {
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [solid, setSolid] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setSolid(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -24,7 +32,7 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className="lp-nav">
+    <header className={`lp-nav${solid ? " is-solid" : ""}`}>
       <div className="lp-nav-bar">
         <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
           <img
@@ -40,7 +48,7 @@ export function SiteHeader() {
 
         <div className="lp-nav-actions">
           <nav className="lp-nav-links" aria-label="Primary">
-            <a href="/#modules">Platform</a>
+            <a href="/#capabilities">What we solve</a>
             <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
               <button
                 type="button"
@@ -50,7 +58,7 @@ export function SiteHeader() {
                 aria-controls={menuId}
                 onClick={() => setOpen((current) => !current)}
               >
-                Products
+                Modules
                 <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
                   <path d="M2.2 4.2 6 8l3.8-3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -68,16 +76,14 @@ export function SiteHeader() {
                 </ul>
               ) : null}
             </div>
-            <a href="/#industries">Industries</a>
-            <a href="/#capabilities">Solutions</a>
-            <a href="/#compliance">Trust</a>
+            <a href="/#compliance">About</a>
           </nav>
           <span className="lp-nav-divider" aria-hidden="true" />
           <Link to="/intrasite" className="lp-nav-text">
             Sign in
           </Link>
           <Link to="/app?signup=1" className="lp-btn lp-btn-demo">
-            Book a demo
+            Request a Demo
           </Link>
         </div>
       </div>
