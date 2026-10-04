@@ -2,6 +2,6 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm install",
   "framework": "vite",
-  "outputDirectory": "dist",
+  "outputDirectory": "apps/designer/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
