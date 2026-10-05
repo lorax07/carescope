@@ -3616,8 +3616,8 @@ img.lp-logo-sequence {
   right: 0;
   bottom: 0;
   left: 0;
-  height: 68%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.42) 42%, rgba(255, 255, 255, 0.82) 100%);
+  height: 62%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 46%, rgba(255, 255, 255, 0.9) 100%);
   pointer-events: none;
 }
 
@@ -3839,11 +3839,63 @@ img.lp-logo-sequence {
 }
 
 .lp-home .lp-lims-film {
-  margin-bottom: 1.15rem;
+  margin-bottom: 3.1rem;
+}
+
+.lp-served {
+  padding: 0.2rem 0 0.85rem;
+}
+
+.lp-served h2 {
+  margin: 0 0 0.95rem;
+  color: #5c6570;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.lp-served-viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+.lp-served-track {
+  display: flex;
+  width: max-content;
+  animation: lp-served-scroll 38s linear infinite;
+}
+
+.lp-served-track ul {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0 0.75rem 0 0;
+  list-style: none;
+}
+
+.lp-served-track li {
+  flex: 0 0 auto;
+  padding: 0.62rem 1.2rem;
+  border: 1px solid rgba(22, 24, 29, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #1c1e22;
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+@keyframes lp-served-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .lp-home .lp-platform {
-  padding-top: 3.4rem;
+  padding-top: 1.6rem;
   padding-bottom: 2.4rem;
   background: transparent;
   overflow: visible;
@@ -3886,9 +3938,9 @@ img.lp-logo-sequence {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
   min-height: 18.5rem;
-  padding: 1.35rem 0.9rem;
+  padding: 0.85rem 0.55rem 1.05rem;
   border-radius: 1.75rem;
   color: #1c1e22;
   text-align: center;
@@ -3896,14 +3948,14 @@ img.lp-logo-sequence {
 }
 
 .lp-module-card .lp-platform-icon {
-  margin: 0 0 0.55rem;
-  width: 3.6rem;
-  height: 3.6rem;
+  margin: 0;
+  width: 11rem;
+  height: 11rem;
 }
 
 .lp-module-card .lp-platform-icon svg {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 6.6rem;
+  height: 6.6rem;
 }
 
 .lp-module-card strong {
@@ -4026,7 +4078,32 @@ img.lp-logo-sequence {
   }
 }
 
+@media (max-width: 420px) {
+  .lp-module-card .lp-platform-icon {
+    width: 8.25rem;
+    height: 8.25rem;
+  }
+
+  .lp-module-card .lp-platform-icon svg {
+    width: 4.8rem;
+    height: 4.8rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .lp-served-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+    max-width: 68rem;
+    margin: 0 auto;
+  }
+
+  .lp-served-track ul[aria-hidden="true"] {
+    display: none;
+  }
+
   .lp-module-row li.is-up,
   .lp-module-row li.is-down {
     animation: none;

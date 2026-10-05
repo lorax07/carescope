@@ -5,6 +5,14 @@ import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
 export function LandingPage() {
+  useEffect(() => {
+    if (window.location.hash !== "#less-friction") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("less-friction")?.scrollIntoView({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   return (
     <div className="lp-page lp-home">
         <SiteHeader />
@@ -30,6 +38,7 @@ export function LandingPage() {
 
         <div className="lp">
       <LimsFilm />
+      <ServedMarquee />
       <PlatformBand />
       <WhatWeSolve />
       <IndustrySpotlights />
@@ -407,6 +416,38 @@ function LimsFilm() {
         aria-label="Sequence LIMS: workflow design, Sequence Instruments, and a Sequence Insights metrics question, each opened from the left menu"
       />
     </figure>
+  );
+}
+
+const BUSINESSES_SERVED = [
+  "Pharmaceutical",
+  "Clinical diagnostics",
+  "Food & beverage",
+  "Agriculture",
+  "Environmental",
+  "Chemicals",
+  "Petrochemicals",
+  "Manufacturing",
+  "Cosmetics",
+  "Biologics",
+] as const;
+
+function ServedMarquee() {
+  return (
+    <section className="lp-served" aria-labelledby="served-heading">
+      <h2 id="served-heading">Businesses we have served</h2>
+      <div className="lp-served-viewport">
+        <div className="lp-served-track">
+          {[0, 1].map((copy) => (
+            <ul key={copy} aria-hidden={copy === 1}>
+              {BUSINESSES_SERVED.map((name) => (
+                <li key={`${copy}-${name}`}>{name}</li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
