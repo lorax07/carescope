@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ReactFlow,
@@ -14,6 +14,7 @@ import {
   type Edge,
   type NodeTypes,
   type OnConnect,
+  type ReactFlowInstance,
   MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -27,8 +28,22 @@ import type {
 import { workflowService } from "../platform";
 import { NodeDetailsPanel, type NewNodeConnection, type NodeConnectionType } from "../components/NodeDetailsPanel";
 import { WorkflowNode as WfNodeView, type WfFlowNode } from "../components/WorkflowNode";
+import { RoutedEdge, WorkflowRoutesContext } from "../components/RoutedEdge";
+import { autoArrange, measureRoutes, rerouteMoved, routeWorkflow, type LayoutNode } from "../workflowLayout";
 
 const nodeTypes: NodeTypes = { workflow: WfNodeView };
+const edgeTypes = { routed: RoutedEdge };
+
+function flowBox(node: WfFlowNode): LayoutNode {
+  return {
+    id: node.id,
+    x: node.position.x,
+    y: node.position.y,
+    width: node.measured?.width ?? node.width ?? 210,
+    height: node.measured?.height ?? node.height ?? 96,
+    layer: node.data.nodeType === "start" ? "FIRST" : node.data.nodeType === "end" ? "LAST" : undefined,
+  };
+}
 
 type WorkflowScreen = {
   id: string;
@@ -168,7 +183,7 @@ function toFlowEdges(def: WorkflowDefinition): Edge[] {
       source: e.source,
       target: e.target,
       label: e.label,
-      type: "step",
+      type: "routed",
       data: {
         connectionType: e.edgeType === "conditional" ? "Decision tree" : e.label === "End" ? "End" : "Trigger",
         condition: e.condition,
@@ -236,6 +251,11 @@ export function DesignerPage() {
   const [cloneOpen, setCloneOpen] = useState(false);
   const [cloneName, setCloneName] = useState("");
   const [isDirty, setIsDirty] = useState(false);
+  const [nodeDragging, setNodeDragging] = useState(false);
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const [pinnedRoutes, setPinnedRoutes] = useState<Record<string, { x: number; y: number }[]> | null>(null);
+  const layoutGuard = useRef("");
+  const flowRef = useRef<ReactFlowInstance<WfFlowNode, Edge> | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -245,6 +265,7 @@ export function DesignerPage() {
       return;
     }
     setWorkflow(def);
+    setPinnedRoutes(null);
     setNodes(toFlowNodes(def, plugins));
     setEdges(toFlowEdges(def));
     const savedScreens = readScreens(def.id, def.name);
@@ -269,6 +290,18 @@ export function DesignerPage() {
     () => nodes.find((n) => n.id === selectedId) ?? null,
     [nodes, selectedId]
   );
+  const layoutEdges = useMemo(
+    () => edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target })),
+    [edges]
+  );
+  const layoutNodes = useMemo(() => nodes.map(flowBox), [nodes]);
+  const routing = useMemo(() => {
+    if (pinnedRoutes && !nodeDragging) return { routes: pinnedRoutes, crossings: 0, throughNodes: 0 };
+    if (pinnedRoutes && nodeDragging && draggedNodeId) {
+      return rerouteMoved(layoutNodes, layoutEdges, pinnedRoutes, draggedNodeId, { thorough: false });
+    }
+    return routeWorkflow(layoutNodes, layoutEdges, { avoidCrossings: !nodeDragging });
+  }, [draggedNodeId, layoutEdges, layoutNodes, nodeDragging, pinnedRoutes]);
   const selectedScreen = screens.find((screen) => screen.id === selectedScreenId) ?? screens[0];
 
   const recordHistory = (
@@ -359,6 +392,34 @@ export function DesignerPage() {
     },
     [workflow, navigate]
   );
+
+  useEffect(() => {
+    if (!workflow || nodes.length < 2) return;
+    const sameGraph =
+      nodes.length === workflow.nodes.length &&
+      nodes.every((node) => workflow.nodes.some((item) => item.id === node.id));
+    if (!sameGraph) return;
+    if (layoutGuard.current === workflow.id) return;
+    const boxes = nodes.map(flowBox);
+    const links = edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
+    let cancelled = false;
+    void autoArrange(boxes, links).then((arranged) => {
+      if (cancelled) return;
+      layoutGuard.current = workflow.id;
+      const nextNodes = nodes.map((node) =>
+        arranged.positions[node.id] ? { ...node, position: { ...arranged.positions[node.id] } } : node
+      );
+      setPinnedRoutes(arranged.routes);
+      setNodes(nextNodes);
+      persistCanvas(nextNodes, edges);
+      recordHistory(nextNodes, edges, screens, "Auto arranged workflow");
+      setStatusMsg("Arranged the workflow from its connections");
+      window.setTimeout(() => flowRef.current?.fitView({ padding: 0.22, duration: 180 }), 40);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [edges, nodes, persistCanvas, screens, setNodes, workflow]);
 
   const saveCurrentSnapshot = useCallback((label = "Saved workflow") => {
     if (!workflow) return;
@@ -480,7 +541,7 @@ export function DesignerPage() {
           {
             ...connection,
             id: crypto.randomUUID(),
-            type: "step",
+            type: "routed",
             label: "Trigger",
             data: { connectionType: "Trigger" },
             markerEnd: { type: MarkerType.ArrowClosed, color: "#5a7366" },
@@ -489,6 +550,7 @@ export function DesignerPage() {
           eds
         );
         persistCanvas(nodes, next);
+        setPinnedRoutes(null);
         recordHistory(nodes, next, screens, "Connected workflow stages");
         return next;
       });
@@ -580,7 +642,7 @@ export function DesignerPage() {
       id: crypto.randomUUID(),
       source: connection.source,
       target: connection.target,
-      type: "step",
+      type: "routed",
       label,
       data: {
         connectionType: connection.connectionType,
@@ -592,6 +654,7 @@ export function DesignerPage() {
     };
     const nextEdges = [...edges, nextEdge];
     setEdges(nextEdges);
+    setPinnedRoutes(null);
     persistCanvas(nodes, nextEdges);
     recordHistory(nodes, nextEdges, screens, `${connection.connectionType} connection: ${sourceNode.data.label} → ${targetNode.data.label}`);
     setPendingConnection(null);
@@ -602,8 +665,51 @@ export function DesignerPage() {
   const deleteNodeConnection = (edgeId: string) => {
     const nextEdges = edges.filter((edge) => edge.id !== edgeId);
     setEdges(nextEdges);
+    setPinnedRoutes(null);
     persistCanvas(nodes, nextEdges);
     recordHistory(nodes, nextEdges, screens, "Removed node connection");
+  };
+
+  const applyArrangement = (nextNodes: WfFlowNode[], label: string) => {
+    setNodes(nextNodes);
+    persistCanvas(nextNodes, edges);
+    recordHistory(nextNodes, edges, screens, label);
+  };
+
+  const handleAutoArrange = () => {
+    if (!workflow) return;
+    const boxes = nodes.map(flowBox);
+    const links = edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
+    void autoArrange(boxes, links).then((arranged) => {
+      const nextNodes = nodes.map((node) =>
+        arranged.positions[node.id] ? { ...node, position: { ...arranged.positions[node.id] } } : node
+      );
+      layoutGuard.current = workflow.id;
+      setPinnedRoutes(arranged.routes);
+      applyArrangement(nextNodes, "Auto arranged workflow");
+      setStatusMsg("Auto arranged the workflow");
+      window.setTimeout(() => flowRef.current?.fitView({ padding: 0.22, duration: 180 }), 40);
+    });
+  };
+
+  const handleCleanUp = () => {
+    const boxes = nodes.map(flowBox);
+    const links = edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
+    const report = routeWorkflow(boxes, links);
+    const current = pinnedRoutes ? measureRoutes(boxes, links, pinnedRoutes) : null;
+    const improved = !current || report.crossings < current.crossings || (report.crossings === current.crossings && report.throughNodes < current.throughNodes);
+    if (improved) setPinnedRoutes(report.routes);
+    const shown = improved ? report : current ?? report;
+    setNodeDragging(false);
+    if (shown.crossings === 0 && shown.throughNodes === 0) {
+      setStatusMsg(improved ? "Cleaned up connections" : "Connections are clear");
+      return;
+    }
+    setStatusMsg(
+      shown.throughNodes === 0
+        ? `Cleaned up connections · ${shown.crossings} crossing${shown.crossings === 1 ? "" : "s"} remain`
+        : `Rerouted connections around the stages`
+    );
   };
 
   const handleSave = () => {
@@ -752,6 +858,8 @@ export function DesignerPage() {
                   </div>
                 ) : null}
               </div>
+              <button type="button" className="btn" onClick={handleAutoArrange}>Auto Arrange</button>
+              <button type="button" className="btn" onClick={handleCleanUp}>Clean Up Connections</button>
               <button type="button" className="btn" onClick={() => { setSimResult(null); setSimulateOpen(true); }}>Simulate</button>
               <button type="button" className="btn" onClick={() => { setCloneName(`${workflow.name} copy`); setCloneOpen(true); }}>Clone</button>
               <button type="button" className="btn btn-primary" onClick={handlePublish} disabled={workflow.status === "published"}>Publish</button>
@@ -762,14 +870,29 @@ export function DesignerPage() {
         </div>
         <div className="canvas-host">
           {designerMode === "workflow" ? (
+            <WorkflowRoutesContext.Provider value={routing.routes}>
             <ReactFlow
               nodes={nodes}
               edges={edges}
+              onInit={(instance) => { flowRef.current = instance; }}
               onNodesChange={(changes) => onNodesChange(changes)}
               onEdgesChange={(changes) => onEdgesChange(changes)}
+              onNodeDragStart={(_, draggedNode) => {
+                setDraggedNodeId(draggedNode.id);
+                setNodeDragging(true);
+              }}
               onNodeDragStop={(_, draggedNode) => {
+                setNodeDragging(false);
+                setDraggedNodeId(null);
                 const next = nodes.map((node) => node.id === draggedNode.id ? { ...node, position: { ...draggedNode.position } } : node);
+                const links = edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
+                const boxes = next.map(flowBox);
                 setNodes(next);
+                const affected = pinnedRoutes
+                  ? rerouteMoved(boxes, links, pinnedRoutes, draggedNode.id, { thorough: true })
+                  : routeWorkflow(boxes, links);
+                const full = affected.crossings > 0 ? routeWorkflow(boxes, links) : affected;
+                setPinnedRoutes(full.crossings < affected.crossings ? full.routes : affected.routes);
                 persistCanvas(next, edges);
                 recordHistory(next, edges, screens, `Moved node: ${(draggedNode.data as WfFlowNode["data"]).label}`);
               }}
@@ -811,7 +934,8 @@ export function DesignerPage() {
               }}
               onPaneClick={() => setNodeContextMenu(null)}
               nodeTypes={nodeTypes}
-              defaultEdgeOptions={{ type: "step" }}
+              edgeTypes={edgeTypes}
+              defaultEdgeOptions={{ type: "routed" }}
               connectionLineType={ConnectionLineType.Step}
               fitView
               deleteKeyCode={["Backspace", "Delete"]}
@@ -821,6 +945,7 @@ export function DesignerPage() {
               <Controls />
               <MiniMap nodeColor={(n) => (n.data as WfFlowNode["data"])?.color ?? "#2dd4a8"} maskColor="rgba(15,23,20,0.7)" />
             </ReactFlow>
+            </WorkflowRoutesContext.Provider>
           ) : selectedScreen ? (
             <div className="workflow-screen-editor">
               <div className="workflow-screen-editor-head"><p className="lims-eyebrow">Screen editor</p><h2>{selectedScreen.name}</h2><span>Changes save automatically</span></div>
