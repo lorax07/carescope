@@ -6,8 +6,27 @@ import "./landing.css";
 
 export function LandingPage() {
   return (
-    <div className="lp-page">
+    <div className="lp-page lp-home">
         <SiteHeader />
+        <section className="lp-showcase" aria-labelledby="showcase-heading">
+          <h1 id="showcase-heading">
+            The laboratory platform
+            <br />
+            that keeps you moving.
+          </h1>
+          <p>
+            CareScope Sequence brings your lab workflows, data and systems together — so you can make changes
+            faster, reduce integrations, and run a more efficient laboratory.
+          </p>
+          <div className="lp-showcase-actions">
+            <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
+              Request a Demo
+            </Link>
+            <a href="#modules" className="lp-pill lp-pill-light">
+              Explore modules
+            </a>
+          </div>
+        </section>
 
         <div className="lp">
         <PlatformBand />
@@ -374,14 +393,7 @@ function PlatformBand() {
   return (
     <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
       <div className="lp-section-inner">
-        <div className="lp-section-head lp-section-head-left">
-        <h2 id="platform-heading">The laboratory platform that keeps you moving.</h2>
-        <p>
-          CareScope Sequence brings your lab workflows, data and systems
-          together — so you can make changes faster, reduce integrations, and
-          run a more efficient laboratory.
-        </p>
-        </div>
+        <h2 id="platform-heading" className="sr-only">Laboratory modules</h2>
         <ul className="lp-cols">
           {MARKETING_MODULES.map((pillar) => (
             <li key={pillar.slug}>

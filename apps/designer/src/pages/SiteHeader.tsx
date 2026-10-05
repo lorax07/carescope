@@ -46,8 +46,9 @@ export function SiteHeader() {
           <img className="lp-logo-sequence" src="/sequence-logo.png" width={1400} height={318} alt="Sequence" />
         </Link>
 
-        <div className="lp-nav-actions">
+        <div className="lp-nav-end">
           <nav className="lp-nav-links" aria-label="Primary">
+            <a href="/">Home</a>
             <a href="/#capabilities">What we solve</a>
             <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
               <button
@@ -77,12 +78,9 @@ export function SiteHeader() {
               ) : null}
             </div>
             <a href="/#compliance">About</a>
+            <Link to="/intrasite">Sign in</Link>
           </nav>
-          <span className="lp-nav-divider" aria-hidden="true" />
-          <Link to="/intrasite" className="lp-nav-text">
-            Sign in
-          </Link>
-          <Link to="/app?signup=1" className="lp-btn lp-btn-demo">
+          <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
             Request a Demo
           </Link>
         </div>
