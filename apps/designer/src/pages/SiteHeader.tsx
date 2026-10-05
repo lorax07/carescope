@@ -49,7 +49,7 @@ export function SiteHeader() {
         <div className="lp-nav-end">
           <nav className="lp-nav-links" aria-label="Primary">
             <a href="/">Home</a>
-            <Link to="/what-we-solve">What we solve</Link>
+            <a href="/#less-friction">What we solve</a>
             <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
               <button
                 type="button"

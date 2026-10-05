@@ -251,8 +251,20 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
 function WhatWeSolve() {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeId, setActiveId] = useState(TOPICS[0].id);
+  const [paused, setPaused] = useState(false);
   const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
   const active = TOPICS[activeIndex] ?? TOPICS[0];
+
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setTimeout(() => {
+      setActiveId((current) => {
+        const index = TOPICS.findIndex((item) => item.id === current);
+        return TOPICS[(index + 1) % TOPICS.length].id;
+      });
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [activeId, paused]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -295,7 +307,17 @@ function WhatWeSolve() {
   }
 
   return (
-    <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
+    <section
+      className="lp-section lp-spotlight"
+      id="less-friction"
+      ref={sectionRef}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
+      }}
+    >
       <div className="lp-section-inner lp-solve-board">
         <div className="lp-solve-intro">
           <h2 className="lp-display-head">Less friction, more science</h2>
@@ -519,18 +541,18 @@ function IndustrySpotlights() {
 }
 
 const REGULATIONS = [
-  ["21 CFR 11", "Electronic records and signatures", "Controls for trustworthy electronic records, audit trails, and legally binding signatures."],
-  ["21 CFR 58", "Good Laboratory Practice", "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens."],
-  ["21 CFR 210", "Drug manufacturing practice", "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture."],
-  ["21 CFR 211", "Finished pharmaceuticals", "Production, laboratory control, record, and distribution requirements for finished drug products."],
-  ["21 CFR 820", "Quality system regulation", "Medical-device quality system requirements for design, production, and recorded evidence."],
-  ["ISO 17025", "Testing laboratory competence", "Requirements for impartial, technically competent testing and calibration laboratories."],
-  ["ISO 15189", "Medical laboratories", "Quality and competence requirements for clinical laboratory examination services."],
-  ["CLIA", "Clinical laboratory quality", "U.S. standards for accurate, reliable, and timely patient laboratory testing."],
-  ["CAP", "Laboratory accreditation", "Inspection expectations for quality management, analytical performance, and documentation."],
-  ["EU Annex 11", "Computerized systems", "European GMP expectations for validated systems, audit trails, and data integrity."],
-  ["ICH Q7", "API good manufacturing", "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems."],
-  ["HIPAA", "Protected health information", "Safeguards for patient information handled by clinical and diagnostic laboratory operations."],
+  { code: "21 CFR 11", name: "Electronic records and signatures", detail: "Controls for trustworthy electronic records, audit trails, and legally binding signatures.", image: "/regulations/reg-cfr-11.jpg" },
+  { code: "21 CFR 58", name: "Good Laboratory Practice", detail: "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens.", image: "/regulations/reg-cfr-58.jpg" },
+  { code: "21 CFR 210", name: "Drug manufacturing practice", detail: "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture.", image: "/regulations/reg-cfr-210.jpg" },
+  { code: "21 CFR 211", name: "Finished pharmaceuticals", detail: "Production, laboratory control, record, and distribution requirements for finished drug products.", image: "/regulations/reg-cfr-211.jpg" },
+  { code: "21 CFR 820", name: "Quality system regulation", detail: "Medical-device quality system requirements for design, production, and recorded evidence.", image: "/regulations/reg-cfr-820.jpg" },
+  { code: "ISO 17025", name: "Testing laboratory competence", detail: "Requirements for impartial, technically competent testing and calibration laboratories.", image: "/regulations/reg-iso-17025.jpg" },
+  { code: "ISO 15189", name: "Medical laboratories", detail: "Quality and competence requirements for clinical laboratory examination services.", image: "/regulations/reg-iso-15189.jpg" },
+  { code: "CLIA", name: "Clinical laboratory quality", detail: "U.S. standards for accurate, reliable, and timely patient laboratory testing.", image: "/regulations/reg-clia.jpg" },
+  { code: "CAP", name: "Laboratory accreditation", detail: "Inspection expectations for quality management, analytical performance, and documentation.", image: "/regulations/reg-cap.jpg" },
+  { code: "EU Annex 11", name: "Computerized systems", detail: "European GMP expectations for validated systems, audit trails, and data integrity.", image: "/regulations/reg-annex-11.jpg" },
+  { code: "ICH Q7", name: "API good manufacturing", detail: "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems.", image: "/regulations/reg-ich-q7.jpg" },
+  { code: "HIPAA", name: "Protected health information", detail: "Safeguards for patient information handled by clinical and diagnostic laboratory operations.", image: "/regulations/reg-hipaa.jpg" },
 ] as const;
 
 function ComplianceSection() {
@@ -544,64 +566,20 @@ function ComplianceSection() {
           </p>
         </div>
         <div className="lp-reg-grid">
-          {REGULATIONS.map(([code, name, detail]) => (
-            <article className="lp-reg-card" key={code} tabIndex={0}>
-              <b>{code}</b>
-              <small>{name}</small>
-              <p>{detail}</p>
+          {REGULATIONS.map((item) => (
+            <article
+              className="lp-reg-card"
+              key={item.code}
+              tabIndex={0}
+              style={{ "--reg-image": `url("${item.image}")` } as CSSProperties}
+            >
+              <b>{item.code}</b>
+              <small>{item.name}</small>
+              <p>{item.detail}</p>
             </article>
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-export function WhatWeSolvePage() {
-  return (
-    <div className="lp-page">
-      <SiteHeader />
-      <div className="lp">
-        <article className="lp-section lp-solve-page">
-          <div className="lp-section-inner">
-            <header className="lp-section-head">
-              <h1 className="lp-display-head">Less friction, more science</h1>
-              <p>
-                CareScope Sequence takes on the operational, technical, and compliance work that slows a laboratory
-                down, so the science can stay in front.
-              </p>
-            </header>
-            {TOPICS.map((topic, index) => (
-              <section className="lp-solve-block" key={topic.id} id={topic.id} aria-labelledby={`solve-${topic.id}`}>
-                <p className="lp-solve-block-index">{String(index + 1).padStart(2, "0")}</p>
-                <h2 id={`solve-${topic.id}`}>{topic.label}</h2>
-                <p>{topic.description}</p>
-                <figure className="lp-solve-visual">
-                  <figcaption>{topic.visual}</figcaption>
-                  <TopicInfographic id={topic.id} />
-                </figure>
-                <div className="lp-solve-outcome">
-                  <span aria-hidden="true">{topic.icon}</span>
-                  <div>
-                    <p>How Sequence helps</p>
-                    <h3>{topic.outcome}</h3>
-                  </div>
-                </div>
-              </section>
-            ))}
-          </div>
-        </article>
-        <footer className="lp-footer">
-          <div className="lp-footer-inner lp-section-wide">
-            <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
-            <nav>
-              <Link to="/" className="lp-footer-intrasite">
-                Back to home
-              </Link>
-            </nav>
-          </div>
-        </footer>
-      </div>
-    </div>
   );
 }

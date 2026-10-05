@@ -8,7 +8,7 @@ import { IntrasiteLabDetailPage } from "./intrasite/LabDetailPage";
 import { IntrasiteClientsPage } from "./intrasite/ClientsPage";
 import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
-import { LandingPage, WhatWeSolvePage } from "./pages/LandingPage";
+import { LandingPage } from "./pages/LandingPage";
 import { ModuleStoryPage } from "./pages/ModuleStoryPage";
 import { LimsEnvironmentPage } from "./pages/LimsEnvironmentPage";
 import { OpsOverviewPage } from "./pages/OpsOverviewPage";
@@ -57,7 +57,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<LandingPage />} />
-        <Route path="what-we-solve" element={<WhatWeSolvePage />} />
+        <Route path="what-we-solve" element={<Navigate to="/#less-friction" replace />} />
         <Route path="modules/:slug" element={<ModuleStoryPage />} />
         <Route path="intrasite" element={<IntrasiteRoot />}>
           <Route path="login" element={<IntrasiteLoginPage />} />
