@@ -3816,8 +3816,173 @@ img.lp-logo-sequence {
 }
 
 .lp-home .lp-platform {
-  padding-top: 0.4rem;
+  padding-top: 1.5rem;
+  padding-bottom: 2.4rem;
   background: transparent;
+  overflow: visible;
+}
+
+.lp-module-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: center;
+  margin: 0;
+  padding: 2.2rem 0 1.4rem;
+  list-style: none;
+}
+
+.lp-module-row li {
+  min-width: 0;
+}
+
+.lp-module-row li.is-up {
+  animation: lp-module-up 3s ease-in-out infinite alternate;
+}
+
+.lp-module-row li.is-down {
+  animation: lp-module-down 3s ease-in-out infinite alternate;
+}
+
+@keyframes lp-module-up {
+  from { transform: translateY(32px); }
+  to { transform: translateY(-32px); }
+}
+
+@keyframes lp-module-down {
+  from { transform: translateY(-32px); }
+  to { transform: translateY(32px); }
+}
+
+.lp-module-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem;
+  min-height: 18.5rem;
+  padding: 1.35rem 0.8rem 1.15rem;
+  border-radius: 1.75rem;
+  color: #1c1e22;
+  text-align: center;
+  text-decoration: none;
+}
+
+.lp-module-card .lp-platform-icon {
+  margin: auto 0 0.85rem;
+  width: 3.6rem;
+  height: 3.6rem;
+}
+
+.lp-module-card .lp-platform-icon svg {
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.lp-module-card strong {
+  color: #16181d;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.lp-module-card > span:last-child {
+  color: #3d4450;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.lp-module-card.is-operations { background: #e4dcf3; }
+.lp-module-card.is-instruments { background: #f4e7ae; }
+.lp-module-card.is-compliance { background: #f6cddd; }
+.lp-module-card.is-client { background: #c9e3f6; }
+.lp-module-card.is-revenue { background: #f8d4c2; }
+.lp-module-card.is-insights { background: #d5efe4; }
+
+.lp-module-card:hover {
+  filter: saturate(1.05);
+}
+
+.lp-page .lp-section-head:has(.lp-display-head),
+.lp-page .lp-solve-intro {
+  max-width: 44rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.lp-page .lp-section-head:has(.lp-display-head) p,
+.lp-page .lp-solve-intro > p:last-child {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lp-page h1.lp-display-head,
+.lp-page .lp-section-head h2.lp-display-head,
+.lp-page .lp-solve-intro h2.lp-display-head,
+.lp-page #compliance .lp-section-head h2.lp-display-head {
+  display: block;
+  width: auto;
+  max-width: 16em;
+  margin: 0 auto 0.85rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #16181d;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(1.45rem, 2.8vw, 2.48rem);
+  font-weight: 800;
+  letter-spacing: -0.052em;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.lp-solve-page {
+  padding-top: 3.5rem;
+}
+
+.lp-solve-block {
+  margin-top: 2.5rem;
+  padding: 1.6rem 1.5rem 1.5rem;
+  border: 1px solid #e7e5e4;
+  border-radius: 22px;
+  background: #fff;
+}
+
+.lp-solve-block-index {
+  margin: 0 0 0.45rem;
+  color: #8b919a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.lp-solve-block h2 {
+  margin: 0 0 0.55rem;
+  color: #16181d;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(1.45rem, 2.4vw, 1.9rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.lp-solve-block > p {
+  max-width: 42rem;
+  margin: 0 0 1rem;
+  color: #615d59;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.lp-solve-block .lp-solve-outcome h3 {
+  margin: 0;
+  color: #16181d;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
 }
 
 .lp-pill:focus-visible,
@@ -3857,5 +4022,30 @@ img.lp-logo-sequence {
 
   .lp-showcase h1 {
     font-size: clamp(2.35rem, 10vw, 3.4rem);
+  }
+
+  .lp-module-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .lp-module-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-module-row li.is-up,
+  .lp-module-row li.is-down {
+    animation: none;
+  }
+
+  .lp-module-row li.is-up {
+    transform: translateY(-18px);
+  }
+
+  .lp-module-row li.is-down {
+    transform: translateY(18px);
   }
 }

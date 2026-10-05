@@ -29,8 +29,8 @@ export function LandingPage() {
         </section>
 
         <div className="lp">
-        <PlatformBand />
       <LimsFilm />
+      <PlatformBand />
       <WhatWeSolve />
       <IndustrySpotlights />
       <ComplianceSection />
@@ -297,9 +297,8 @@ function WhatWeSolve() {
   return (
     <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
       <div className="lp-section-inner lp-solve-board">
-        <h2 className="lp-solve-side-heading">What we solve</h2>
         <div className="lp-solve-intro">
-          <h2>Less friction. More science.</h2>
+          <h2 className="lp-display-head">Less friction, more science</h2>
           <p>
             CareScope Sequence eliminates the biggest operational, technical and compliance challenges labs face—so
             you can focus on what matters most: better patient outcomes.
@@ -389,15 +388,17 @@ function LimsFilm() {
   );
 }
 
+const MODULES_BOUNCING_UP = new Set(["operations", "compliance", "revenue"]);
+
 function PlatformBand() {
   return (
     <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
       <div className="lp-section-inner">
         <h2 id="platform-heading" className="sr-only">Laboratory modules</h2>
-        <ul className="lp-cols">
+        <ul className="lp-module-row">
           {MARKETING_MODULES.map((pillar) => (
-            <li key={pillar.slug}>
-              <Link to={`/modules/${pillar.slug}`} className="lp-platform-card">
+            <li key={pillar.slug} className={MODULES_BOUNCING_UP.has(pillar.slug) ? "is-up" : "is-down"}>
+              <Link to={`/modules/${pillar.slug}`} className={`lp-module-card is-${pillar.slug}`}>
                 <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
                   {pillar.icon}
                 </span>
@@ -479,7 +480,7 @@ function IndustrySpotlights() {
     >
       <div className="lp-section-inner">
         <div className="lp-section-head">
-          <h2 id="industry-spotlights-heading">Industry Spotlights</h2>
+          <h2 id="industry-spotlights-heading" className="lp-display-head">Industry Spotlights</h2>
           <p>See how Sequence supports the laboratories testing products across regulated and everyday industries.</p>
         </div>
         <div className="lp-page-stage" aria-live="polite">
@@ -537,7 +538,7 @@ function ComplianceSection() {
     <section className="lp-section" id="compliance">
       <div className="lp-section-inner">
         <div className="lp-section-head">
-          <h2>Governed for regulated environments.</h2>
+          <h2 className="lp-display-head">Governed for regulated environments</h2>
           <p>
             Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
           </p>
@@ -553,5 +554,54 @@ function ComplianceSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+export function WhatWeSolvePage() {
+  return (
+    <div className="lp-page">
+      <SiteHeader />
+      <div className="lp">
+        <article className="lp-section lp-solve-page">
+          <div className="lp-section-inner">
+            <header className="lp-section-head">
+              <h1 className="lp-display-head">Less friction, more science</h1>
+              <p>
+                CareScope Sequence takes on the operational, technical, and compliance work that slows a laboratory
+                down, so the science can stay in front.
+              </p>
+            </header>
+            {TOPICS.map((topic, index) => (
+              <section className="lp-solve-block" key={topic.id} id={topic.id} aria-labelledby={`solve-${topic.id}`}>
+                <p className="lp-solve-block-index">{String(index + 1).padStart(2, "0")}</p>
+                <h2 id={`solve-${topic.id}`}>{topic.label}</h2>
+                <p>{topic.description}</p>
+                <figure className="lp-solve-visual">
+                  <figcaption>{topic.visual}</figcaption>
+                  <TopicInfographic id={topic.id} />
+                </figure>
+                <div className="lp-solve-outcome">
+                  <span aria-hidden="true">{topic.icon}</span>
+                  <div>
+                    <p>How Sequence helps</p>
+                    <h3>{topic.outcome}</h3>
+                  </div>
+                </div>
+              </section>
+            ))}
+          </div>
+        </article>
+        <footer className="lp-footer">
+          <div className="lp-footer-inner lp-section-wide">
+            <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
+            <nav>
+              <Link to="/" className="lp-footer-intrasite">
+                Back to home
+              </Link>
+            </nav>
+          </div>
+        </footer>
+      </div>
+    </div>
   );
 }
