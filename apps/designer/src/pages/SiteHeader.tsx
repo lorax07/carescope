@@ -1,10 +1,11 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 
 export function SiteHeader() {
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [solid, setSolid] = useState(false);
 
@@ -77,6 +78,9 @@ export function SiteHeader() {
                 </ul>
               ) : null}
             </div>
+            <Link to="/pricing" aria-current={pathname === "/pricing" ? "page" : undefined}>
+              Pricing
+            </Link>
             <a href="/#compliance">About</a>
             <Link to="/intrasite">Sign in</Link>
           </nav>
