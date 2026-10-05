@@ -86,55 +86,80 @@ const TOPICS: Topic[] = [
     icon: "↯",
   },
   {
-    id: "friction",
-    label: "Operational Friction",
-    description: "Disconnected systems, manual steps and waiting points slow your lab down and increase the risk of errors.",
-    visual: "Traditional LIMS compared with Sequence",
-    outcome: "Keep your workflow moving.",
+    id: "operations",
+    label: "Operational and compliance friction",
+    description: "Disconnected queues, manual handoffs, and compliance evidence assembled after the fact slow the lab and raise the chance of error.",
+    visual: "Traditional LIMS issues compared with Sequence",
+    outcome: "One accession from receive through release, with the evidence already on the work.",
     icon: "⌘",
   },
   {
-    id: "consultants",
-    label: "Consultant Dependency",
-    description: "Traditional LIMS changes require multiple teams and external consultants, adding time, cost and complexity.",
-    visual: "Traditional lifecycle compared with Sequence",
-    outcome: "Put control back in your hands.",
-    icon: "♟",
-  },
-  {
     id: "integration",
-    label: "Integration Complexity",
-    description: "Multiple systems, interfaces and vendors create a fragile ecosystem that’s hard to manage and scale.",
-    visual: "Legacy LIMS compared with Sequence",
-    outcome: "Fewer integrations. Greater control.",
+    label: "Integration and Contractor dependency",
+    description: "Traditional LIMS changes depend on outside contractors and a separate interface for every system the laboratory touches.",
+    visual: "Traditional LIMS issues compared with Sequence",
+    outcome: "Run the laboratory in Sequence, without handing the change to a contractor.",
     icon: "⌕",
-  },
-  {
-    id: "compliance",
-    label: "Compliance Friction",
-    description: "Every change requires documentation, approvals and validation—slowing down innovation and operations.",
-    visual: "Controlled and compliant by design",
-    outcome: "Stay compliant, move faster.",
-    icon: "♢",
   },
 ];
 
-const FLOW = ["Order", "Accession", "Testing", "Result", "Report"];
-const CONSULTANT_FLOW = ["Lab request", "Consultant", "IT", "Project mgr", "Testing", "Validation", "Deployment"];
-const CONFIG_FLOW = ["Draft", "Review", "Test", "Approve", "Deploy"];
-const COMPLIANCE_FLOW = ["Change request", "Test", "Validate", "Document", "Approve", "Release"];
-const INTEGRATIONS = ["EMR", "Instruments", "Billing", "Reporting", "Other systems", "Portals", "Files"];
+const OPERATIONS_ISSUES = [
+  "Sample status is split across spreadsheets, inboxes, and conversations at the bench.",
+  "Receive, testing, review, and release do not share one accession record.",
+  "Priority, holds, and location are tracked outside the workflow.",
+  "Instrument status and the current run step are only visible by walking to the bench.",
+  "Flags, reviewer identity, and release evidence are assembled after testing is finished.",
+  "Deviations, CAPA, change control, and controlled documents live in separate binders.",
+  "Signatures are scanned pages, and the audit trail is rebuilt when an inspection is already scheduled.",
+];
 
-function Flow({ items, tone = "traditional" }: { items: string[]; tone?: "traditional" | "sequence" }) {
+const OPERATIONS_SOLUTIONS = [
+  "Home, Testing, Review, and Release are stages of the same accession.",
+  "Receive sample and Log sample open the record, with chain of custody in order and who did it.",
+  "Priority, site, and hold stay on the work. The queue shows open, in testing, in review, or ready for release.",
+  "A current run shows the instrument, the step it is on, the samples and solutions, and the control panel when the instrument is integrated.",
+  "Review covers an individual sample or a batch, with flags, a reviewer PIN, and authorization before release.",
+  "Sequence Compliance keeps deviations, CAPA, change control, controlled documents, and signatures on the work they approve.",
+  "The audit trail is the record of those actions, so the inspection file is the work itself.",
+];
+
+const INTEGRATION_ISSUES = [
+  "Instruments, billing, reporting, portals, and files each depend on a separate interface.",
+  "Connecting an instrument waits on a vendor and a programmer.",
+  "A workflow change passes through a contractor, IT, and a project manager before the lab can use it.",
+  "The client account and the accessions in the laboratory are different systems.",
+  "Charges are created after release, in a billing tool the bench does not open.",
+  "A question about open work, revenue, or an account becomes a report request.",
+  "Even a small change becomes a customization project with outside cost and delay.",
+];
+
+const INTEGRATION_SOLUTIONS = [
+  "Operations, Instruments, Compliance, Client, Revenue, and Insights are modules of one platform.",
+  "Add an instrument by identity, interface, and place, and see whether its sequence is running.",
+  "The workflow designer builds screens, branches, and connections, and can attach a template to a branch the lab selects.",
+  "Sequence Client keeps contacts, agreements, and the laboratory work under the same account.",
+  "Sequence Revenue carries charge capture, edits, denials, and payment on that account and accession.",
+  "Sequence Insights shows accounts, open work, revenue, and pipeline, and answers only from that laboratory text.",
+  "The lab drafts, reviews, and publishes the workflow without handing the change to a contractor.",
+];
+
+function CompareLists({ issues, solutions }: { issues: string[]; solutions: string[] }) {
   return (
-    <div className={`lp-native-flow is-${tone}`}>
-      {items.map((item, index) => (
-        <div className="lp-native-flow-item" key={item}>
-          <span>{index + 1}</span>
-          <b>{item}</b>
-          {index < items.length - 1 ? <i aria-hidden="true">→</i> : null}
-        </div>
-      ))}
+    <div className="lp-native-comparison lp-native-lists">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <p>Issues laboratories face</p>
+        <ul>
+          {issues.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </section>
+      <section className="is-sequence">
+        <h5>Sequence</h5>
+        <p>How this product addresses them</p>
+        <ul>
+          {solutions.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+      </section>
     </div>
   );
 }
@@ -169,92 +194,10 @@ function CostInfographic() {
   );
 }
 
-function OperationalInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={FLOW} />
-        <p className="lp-native-warning">Workarounds · handoffs · waiting</p>
-      </section>
-      <section>
-        <h5>Sequence</h5>
-        <Flow items={FLOW} tone="sequence" />
-        <p className="lp-native-good">A unified workflow with no disconnected handoffs</p>
-      </section>
-    </div>
-  );
-}
-
-function ConsultantInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={CONSULTANT_FLOW} />
-        <p className="lp-native-warning">Multiple handoffs. Extended timelines.</p>
-      </section>
-      <section>
-        <h5>Sequence configuration lifecycle</h5>
-        <Flow items={CONFIG_FLOW} tone="sequence" />
-        <p className="lp-native-good">The lab retains control from draft through deployment</p>
-      </section>
-    </div>
-  );
-}
-
-function IntegrationMap({ sequence = false }: { sequence?: boolean }) {
-  return (
-    <div className={`lp-native-hub${sequence ? " is-sequence" : ""}`}>
-      <strong>{sequence ? "Sequence" : "LIMS"}</strong>
-      {INTEGRATIONS.map((item, index) => (
-        <span key={item} style={{ "--hub-index": index } as CSSProperties}>{item}</span>
-      ))}
-    </div>
-  );
-}
-
-function IntegrationInfographic() {
-  return (
-    <div className="lp-native-comparison lp-native-integration">
-      <section>
-        <h5>Legacy LIMS</h5>
-        <IntegrationMap />
-      </section>
-      <section>
-        <h5>Sequence</h5>
-        <IntegrationMap sequence />
-        <p className="lp-native-good">Reduce integration dependency</p>
-      </section>
-    </div>
-  );
-}
-
-function ComplianceInfographic() {
-  return (
-    <div className="lp-native-comparison">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <Flow items={COMPLIANCE_FLOW} />
-        <p className="lp-native-warning">Slow, manual and high risk</p>
-      </section>
-      <section>
-        <h5>Sequence · controlled and compliant by design</h5>
-        <Flow items={COMPLIANCE_FLOW} tone="sequence" />
-        <div className="lp-native-features">
-          {["Audit trail", "Electronic signatures", "Versioning", "Traceability"].map((item) => <span key={item}>{item}</span>)}
-        </div>
-      </section>
-    </div>
-  );
-}
-
 function TopicInfographic({ id }: { id: Topic["id"] }) {
   if (id === "cost") return <CostInfographic />;
-  if (id === "friction") return <OperationalInfographic />;
-  if (id === "consultants") return <ConsultantInfographic />;
-  if (id === "integration") return <IntegrationInfographic />;
-  return <ComplianceInfographic />;
+  if (id === "operations") return <CompareLists issues={OPERATIONS_ISSUES} solutions={OPERATIONS_SOLUTIONS} />;
+  return <CompareLists issues={INTEGRATION_ISSUES} solutions={INTEGRATION_SOLUTIONS} />;
 }
 
 function WhatWeSolve() {
