@@ -1,31 +1,486 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
+import { findInstrument } from "./instruments";
+import { labMenuPath, useLabOperations } from "./labOperations";
+import { readLimsSession } from "./limsSession";
+import { SampleDetailBody } from "./pages/SampleDetailPage";
+import { findSample, getSamples } from "./samples";
+import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { findRunSequence, RunSequenceView } from "./testingRuns";
+import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
 const NAV = [
-  { to: "/app", label: "Dashboard", end: true },
-  { to: "/app/samples", label: "Samples" },
-  { to: "/app/tests", label: "Tests" },
-  { to: "/app/results", label: "Results" },
-  { to: "/app/instruments", label: "Instruments" },
-  { to: "/app/inventory", label: "Inventory" },
-  { to: "/app/quality", label: "Quality" },
-  { to: "/app/workflows", label: "Workflows" },
-  { to: "/app/catalog", label: "Catalog" },
+  { to: "/app/design", label: "Workflow design" },
+  { to: "/app/instruments", label: "Sequence Instruments" },
+  { to: "/app/connectivity", label: "Sequence Client" },
+  { to: "/app/quality", label: "Sequence Compliance" },
+  { to: "/app/billing", label: "Sequence Revenue" },
+  { to: "/app/insights", label: "Sequence Insights" },
 ] as const;
+
+function useLocalClock(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now;
+}
+
+type OpenEdge = "left" | "right" | "top";
+
+const LAUNCHER = 64;
+const EDGE_PAD = 0;
+
+const MAGNET = 168;
+
+function pointerDistances(x: number, y: number, width: number): Record<OpenEdge, number> {
+  return {
+    top: Math.max(0, y),
+    left: Math.max(0, x),
+    right: Math.max(0, width - x),
+  };
+}
+
+function nearestEdge(x: number, y: number, width: number, current: OpenEdge): OpenEdge {
+  const distances = pointerDistances(x, y, width);
+  let edge = current;
+  let best = distances[current];
+  for (const side of ["left", "right", "top"] as const) {
+    if (distances[side] < best - 12) {
+      best = distances[side];
+      edge = side;
+    }
+  }
+  return edge;
+}
+
+function snappedPos(edge: OpenEdge, width: number, dockWidth: number): { x: number; y: number } {
+  if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - dockWidth), y: EDGE_PAD };
+  return { x: EDGE_PAD, y: EDGE_PAD };
+}
+
+function utcOffsetLabel(date: Date): string {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "+" : "−";
+  const abs = Math.abs(offsetMinutes);
+  const hours = Math.floor(abs / 60);
+  const minutes = abs % 60;
+  if (minutes === 0) return `UTC${sign}${hours}`;
+  return `UTC${sign}${hours}:${String(minutes).padStart(2, "0")}`;
+}
+
+function NavIcon({ name }: { name: string }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: 16,
+    height: 16,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  if (name === "overview") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="4" width="7" height="7" rx="1.5" />
+        <rect x="13" y="4" width="7" height="7" rx="1.5" />
+        <rect x="4" y="13" width="7" height="7" rx="1.5" />
+        <rect x="13" y="13" width="7" height="7" rx="1.5" />
+      </svg>
+    );
+  }
+  if (name === "home") {
+    return (
+      <svg {...common}>
+        <path d="M4 11.5 12 5l8 6.5" />
+        <path d="M7 10.5V19h10v-8.5" />
+      </svg>
+    );
+  }
+  if (name === "testing") {
+    return (
+      <svg {...common}>
+        <path d="M9 3h6" />
+        <path d="M10 3v5.5L6.5 18A3.2 3.2 0 0 0 9.4 22h5.2a3.2 3.2 0 0 0 2.9-4L14 8.5V3" />
+      </svg>
+    );
+  }
+  if (name === "review") {
+    return (
+      <svg {...common}>
+        <rect x="6" y="3.5" width="12" height="17" rx="2" />
+        <path d="m9 12 2 2 4-4" />
+      </svg>
+    );
+  }
+  if (name === "release") {
+    return (
+      <svg {...common}>
+        <path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" />
+        <path d="M8 8V6a4 4 0 0 1 8 0v2" />
+      </svg>
+    );
+  }
+  if (name === "design") {
+    return (
+      <svg {...common}>
+        <circle cx="6" cy="7" r="2.2" />
+        <circle cx="17" cy="6" r="2.2" />
+        <circle cx="12" cy="17" r="2.2" />
+        <path d="M8 8.2 10.4 15M15.2 7.6 13.4 15" />
+      </svg>
+    );
+  }
+  if (name === "instruments") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="7" width="16" height="10" rx="2" />
+        <path d="M8 7V5h8v2M8 17v2M16 17v2" />
+      </svg>
+    );
+  }
+  if (name === "connectivity") {
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="9" r="2.2" />
+        <circle cx="16" cy="9" r="2.2" />
+        <path d="M4.8 18a3.4 3.4 0 0 1 6.4 0M12.8 18a3.4 3.4 0 0 1 6.4 0" />
+      </svg>
+    );
+  }
+  if (name === "quality") {
+    return (
+      <svg {...common}>
+        <path d="M12 3.5 19 6.5v5.2c0 4.2-2.8 7.2-7 8.8-4.2-1.6-7-4.6-7-8.8V6.5L12 3.5z" />
+      </svg>
+    );
+  }
+  if (name === "billing") {
+    return (
+      <svg {...common}>
+        <rect x="6" y="4" width="12" height="16" rx="1.5" />
+        <path d="M9 9h6M9 12h6M9 15h4" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <path d="M4 16.5 9 12l3 2.5 6-7" />
+      <path d="M14 7.5h4.5V12" />
+    </svg>
+  );
+}
+
+function workspaceTabLabel(section: string, menu: { view: string; label: string }[]): string {
+  if (section === "instruments") return "Instruments";
+  return (
+    menu.find((item) => item.view === section)?.label ??
+    {
+      design: "Workflow design",
+      connectivity: "Sequence Client",
+      quality: "Sequence Compliance",
+      billing: "Sequence Revenue",
+      insights: "Sequence Insights",
+    }[section] ??
+    "Workspace"
+  );
+}
+
+function PinnedScreen({ tab }: { tab: PinnedTab }) {
+  if (tab.kind === "sample") {
+    const sample = findSample(tab.recordId);
+    return sample ? <SampleDetailBody sample={sample} showBack={false} /> : null;
+  }
+  if (tab.kind === "run") {
+    const run = findRunSequence(tab.recordId);
+    return run ? <RunSequenceView run={run} /> : null;
+  }
+  if (tab.kind === "testing") {
+    return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received")} /></section></div>;
+  }
+  const instrument = findInstrument(tab.recordId);
+  if (!instrument) return null;
+  return (
+    <div className="lims-page">
+      <section className="lims-panel">
+        <InstrumentRecordView instrument={instrument} />
+      </section>
+    </div>
+  );
+}
 
 /** LIMS application shell */
 export function AppShell() {
+  return (
+    <SectionTabsProvider>
+      <AppFrame />
+    </SectionTabsProvider>
+  );
+}
+
+function AppFrame() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [dockWidth, setDockWidth] = useState(440);
+  const [resizingDock, setResizingDock] = useState(false);
   const [signupOpen, setSignupOpen] = useState(
     () => searchParams.get("signup") === "1"
   );
+  const lims = readLimsSession();
+  const labOps = useLabOperations();
+  const sectionTabs = useSectionTabs();
+  const [infraOpen, setInfraOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
+  const [navPos, setNavPos] = useState({ x: EDGE_PAD, y: EDGE_PAD });
+  const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
+  const [docked, setDocked] = useState(true);
+  const [dragging, setDragging] = useState(false);
+  const [settling, setSettling] = useState(false);
+  const [nearEdge, setNearEdge] = useState(false);
+  const navPosRef = useRef(navPos);
+  const openEdgeRef = useRef<OpenEdge>("left");
+  const draggingRef = useRef(false);
+  const settleTimer = useRef(0);
+  navPosRef.current = navPos;
+  openEdgeRef.current = openEdge;
+  draggingRef.current = dragging;
+  const dockRef = useRef<HTMLDivElement>(null);
+  const suppressClick = useRef(false);
+  const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
+  const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const now = useLocalClock();
+  const edge = openEdge;
+  const horizontal = edge === "top";
+  const signedInName = lims?.username ?? "M. Chen";
+  const railInitials =
+    signedInName
+      .split(/\s+/)
+      .map((part) => part.replace(/[^a-z0-9]/gi, "").charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "MC";
 
   useEffect(() => {
     if (searchParams.get("signup") === "1") {
       setSignupOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(settleTimer.current), []);
+
+  const [dockTick, setDockTick] = useState(0);
+  useEffect(() => {
+    const dock = dockRef.current;
+    if (!dock) return;
+    const observer = new ResizeObserver(() => setDockTick((tick) => tick + 1));
+    observer.observe(dock);
+    return () => observer.disconnect();
+  }, [navOpen, edge]);
+
+  useLayoutEffect(() => {
+    if (dragging || settling || !docked) {
+      setInsets((current) =>
+        current.left === 0 && current.right === 0 && current.top === 0 && current.bottom === 0
+          ? current
+          : { left: 0, right: 0, top: 0, bottom: 0 },
+      );
+      return;
+    }
+    const dock = dockRef.current;
+    if (!dock) return;
+    const gap = navOpen ? 12 : 0;
+    const box = dock.getBoundingClientRect();
+    const next =
+      edge === "left"
+        ? { left: Math.ceil(box.right + gap), right: 0, top: 0, bottom: 0 }
+        : edge === "right"
+          ? { left: 0, right: Math.ceil(window.innerWidth - box.left + gap), top: 0, bottom: 0 }
+          : { left: 0, right: 0, top: Math.ceil(box.bottom + gap), bottom: 0 };
+    setInsets((current) =>
+      current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
+        ? current
+        : next,
+    );
+  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked, dockTick]);
+
+  useLayoutEffect(() => {
+    if (!docked || dragging || settling) return;
+    const measured = dockRef.current?.offsetWidth ?? LAUNCHER;
+    const next = snappedPos(edge, viewport.width, measured);
+    setNavPos((pos) => {
+      if (pos.x === next.x && pos.y === next.y) return pos;
+      navPosRef.current = next;
+      return next;
+    });
+  }, [navOpen, edge, viewport.width, docked, dragging, settling, dockTick]);
+
+  function armDocked() {
+    window.clearTimeout(settleTimer.current);
+    settleTimer.current = window.setTimeout(() => {
+      if (draggingRef.current) return;
+      setSettling(false);
+      setDocked(true);
+      setNearEdge(false);
+    }, 480);
+  }
+
+  function finishDrag(pointer: { x: number; y: number }) {
+    setDragging(false);
+    draggingRef.current = false;
+    const dockBox = dockRef.current?.getBoundingClientRect();
+    const dockWidth = dockBox?.width ?? LAUNCHER;
+    const candidate = nearestEdge(pointer.x, pointer.y, window.innerWidth, openEdgeRef.current);
+    const gap = pointerDistances(pointer.x, pointer.y, window.innerWidth)[candidate];
+    if (gap > MAGNET) {
+      window.clearTimeout(settleTimer.current);
+      setDocked(false);
+      setSettling(false);
+      setNearEdge(false);
+      return;
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setSettling(!reduce);
+    setOpenEdge(candidate);
+    openEdgeRef.current = candidate;
+    const seat = () => {
+      const measured = dockRef.current?.offsetWidth ?? dockWidth;
+      const next = snappedPos(candidate, window.innerWidth, measured);
+      const current = navPosRef.current;
+      if (reduce || (Math.abs(next.x - current.x) < 1 && Math.abs(next.y - current.y) < 1)) {
+        navPosRef.current = next;
+        setNavPos(next);
+        setSettling(false);
+        setDocked(true);
+        setNearEdge(false);
+        return;
+      }
+      navPosRef.current = next;
+      setNavPos(next);
+      armDocked();
+    };
+    if (reduce) {
+      seat();
+      return;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(seat));
+  }
+
+  function returnToLastEdge() {
+    const side = openEdgeRef.current;
+    const measured = dockRef.current?.offsetWidth ?? LAUNCHER;
+    const next = snappedPos(side, window.innerWidth, measured);
+    const current = navPosRef.current;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const same = Math.abs(next.x - current.x) < 1 && Math.abs(next.y - current.y) < 1;
+    if (reduce || same) {
+      navPosRef.current = next;
+      setNavPos(next);
+      setSettling(false);
+      setDocked(true);
+      setNearEdge(false);
+      return;
+    }
+    setSettling(true);
+    navPosRef.current = next;
+    setNavPos(next);
+    armDocked();
+  }
+
+  function beginNavDrag(event: ReactPointerEvent<HTMLElement>, options?: { toggle?: boolean }) {
+    if (event.button !== 0) return;
+    const target = event.target as HTMLElement;
+    if (!target.closest("a")) event.preventDefault();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const origin = navPosRef.current;
+    let moved = false;
+    let pointerX = startX;
+    let pointerY = startY;
+    function move(ev: { clientX: number; clientY: number }) {
+      pointerX = ev.clientX;
+      pointerY = ev.clientY;
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (!moved) {
+        if (Math.hypot(dx, dy) <= 4) return;
+        moved = true;
+        window.clearTimeout(settleTimer.current);
+        draggingRef.current = true;
+        setDragging(true);
+        setDocked(false);
+        setSettling(false);
+      }
+      const bounds = dockRef.current?.getBoundingClientRect();
+      const limitX = window.innerWidth - Math.ceil(bounds?.width ?? LAUNCHER) - 8;
+      const limitY = window.innerHeight - Math.ceil(bounds?.height ?? LAUNCHER) - 8;
+      const x = Math.min(Math.max(0, origin.x + dx), Math.max(0, limitX));
+      const y = Math.min(Math.max(0, origin.y + dy), Math.max(0, limitY));
+      const next = { x, y };
+      navPosRef.current = next;
+      const candidate = nearestEdge(ev.clientX, ev.clientY, window.innerWidth, openEdgeRef.current);
+      const gap = pointerDistances(ev.clientX, ev.clientY, window.innerWidth)[candidate];
+      setNearEdge(gap <= MAGNET);
+      setNavPos(next);
+    }
+    function up() {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("mouseup", up);
+      if (!moved) {
+        draggingRef.current = false;
+        setDragging(false);
+        if (options?.toggle) setNavOpen((open) => !open);
+        return;
+      }
+      suppressClick.current = true;
+      window.getSelection()?.removeAllRanges();
+      finishDrag({ x: pointerX, y: pointerY });
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("mousemove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("mouseup", up);
+  }
+
+  function onMenuPointerDown(event: ReactPointerEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest("a, input, select, textarea")) return;
+    if (target.closest("button") && !target.closest(".sequence-wordmark")) return;
+    beginNavDrag(event, { toggle: true });
+  }
+
+  function onRailPointerDown(event: ReactPointerEvent<HTMLElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest(".lims-rail-user")) return;
+    beginNavDrag(event, { toggle: Boolean(target.closest(".lims-rail-logo")) });
+  }
+
+  function onShellClickCapture(event: ReactMouseEvent) {
+    if (!suppressClick.current) return;
+    suppressClick.current = false;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function onWorkspaceClick(event: ReactMouseEvent) {
+    if (docked || draggingRef.current) return;
+    if (dockRef.current?.contains(event.target as Node)) return;
+    returnToLastEdge();
+  }
 
   function closeSignup() {
     setSignupOpen(false);
@@ -36,44 +491,182 @@ export function AppShell() {
     }
   }
 
-  return (
-    <div className="lims-shell">
-      <aside className="lims-sidebar">
-        <NavLink to="/" className="lims-brand">
-          <span className="lims-brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="26" height="26">
-              <circle cx="16" cy="16" r="14" fill="#1B6EF3" />
-              <path
-                d="M10 16.5h4.2L16 10l1.8 6.5H22"
-                fill="none"
-                stroke="#fff"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span>
-            <strong>CareScope</strong>
-            <small>LIMS</small>
-          </span>
-        </NavLink>
+  const operationLinks = labOps.menu.filter((item) => item.enabled && item.label.trim());
 
-        <div className="lims-site">
-          <span className="lims-site-dot" />
-          North Lab · Production
+  return (
+    <div
+      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}`}
+      style={
+        {
+          "--nav-left": `${insets.left}px`,
+          "--nav-right": `${insets.right}px`,
+          "--nav-top": `${insets.top}px`,
+          "--nav-bottom": `${insets.bottom}px`,
+        } as CSSProperties
+      }
+      onClickCapture={onShellClickCapture}
+      onClick={onWorkspaceClick}
+    >
+      <div
+        ref={dockRef}
+        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${docked ? " is-docked" : " is-floating"}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
+        style={{ left: navPos.x, top: navPos.y }}
+        onTransitionEnd={(event) => {
+          if (event.target !== dockRef.current) return;
+          if (event.propertyName !== "left" && event.propertyName !== "top") return;
+          if (draggingRef.current) return;
+          window.clearTimeout(settleTimer.current);
+          setSettling(false);
+          setDocked(true);
+          setNearEdge(false);
+        }}
+      >
+        <button
+          type="button"
+          className="sequence-nav-toggle"
+          aria-expanded={navOpen}
+          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            beginNavDrag(event, { toggle: true });
+          }}
+        >
+          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
+          <span className="sequence-dot-mark" aria-hidden="true">
+            {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
+          </span>
+        </button>
+        {navOpen ? null : (
+          <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
+            <nav className="lims-nav" aria-label="LIMS modules">
+              {operationLinks.filter((item) => item.view !== "overview").map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={labMenuPath(item.view)}
+                  end={item.view === "overview"}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(item.view)}
+                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={item.view} />
+                  </span>
+                </NavLink>
+              ))}
+              {NAV.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
+                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={sectionFromPath(item.to)} />
+                  </span>
+                </NavLink>
+              ))}
+            </nav>
+            <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
+              {railInitials}
+            </button>
+          </div>
+        )}
+      {navOpen ? (
+      <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
+        <div className="lims-menu-brand">
+        <div className="lims-site-block">
+          <div className="lims-site">
+            <span className="lims-site-dot" />
+            <span className="lims-site-name">
+              {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
+            </span>
+            {lims ? (
+              <button
+                type="button"
+                className="lims-site-expand"
+                aria-expanded={infraOpen}
+                aria-label="Backend infrastructure"
+                onClick={() => setInfraOpen((open) => !open)}
+              >
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                  <path
+                    d={infraOpen ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ) : null}
+          </div>
+          {lims && infraOpen ? (
+            <dl className="lims-infra">
+              <div>
+                <dt>Connection speed</dt>
+                <dd>{lims.connectionSpeed || "18 ms"}</dd>
+              </div>
+              <div>
+                <dt>Database</dt>
+                <dd>
+                  <code>{lims.databaseName || "cs_apex_diagnostics_dev1"}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>Error log</dt>
+                <dd>{lims.errorLog || "Clear"}</dd>
+              </div>
+              <div>
+                <dt>Last backup</dt>
+                <dd>
+                  {lims.lastBackup
+                    ? new Date(lims.lastBackup).toLocaleString()
+                    : new Date("2026-09-23T02:15:00.000Z").toLocaleString()}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+        </div>
         </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
+          <p className="lims-nav-label">Sequence Operations</p>
+          {operationLinks.map((item) => (
+              <NavLink
+                key={item.id}
+                to={labMenuPath(item.view)}
+                end={item.view === "overview"}
+                onClick={() => {
+                  sectionTabs.showSection(item.view);
+                }}
+                className={({ isActive }) =>
+                  `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
+                }
+              >
+                <span className="lims-nav-icon">
+                  <NavIcon name={item.view} />
+                </span>
+                {item.label}
+              </NavLink>
+            ))}
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              end={"end" in item ? item.end : false}
+              onClick={() => {
+                sectionTabs.showSection(sectionFromPath(item.to));
+              }}
               className={({ isActive }) =>
                 `lims-nav-item${isActive ? " active" : ""}`
               }
             >
+              <span className="lims-nav-icon">
+                <NavIcon name={sectionFromPath(item.to)} />
+              </span>
               {item.label}
             </NavLink>
           ))}
@@ -81,36 +674,135 @@ export function AppShell() {
 
         <div className="lims-sidebar-foot">
           <div className="lims-user">
-            <span className="lims-avatar">MC</span>
+            <span className="lims-avatar">{lims ? "AD" : "MC"}</span>
             <div>
-              <b>M. Chen</b>
-              <small>Lab Analyst</small>
+              <b>{lims ? lims.username : "M. Chen"}</b>
+              <small>{lims ? `${lims.clientName} LIMS` : "Lab Analyst"}</small>
             </div>
+            <button
+              type="button"
+              className="lims-settings"
+              aria-label="Settings"
+              onClick={() => setSettingsOpen(true)}
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M19.4 13a7.8 7.8 0 0 0 .1-1 7.8 7.8 0 0 0-.1-1l2.1-1.6a.5.5 0 0 0 .1-.6l-2-3.4a.5.5 0 0 0-.6-.2l-2.5 1a7.4 7.4 0 0 0-1.7-1l-.4-2.6a.5.5 0 0 0-.5-.4h-4a.5.5 0 0 0-.5.4L9.1 4.2a7.4 7.4 0 0 0-1.7 1l-2.5-1a.5.5 0 0 0-.6.2l-2 3.4a.5.5 0 0 0 .1.6L4.6 11a7.8 7.8 0 0 0-.1 1 7.8 7.8 0 0 0 .1 1l-2.1 1.6a.5.5 0 0 0-.1.6l2 3.4a.5.5 0 0 0 .6.2l2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6a.5.5 0 0 0 .5.4h4a.5.5 0 0 0 .5-.4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1a.5.5 0 0 0 .6-.2l2-3.4a.5.5 0 0 0-.1-.6L19.4 13zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
+      ) : null}
+      </div>
 
       <div className="lims-main">
         <header className="lims-topbar">
           <div className="lims-search">
             <input
               type="search"
-              placeholder="Search accession, sample ID, batch…"
+              placeholder="Search accession, order, client…"
               aria-label="Search laboratory records"
             />
           </div>
           <div className="lims-topbar-meta">
-            <span className="lims-chip warn">3 STAT</span>
-            <span className="lims-chip">Shift B</span>
-            <span className="lims-chip muted">UTC−5</span>
+            <time className="lims-chip" dateTime={now.toISOString()}>
+              {signedInName} · {now.toLocaleString()}
+            </time>
+            <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
           </div>
         </header>
-        <div className="lims-content">
-          <Outlet />
+        <div
+          ref={workspaceRef}
+          className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}`}
+          style={{ "--screen-dock-width": `${dockWidth}px` } as CSSProperties}
+        >
+          {sectionTabs.presentation === "screen" && sectionTabs.activeId ? (
+            <div className="lims-content">
+              <div className="lims-page screen-view-page">
+                <SectionTabStrip mainLabel={workspaceTabLabel(sectionTabs.section, labOps.menu)} />
+                <div className="screen-view-body">
+                  {sectionTabs.tabs
+                    .filter((tab) => tab.id === sectionTabs.activeId)
+                    .map((tab) => (
+                      <PinnedScreen key={tab.id} tab={tab} />
+                    ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="lims-content">
+              <Outlet />
+            </div>
+          )}
+          {sectionTabs.presentation === "tab"
+            ? sectionTabs.tabs
+            .filter((tab) => tab.id === sectionTabs.activeId)
+            .map((tab) => (
+              <div key={tab.id} className="lims-screen-dock-wrap">
+                <div
+                  className="lims-screen-resizer"
+                  role="separator"
+                  aria-label="Resize tabbed screen"
+                  aria-orientation="vertical"
+                  aria-valuemin={320}
+                  aria-valuenow={Math.round(dockWidth)}
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+                    event.preventDefault();
+                    const workspaceWidth = workspaceRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+                    const minMain = Math.min(520, workspaceWidth * 0.42);
+                    const maxDock = Math.max(320, workspaceWidth - minMain);
+                    const change = event.key === "ArrowLeft" ? 32 : -32;
+                    setDockWidth((current) => Math.min(maxDock, Math.max(320, current + change)));
+                  }}
+                  onPointerDown={(event) => {
+                    if (event.button !== 0) return;
+                    event.preventDefault();
+                    const handle = event.currentTarget;
+                    handle.setPointerCapture(event.pointerId);
+                    setResizingDock(true);
+                    const resize = (clientX: number) => {
+                      const rect = workspaceRef.current?.getBoundingClientRect();
+                      if (!rect) return;
+                      const minMain = Math.min(520, rect.width * 0.42);
+                      const maxDock = Math.max(320, rect.width - minMain);
+                      setDockWidth(Math.min(maxDock, Math.max(320, rect.right - clientX)));
+                    };
+                    const onMove = (moveEvent: PointerEvent) => resize(moveEvent.clientX);
+                    const onEnd = () => {
+                      handle.removeEventListener("pointermove", onMove);
+                      handle.removeEventListener("pointerup", onEnd);
+                      handle.removeEventListener("pointercancel", onEnd);
+                      setResizingDock(false);
+                    };
+                    handle.addEventListener("pointermove", onMove);
+                    handle.addEventListener("pointerup", onEnd);
+                    handle.addEventListener("pointercancel", onEnd);
+                  }}
+                >
+                  <span />
+                </div>
+                <aside className="lims-screen-dock" aria-label={tab.title}>
+                  <div className="lims-screen-dock-head">
+                    <strong>{tab.title}</strong>
+                    <button type="button" className="btn" onClick={() => sectionTabs.showSection()}>
+                      Main screen
+                    </button>
+                  </div>
+                  <PinnedScreen tab={tab} />
+                </aside>
+              </div>
+            ))
+            : null}
         </div>
       </div>
 
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
+      {settingsOpen ? <SettingsDialog onClose={() => setSettingsOpen(false)} /> : null}
     </div>
   );
 }

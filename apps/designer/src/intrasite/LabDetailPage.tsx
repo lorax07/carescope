@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import {
+  ApiError,
+  getClient,
+  type Client,
+  type ClientDossier,
+  type Lab,
+  type ModuleCatalogItem,
+  type ModuleChangeRequest,
+} from "./api";
+import { AccountHistoryPanel } from "./ClientCases";
+import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
+import { ModuleCase } from "./ModuleCase";
+
+export function IntrasiteLabDetailPage() {
+  const { id = "", labId = "" } = useParams();
+  const [client, setClient] = useState<Client | null>(null);
+  const [lab, setLab] = useState<Lab | null>(null);
+  const [labs, setLabs] = useState<Lab[]>([]);
+  const [dossier, setDossier] = useState<ClientDossier | null>(null);
+  const [requests, setRequests] = useState<ModuleChangeRequest[]>([]);
+  const [catalog, setCatalog] = useState<ModuleCatalogItem[]>(LAB_MODULE_CATALOG);
+  const [error, setError] = useState<string | null>(null);
+  const [moduleOpen, setModuleOpen] = useState(false);
+
+  async function refresh() {
+    const result = await getClient(id);
+    const found = result.labs.find((item) => item.id === labId) ?? null;
+    setClient(result.client);
+    setLab(found);
+    setLabs(result.labs);
+    setDossier(result.dossier);
+    setRequests(result.requests);
+    if (result.moduleCatalog?.length) setCatalog(result.moduleCatalog);
+  }
+
+  useEffect(() => {
+    refresh().catch((err: unknown) => {
+      setError(err instanceof ApiError ? err.message : "Unable to load lab instance");
+    });
+  }, [id, labId]);
+
+  if (!lab && !error) {
+    return (
+      <div className="is-page">
+        <p className="is-muted">Loading lab instance…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="is-page">
+      <header className="is-page-header is-page-header-split">
+        <div>
+          <p className="is-eyebrow">
+            <Link to="/intrasite">Accounts</Link>
+            {" / "}
+            <Link to={`/intrasite/clients/${id}`}>{client?.name ?? "Name"}</Link>
+            {" / lab instance"}
+          </p>
+          <h1>{lab?.name ?? "Lab instance"}</h1>
+          <p>
+            Instance details for this lab, including the modules it runs and the Dev1, Dev2, QA, and
+            Production installations it is mapped to.
+          </p>
+        </div>
+      </header>
+
+      {error ? <p className="is-error">{error}</p> : null}
+
+      {lab ? (
+        <>
+          <section className="is-infra-meta">
+            <article>
+              <span>Lab Instance Status</span>
+              <strong className="is-status-row">
+                <span className={`is-pill ${lab.status}`}>{lab.status}</span>
+                <span className="is-status-lab">{lab.name}</span>
+              </strong>
+            </article>
+            <article>
+              <span>Account</span>
+              <strong>{client?.name}</strong>
+            </article>
+          </section>
+
+          <section className="is-panel">
+            <div className="is-panel-head">
+              <div>
+                <h2>Modules</h2>
+                <p className="is-muted">
+                  Adding and removing a module applies to all installed environments.
+                </p>
+              </div>
+              <button type="button" className="btn btn-primary" onClick={() => setModuleOpen(true)}>
+                Add Or Remove Module
+              </button>
+            </div>
+            <div className="is-module-chips">
+              {lab.modules.length === 0 ? (
+                <span className="is-muted">None</span>
+              ) : (
+                lab.modules.map((moduleId) => (
+                  <span key={moduleId} className="is-module-chip">
+                    {moduleLabel(moduleId)}
+                  </span>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="is-panel">
+            <h2>Installations</h2>
+            <p className="is-muted">This lab instance is mapped onto Dev1, Dev2, QA, and Production.</p>
+            <div className="is-contact-grid">
+              {(dossier?.infrastructure.environments ?? []).map((env) => (
+                <button
+                  key={env.id}
+                  type="button"
+                  className={`is-contact-card is-env-launch${env.id === "prod" ? " is-env-production" : ""}`}
+                  onClick={() => {
+                    const url = `/lims/${id}/${lab.id}/${env.id}`;
+                    window.open(url, `lims-${lab.id}-${env.id}`, "width=1280,height=840");
+                  }}
+                >
+                  <span>{env.label}</span>
+                  <strong>
+                    {lab.name} · {env.label}
+                  </strong>
+                  <small>{env.purpose}</small>
+                  <code>{env.host}</code>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {dossier ? (
+            <section className="is-panel">
+              <h2>Account History</h2>
+              <AccountHistoryPanel dossier={dossier} labs={labs} />
+            </section>
+          ) : null}
+        </>
+      ) : (
+        <p className="is-error">Lab instance not found.</p>
+      )}
+
+      {moduleOpen && lab ? (
+        <ModuleCase
+          clientId={id}
+          lab={lab}
+          requests={requests}
+          catalog={catalog}
+          onClose={() => setModuleOpen(false)}
+          onChanged={refresh}
+        />
+      ) : null}
+    </div>
+  );
+}

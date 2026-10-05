@@ -1,472 +1,545 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
-import { MODULE_INTEGRATIONS } from "@carescope/workflow-core";
+import { MARKETING_MODULES } from "./marketingModules";
+import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
-const CAPABILITIES = MODULE_INTEGRATIONS.map((m) => ({
-  id: m.module,
-  label: m.label,
-  description: m.description,
-}));
-
 export function LandingPage() {
-  const [headerScrolled, setHeaderScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setHeaderScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div className="lp">
-      <div className="lp-frame">
-        <header className={`lp-nav${headerScrolled ? " lp-nav-scrolled" : ""}`}>
-          <Link to="/" className="lp-logo" aria-label="CareScope home">
-            <span className="lp-logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <circle cx="16" cy="16" r="14" fill="#1B6EF3" />
-                <path
-                  d="M16 7.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17Zm0 3.2a2.4 2.4 0 0 1 2.4 2.4v1.1l1.8.9a1 1 0 0 1 .05 1.75l-1.85.9v1.85a2.4 2.4 0 1 1-4.8 0v-1.85l-1.85-.9a1 1 0 0 1 .05-1.75l1.8-.9V13.1A2.4 2.4 0 0 1 16 10.7Z"
-                  fill="#fff"
-                />
-              </svg>
-            </span>
-            <span className="lp-logo-word">
-              <span className="lp-brand-care">CareScope</span>
-            </span>
-          </Link>
+    <div className="lp-page">
+        <SiteHeader />
 
-          <nav className="lp-nav-links" aria-label="Primary">
-            <a href="#capabilities">Capabilities</a>
-            <a href="#workflows">Workflows</a>
-            <a href="#compliance">Compliance</a>
-            <Link to="/app?signup=1">Try OneLab</Link>
-          </nav>
+        <div className="lp">
+        <PlatformBand />
+      <LimsFilm />
+      <WhatWeSolve />
+      <IndustrySpotlights />
+      <ComplianceSection />
 
-          <div className="lp-nav-actions">
-            <Link to="/app" className="lp-link-quiet">
-              Sign in
-            </Link>
-            <Link to="/app?signup=1" className="lp-btn lp-btn-primary">
-              Try OneLab
-            </Link>
-          </div>
-        </header>
-
-        <section className="lp-hero" aria-labelledby="hero-brand">
-          <div className="lp-hero-copy">
-            <p className="lp-brand-lockup" id="hero-brand">
-              <span className="lp-brand-care">CareScope</span>{" "}
-              <span className="lp-brand-onelab">OneLab</span>
-            </p>
-            <h1 className="lp-hero-title">
-              Your lab shouldn’t have to work around your LIMS.
-            </h1>
-            <p className="lp-hero-lede">
-              Stop stitching together software to run your laboratory. One
-              intelligent platform connects your entire operation — from
-              accessioning and testing to quality, billing, client service, and
-              analytics — so your team can spend less time managing systems and
-              more time advancing science.
-            </p>
-            <div className="lp-hero-cta">
-              <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-                Try OneLab
-              </Link>
-              <a href="#capabilities" className="lp-btn lp-btn-ghost lp-btn-lg">
-                Browse Modules
-              </a>
-            </div>
-          </div>
-
-          <div className="lp-hero-visual" aria-hidden="true">
-            <IntegrationsComparisonVisual />
-          </div>
-        </section>
-      </div>
-
-      <section className="lp-section" id="capabilities">
-        <div className="lp-section-inner lp-section-wide">
-          <div className="lp-section-heading-row">
-            <div>
-              <p className="lp-eyebrow">Capabilities</p>
-              <h2 className="lp-h2">
-                Everything you need to run the business around your lab under
-                one platform
-              </h2>
-            </div>
-            <p className="lp-capability-count">
-              {CAPABILITIES.length} modules
-            </p>
-          </div>
-
-          <CapabilitiesCarousel items={CAPABILITIES} />
-        </div>
-      </section>
-
-      <section className="lp-section lp-section-tint" id="workflows">
-        <div className="lp-section-inner lp-section-wide lp-workflow-block">
-          <div>
-            <p className="lp-eyebrow">Workflow engine</p>
-            <h2 className="lp-h2">Automate laboratory process by design.</h2>
-            <p className="lp-section-lede">
-              A visual, no-code orchestration layer for approvals, instrument
-              actions, notifications, and compliance checks — configurable for
-              every module above.
-            </p>
-            <Link to="/app/workflows" className="lp-btn lp-btn-primary">
-              Open workflow designer
-            </Link>
-          </div>
-          <div className="lp-workflow-panel" aria-hidden="true">
-            <WorkflowMiniCanvas />
-          </div>
-        </div>
-      </section>
-
-      <section className="lp-section" id="compliance">
-        <div className="lp-section-inner lp-section-wide">
-          <p className="lp-eyebrow">Trust</p>
-          <h2 className="lp-h2">Governed for regulated environments.</h2>
-          <p className="lp-section-lede">
-            Immutable execution logs, e-signatures, document control, and
-            multi-site isolation so audits are prepared continuously — not
-            reconstructed later.
-          </p>
-          <ul className="lp-trust-list">
-            <li>21 CFR Part 11–ready electronic signatures</li>
-            <li>Chain of custody with scan-verified transfers</li>
-            <li>Versioned workflows with publish, rollback, and simulation</li>
-            <li>Tenant-isolated operations across laboratory sites</li>
-          </ul>
-        </div>
-      </section>
-
-      <section className="lp-cta-band">
-        <div className="lp-cta-band-inner lp-section-wide">
-          <h2 className="lp-h2">Bring pedigree to your laboratory stack.</h2>
-          <p>
-            Configure CareScope around your methods, sites, and quality system —
-            then automate the rest through the workflow engine.
-          </p>
-          <Link to="/app?signup=1" className="lp-btn lp-btn-primary lp-btn-lg">
-            Try OneLab
-          </Link>
-        </div>
-      </section>
+      <p className="lp-brand-lockup">
+        <img
+          className="lp-footer-logo"
+          src="/carescope-parent-logo.png"
+          alt="CareScope. Building Better Healthcare for Everyone."
+        />
+      </p>
 
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
-          <span className="lp-logo-word">
-            <span className="lp-brand-care">CareScope</span>
-          </span>
-          <span>Laboratory information management</span>
+          <p className="lp-copyright">© 2026 Carescope, All Rights Reserved</p>
           <nav>
-            <Link to="/app">LIMS</Link>
-            <Link to="/app/samples">Samples</Link>
+            <a href="/intrasite" className="lp-footer-intrasite">
+              Sequence Intrasite Access
+            </a>
           </nav>
         </div>
       </footer>
+        </div>
     </div>
   );
 }
 
-type Capability = {
+type Topic = {
   id: string;
   label: string;
   description: string;
+  visual: string;
+  outcome: string;
+  icon: string;
 };
 
-function CapabilitiesCarousel({ items }: { items: Capability[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const pageSize = usePageSize();
-  const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+const TOPICS: Topic[] = [
+  {
+    id: "cost",
+    label: "The Cost of Change",
+    description: "Even small changes can turn into large, time-consuming projects—with multiple teams, systems and approvals.",
+    visual: "Illustrative annual cost model",
+    outcome: "Make changes in hours, not weeks.",
+    icon: "↯",
+  },
+  {
+    id: "friction",
+    label: "Operational Friction",
+    description: "Disconnected systems, manual steps and waiting points slow your lab down and increase the risk of errors.",
+    visual: "Traditional LIMS compared with Sequence",
+    outcome: "Keep your workflow moving.",
+    icon: "⌘",
+  },
+  {
+    id: "consultants",
+    label: "Consultant Dependency",
+    description: "Traditional LIMS changes require multiple teams and external consultants, adding time, cost and complexity.",
+    visual: "Traditional lifecycle compared with Sequence",
+    outcome: "Put control back in your hands.",
+    icon: "♟",
+  },
+  {
+    id: "integration",
+    label: "Integration Complexity",
+    description: "Multiple systems, interfaces and vendors create a fragile ecosystem that’s hard to manage and scale.",
+    visual: "Legacy LIMS compared with Sequence",
+    outcome: "Fewer integrations. Greater control.",
+    icon: "⌕",
+  },
+  {
+    id: "compliance",
+    label: "Compliance Friction",
+    description: "Every change requires documentation, approvals and validation—slowing down innovation and operations.",
+    visual: "Controlled and compliant by design",
+    outcome: "Stay compliant, move faster.",
+    icon: "♢",
+  },
+];
 
-  const goTo = useCallback(
-    (next: number) => {
-      const clamped = ((next % pageCount) + pageCount) % pageCount;
-      setIndex(clamped);
-      const el = trackRef.current;
-      if (!el) return;
-      const pageWidth = el.clientWidth;
-      el.scrollTo({ left: clamped * pageWidth, behavior: "smooth" });
-    },
-    [pageCount]
+const FLOW = ["Order", "Accession", "Testing", "Result", "Report"];
+const CONSULTANT_FLOW = ["Lab request", "Consultant", "IT", "Project mgr", "Testing", "Validation", "Deployment"];
+const CONFIG_FLOW = ["Draft", "Review", "Test", "Approve", "Deploy"];
+const COMPLIANCE_FLOW = ["Change request", "Test", "Validate", "Document", "Approve", "Release"];
+const INTEGRATIONS = ["EMR", "Instruments", "Billing", "Reporting", "Other systems", "Portals", "Files"];
+
+function Flow({ items, tone = "traditional" }: { items: string[]; tone?: "traditional" | "sequence" }) {
+  return (
+    <div className={`lp-native-flow is-${tone}`}>
+      {items.map((item, index) => (
+        <div className="lp-native-flow-item" key={item}>
+          <span>{index + 1}</span>
+          <b>{item}</b>
+          {index < items.length - 1 ? <i aria-hidden="true">→</i> : null}
+        </div>
+      ))}
+    </div>
   );
+}
+
+function CostInfographic() {
+  const costs = [
+    ["Vendor customization", "$142K", 49],
+    ["Integrations", "$61K", 21],
+    ["Internal IT", "$38K", 13],
+    ["Lab staff", "$27K", 9],
+    ["Validation/QA", "$19K", 7],
+  ] as const;
+  return (
+    <div className="lp-native-cost">
+      <div className="lp-native-total">
+        <strong>$287K</strong>
+        <small>Total annual cost of change</small>
+      </div>
+      <div className="lp-native-bars">
+        {costs.map(([label, value, percent], index) => (
+          <div className={`lp-native-bar is-${index + 1}`} key={label}>
+            <div>
+              <b>{label}</b>
+              <span>{value} <small>({percent}%)</small></span>
+            </div>
+            <i style={{ width: `${percent * 1.82}%` }} />
+          </div>
+        ))}
+      </div>
+      <p>Figures are an illustrative annual cost model, not an industry average.</p>
+    </div>
+  );
+}
+
+function OperationalInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={FLOW} />
+        <p className="lp-native-warning">Workarounds · handoffs · waiting</p>
+      </section>
+      <section>
+        <h5>Sequence</h5>
+        <Flow items={FLOW} tone="sequence" />
+        <p className="lp-native-good">A unified workflow with no disconnected handoffs</p>
+      </section>
+    </div>
+  );
+}
+
+function ConsultantInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={CONSULTANT_FLOW} />
+        <p className="lp-native-warning">Multiple handoffs. Extended timelines.</p>
+      </section>
+      <section>
+        <h5>Sequence configuration lifecycle</h5>
+        <Flow items={CONFIG_FLOW} tone="sequence" />
+        <p className="lp-native-good">The lab retains control from draft through deployment</p>
+      </section>
+    </div>
+  );
+}
+
+function IntegrationMap({ sequence = false }: { sequence?: boolean }) {
+  return (
+    <div className={`lp-native-hub${sequence ? " is-sequence" : ""}`}>
+      <strong>{sequence ? "Sequence" : "LIMS"}</strong>
+      {INTEGRATIONS.map((item, index) => (
+        <span key={item} style={{ "--hub-index": index } as CSSProperties}>{item}</span>
+      ))}
+    </div>
+  );
+}
+
+function IntegrationInfographic() {
+  return (
+    <div className="lp-native-comparison lp-native-integration">
+      <section>
+        <h5>Legacy LIMS</h5>
+        <IntegrationMap />
+      </section>
+      <section>
+        <h5>Sequence</h5>
+        <IntegrationMap sequence />
+        <p className="lp-native-good">Reduce integration dependency</p>
+      </section>
+    </div>
+  );
+}
+
+function ComplianceInfographic() {
+  return (
+    <div className="lp-native-comparison">
+      <section>
+        <h5>Traditional LIMS</h5>
+        <Flow items={COMPLIANCE_FLOW} />
+        <p className="lp-native-warning">Slow, manual and high risk</p>
+      </section>
+      <section>
+        <h5>Sequence · controlled and compliant by design</h5>
+        <Flow items={COMPLIANCE_FLOW} tone="sequence" />
+        <div className="lp-native-features">
+          {["Audit trail", "Electronic signatures", "Versioning", "Traceability"].map((item) => <span key={item}>{item}</span>)}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function TopicInfographic({ id }: { id: Topic["id"] }) {
+  if (id === "cost") return <CostInfographic />;
+  if (id === "friction") return <OperationalInfographic />;
+  if (id === "consultants") return <ConsultantInfographic />;
+  if (id === "integration") return <IntegrationInfographic />;
+  return <ComplianceInfographic />;
+}
+
+function WhatWeSolve() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [activeId, setActiveId] = useState(TOPICS[0].id);
+  const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
+  const active = TOPICS[activeIndex] ?? TOPICS[0];
 
   useEffect(() => {
-    if (paused) return;
-    const id = window.setInterval(() => goTo(index + 1), 4500);
-    return () => window.clearInterval(id);
-  }, [goTo, index, paused]);
+    const section = sectionRef.current;
+    if (!section) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const pageWidth = el.clientWidth || 1;
-      setIndex(Math.round(el.scrollLeft / pageWidth));
+    let frame = 0;
+    const update = () => {
+      const rect = section.getBoundingClientRect();
+      const view = window.innerHeight;
+      const enter = 1 - (rect.top - view * 0.12) / (view * 0.42);
+      const leave = (rect.bottom - view * 0.08) / (view * 0.38);
+      const spotlight = Math.min(1, Math.max(0, Math.min(enter, leave)));
+      section.style.setProperty("--spotlight", spotlight.toFixed(3));
     };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
-  useEffect(() => {
-    goTo(0);
-  }, [goTo, pageSize]);
-
-  const pages = Array.from({ length: pageCount }, (_, page) =>
-    items.slice(page * pageSize, page * pageSize + pageSize)
-  );
+  function moveTab(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    let next = activeIndex;
+    if (event.key === "ArrowRight") next = (activeIndex + 1) % TOPICS.length;
+    if (event.key === "ArrowLeft") next = (activeIndex - 1 + TOPICS.length) % TOPICS.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = TOPICS.length - 1;
+    setActiveId(TOPICS[next].id);
+    document.getElementById(`solve-tab-${TOPICS[next].id}`)?.focus();
+  }
 
   return (
-    <div
-      className="lp-carousel"
+    <section className="lp-section lp-spotlight" id="capabilities" ref={sectionRef}>
+      <div className="lp-section-inner lp-solve-board">
+        <h2 className="lp-solve-side-heading">What we solve</h2>
+        <div className="lp-solve-intro">
+          <h2>Less friction. More science.</h2>
+          <p>
+            CareScope Sequence eliminates the biggest operational, technical and compliance challenges labs face—so
+            you can focus on what matters most: better patient outcomes.
+          </p>
+        </div>
+
+        <div className="lp-solve-jumps" role="tablist" aria-label="What we solve topics" onKeyDown={moveTab}>
+          {TOPICS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`solve-tab-${item.id}`}
+              aria-selected={item.id === active.id}
+              aria-controls="solve-active-panel"
+              tabIndex={item.id === active.id ? 0 : -1}
+              className={item.id === active.id ? "is-on" : undefined}
+              onClick={() => setActiveId(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <article
+          className="lp-solve-card"
+          id="solve-active-panel"
+          role="tabpanel"
+          aria-labelledby={`solve-tab-${active.id}`}
+          key={active.id}
+        >
+          <div className="lp-solve-card-head">
+            <span>{activeIndex + 1}</span>
+            <div>
+              <h3>{active.label}</h3>
+              <p>{active.description}</p>
+            </div>
+          </div>
+          <figure className="lp-solve-visual">
+            <figcaption>{active.visual}</figcaption>
+            <TopicInfographic id={active.id} />
+          </figure>
+          <div className="lp-solve-outcome">
+            <span aria-hidden="true">{active.icon}</span>
+            <div>
+              <p>How Sequence helps</p>
+              <h4>{active.outcome}</h4>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function LimsFilm() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = 0.85;
+    video.muted = false;
+    video.play().catch(() => {
+      video.muted = true;
+      void video.play();
+      const unmute = () => {
+        video.muted = false;
+        void video.play();
+      };
+      video.addEventListener("pointerdown", unmute, { once: true });
+    });
+  }, []);
+
+  return (
+    <figure className="lp-lims-film">
+      <video
+        ref={videoRef}
+        src="/lims-in-action.mp4"
+        autoPlay
+        loop
+        playsInline
+        controls
+        aria-label="Sequence LIMS: workflow design, Sequence Instruments, and a Sequence Insights metrics question, each opened from the left menu"
+      />
+    </figure>
+  );
+}
+
+function PlatformBand() {
+  return (
+    <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
+      <div className="lp-section-inner">
+        <div className="lp-section-head lp-section-head-left">
+        <h2 id="platform-heading">The laboratory platform that keeps you moving.</h2>
+        <p>
+          CareScope Sequence brings your lab workflows, data and systems
+          together — so you can make changes faster, reduce integrations, and
+          run a more efficient laboratory.
+        </p>
+        </div>
+        <ul className="lp-cols">
+          {MARKETING_MODULES.map((pillar) => (
+            <li key={pillar.slug}>
+              <Link to={`/modules/${pillar.slug}`} className="lp-platform-card">
+                <span className={`lp-platform-icon ${pillar.tone}`} aria-hidden="true">
+                  {pillar.icon}
+                </span>
+                <strong>{pillar.title}</strong>
+                <span>{pillar.detail}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const INDUSTRY_SPOTLIGHTS = [
+  {
+    title: "Pharmaceutical",
+    summary: "Control stability, release, and batch records from one governed laboratory workflow.",
+    points: ["Method and specification control", "Review, approval, and certificate release", "Complete audit history for every change"],
+  },
+  {
+    title: "Agriculture",
+    summary: "Follow soil, crop, feed, and residue samples from the field through the reported result.",
+    points: ["Field-to-lab chain of custody", "High-volume accessioning", "Client-ready certificates"],
+  },
+  {
+    title: "Manufacturing",
+    summary: "Connect incoming material, in-process checks, and final quality release without extra systems.",
+    points: ["Specification-driven routing", "Instrument and batch traceability", "Faster controlled changes"],
+  },
+  {
+    title: "Chemicals / Petrochemicals",
+    summary: "Standardize methods, solutions, instrument runs, and certificates across complex matrices.",
+    points: ["Run and reagent traceability", "Repeatable method setup", "Governed result release"],
+  },
+  {
+    title: "Food & Beverage",
+    summary: "Move microbiology, chemistry, and safety testing through one visible operating workflow.",
+    points: ["Priority and hold management", "Batch and individual review", "Release evidence in one record"],
+  },
+  {
+    title: "Environmental",
+    summary: "Manage large sample intakes, custody movements, analysis, and compliance reporting together.",
+    points: ["Custody at every movement", "Multi-site operations", "Defensible reporting packages"],
+  },
+  {
+    title: "Clinical",
+    summary: "Keep accessioning, testing, review, and release aligned for diagnostic laboratory teams.",
+    points: ["Clear work queues", "Controlled authorization", "Protected operational history"],
+  },
+  {
+    title: "Cosmetics",
+    summary: "Coordinate formulation testing, stability, and quality release with less operational friction.",
+    points: ["Stability study tracking", "Review before release", "Versioned quality workflows"],
+  },
+] as const;
+
+function IndustrySpotlights() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % INDUSTRY_SPOTLIGHTS.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [paused]);
+
+  return (
+    <section
+      className="lp-section lp-industry-spotlights"
+      id="industries"
+      aria-labelledby="industry-spotlights-heading"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className="lp-carousel-controls">
-        <button
-          type="button"
-          className="lp-carousel-btn"
-          aria-label="Previous capabilities"
-          onClick={() => goTo(index - 1)}
-        >
-          ←
-        </button>
-        <div className="lp-carousel-dots" role="tablist" aria-label="Capability pages">
-          {pages.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={i === index}
-              className={`lp-carousel-dot${i === index ? " active" : ""}`}
-              aria-label={`Show capabilities page ${i + 1}`}
-              onClick={() => goTo(i)}
-            />
-          ))}
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+          <h2 id="industry-spotlights-heading">Industry Spotlights</h2>
+          <p>See how Sequence supports the laboratories testing products across regulated and everyday industries.</p>
         </div>
-        <button
-          type="button"
-          className="lp-carousel-btn"
-          aria-label="Next capabilities"
-          onClick={() => goTo(index + 1)}
-        >
-          →
-        </button>
-      </div>
-
-      <div className="lp-carousel-viewport" ref={trackRef}>
-        {pages.map((page, pageIdx) => (
-          <div className="lp-carousel-page" key={pageIdx} aria-hidden={pageIdx !== index}>
-            {page.map((item, i) => (
-              <article className="lp-capability" key={item.id}>
-                <span className="lp-capability-index">
-                  {String(pageIdx * pageSize + i + 1).padStart(2, "0")}
-                </span>
-                <h3>{item.label}</h3>
-                <p>{item.description}</p>
+        <div className="lp-page-stage" aria-live="polite">
+          <div className="lp-page-track" style={{ transform: `translateX(-${index * 100}%)` }}>
+            {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
+              <article className="lp-page-card" key={industry.title} aria-hidden={industryIndex !== index}>
+                <header>
+                  <span>Page {String(industryIndex + 1).padStart(2, "0")}</span>
+                  <b>{industry.title}</b>
+                </header>
+                <h3>{industry.title}</h3>
+                <p>{industry.summary}</p>
+                <ul>
+                  {industry.points.map((point) => <li key={point}>{point}</li>)}
+                </ul>
               </article>
             ))}
           </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function usePageSize() {
-  const [size, setSize] = useState(3);
-  useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      if (w < 700) setSize(1);
-      else if (w < 1100) setSize(2);
-      else setSize(3);
-    };
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
-  return size;
-}
-
-const FRAGMENTED_PAINS = [
-  "Expensive and delayed deployments",
-  "Complex integration management",
-  "Reduced customer satisfaction",
-  "Audit risk",
-] as const;
-
-const ONELAB_BENEFITS = [
-  "No middleware",
-  "No glue code",
-  "No stitching",
-] as const;
-
-const FRAGMENTED_SYSTEMS = [
-  { id: "lis", label: "Legacy LIS", x: 78, y: 58 },
-  { id: "emr", label: "EMR", x: 210, y: 42 },
-  { id: "inst", label: "Instruments", x: 318, y: 78 },
-  { id: "qc", label: "QC / CAPA", x: 54, y: 168 },
-  { id: "bill", label: "Billing", x: 176, y: 198 },
-  { id: "inv", label: "Inventory", x: 300, y: 176 },
-  { id: "crm", label: "Client portal", x: 112, y: 278 },
-  { id: "bi", label: "BI / Excel", x: 250, y: 288 },
-] as const;
-
-const FRAGMENTED_EDGES: Array<[number, number]> = [
-  [0, 1],
-  [0, 3],
-  [0, 4],
-  [1, 2],
-  [1, 4],
-  [2, 5],
-  [3, 4],
-  [3, 6],
-  [4, 5],
-  [4, 7],
-  [5, 7],
-  [6, 7],
-];
-
-function IntegrationsComparisonVisual() {
-  return (
-    <div className="lp-compare">
-      <div className="lp-compare-panel lp-compare-before">
-        <div className="lp-compare-head">
-          <span className="lp-compare-label lp-compare-label-alert">Typical lab stack</span>
-          <strong className="lp-compare-metric lp-compare-metric-text lp-compare-metric-alert">
-            Multiple Custom Integrations
-          </strong>
-          <ul className="lp-compare-pains">
-            {FRAGMENTED_PAINS.map((pain) => (
-              <li key={pain}>{pain}</li>
-            ))}
-          </ul>
         </div>
-        <svg
-          className="lp-compare-canvas"
-          viewBox="0 0 380 340"
-          role="img"
-          aria-label="Many disconnected systems linked by integrations"
-        >
-          <defs>
-            <linearGradient id="fragLine" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#64748b" stopOpacity="0.55" />
-            </linearGradient>
-          </defs>
-          {FRAGMENTED_EDGES.map(([a, b], i) => {
-            const from = FRAGMENTED_SYSTEMS[a];
-            const to = FRAGMENTED_SYSTEMS[b];
-            const midX = (from.x + to.x) / 2 + ((i % 2 === 0 ? 1 : -1) * 18);
-            const midY = (from.y + to.y) / 2 + ((i % 3) - 1) * 14;
-            return (
-              <path
-                key={`${from.id}-${to.id}`}
-                className="lp-compare-edge"
-                style={{ animationDelay: `${0.15 + i * 0.07}s` }}
-                d={`M${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-                fill="none"
-                stroke="url(#fragLine)"
-                strokeWidth="1.75"
-              />
-            );
-          })}
-          {FRAGMENTED_SYSTEMS.map((node, i) => (
-            <g
-              key={node.id}
-              className="lp-compare-node"
-              style={{ animationDelay: `${0.35 + i * 0.06}s` }}
-              transform={`translate(${node.x} ${node.y})`}
-            >
-              <rect x="-52" y="-18" width="104" height="36" rx="8" />
-              <text y="5">{node.label}</text>
-            </g>
+        <div className="lp-page-nav" role="tablist" aria-label="Industry spotlight pages">
+          {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
+            <button
+              type="button"
+              role="tab"
+              key={industry.title}
+              aria-selected={industryIndex === index}
+              aria-label={`Show ${industry.title}`}
+              className={industryIndex === index ? "is-on" : undefined}
+              onClick={() => setIndex(industryIndex)}
+            />
           ))}
-        </svg>
-      </div>
-
-      <div className="lp-compare-divider" aria-hidden="true">
-        <span>vs</span>
-      </div>
-
-      <div className="lp-compare-panel lp-compare-after">
-        <div className="lp-compare-head">
-          <span className="lp-compare-brand-onelab">OneLab</span>
-          <strong className="lp-compare-metric lp-compare-metric-good lp-compare-metric-text">
-            One Native Integration
-          </strong>
-          <ul className="lp-compare-benefits">
-            {ONELAB_BENEFITS.map((benefit) => (
-              <li key={benefit}>{benefit}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="lp-compare-one">
-          <div className="lp-compare-one-glow" />
-          <OneLabUnifiedVisual />
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-const ONELAB_KEY_MODULES = [
-  "Sample Lifecycle",
-  "Data & Analytics",
-  "Lab Quality Management System",
-  "Billing",
-  "Customer Portal",
-  "20+ Modules",
+const REGULATIONS = [
+  ["21 CFR 11", "Electronic records and signatures", "Controls for trustworthy electronic records, audit trails, and legally binding signatures."],
+  ["21 CFR 58", "Good Laboratory Practice", "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens."],
+  ["21 CFR 210", "Drug manufacturing practice", "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture."],
+  ["21 CFR 211", "Finished pharmaceuticals", "Production, laboratory control, record, and distribution requirements for finished drug products."],
+  ["21 CFR 820", "Quality system regulation", "Medical-device quality system requirements for design, production, and recorded evidence."],
+  ["ISO 17025", "Testing laboratory competence", "Requirements for impartial, technically competent testing and calibration laboratories."],
+  ["ISO 15189", "Medical laboratories", "Quality and competence requirements for clinical laboratory examination services."],
+  ["CLIA", "Clinical laboratory quality", "U.S. standards for accurate, reliable, and timely patient laboratory testing."],
+  ["CAP", "Laboratory accreditation", "Inspection expectations for quality management, analytical performance, and documentation."],
+  ["EU Annex 11", "Computerized systems", "European GMP expectations for validated systems, audit trails, and data integrity."],
+  ["ICH Q7", "API good manufacturing", "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems."],
+  ["HIPAA", "Protected health information", "Safeguards for patient information handled by clinical and diagnostic laboratory operations."],
 ] as const;
 
-function OneLabUnifiedVisual() {
+function ComplianceSection() {
   return (
-    <div
-      className="lp-compare-one-system"
-      aria-hidden="true"
-      role="img"
-      aria-label="OneLab ships key lab capabilities as one native integration"
-    >
-      <div className="lp-onelab-poster">
-        <div className="lp-onelab-included">
-          <p className="lp-onelab-included-label">
-            Everything ships inside <span className="lp-onelab-name">OneLab</span>
+    <section className="lp-section" id="compliance">
+      <div className="lp-section-inner">
+        <div className="lp-section-head">
+          <h2>Governed for regulated environments.</h2>
+          <p>
+            Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
           </p>
-          <ul>
-            {ONELAB_KEY_MODULES.map((item, i) => (
-              <li key={item} style={{ animationDelay: `${0.15 + i * 0.06}s` }}>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+        </div>
+        <div className="lp-reg-grid">
+          {REGULATIONS.map(([code, name, detail]) => (
+            <article className="lp-reg-card" key={code} tabIndex={0}>
+              <b>{code}</b>
+              <small>{name}</small>
+              <p>{detail}</p>
+            </article>
+          ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function WorkflowMiniCanvas() {
-  return (
-    <div className="lp-mini-flow">
-      <div className="node start">Start</div>
-      <span className="edge" />
-      <div className="node">Receive</div>
-      <span className="edge" />
-      <div className="node decision">STAT?</div>
-      <span className="edge" />
-      <div className="node">Approve</div>
-      <span className="edge" />
-      <div className="node end">CoA</div>
-    </div>
+    </section>
   );
 }

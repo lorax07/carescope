@@ -1,5 +1,8 @@
 import { useMemo, useState, type DragEvent } from "react";
 import type { NodePlugin } from "@carescope/workflow-core";
+import { Link } from "react-router-dom";
+
+const COLLAPSIBLE = new Set(["flow", "human", "logic", "laboratory"]);
 
 const CATEGORY_ORDER = [
   "flow",
@@ -17,10 +20,12 @@ const CATEGORY_ORDER = [
 
 interface Props {
   plugins: NodePlugin[];
+  workflowName: string;
 }
 
-export function NodePalette({ plugins }: Props) {
+export function NodePalette({ plugins, workflowName }: Props) {
   const [query, setQuery] = useState("");
+  const [closed, setClosed] = useState<Set<string>>(() => new Set());
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -58,7 +63,13 @@ export function NodePalette({ plugins }: Props) {
 
   return (
     <aside className="palette">
-      <div className="palette-header">Node Library</div>
+      <div className="workflow-designer-sidebar-head">
+        <Link to="/app/workflows" className="btn btn-ghost">← Workflows</Link>
+        <div>
+          <h2>Workflow Designer</h2>
+          <p>{workflowName}</p>
+        </div>
+      </div>
       <div className="palette-search">
         <input
           placeholder="Search nodes…"
@@ -67,10 +78,33 @@ export function NodePalette({ plugins }: Props) {
         />
       </div>
       <div className="palette-body">
-        {grouped.map((group) => (
+        {grouped.map((group) => {
+          const collapsible = COLLAPSIBLE.has(group.category);
+          const open = !collapsible || !closed.has(group.category);
+          return (
           <div key={group.category} className="palette-category">
-            <div className="palette-category-title">{group.category}</div>
-            {group.items.map((plugin) => (
+            {collapsible ? (
+              <button
+                type="button"
+                className="palette-category-title"
+                aria-expanded={open}
+                onClick={() =>
+                  setClosed((current) => {
+                    const next = new Set(current);
+                    if (next.has(group.category)) next.delete(group.category);
+                    else next.add(group.category);
+                    return next;
+                  })
+                }
+              >
+                <span aria-hidden="true">{open ? "▾" : "▸"}</span>
+                {group.category}
+              </button>
+            ) : (
+              <div className="palette-category-title">{group.category}</div>
+            )}
+            {open
+              ? group.items.map((plugin) => (
               <div
                 key={plugin.type}
                 className="palette-item"
@@ -84,9 +118,11 @@ export function NodePalette({ plugins }: Props) {
                 />
                 <span>{plugin.label}</span>
               </div>
-            ))}
+            ))
+              : null}
           </div>
-        ))}
+          );
+        })}
       </div>
     </aside>
   );

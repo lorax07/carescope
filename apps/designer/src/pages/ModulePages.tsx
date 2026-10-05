@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { LAB_MODULE_CATALOG, type LabModuleId } from "../intrasite/catalog";
 
 type ModulePageProps = {
   eyebrow: string;
@@ -36,6 +37,22 @@ function ModulePage({ eyebrow, title, lede, rows }: ModulePageProps) {
         </ul>
       </section>
     </div>
+  );
+}
+
+export function LimsModulePage({ id }: { id: LabModuleId }) {
+  const module = LAB_MODULE_CATALOG.find((item) => item.id === id) ?? LAB_MODULE_CATALOG[0];
+  const capabilities = module.capabilities.split(", ");
+  return (
+    <ModulePage
+      eyebrow={module.positioning}
+      title={module.label}
+      lede={module.capabilities}
+      rows={capabilities.map((capability) => ({
+        label: capability,
+        value: "Included",
+      }))}
+    />
   );
 }
 

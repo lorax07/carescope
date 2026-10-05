@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const QUEUE = [
@@ -56,6 +57,18 @@ const INSTRUMENTS = [
 ] as const;
 
 export function DashboardPage() {
+  const [checked, setChecked] = useState<Set<string>>(() => new Set());
+  const allChecked = QUEUE.every((row) => checked.has(row.id));
+
+  function toggle(id: string) {
+    setChecked((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   return (
     <div className="lims-page">
       <div className="lims-page-header">
@@ -109,6 +122,16 @@ export function DashboardPage() {
             <table className="lims-table">
               <thead>
                 <tr>
+                  <th className="lims-check">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all samples"
+                      checked={allChecked}
+                      onChange={() =>
+                        setChecked(allChecked ? new Set() : new Set(QUEUE.map((row) => row.id)))
+                      }
+                    />
+                  </th>
                   <th>Accession</th>
                   <th>Client</th>
                   <th>Test</th>
@@ -120,7 +143,15 @@ export function DashboardPage() {
               </thead>
               <tbody>
                 {QUEUE.map((row) => (
-                  <tr key={row.id}>
+                  <tr key={row.id} className={checked.has(row.id) ? "is-selected" : ""}>
+                    <td className="lims-check">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${row.id}`}
+                        checked={checked.has(row.id)}
+                        onChange={() => toggle(row.id)}
+                      />
+                    </td>
                     <td>
                       <Link to="/app/samples" className="lims-mono">
                         {row.id}
