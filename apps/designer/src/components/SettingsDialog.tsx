@@ -7,6 +7,7 @@ import {
   saveReviewerPin,
   useReviewerPin,
 } from "../reviewerPin";
+import { WorkflowStagesEditor } from "./WorkflowStagesEditor";
 
 function validPin(pin: string): boolean {
   return /^\d{4,6}$/.test(pin);
@@ -16,6 +17,7 @@ const SECTIONS = [
   { id: "profile", label: "Profile" },
   { id: "password", label: "Password" },
   { id: "pin", label: "Reviewer PIN" },
+  { id: "workflow", label: "Workflow" },
 ] as const;
 
 type SettingsSection = (typeof SECTIONS)[number]["id"];
@@ -209,6 +211,12 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
                       Reset PIN
                     </button>
                   )}
+                </section>
+              ) : null}
+              {section === "workflow" ? (
+                <section className="settings-option">
+                  <h3>Workflow stages</h3>
+                  <WorkflowStagesEditor />
                 </section>
               ) : null}
             </div>

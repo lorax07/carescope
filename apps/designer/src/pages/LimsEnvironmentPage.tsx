@@ -69,6 +69,7 @@ export function LimsEnvironmentPage() {
       username: LIMS_USERNAME,
       clientName: context.clientName,
       labName: context.labName,
+      labId,
       envLabel: context.envLabel,
       connectionSpeed: context.connectionSpeed,
       databaseName: context.databaseName,

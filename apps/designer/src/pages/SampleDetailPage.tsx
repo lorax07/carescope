@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AccountLink } from "../components/AccountTable";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
-import { findSample, STATUS_LABEL, type SampleRecord } from "../samples";
+import { findSample, CONDITION_LABEL, STATUS_LABEL, isOnHold, type SampleRecord } from "../samples";
 
 function FolderIcon() {
   return (
@@ -31,7 +31,7 @@ function eventTime(received: string, minutes: number): string {
 }
 
 function custodyEvents(sample: SampleRecord): CustodyEvent[] {
-  const rank = { received: 0, hold: 0, testing: 1, review: 2, approval: 3, released: 4 }[sample.status];
+  const rank = { received: 0, accessioning: 0, processing: 0, testing: 1, review: 2, released: 4 }[sample.status] ?? 0;
   const events: CustodyEvent[] = [
     {
       title: "Sample logged",
@@ -64,7 +64,7 @@ function custodyEvents(sample: SampleRecord): CustodyEvent[] {
       },
     );
   }
-  if (rank >= 3) {
+  if (rank >= 4) {
     events.push({
       title: "Review complete",
       detail: "Peer review completed and routed to QA",
@@ -80,7 +80,7 @@ function custodyEvents(sample: SampleRecord): CustodyEvent[] {
       minutes: 260,
     });
   }
-  if (sample.status === "hold") {
+  if (isOnHold(sample)) {
     events.push({
       title: "Sample placed on hold",
       detail: sample.custody,
@@ -173,8 +173,12 @@ export function SampleDetailBody({
               <dd>{sample.priority}</dd>
             </div>
             <div>
-              <dt>Status</dt>
+              <dt>Stage</dt>
               <dd>{STATUS_LABEL[sample.status]}</dd>
+            </div>
+            <div>
+              <dt>Condition</dt>
+              <dd>{CONDITION_LABEL[sample.condition]}</dd>
             </div>
             <div>
               <dt>Location</dt>

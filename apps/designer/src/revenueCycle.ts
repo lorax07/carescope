@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { accountById, accountByName, CRM_ACCOUNTS, type CrmAccount } from "./crmAccounts";
-import { findSample, useSamples, type SampleRecord, type SampleStatus } from "./samples";
+import { findSample, useSamples, type SampleRecord } from "./samples";
 
 export type BillRoute = "837P" | "Invoice" | "Statement";
 
@@ -148,8 +148,9 @@ export function splitTests(tests: string): string[] {
   return tests.split(",").map((test) => test.trim()).filter(Boolean);
 }
 
-export function labReady(status: SampleStatus): boolean {
-  return status === "review" || status === "approval" || status === "released" || status === "hold";
+export function labReady(sample: SampleRecord): boolean {
+  if (sample.condition === "cancelled" || sample.condition === "rejected") return false;
+  return sample.status === "review" || sample.status === "released" || sample.condition === "on_hold";
 }
 
 export function routeLabel(route: BillRoute): string {
@@ -194,7 +195,7 @@ export function editsFor(charge: Charge, account: CrmAccount | undefined, sample
   if ((charge.route === "837P" || charge.route === "Statement") && !charge.icd10) reasons.push("ICD-10 required before billing");
   if (!charge.cpt) reasons.push("CPT/HCPCS is missing for this test");
   if (account?.status === "On hold" && !charge.accountOverride) reasons.push("Account is on hold");
-  if (sample?.status === "hold" && !charge.labOverride) reasons.push(`Laboratory hold: ${sample.custody}`);
+  if (sample?.condition === "on_hold" && !charge.labOverride) reasons.push(`Laboratory hold: ${sample.custody}`);
   return reasons;
 }
 
@@ -503,7 +504,7 @@ function reprice(cycle: Cycle, test: string) {
 export function applyCapture(cycle: Cycle, sample: SampleRecord, account: CrmAccount): { ids: string[]; skipped: string[] } {
   const ids: string[] = [];
   const skipped: string[] = [];
-  if (!labReady(sample.status)) return { ids, skipped };
+  if (!labReady(sample)) return { ids, skipped };
   const route = billingRoute(account);
   for (const test of splitTests(sample.tests)) {
     const taken = cycle.charges.some((charge) => charge.accessionId === sample.accessionId && charge.test === test && charge.status !== "rebilled");

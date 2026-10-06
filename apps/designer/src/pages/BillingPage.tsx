@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AccountLink, AccountTable } from "../components/AccountTable";
+import { StageConditionCell } from "../components/StageConditionCell";
 import { accountById, accountByName, CRM_ACCOUNTS } from "../crmAccounts";
 import {
   aging,
@@ -37,7 +38,8 @@ import {
   type ChargeStatus,
   type WorkStage,
 } from "../revenueCycle";
-import { STATUS_LABEL, useSamples, type SampleRecord } from "../samples";
+import { CONDITION_LABEL, STATUS_LABEL, isOnHold, useSamples, type SampleRecord } from "../samples";
+import { useWorkflowStages } from "../workflowStages";
 
 const STAGES: { id: WorkStage; label: string }[] = [
   { id: "awaiting", label: "Awaiting lab" },
@@ -74,7 +76,7 @@ function rowsFor(stage: WorkStage, cycle: ReturnType<typeof useRevenue>, samples
   const allowed = (accountId: string) => accountFilter === "all" || accountId === accountFilter;
   if (stage === "awaiting" || stage === "capture") {
     return samples
-      .filter((sample) => (stage === "awaiting" ? !labReady(sample.status) : labReady(sample.status)))
+        .filter((sample) => (stage === "awaiting" ? !labReady(sample) : labReady(sample)))
       .flatMap((sample) => {
         const account = accountByName(sample.client);
         if (!account || !allowed(account.id)) return [];
@@ -443,6 +445,7 @@ function WorkTable({
 }) {
   const chargeRows = rows.filter((row): row is Extract<WorkRow, { kind: "charge" }> => row.kind === "charge");
   const sampleRows = rows.filter((row): row is Extract<WorkRow, { kind: "sample" }> => row.kind === "sample");
+  const stages = useWorkflowStages();
   if (stage === "awaiting" || stage === "capture") {
     return (
       <div className="lims-table-wrap">
@@ -452,7 +455,7 @@ function WorkTable({
               <th>Accession</th>
               <th>Account</th>
               <th>Tests</th>
-              <th>Laboratory</th>
+              <th>Stage & Condition</th>
             </tr>
           </thead>
           <tbody>
@@ -472,7 +475,9 @@ function WorkTable({
                     <AccountLink name={row.sample.client} />
                   </td>
                   <td>{row.sample.tests}</td>
-                  <td>{STATUS_LABEL[row.sample.status]}</td>
+                  <td className="is-stage">
+                    <StageConditionCell status={row.sample.status} condition={row.sample.condition} stages={stages} />
+                  </td>
                 </tr>
               ))
             )}
@@ -616,7 +621,10 @@ function SampleCase({
     <>
       <div className="lims-panel-head">
         <h2 className="lims-mono">{sample.accessionId}</h2>
-        <span>{STATUS_LABEL[sample.status]}</span>
+        <span>
+          {STATUS_LABEL[sample.status]}
+          {sample.condition !== "normal" ? ` · ${CONDITION_LABEL[sample.condition]}` : ""}
+        </span>
       </div>
       {stage === "awaiting" ? <p className="billing-note">Charge capture opens when this accession reaches review.</p> : null}
       {stage === "capture" ? (
@@ -704,7 +712,7 @@ function ChargeActions({
           </select>
         </label>
       ) : null}
-      {charge.status === "held" && sample?.status === "hold" && !charge.labOverride ? (
+      {charge.status === "held" && sample && isOnHold(sample) && !charge.labOverride ? (
         <button
           type="button"
           className="btn btn-primary"

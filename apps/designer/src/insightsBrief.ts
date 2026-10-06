@@ -1,6 +1,6 @@
 import { CRM_ACCOUNTS, type CrmAccount } from "./crmAccounts";
 import { ledgerSnapshot, money, type AccountRollup, type Charge } from "./revenueCycle";
-import { STATUS_LABEL, type SampleRecord, type SampleStatus } from "./samples";
+import { CONDITION_LABEL, STATUS_LABEL, type SampleRecord, type SampleStatus } from "./samples";
 
 const STOP = new Set([
   "the",
@@ -31,7 +31,7 @@ const STOP = new Set([
   "our",
 ]);
 
-const STATUSES: SampleStatus[] = ["received", "testing", "review", "approval", "released", "hold"];
+const STATUSES: SampleStatus[] = ["received", "accessioning", "processing", "testing", "review", "released"];
 
 export const ASK_FOR_QUESTION = "Ask a question about the text provided.";
 export const NO_ANSWER = "The text provided does not include an answer to that.";
@@ -113,10 +113,10 @@ export function businessBrief(
       const work = openLab === 1 ? "1 accession" : `${openLab} accessions`;
       return `${account.name} (${account.number}) is ${account.health} and ${account.status}. Owner ${account.owner}. Bills ${account.billTo} through ${account.payer}. Open laboratory work: ${work}. Net charges ${money(rollup.net)}, collected ${money(rollup.collected)}, unbilled ${money(rollup.unbilled)}, accounts receivable ${money(rollup.ar)}.`;
     }),
-    `Laboratory status: ${STATUSES.map((status) => `${STATUS_LABEL[status]} ${snapshot.statusCounts[status]}`).join(", ")}.`,
+    `Laboratory stages: ${STATUSES.map((status) => `${STATUS_LABEL[status]} ${snapshot.statusCounts[status]}`).join(", ")}.`,
     ...samples.map(
       (sample) =>
-        `Accession ${sample.accessionId} for ${sample.client} is ${STATUS_LABEL[sample.status]}, priority ${sample.priority}, tests ${sample.tests}, order ${sample.orderId}.`,
+        `Accession ${sample.accessionId} for ${sample.client} is ${STATUS_LABEL[sample.status]}, condition ${CONDITION_LABEL[sample.condition]}, priority ${sample.priority}, tests ${sample.tests}, order ${sample.orderId}.`,
     ),
     ...accounts.flatMap((account) =>
       account.opportunities.map(

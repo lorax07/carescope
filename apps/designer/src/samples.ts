@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-export type SampleStatus = "received" | "testing" | "review" | "approval" | "released" | "hold";
+export type SampleStage = "received" | "accessioning" | "processing" | "testing" | "review" | "released";
+export type SampleStatus = SampleStage;
+export type SampleCondition = "normal" | "on_hold" | "problem" | "cancelled" | "rejected";
 
 export type SampleRecord = {
   /** Primary sample key. Increments on the account each time a sample is logged. */
@@ -14,12 +16,16 @@ export type SampleRecord = {
   matrix: string;
   tests: string;
   status: SampleStatus;
+  condition: SampleCondition;
   priority: "STAT" | "Rush" | "Routine";
   custody: string;
   site: string;
   /** Set when the sample was logged into a batch. Null means it is reviewed alone. */
   batchId: string | null;
 };
+
+const STAGES = new Set<SampleStatus>(["received", "accessioning", "processing", "testing", "review", "released"]);
+const CONDITIONS = new Set<SampleCondition>(["normal", "on_hold", "problem", "cancelled", "rejected"]);
 
 const ACCOUNT = {
   id: "client-apex",
@@ -37,7 +43,8 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     client: "Vertex Materials",
     matrix: "Polymer",
     tests: "Identity FTIR",
-    status: "hold",
+    status: "processing",
+    condition: "on_hold",
     priority: "Rush",
     custody: "Deviation DEV-118",
     site: "East Lab",
@@ -49,6 +56,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Stability pull",
     tests: "Assay, Appearance",
     status: "released",
+    condition: "normal",
     priority: "Routine",
     custody: "Archive",
     site: "North Lab",
@@ -60,6 +68,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Powder",
     tests: "Heavy Metals ICP-MS",
     status: "testing",
+    condition: "normal",
     priority: "Routine",
     custody: "Metals lab",
     site: "North Lab",
@@ -70,7 +79,8 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     client: "Summit Generics",
     matrix: "Tablet",
     tests: "Dissolution",
-    status: "approval",
+    status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "QA hold",
     site: "North Lab",
@@ -82,6 +92,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Drug substance",
     tests: "Potency ELISA",
     status: "received",
+    condition: "normal",
     priority: "Rush",
     custody: "Intake rack A",
     site: "North Lab",
@@ -93,6 +104,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Raw material",
     tests: "Microbial Limits",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "Micro suite",
     site: "North Lab",
@@ -104,6 +116,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Finished product",
     tests: "HPLC Assay, Impurities",
     status: "testing",
+    condition: "normal",
     priority: "STAT",
     custody: "Bench 3 · QR verified",
     site: "North Lab",
@@ -115,6 +128,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Raw material",
     tests: "Salmonella",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "Micro suite",
     site: "North Lab",
@@ -126,6 +140,7 @@ const LOGGED: Omit<SampleRecord, "sampleId">[] = [
     matrix: "Tablet",
     tests: "Uniformity",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "Review bench",
     site: "North Lab",
@@ -142,7 +157,7 @@ function ACCOUNT_FIELDS(accessionId: string, orderId: string, batchId: string | 
   };
 }
 
-const approvedIds = new Set<string>();
+const approvedIds = new Set<string>(["SCP-20479"]);
 const approvalListeners = new Set<() => void>();
 
 export function useReviewApprovals(): Set<string> {
@@ -162,9 +177,16 @@ export function approveSamples(accessionIds: string[]): void {
   approvalListeners.forEach((listener) => listener());
 }
 
-export function reviewStatus(sample: SampleRecord, approved: Set<string>): SampleStatus {
-  if (sample.status === "review" && approved.has(sample.accessionId)) return "approval";
+export function reviewStatus(sample: SampleRecord, _approved: Set<string>): SampleStatus {
   return sample.status;
+}
+
+export function isOnHold(sample: SampleRecord): boolean {
+  return sample.condition === "on_hold";
+}
+
+export function isStopped(sample: SampleRecord): boolean {
+  return sample.condition === "cancelled" || sample.condition === "rejected";
 }
 
 export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): SampleRecord[] {
@@ -181,13 +203,33 @@ export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): Sa
 const LOGGED_KEY = "carescope.samples.logged";
 const sampleListeners = new Set<() => void>();
 
+function migrateStatus(status: string | undefined, condition: string | undefined): { status: SampleStatus; condition: SampleCondition } {
+  let nextStatus = status ?? "received";
+  let nextCondition = condition ?? "normal";
+  if (nextStatus === "hold") {
+    nextStatus = "processing";
+    if (nextCondition === "normal") nextCondition = "on_hold";
+  }
+  if (nextStatus === "approval") nextStatus = "review";
+  return {
+    status: STAGES.has(nextStatus as SampleStatus) ? (nextStatus as SampleStatus) : "received",
+    condition: CONDITIONS.has(nextCondition as SampleCondition) ? (nextCondition as SampleCondition) : "normal",
+  };
+}
+
+function normalizeSample(row: SampleRecord): SampleRecord | null {
+  if (!row || typeof row.sampleId !== "number" || typeof row.accountId !== "string") return null;
+  const migrated = migrateStatus(row.status, row.condition);
+  return { ...row, status: migrated.status, condition: migrated.condition };
+}
+
 function readLogged(): SampleRecord[] {
   try {
     const raw = localStorage.getItem(LOGGED_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as SampleRecord[];
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((row) => row && typeof row.sampleId === "number" && typeof row.accountId === "string");
+    return parsed.map(normalizeSample).filter((row): row is SampleRecord => Boolean(row));
   } catch {
     return [];
   }
@@ -254,6 +296,7 @@ export function logSample(input: SampleLog): SampleRecord {
     accessionId: nextAccessionId(),
     received: loggedAt(),
     status: "received",
+    condition: "normal",
     custody: "Intake",
     batchId: null,
   };
@@ -333,9 +376,17 @@ export function findSample(id: string): SampleRecord | undefined {
 
 export const STATUS_LABEL: Record<SampleStatus, string> = {
   received: "Received",
-  testing: "In testing",
-  review: "Peer review",
-  approval: "QA approval",
+  accessioning: "Accessioning",
+  processing: "Processing",
+  testing: "Testing",
+  review: "Review",
   released: "Released",
-  hold: "On hold",
+};
+
+export const CONDITION_LABEL: Record<SampleCondition, string> = {
+  normal: "Normal",
+  on_hold: "On Hold",
+  problem: "Problem",
+  cancelled: "Cancelled",
+  rejected: "Rejected",
 };

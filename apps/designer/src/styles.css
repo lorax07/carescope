@@ -1234,7 +1234,7 @@ a {
 }
 
 .lims-modal.settings-dialog {
-  width: min(820px, calc(100vw - 3rem));
+  width: min(920px, calc(100vw - 3rem));
   min-height: 440px;
 }
 
@@ -2691,6 +2691,82 @@ a {
 }
 .lims-status.hold::before {
   background: #dc2626;
+}
+
+.lims-table th.is-stage {
+  max-width: 7.4rem;
+  white-space: normal;
+  line-height: 1.15;
+  cursor: grab;
+}
+
+.lims-table td.is-stage {
+  padding: 0.38rem 0.45rem;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.stage-condition {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.stage-condition-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+}
+
+.stage-condition-icon {
+  display: grid;
+  place-items: center;
+  width: 0.78rem;
+  height: 0.78rem;
+}
+
+.stage-condition-icon svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.stage-condition-text {
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.stage-condition-text.is-on_hold,
+.stage-condition-text.is-problem,
+.stage-condition-text.is-cancelled,
+.stage-condition-text.is-rejected {
+  color: #b45309;
+}
+
+.stage-condition-text.is-cancelled,
+.stage-condition-text.is-rejected {
+  color: #b42318;
+}
+
+.workflow-stages-editor p {
+  margin: 0 0 0.85rem;
+  color: var(--text-muted);
+}
+
+.workflow-stage-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 7.5rem auto auto;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.workflow-stage-list select {
+  min-width: 0;
 }
 
 .lims-list {

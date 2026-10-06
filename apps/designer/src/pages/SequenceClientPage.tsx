@@ -1,12 +1,15 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AccountTable } from "../components/AccountTable";
+import { StageConditionCell } from "../components/StageConditionCell";
 import { accountById, accountOpportunities, CRM_ACCOUNTS, type CrmAccount } from "../crmAccounts";
 import { accountRevenueLabel, useRevenue } from "../revenueCycle";
-import { STATUS_LABEL, useSamples } from "../samples";
+import { useSamples } from "../samples";
+import { useWorkflowStages } from "../workflowStages";
 
 export function SequenceClientPage() {
   const samples = useSamples();
+  const stages = useWorkflowStages();
   const ledger = useRevenue();
   const [params, setParams] = useSearchParams();
   const selected = accountById(params.get("account") ?? "") ?? CRM_ACCOUNTS[0];
@@ -129,7 +132,7 @@ export function SequenceClientPage() {
                 <tr>
                   <th>Accession</th>
                   <th>Tests</th>
-                  <th>Status</th>
+                  <th>Stage & Condition</th>
                   <th>Site</th>
                 </tr>
               </thead>
@@ -138,7 +141,9 @@ export function SequenceClientPage() {
                   <tr key={sample.accessionId}>
                     <td className="lims-mono">{sample.accessionId}</td>
                     <td>{sample.tests}</td>
-                    <td>{STATUS_LABEL[sample.status]}</td>
+                    <td className="is-stage">
+                      <StageConditionCell status={sample.status} condition={sample.condition} stages={stages} />
+                    </td>
                     <td>{sample.site}</td>
                   </tr>
                 ))}

@@ -36,6 +36,7 @@ function sample(overrides: Partial<SampleRecord> = {}): SampleRecord {
     matrix: "Tablet",
     tests: "Uniformity",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "Review bench",
     site: "North Lab",
@@ -84,7 +85,8 @@ describe("laboratory revenue cycle", () => {
       orderId: "ORD-44999",
       client: "Aether Pharma",
       tests: "Assay, Appearance",
-      status: "approval",
+    status: "review",
+    condition: "normal",
     });
     const created = applyCapture(cycle, row, account);
     expect(created.skipped).toEqual(["Appearance"]);
@@ -119,7 +121,8 @@ describe("laboratory revenue cycle", () => {
       orderId: "ORD-44071",
       client: "Vertex Materials",
       tests: "Identity FTIR",
-      status: "hold",
+      status: "processing",
+      condition: "on_hold",
       custody: "Deviation DEV-118",
     });
     syncCycle(cycle, [held]);
@@ -156,7 +159,8 @@ describe("laboratory revenue cycle", () => {
       accessionId: "SCP-20458",
       client: "Vertex Materials",
       tests: "Identity FTIR",
-      status: "hold",
+      status: "processing",
+      condition: "on_hold",
       custody: "Deviation DEV-118",
     });
     applyLabOverride(cycle, "CHG-1001", held);
@@ -192,7 +196,8 @@ describe("laboratory revenue cycle", () => {
     const held = sample({
       accessionId: "SCP-20458",
       client: "Vertex Materials",
-      status: "hold",
+      status: "processing",
+      condition: "on_hold",
       custody: "Deviation DEV-118",
       tests: "Identity FTIR",
     });

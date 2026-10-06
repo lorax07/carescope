@@ -10,17 +10,20 @@ import { ResultWindow } from "../components/ResultWindow";
 import { StartTestingWorkflow } from "../components/StartTestingWorkflow";
 import { CURRENT_RUNS } from "../testingRuns";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
+import { useProfileColumns } from "../profileColumns";
+import { StageConditionCell } from "../components/StageConditionCell";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
 import {
   approveSamples,
+  isOnHold,
   isResulted,
   reviewStatus,
-  STATUS_LABEL,
   testNames,
   useReviewApprovals,
   useSamples,
   type SampleRecord,
 } from "../samples";
+import { useWorkflowStages } from "../workflowStages";
 
 type QuickFilter = "all" | "stat" | "testing" | "review" | "hold" | `priority:${string}`;
 type ReviewFilter = "all" | "individual" | "batch";
@@ -38,8 +41,8 @@ function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean 
   if (filter.startsWith("priority:")) return sample.priority === filter.slice("priority:".length);
   if (filter === "stat") return sample.priority === "STAT";
   if (filter === "testing") return sample.status === "testing";
-  if (filter === "review") return sample.status === "review" || sample.status === "approval";
-  return sample.status === "hold";
+  if (filter === "review") return sample.status === "review";
+  return isOnHold(sample);
 }
 
 function wildcardMatch(text: string, query: string): boolean {
@@ -197,11 +200,11 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
   },
 };
 
-function matchesView(sample: SampleRecord, status: SampleRecord["status"], view: SampleView): boolean {
+function matchesView(sample: SampleRecord, view: SampleView, approved: Set<string>): boolean {
   if (view === "home") return true;
-  if (view === "testing") return status === "testing";
-  if (view === "review") return (status === "review" || status === "approval") && isResulted(sample);
-  return status === "approval" || status === "released";
+  if (view === "testing") return sample.status === "testing";
+  if (view === "review") return sample.status === "review" && isResulted(sample) && !approved.has(sample.accessionId);
+  return sample.status === "released" || approved.has(sample.accessionId);
 }
 
 function FolderIcon() {
@@ -230,6 +233,7 @@ function cell(
   onOpen?: (sample: SampleRecord) => void,
   onReceipt?: (sample: SampleRecord) => void,
   view: SampleView = "home",
+  stages: ReturnType<typeof useWorkflowStages> = [],
 ) {
   if (id === "accessionId") {
     return (
@@ -277,7 +281,7 @@ function cell(
     );
   }
   if (id === "status") {
-    return <span className={`lims-status ${status}`}>{STATUS_LABEL[status]}</span>;
+    return <StageConditionCell status={status} condition={sample.condition} stages={stages} />;
   }
   if (id === "custody") return sample.custody;
   return sample.site;
@@ -285,6 +289,8 @@ function cell(
 
 export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const { priorities, menu, columns, buttons } = useLabOperations();
+  const { visible, moveColumn } = useProfileColumns(columns);
+  const stages = useWorkflowStages();
   const approved = useReviewApprovals();
   const planted = useResultFlags();
   const sectionTabs = useSectionTabs();
@@ -307,11 +313,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [testingOpen, setTestingOpen] = useState(false);
   const copy = VIEW_COPY[view];
   const title = menu.find((item) => item.view === view)?.label || copy.title;
-  const visible = columns.filter((column) => column.enabled && column.label.trim());
-  const contextRows = samples.filter((sample) => {
-    const status = reviewStatus(sample, approved);
-    return matchesView(sample, status, view);
-  });
+  const contextRows = samples.filter((sample) => matchesView(sample, view, approved));
   const testOptions = [...new Set(contextRows.flatMap(testNames))].sort();
   const clientOptions = [...new Set(contextRows.map((sample) => sample.client))].sort();
   const rows = contextRows
@@ -408,7 +410,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     {
       title: "Waiting to start",
       hint: "Received and still at intake",
-      rows: open.filter((sample) => sample.status === "received"),
+      rows: open.filter((sample) => sample.status === "received" || sample.status === "accessioning"),
     },
     {
       title: "STAT on the floor",
@@ -418,7 +420,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     {
       title: "Blocked",
       hint: "On hold until the location issue or deviation clears",
-      rows: open.filter((sample) => sample.status === "hold"),
+      rows: open.filter((sample) => isOnHold(sample)),
     },
   ];
   const quickFilters =
@@ -600,7 +602,22 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 </th>
                 {view === "review" ? <th>Review type</th> : null}
                 {visible.map((column) => (
-                  <th key={column.id}>
+                  <th
+                    key={column.id}
+                    className={column.id === "status" ? "is-stage" : undefined}
+                    draggable
+                    title="Drag to rearrange columns for your profile"
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData("text/column-id", column.id);
+                      event.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const from = event.dataTransfer.getData("text/column-id") as SampleColumnId;
+                      if (from) moveColumn(from, column.id);
+                    }}
+                  >
                     {column.id === "received" && view === "review"
                       ? "Test Complete"
                       : column.id === "received" && view === "release"
@@ -657,7 +674,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                               </td>
                             ) : null}
                             {visible.map((column) => (
-                              <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
+                              <td key={column.id} className={column.id === "status" ? "is-stage" : undefined}>
+                                {cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view, stages)}
+                              </td>
                             ))}
                             <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
                             <td>{resultButton(sample)}</td>
@@ -695,7 +714,9 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                           </td>
                         ) : null}
                         {visible.map((column) => (
-                          <td key={column.id}>{cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view)}</td>
+                          <td key={column.id} className={column.id === "status" ? "is-stage" : undefined}>
+                            {cell(sample, column.id, reviewStatus(sample, approved), setOpenSample, setReceiptSample, view, stages)}
+                          </td>
                         ))}
                         {view === "review" ? (
                           <td>{reasonsForSample(sample.accessionId, planted).join(", ")}</td>
@@ -758,7 +779,12 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setTestingOpen(false)}>
           <div className="lims-modal lims-modal-wide start-testing-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <StartTestingWorkflow
-              pool={samples.filter((sample) => sample.status === "received" || sample.status === "testing")}
+              pool={samples.filter((sample) =>
+                sample.status === "received" ||
+                sample.status === "accessioning" ||
+                sample.status === "processing" ||
+                sample.status === "testing"
+              )}
               onClose={() => setTestingOpen(false)}
               onTab={() => {
                 sectionTabs.pin({ kind: "testing", recordId: "new", title: "Start Testing" });

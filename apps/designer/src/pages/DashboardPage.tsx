@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { StageConditionCell } from "../components/StageConditionCell";
+import { DEFAULT_WORKFLOW_STAGES } from "../workflowStages";
 
 const QUEUE = [
   {
@@ -7,6 +9,7 @@ const QUEUE = [
     client: "Aether Pharma",
     test: "HPLC Assay · USP",
     status: "testing",
+    condition: "normal",
     priority: "STAT",
     analyst: "M. Chen",
     due: "Today 14:00",
@@ -16,6 +19,7 @@ const QUEUE = [
     client: "Northwind Foods",
     test: "Microbial Limits",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     analyst: "J. Ortiz",
     due: "Today 16:30",
@@ -25,6 +29,7 @@ const QUEUE = [
     client: "Helix Biologics",
     test: "Potency · ELISA",
     status: "received",
+    condition: "normal",
     priority: "Rush",
     analyst: "Unassigned",
     due: "Tomorrow 09:00",
@@ -33,7 +38,8 @@ const QUEUE = [
     id: "SCP-20479",
     client: "Summit Generics",
     test: "Dissolution",
-    status: "approval",
+    status: "review",
+    condition: "normal",
     priority: "Routine",
     analyst: "A. Patel",
     due: "Today 17:00",
@@ -43,6 +49,7 @@ const QUEUE = [
     client: "Cascade Nutraceuticals",
     test: "Heavy Metals ICP-MS",
     status: "testing",
+    condition: "normal",
     priority: "Routine",
     analyst: "M. Chen",
     due: "Tomorrow 11:00",
@@ -136,7 +143,7 @@ export function DashboardPage() {
                   <th>Client</th>
                   <th>Test</th>
                   <th>Priority</th>
-                  <th>Status</th>
+                  <th>Stage & Condition</th>
                   <th>Analyst</th>
                   <th>Due</th>
                 </tr>
@@ -172,10 +179,8 @@ export function DashboardPage() {
                         {row.priority}
                       </span>
                     </td>
-                    <td>
-                      <span className={`lims-status ${row.status}`}>
-                        {labelStatus(row.status)}
-                      </span>
+                    <td className="is-stage">
+                      <StageConditionCell status={row.status} condition={row.condition} stages={DEFAULT_WORKFLOW_STAGES} />
                     </td>
                     <td>{row.analyst}</td>
                     <td>{row.due}</td>
@@ -230,19 +235,4 @@ export function DashboardPage() {
       </div>
     </div>
   );
-}
-
-function labelStatus(status: string): string {
-  switch (status) {
-    case "received":
-      return "Received";
-    case "testing":
-      return "In testing";
-    case "review":
-      return "Peer review";
-    case "approval":
-      return "QA approval";
-    default:
-      return status;
-  }
 }

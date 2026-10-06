@@ -63,7 +63,7 @@ export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
     { id: "client", label: "Client", enabled: true },
     { id: "tests", label: "Tests", enabled: true },
     { id: "priority", label: "Priority", enabled: true },
-    { id: "status", label: "Status", enabled: true },
+    { id: "status", label: "Stage & Condition", enabled: true },
     { id: "custody", label: "Location", enabled: true },
     { id: "site", label: "Site", enabled: true },
     { id: "matrix", label: "Matrix", enabled: false },
@@ -133,9 +133,11 @@ function mergeColumns(saved: SampleColumn[] | undefined): SampleColumn[] {
     label:
       column.id === "custody"
         ? "Location"
-        : column.label?.trim()
-          ? column.label
-          : DEFAULT_LAB_OPERATIONS.columns.find((item) => item.id === column.id)!.label,
+        : column.id === "status"
+          ? "Stage & Condition"
+          : column.label?.trim()
+            ? column.label
+            : DEFAULT_LAB_OPERATIONS.columns.find((item) => item.id === column.id)!.label,
     enabled: Boolean(column.enabled),
   }));
 }

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { labMenuPath, useLabOperations } from "../labOperations";
-import { useSamples } from "../samples";
+import { isOnHold, useSamples } from "../samples";
 
 const WEEK = {
   tat: "18.4 h",
@@ -14,11 +14,11 @@ export function OpsOverviewPage() {
   const title = menu.find((item) => item.view === "overview")?.label || "Overview";
   const open = samples.filter((sample) => sample.status !== "released");
   const stat = open.filter((sample) => sample.priority === "STAT");
-  const hold = open.filter((sample) => sample.status === "hold");
-  const review = open.filter((sample) => sample.status === "review" || sample.status === "approval");
+  const hold = open.filter((sample) => isOnHold(sample));
+  const review = open.filter((sample) => sample.status === "review");
   const stages = [
-    { label: "Received", count: open.filter((sample) => sample.status === "received").length, to: labMenuPath("home") },
-    { label: "In testing", count: open.filter((sample) => sample.status === "testing").length, to: labMenuPath("testing") },
+    { label: "Received", count: open.filter((sample) => sample.status === "received" || sample.status === "accessioning").length, to: labMenuPath("home") },
+    { label: "In testing", count: open.filter((sample) => sample.status === "testing" || sample.status === "processing").length, to: labMenuPath("testing") },
     { label: "Review", count: review.length, to: labMenuPath("review") },
     { label: "On hold", count: hold.length, to: labMenuPath("home") },
   ];
@@ -56,7 +56,7 @@ export function OpsOverviewPage() {
         <div className="lims-kpi">
           <span>Awaiting review</span>
           <strong>{review.length}</strong>
-          <small>Peer review and QA approval</small>
+          <small>Review and release</small>
         </div>
         <div className="lims-kpi">
           <span>On hold</span>

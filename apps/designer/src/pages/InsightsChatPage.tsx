@@ -3,6 +3,7 @@ import { CRM_ACCOUNTS } from "../crmAccounts";
 import { AccountLink } from "../components/AccountTable";
 import { accountRevenueLabel, money, useRevenue } from "../revenueCycle";
 import { STATUS_LABEL, useSamples, type SampleStatus } from "../samples";
+import { DEFAULT_WORKFLOW_STAGES } from "../workflowStages";
 import { answerFromText, businessBrief, businessSnapshot } from "../insightsBrief";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
@@ -11,7 +12,7 @@ const OPENING = "Answers come from the briefing text. Ask about accounts, revenu
 
 const SUGGESTIONS = ["Collected revenue", "Open denials", "Northwind Foods"];
 
-const STATUS_ORDER: SampleStatus[] = ["received", "testing", "review", "approval", "released", "hold"];
+const STATUS_ORDER: SampleStatus[] = DEFAULT_WORKFLOW_STAGES.map((stage) => stage.id as SampleStatus);
 
 export function InsightsChatPage() {
   const samples = useSamples();

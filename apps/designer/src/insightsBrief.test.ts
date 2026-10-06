@@ -14,7 +14,8 @@ const SAMPLES = withAccountSampleIds([
     client: "Vertex Materials",
     matrix: "Polymer",
     tests: "Identity FTIR",
-    status: "hold",
+    status: "processing",
+    condition: "on_hold",
     priority: "Rush",
     custody: "Deviation DEV-118",
     site: "East Lab",
@@ -30,6 +31,7 @@ const SAMPLES = withAccountSampleIds([
     matrix: "Raw material",
     tests: "Microbial Limits",
     status: "review",
+    condition: "normal",
     priority: "Routine",
     custody: "Micro suite",
     site: "North Lab",
@@ -46,7 +48,7 @@ describe("business brief", () => {
     expect(brief).toContain(`Collected revenue is ${money(books.collected)}.`);
     expect(brief).toContain(`Open denials: ${books.openDenials}.`);
     expect(brief).toContain("Northwind Foods (ACC-1077) is At risk and On hold.");
-    expect(brief).toContain("Accession SCP-20458 for Vertex Materials is On hold");
+    expect(brief).toContain("Accession SCP-20458 for Vertex Materials is Processing, condition On Hold");
     expect(brief).toContain("Opportunity Renew pathogen surveillance for Northwind Foods is in Negotiation for $52,000, close 2026-08-12.");
   });
 

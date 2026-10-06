@@ -12,6 +12,7 @@ import {
 import { AccountHistoryPanel } from "./ClientCases";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
 import { ModuleCase } from "./ModuleCase";
+import { WorkflowStagesEditor } from "../components/WorkflowStagesEditor";
 
 export function IntrasiteLabDetailPage() {
   const { id = "", labId = "" } = useParams();
@@ -109,6 +110,21 @@ export function IntrasiteLabDetailPage() {
               )}
             </div>
           </section>
+
+          {lab.modules.includes("lab_operations") ? (
+            <section className="is-panel">
+              <div className="is-panel-head">
+                <div>
+                  <h2>Workflow settings</h2>
+                  <p className="is-muted">
+                    Core Sequence Operations stages for this laboratory. They apply to every module
+                    added here.
+                  </p>
+                </div>
+              </div>
+              <WorkflowStagesEditor labId={lab.id} />
+            </section>
+          ) : null}
 
           <section className="is-panel">
             <h2>Installations</h2>

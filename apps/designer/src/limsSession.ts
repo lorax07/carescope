@@ -7,6 +7,7 @@ export type LimsSession = {
   username: string;
   clientName: string;
   labName: string;
+  labId?: string;
   envLabel: string;
   connectionSpeed: string;
   databaseName: string;

@@ -202,7 +202,7 @@ function PinnedScreen({ tab }: { tab: PinnedTab }) {
     return run ? <RunSequenceView run={run} /> : null;
   }
   if (tab.kind === "testing") {
-    return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received")} /></section></div>;
+    return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received" || sample.status === "accessioning" || sample.status === "processing")} /></section></div>;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
