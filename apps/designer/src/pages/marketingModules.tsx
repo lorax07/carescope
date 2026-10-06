@@ -136,11 +136,11 @@ export const MARKETING_MODULES: MarketingModule[] = [
       "Charges are late, incomplete, or held for a code the bench cannot see. A denial shows up in a system the laboratory does not open, long after the result was released.",
     solutionTitle: "Revenue follows the account and the accession",
     solution:
-      "Sequence Revenue uses the same account and the work already in the laboratory. Charge capture, edits, submission, denials, and payment sit on the accession.",
+      "Sequence Revenue uses the same account and the work already in the laboratory. Charge capture, claims, work queues, payments, denials, and A/R sit on the accession.",
     points: [
-      "Work moves from the lab through charge capture, edits, and submission",
-      "Denials, holds, and write-offs stay on the charge",
-      "Prices and diagnosis are set on the work",
+      "Work queues show what needs a person, not a dump of the ledger",
+      "Claims keep workflow, financial status, and record status separate",
+      "Denials, aging A/R, and payments drill into the same charge",
     ],
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">

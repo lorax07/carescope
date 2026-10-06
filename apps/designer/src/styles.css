@@ -1796,10 +1796,23 @@ a {
   padding: 0.85rem 1rem 0;
 }
 
-.rcm-aging div {
+.rcm-aging > * {
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 0.7rem 0.8rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.rcm-aging button {
+  cursor: pointer;
+}
+
+.rcm-aging button.is-on {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .rcm-aging span {
@@ -1814,6 +1827,215 @@ a {
 .rcm-aging strong {
   display: block;
   margin-top: 0.2rem;
+}
+
+.rcm-page .rcm-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.rcm-subnav {
+  margin-bottom: 0.25rem;
+}
+
+.rcm-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: 0.85rem 1rem 1rem;
+}
+
+.rcm-metric-grid.is-compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rcm-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.rcm-metric:hover,
+.rcm-metric:focus-visible {
+  border-color: var(--accent);
+}
+
+.rcm-metric small {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.rcm-metric strong {
+  font-size: 1.15rem;
+}
+
+.rcm-metric span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.rcm-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.85rem;
+}
+
+.rcm-attention {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem 0.85rem 0.85rem;
+}
+
+.rcm-attention li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rcm-attention a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.rcm-attention b {
+  font-size: 0.92rem;
+}
+
+.rcm-attention span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.rcm-attention em {
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rcm-exceptions {
+  list-style: none;
+  margin: 0;
+  padding: 0.2rem 1rem 1rem;
+}
+
+.rcm-exceptions li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rcm-exceptions span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.rcm-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.rcm-status-row b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.rcm-toolbar {
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.rcm-toolbar label,
+.rcm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.rcm-toolbar input,
+.rcm-toolbar select,
+.rcm-field input,
+.rcm-field select,
+.rcm-field textarea,
+.rcm-page td input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+
+.rcm-muted {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.rcm-log {
+  margin: 0.35rem 1rem 0.85rem;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.rcm-bar {
+  height: 6px;
+  margin-top: 0.45rem;
+  border-radius: 99px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+
+.rcm-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+@media (max-width: 1100px) {
+  .rcm-metric-grid,
+  .rcm-metric-grid.is-compact,
+  .rcm-aging {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rcm-split {
+    grid-template-columns: 1fr;
+  }
 }
 
 .account-toolbar {

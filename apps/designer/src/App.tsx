@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
@@ -10,6 +10,7 @@ import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
+import { RCM_SUBNAV } from "./pages/rcm/RcmShell";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 import { DEFAULT_WORKFLOW_STAGES, useWorkflowStages } from "./workflowStages";
@@ -699,6 +700,7 @@ function AppFrame() {
               </NavLink>
             ))}
           {NAV.map((item) => (
+            <Fragment key={item.to}>
             <NavLink
               key={item.to}
               to={item.to}
@@ -706,14 +708,31 @@ function AppFrame() {
                 sectionTabs.showSection(sectionFromPath(item.to));
               }}
               className={({ isActive }) =>
-                `lims-nav-item${isActive ? " active" : ""}`
+                `lims-nav-item${item.to === "/app/billing" ? " is-core-parent" : ""}${isActive ? " active" : ""}`
               }
+              end={item.to === "/app/billing"}
             >
               <span className="lims-nav-icon">
                 <NavIcon name={sectionFromPath(item.to)} />
               </span>
               {item.label}
             </NavLink>
+            {item.to === "/app/billing"
+              ? RCM_SUBNAV.filter((sub) => !sub.end).map((sub) => (
+                  <NavLink
+                    key={sub.to}
+                    to={sub.to}
+                    onClick={() => sectionTabs.showSection("billing")}
+                    className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                  >
+                    <span className="lims-nav-icon">
+                      <NavIcon name="billing" />
+                    </span>
+                    {sub.label}
+                  </NavLink>
+                ))
+              : null}
+            </Fragment>
           ))}
         </nav>
 

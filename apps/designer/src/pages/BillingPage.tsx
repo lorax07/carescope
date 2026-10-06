@@ -38,6 +38,7 @@ import {
   type ChargeStatus,
   type WorkStage,
 } from "../revenueCycle";
+import { RcmShell } from "./rcm/RcmShell";
 import { CONDITION_LABEL, STATUS_LABEL, isOnHold, useSamples, type SampleRecord } from "../samples";
 import { useWorkflowStages } from "../workflowStages";
 
@@ -175,16 +176,10 @@ export function BillingPage() {
   const selectedCharge = current?.kind === "charge" ? current.charge : undefined;
 
   return (
-    <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Revenue</p>
-          <h1>Sequence Revenue</h1>
-          <p className="lims-page-lede">
-            Work each accession from charge capture through coding, edits, claim or invoice submission, payment, and denial follow-up.
-          </p>
-        </div>
-      </div>
+    <RcmShell
+      title="Charge capture"
+      lede="Work each accession from charge capture through coding, edits, claim or invoice submission, payment, and denial follow-up."
+    >
 
       <div className="lims-kpi-row">
         <div className="lims-kpi">
@@ -428,7 +423,7 @@ export function BillingPage() {
         <p className="billing-note">The Sequence Client account list. Revenue is the open balance on this ledger.</p>
         <AccountTable />
       </section>
-    </div>
+    </RcmShell>
   );
 }
 

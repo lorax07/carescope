@@ -59,7 +59,7 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
     label: "Sequence Revenue",
     positioning: "This is a robust revenue Cycle management system",
     capabilities:
-      "Charge capture, test pricing, client-specific pricing, insurance billing, CPT/HCPCS codes, ICD-10 codes, payer information, claim data, self-pay, client billing, billing edits/holds, rebilling, denials and exceptions, payment status, revenue reporting",
+      "Charge capture, claims, work queues, insurance and client billing, CPT/HCPCS, ICD-10, payers, denials, appeals, payment posting, A/R aging, billing rules, revenue analytics",
   },
   {
     id: "insights",
