@@ -563,6 +563,13 @@ a {
   box-shadow: none;
 }
 
+.lims-nav-dock.is-top .lims-sidebar,
+.lims-nav-dock.is-top .lims-nav {
+  flex-wrap: nowrap;
+  align-items: center;
+  align-content: center;
+}
+
 .lims-nav-dock.is-docked.is-open.is-top .lims-sidebar {
   width: max-content;
   height: auto;
@@ -618,7 +625,10 @@ a {
   max-width: 16rem;
 }
 
-.lims-nav-dock.is-top .lims-sidebar-foot,
+.lims-nav-dock.is-top .lims-sidebar-foot {
+  display: none;
+}
+
 .lims-nav-dock.is-bottom .lims-sidebar-foot {
   border: 0;
   padding: 0 0 0 0.2rem;
