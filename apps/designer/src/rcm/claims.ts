@@ -72,9 +72,10 @@ export function exceptionsFor(charge: Charge, owner: string): Exception[] {
 }
 
 export function nextActionFor(claim: Pick<Claim, "workflow" | "exceptions" | "financial">): string {
-  if (claim.exceptions.some((item) => item.code === "SCRUB")) return "Clear scrubbing exceptions";
-  if (claim.workflow === "ready") return "Submit the claim";
   if (claim.workflow === "denied") return "Work the denial";
+  if (claim.workflow === "appealed") return "Track the appeal";
+  if (claim.exceptions.some((item) => item.code === "SCRUB" || item.code.startsWith("RULE-"))) return "Clear scrubbing exceptions";
+  if (claim.workflow === "ready") return "Submit the claim";
   if (claim.workflow === "submitted" || claim.financial === "receivable") return "Watch payer response or post payment";
   if (claim.workflow === "draft") return "Capture remaining charges";
   if (claim.workflow === "review") return "Review and scrub";

@@ -70,7 +70,7 @@ export function RcmArPage() {
               key={item.id}
               type="button"
               className={bucket === item.id ? "is-on" : ""}
-              onClick={() => setFilter("bucket", item.id)}
+              onClick={() => setFilter("bucket", bucket === item.id ? "all" : item.id)}
             >
               <span>{item.label}</span>
               <strong>{formatMoney(item.cents)}</strong>

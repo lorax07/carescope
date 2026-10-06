@@ -1836,7 +1836,28 @@ a {
 }
 
 .rcm-subnav {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.55rem;
+}
+
+.rcm-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.rcm-status-row span {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+}
+
+.rcm-status-row b {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .rcm-metric-grid {
@@ -1948,20 +1969,6 @@ a {
 .rcm-exceptions span {
   color: var(--text-muted);
   font-size: 0.8rem;
-}
-
-.rcm-status-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  margin: 0.35rem 0 0.5rem;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.rcm-status-row b {
-  color: var(--text);
-  font-weight: 700;
 }
 
 .rcm-toolbar {

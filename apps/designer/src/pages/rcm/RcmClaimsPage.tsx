@@ -12,11 +12,17 @@ export function RcmClaimsPage() {
   const page = Number(params.get("page") || "1");
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    return claims.filter((claim) => {
-      if (workflow !== "all" && claim.workflow !== workflow) return false;
-      if (!needle) return true;
-      return `${claim.id} ${claim.accountName} ${claim.accessionId} ${claim.payerName}`.toLowerCase().includes(needle);
-    });
+    return claims
+      .filter((claim) => {
+        if (workflow !== "all" && claim.workflow !== workflow) return false;
+        if (!needle) return true;
+        return `${claim.id} ${claim.accountName} ${claim.accessionId} ${claim.payerName}`.toLowerCase().includes(needle);
+      })
+      .sort((a, b) => {
+        if (a.recordStatus !== b.recordStatus) return a.recordStatus === "open" ? -1 : 1;
+        if (Boolean(a.exceptions.length) !== Boolean(b.exceptions.length)) return a.exceptions.length ? -1 : 1;
+        return b.balanceCents - a.balanceCents || a.id.localeCompare(b.id);
+      });
   }, [claims, query, workflow]);
   const paged = pageRows(filtered, page);
 
