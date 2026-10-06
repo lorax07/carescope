@@ -1165,24 +1165,29 @@
 }
 
 .lp-solve-jumps button {
-  padding: 0.55rem 1rem;
-  border: 1px solid #cad4e5;
+  padding: 0.55rem 1.15rem;
+  border: 1px solid rgba(11, 31, 68, 0.18);
   border-radius: 999px;
   background: #fff;
   color: #0b1f44;
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 650;
   text-align: center;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.lp-solve-jumps button.is-on,
+.lp-solve-jumps button.is-on {
+  border-color: #0b1f44;
+  background: #fff;
+  color: #0b1f44;
+  box-shadow: 0 0 0 1px #0b1f44;
+}
+
 .lp-solve-jumps button:hover {
   border-color: #0b1f44;
-  background: #0b1f44;
-  color: #fff;
+  color: #0b1f44;
 }
 
 .lp-solve-jumps button:focus-visible {
@@ -1369,20 +1374,84 @@
 }
 
 .lp-native-lists {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.lp-native-pairs-head-row,
+.lp-native-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1.35rem minmax(0, 1fr);
+  gap: 0.55rem;
   align-items: stretch;
 }
 
+.lp-native-pairs-head h5,
 .lp-native-lists h5 {
+  margin: 0;
   color: #0b1f44;
   font-size: 0.78rem;
 }
 
+.lp-native-pairs-head p,
 .lp-native-lists > section > p {
-  margin: 0.35rem 0 0;
+  margin: 0.28rem 0 0;
   color: #65738b;
   font-size: 0.72rem;
   font-weight: 650;
+}
+
+.lp-native-pairs-head.is-sequence h5 {
+  color: #087f74;
+}
+
+.lp-native-pair article {
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr);
+  gap: 0.55rem;
+  align-items: start;
+  min-height: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #fff5f7;
+  color: #243044;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.lp-native-pair article > span {
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.08rem;
+  border-radius: 50%;
+  background: #ba4267;
+  color: #fff;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.lp-native-pair article p {
+  margin: 0;
+}
+
+.lp-native-pair article.is-sequence {
+  background: #e7f8f5;
+}
+
+.lp-native-pair article.is-sequence > span {
+  background: #087f74;
+}
+
+.lp-native-pairs-solves {
+  display: grid;
+  place-items: center;
+  color: #087f74;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
 .lp-native-lists ul {
@@ -1657,6 +1726,16 @@
   .lp-native-integration,
   .lp-native-lists {
     grid-template-columns: 1fr;
+  }
+
+  .lp-native-pairs-head-row,
+  .lp-native-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-native-pairs-solves,
+  .lp-native-pairs-gap {
+    display: none;
   }
 
   .lp-native-features {

@@ -89,7 +89,7 @@ const TOPICS: Topic[] = [
     id: "operations",
     label: "Operational and compliance friction",
     description: "Disconnected queues, manual handoffs, and compliance evidence assembled after the fact slow the lab and raise the chance of error.",
-    visual: "Traditional LIMS issues compared with Sequence",
+    visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
     outcome: "One accession from receive through release, with the evidence already on the work.",
     icon: "⌘",
   },
@@ -97,69 +97,87 @@ const TOPICS: Topic[] = [
     id: "integration",
     label: "Integration and Contractor dependency",
     description: "Traditional LIMS changes depend on outside contractors and a separate interface for every system the laboratory touches.",
-    visual: "Traditional LIMS issues compared with Sequence",
+    visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
     outcome: "Run the laboratory in Sequence, without handing the change to a contractor.",
     icon: "⌕",
   },
 ];
 
-const OPERATIONS_ISSUES = [
-  "Sample status is split across spreadsheets, inboxes, and conversations at the bench.",
-  "Receive, testing, review, and release do not share one accession record.",
-  "Priority, holds, and location are tracked outside the workflow.",
-  "Instrument status and the current run step are only visible by walking to the bench.",
-  "Flags, reviewer identity, and release evidence are assembled after testing is finished.",
-  "Deviations, CAPA, change control, and controlled documents live in separate binders.",
-  "Signatures are scanned pages, and the audit trail is rebuilt when an inspection is already scheduled.",
-];
+const OPERATIONS_PAIRS = [
+  {
+    issue: "The sample queue lives in spreadsheets, inboxes, and conversations at the bench.",
+    solution: "Home, Testing, Review, and Release are stages of the same accession, so the queue is the work.",
+  },
+  {
+    issue: "Priority, holds, and location are tracked outside the workflow.",
+    solution: "Priority, site, and hold stay on the sample. The list shows open, in testing, in review, or ready for release.",
+  },
+  {
+    issue: "Instrument status and the current run step are only visible by walking to the bench.",
+    solution: "A current run shows the instrument, the step, the samples, and the control panel when it is integrated.",
+  },
+  {
+    issue: "Flags, reviewer identity, and release evidence are assembled after testing is finished.",
+    solution: "Review covers a sample or a batch, with flags, a reviewer PIN, and authorization before release.",
+  },
+  {
+    issue: "Deviations, CAPA, signatures, and the audit trail live in separate binders until an inspection.",
+    solution: "Sequence Compliance keeps that quality work on the accession, so the audit trail is the inspection file.",
+  },
+] as const;
 
-const OPERATIONS_SOLUTIONS = [
-  "Home, Testing, Review, and Release are stages of the same accession.",
-  "Receive sample and Log sample open the record, with chain of custody in order and who did it.",
-  "Priority, site, and hold stay on the work. The queue shows open, in testing, in review, or ready for release.",
-  "A current run shows the instrument, the step it is on, the samples and solutions, and the control panel when the instrument is integrated.",
-  "Review covers an individual sample or a batch, with flags, a reviewer PIN, and authorization before release.",
-  "Sequence Compliance keeps deviations, CAPA, change control, controlled documents, and signatures on the work they approve.",
-  "The audit trail is the record of those actions, so the inspection file is the work itself.",
-];
+const INTEGRATION_PAIRS = [
+  {
+    issue: "Instruments, billing, reporting, and files each depend on a separate interface.",
+    solution: "Operations, Instruments, Compliance, Client, Revenue, and Insights are modules of one platform.",
+  },
+  {
+    issue: "Connecting an instrument waits on a vendor and a programmer.",
+    solution: "Add an instrument by identity, interface, and place, and see whether its sequence is running.",
+  },
+  {
+    issue: "A workflow change passes through a contractor, IT, and a project manager before the lab can use it.",
+    solution: "The lab drafts, reviews, and publishes the workflow in the designer, without handing it to a contractor.",
+  },
+  {
+    issue: "The client account and the accessions in the laboratory are different systems.",
+    solution: "Sequence Client keeps contacts, agreements, and the laboratory work under the same account.",
+  },
+  {
+    issue: "Charges and operating questions wait on a billing tool or a report request after release.",
+    solution: "Sequence Revenue bills the accession. Insights answers from that laboratory’s accounts, work, and revenue.",
+  },
+] as const;
 
-const INTEGRATION_ISSUES = [
-  "Instruments, billing, reporting, portals, and files each depend on a separate interface.",
-  "Connecting an instrument waits on a vendor and a programmer.",
-  "A workflow change passes through a contractor, IT, and a project manager before the lab can use it.",
-  "The client account and the accessions in the laboratory are different systems.",
-  "Charges are created after release, in a billing tool the bench does not open.",
-  "A question about open work, revenue, or an account becomes a report request.",
-  "Even a small change becomes a customization project with outside cost and delay.",
-];
-
-const INTEGRATION_SOLUTIONS = [
-  "Operations, Instruments, Compliance, Client, Revenue, and Insights are modules of one platform.",
-  "Add an instrument by identity, interface, and place, and see whether its sequence is running.",
-  "The workflow designer builds screens, branches, and connections, and can attach a template to a branch the lab selects.",
-  "Sequence Client keeps contacts, agreements, and the laboratory work under the same account.",
-  "Sequence Revenue carries charge capture, edits, denials, and payment on that account and accession.",
-  "Sequence Insights shows accounts, open work, revenue, and pipeline, and answers only from that laboratory text.",
-  "The lab drafts, reviews, and publishes the workflow without handing the change to a contractor.",
-];
-
-function CompareLists({ issues, solutions }: { issues: string[]; solutions: string[] }) {
+function CompareLists({ pairs }: { pairs: readonly { issue: string; solution: string }[] }) {
   return (
-    <div className="lp-native-comparison lp-native-lists">
-      <section>
-        <h5>Traditional LIMS</h5>
-        <p>Issues laboratories face</p>
-        <ul>
-          {issues.map((item) => <li key={item}>{item}</li>)}
-        </ul>
-      </section>
-      <section className="is-sequence">
-        <h5>Sequence</h5>
-        <p>How this product addresses them</p>
-        <ul>
-          {solutions.map((item) => <li key={item}>{item}</li>)}
-        </ul>
-      </section>
+    <div className="lp-native-comparison lp-native-lists lp-native-pairs">
+      <div className="lp-native-pairs-head-row">
+        <div className="lp-native-pairs-head">
+          <h5>Traditional LIMS</h5>
+          <p>The problems</p>
+        </div>
+        <span className="lp-native-pairs-gap" aria-hidden="true" />
+        <div className="lp-native-pairs-head is-sequence">
+          <h5>Sequence</h5>
+          <p>How Sequence solves them</p>
+        </div>
+      </div>
+      {pairs.map((pair, index) => (
+        <div className="lp-native-pair" key={pair.issue}>
+          <article>
+            <span>{index + 1}</span>
+            <p>{pair.issue}</p>
+          </article>
+          <span className="lp-native-pairs-solves" aria-hidden="true">
+            →
+          </span>
+          <article className="is-sequence">
+            <span>{index + 1}</span>
+            <p>{pair.solution}</p>
+          </article>
+        </div>
+      ))}
     </div>
   );
 }
@@ -196,8 +214,8 @@ function CostInfographic() {
 
 function TopicInfographic({ id }: { id: Topic["id"] }) {
   if (id === "cost") return <CostInfographic />;
-  if (id === "operations") return <CompareLists issues={OPERATIONS_ISSUES} solutions={OPERATIONS_SOLUTIONS} />;
-  return <CompareLists issues={INTEGRATION_ISSUES} solutions={INTEGRATION_SOLUTIONS} />;
+  if (id === "operations") return <CompareLists pairs={OPERATIONS_PAIRS} />;
+  return <CompareLists pairs={INTEGRATION_PAIRS} />;
 }
 
 function WhatWeSolve() {
