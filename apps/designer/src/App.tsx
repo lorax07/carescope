@@ -262,6 +262,7 @@ function AppFrame() {
   const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [headerH, setHeaderH] = useState(62);
   const [logoW, setLogoW] = useState(72);
+  const [logoStack, setLogoStack] = useState(52);
   const [topSlot, setTopSlot] = useState(0);
   const now = useLocalClock();
   const stages = useWorkflowStages();
@@ -331,8 +332,11 @@ function AppFrame() {
       const dock = dockRef.current;
       const brand = brandRef.current;
       const logoRight = Math.ceil((brand ?? logo)?.getBoundingClientRect().right ?? 72);
-      const gap = navOpen && edge === "top" ? 28 : 14;
+      const gap = navOpen && edge === "top" ? 20 : 14;
       setLogoW(logoRight + gap);
+      if (edge === "top" && logo && header) {
+        setLogoStack(Math.max(36, Math.ceil(logo.getBoundingClientRect().bottom - header.getBoundingClientRect().top + 4)));
+      }
       if (edge === "top" && docked && !dragging && !settling && dock) {
         setTopSlot(Math.max(0, Math.ceil(dock.getBoundingClientRect().width)));
         const dockH = Math.ceil(dock.getBoundingClientRect().height);
@@ -595,6 +599,7 @@ function AppFrame() {
           "--nav-bottom": `${insets.bottom}px`,
           "--header-h": `${headerH}px`,
           "--header-logo-w": `${logoW}px`,
+          "--brand-logo-stack": `${logoStack}px`,
           "--top-nav-slot": `${topSlot}px`,
         } as CSSProperties
       }

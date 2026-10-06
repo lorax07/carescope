@@ -66,6 +66,7 @@ a {
 .lims-shell {
   --header-h: 3.85rem;
   --header-logo-w: 4.5rem;
+  --brand-logo-stack: 3.25rem;
   --top-nav-slot: 0px;
   display: block;
   min-height: 100vh;
@@ -479,12 +480,12 @@ a {
 
 .lims-nav-dock.is-top .lims-icon-rail {
   flex-direction: row;
-  align-items: flex-end;
+  align-items: center;
   width: max-content;
-  height: var(--header-h, 3.85rem);
+  height: auto;
   max-width: none;
-  max-height: var(--header-h, 3.85rem);
-  padding: 0.45rem 0.55rem 0.2rem 0.2rem;
+  max-height: none;
+  padding: 0.1rem 0.55rem 0.2rem 0.2rem;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -492,16 +493,25 @@ a {
 
 .lims-nav-dock.is-docked:not(.is-open).is-top {
   left: var(--header-logo-w, 4.5rem) !important;
+  display: flex;
+  align-items: flex-start;
   width: max-content;
   max-width: calc(100vw - var(--header-logo-w, 4.5rem) - 40rem);
-  height: var(--header-h, 3.85rem);
+  height: auto;
+  min-height: calc(var(--header-h, 3.85rem) - var(--brand-logo-stack, 3.25rem));
+  padding-top: var(--brand-logo-stack, 3.25rem);
+  box-sizing: border-box;
 }
 
 .lims-nav-dock.is-docked.is-open.is-top {
   left: var(--header-logo-w, 7.4rem) !important;
+  display: flex;
+  align-items: flex-start;
   width: max-content;
   max-width: calc(100vw - var(--header-logo-w, 7.4rem) - 40rem);
   height: auto;
+  padding-top: var(--brand-logo-stack, 3.25rem);
+  box-sizing: border-box;
 }
 
 .lims-nav-dock.is-top .lims-icon-rail .lims-nav {
