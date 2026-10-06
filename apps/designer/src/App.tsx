@@ -324,19 +324,26 @@ function AppFrame() {
   }, [navOpen, navPos, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
-    const header = headerRef.current;
-    const logo = logoRef.current;
-    const dock = dockRef.current;
-    if (logo) setLogoW(Math.ceil(logo.getBoundingClientRect().right) + 12);
-    if (edge === "top" && docked && !dragging && !settling && dock) {
-      setTopSlot(Math.max(0, Math.ceil(dock.getBoundingClientRect().width)));
-      const dockH = Math.ceil(dock.getBoundingClientRect().height);
-      const headerHgt = header?.offsetHeight ?? 62;
-      setHeaderH(Math.max(headerHgt, dockH));
-    } else {
-      setTopSlot(0);
-      if (header) setHeaderH(header.offsetHeight);
-    }
+    const measure = () => {
+      const header = headerRef.current;
+      const logo = logoRef.current;
+      const dock = dockRef.current;
+      const logoRight = logo ? Math.ceil(logo.getBoundingClientRect().right) : 72;
+      const gap = navOpen && edge === "top" ? 28 : 14;
+      setLogoW(logoRight + gap);
+      if (edge === "top" && docked && !dragging && !settling && dock) {
+        setTopSlot(Math.max(0, Math.ceil(dock.getBoundingClientRect().width)));
+        const dockH = Math.ceil(dock.getBoundingClientRect().height);
+        const headerHgt = header?.offsetHeight ?? 62;
+        setHeaderH(Math.max(headerHgt, dockH));
+      } else {
+        setTopSlot(0);
+        if (header) setHeaderH(header.offsetHeight);
+      }
+    };
+    measure();
+    const timer = window.setTimeout(measure, 340);
+    return () => window.clearTimeout(timer);
   }, [navOpen, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {

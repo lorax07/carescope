@@ -91,7 +91,7 @@ export function SequenceStageMark({ stages }: { stages: WorkflowStage[] }) {
     <span className="sequence-stage-mark" aria-hidden="true">
       {shown.map((stage) => (
         <i key={stage.id}>
-          <StageGlyph stage={stage} filled size={8} />
+          <StageGlyph stage={stage} filled size={11} />
         </i>
       ))}
     </span>
