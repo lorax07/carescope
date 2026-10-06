@@ -11,7 +11,7 @@ const WEEK = {
 export function OpsOverviewPage() {
   const { menu } = useLabOperations();
   const samples = useSamples();
-  const title = menu.find((item) => item.view === "overview")?.label || "Overview";
+  const title = menu.find((item) => item.view === "overview")?.label || "Operations Overview";
   const open = samples.filter((sample) => sample.status !== "released");
   const stat = open.filter((sample) => sample.priority === "STAT");
   const hold = open.filter((sample) => isOnHold(sample));

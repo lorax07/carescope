@@ -50,7 +50,7 @@ const EVENT = "carescope-lab-ops";
 export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
   priorities: ["STAT", "Rush", "Routine"],
   menu: [
-    { id: "overview", label: "Overview", view: "overview", enabled: true },
+    { id: "overview", label: "Operations Overview", view: "overview", enabled: true },
     { id: "home", label: "Home", view: "home", enabled: true },
     { id: "testing", label: "Testing", view: "testing", enabled: true },
     { id: "review", label: "Review", view: "review", enabled: true },
@@ -119,7 +119,11 @@ function mergeMenu(saved: LabMenuItem[] | undefined): LabMenuItem[] {
   const missing = DEFAULT_LAB_OPERATIONS.menu.filter((item) => !seen.has(item.view));
   const overview = missing.filter((item) => item.view === "overview");
   const rest = missing.filter((item) => item.view !== "overview");
-  return [...overview, ...known, ...rest];
+  return [...overview, ...known, ...rest].map((item) =>
+    item.view === "overview" && (!item.label.trim() || item.label.trim() === "Overview")
+      ? { ...item, label: "Operations Overview" }
+      : item,
+  );
 }
 
 const COLUMN_IDS = new Set(DEFAULT_LAB_OPERATIONS.columns.map((column) => column.id));

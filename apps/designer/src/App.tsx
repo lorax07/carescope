@@ -256,6 +256,7 @@ function AppFrame() {
   const dockRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLButtonElement>(null);
+  const brandRef = useRef<HTMLDivElement>(null);
   const suppressClick = useRef(false);
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
   const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
@@ -308,7 +309,7 @@ function AppFrame() {
     }
     const dock = dockRef.current;
     if (!dock) return;
-    const gap = navOpen ? 12 : 0;
+    const gap = navOpen ? 6 : 0;
     const box = dock.getBoundingClientRect();
     const next =
       edge === "left"
@@ -328,7 +329,8 @@ function AppFrame() {
       const header = headerRef.current;
       const logo = logoRef.current;
       const dock = dockRef.current;
-      const logoRight = logo ? Math.ceil(logo.getBoundingClientRect().right) : 72;
+      const brand = brandRef.current;
+      const logoRight = Math.ceil((brand ?? logo)?.getBoundingClientRect().right ?? 72);
       const gap = navOpen && edge === "top" ? 28 : 14;
       setLogoW(logoRight + gap);
       if (edge === "top" && docked && !dragging && !settling && dock) {
@@ -522,79 +524,10 @@ function AppFrame() {
   }
 
   const operationLinks = labOps.menu.filter((item) => item.enabled && item.label.trim());
+  const overviewLink = operationLinks.find((item) => item.view === "overview");
+  const coreLinks = operationLinks.filter((item) => item.view !== "overview");
 
-  return (
-    <div
-      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}`}
-      style={
-        {
-          "--nav-left": `${insets.left}px`,
-          "--nav-right": `${insets.right}px`,
-          "--nav-top": `${insets.top}px`,
-          "--nav-bottom": `${insets.bottom}px`,
-          "--header-h": `${headerH}px`,
-          "--header-logo-w": `${logoW}px`,
-          "--top-nav-slot": `${topSlot}px`,
-        } as CSSProperties
-      }
-      onClickCapture={onShellClickCapture}
-      onClick={onWorkspaceClick}
-    >
-      <div
-        ref={dockRef}
-        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${docked ? " is-docked" : " is-floating"}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
-        style={{ left: navPos.x, top: navPos.y }}
-        onTransitionEnd={(event) => {
-          if (event.target !== dockRef.current) return;
-          if (event.propertyName !== "left" && event.propertyName !== "top") return;
-          if (draggingRef.current) return;
-          window.clearTimeout(settleTimer.current);
-          setSettling(false);
-          setDocked(true);
-          setNearEdge(false);
-        }}
-      >
-        {navOpen ? null : (
-          <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
-            <nav className="lims-nav" aria-label="LIMS modules">
-              {operationLinks.filter((item) => item.view !== "overview").map((item) => (
-                <NavLink
-                  key={item.id}
-                  to={labMenuPath(item.view)}
-                  end={item.view === "overview"}
-                  title={item.label}
-                  aria-label={item.label}
-                  onClick={() => sectionTabs.showSection(item.view)}
-                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
-                >
-                  <span className="lims-nav-icon">
-                    <NavIcon name={item.view} />
-                  </span>
-                </NavLink>
-              ))}
-              {NAV.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  title={item.label}
-                  aria-label={item.label}
-                  onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
-                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
-                >
-                  <span className="lims-nav-icon">
-                    <NavIcon name={sectionFromPath(item.to)} />
-                  </span>
-                </NavLink>
-              ))}
-            </nav>
-            <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
-              {railInitials}
-            </button>
-          </div>
-        )}
-      {navOpen ? (
-      <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
-        <div className="lims-menu-brand">
+  const labEnvironment = (
         <div className="lims-site-block">
           <div className="lims-site">
             <span className="lims-site-dot" />
@@ -649,20 +582,109 @@ function AppFrame() {
             </dl>
           ) : null}
         </div>
+  );
+
+  return (
+    <div
+      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}`}
+      style={
+        {
+          "--nav-left": `${insets.left}px`,
+          "--nav-right": `${insets.right}px`,
+          "--nav-top": `${insets.top}px`,
+          "--nav-bottom": `${insets.bottom}px`,
+          "--header-h": `${headerH}px`,
+          "--header-logo-w": `${logoW}px`,
+          "--top-nav-slot": `${topSlot}px`,
+        } as CSSProperties
+      }
+      onClickCapture={onShellClickCapture}
+      onClick={onWorkspaceClick}
+    >
+      <div
+        ref={dockRef}
+        className={`lims-nav-dock is-${edge}${navOpen ? " is-open" : ""}${docked ? " is-docked" : " is-floating"}${settling ? " is-settling" : ""}${nearEdge ? " is-near" : ""}`}
+        style={{ left: navPos.x, top: navPos.y }}
+        onTransitionEnd={(event) => {
+          if (event.target !== dockRef.current) return;
+          if (event.propertyName !== "left" && event.propertyName !== "top") return;
+          if (draggingRef.current) return;
+          window.clearTimeout(settleTimer.current);
+          setSettling(false);
+          setDocked(true);
+          setNearEdge(false);
+        }}
+      >
+        {navOpen ? null : (
+          <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
+            <nav className="lims-nav" aria-label="LIMS modules">
+              {operationLinks.map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={labMenuPath(item.view)}
+                  end={item.view === "overview"}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(item.view)}
+                  className={({ isActive }) => `lims-nav-item${item.view !== "overview" ? " is-core-child" : " is-core-parent"}${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={item.view} />
+                  </span>
+                </NavLink>
+              ))}
+              {NAV.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  title={item.label}
+                  aria-label={item.label}
+                  onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
+                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={sectionFromPath(item.to)} />
+                  </span>
+                </NavLink>
+              ))}
+            </nav>
+            <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
+              {railInitials}
+            </button>
+          </div>
+        )}
+      {navOpen ? (
+      <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
+        {edge === "top" ? null : (
+        <div className="lims-menu-brand">
+        {labEnvironment}
         </div>
+        )}
 
         <nav className="lims-nav" aria-label="LIMS modules">
-          <p className="lims-nav-label">Sequence Operations</p>
-          {operationLinks.map((item) => (
+          {overviewLink ? (
+            <NavLink
+              key={overviewLink.id}
+              to={labMenuPath(overviewLink.view)}
+              end
+              onClick={() => sectionTabs.showSection(overviewLink.view)}
+              className={({ isActive }) => `lims-nav-item is-core-parent${isActive ? " active" : ""}`}
+            >
+              <span className="lims-nav-icon">
+                <NavIcon name={overviewLink.view} />
+              </span>
+              {overviewLink.label}
+            </NavLink>
+          ) : null}
+          {coreLinks.map((item) => (
               <NavLink
                 key={item.id}
                 to={labMenuPath(item.view)}
-                end={item.view === "overview"}
                 onClick={() => {
                   sectionTabs.showSection(item.view);
                 }}
                 className={({ isActive }) =>
-                  `lims-nav-item lims-nav-sub${isActive ? " active" : ""}`
+                  `lims-nav-item is-core-child${isActive ? " active" : ""}`
                 }
               >
                 <span className="lims-nav-icon">
@@ -717,6 +739,7 @@ function AppFrame() {
       </div>
 
       <header className="lims-topbar" ref={headerRef}>
+        <div className="lims-topbar-brand" ref={brandRef}>
         <button
           ref={logoRef}
           type="button"
@@ -731,6 +754,8 @@ function AppFrame() {
           <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
           <SequenceStageMark stages={stages.length ? stages : DEFAULT_WORKFLOW_STAGES} />
         </button>
+        {edge === "top" ? <div className="lims-topbar-site">{labEnvironment}</div> : null}
+        </div>
         <div className="lims-topbar-nav-slot" aria-hidden="true" />
         <div className="lims-search">
           <input
