@@ -6,11 +6,11 @@ import "./landing.css";
 const CORE_PLANS = [
   { plan: "Starter", volume: "Under 10K", price: "1st year free, then $15K / year" },
   { plan: "Essential", volume: "10K–25K", price: "$50K / year" },
-  { plan: "Essential", volume: "25K–50K", price: "$100K / year" },
+  { plan: "Professional", volume: "25K–50K", price: "$100K / year" },
   { plan: "Growth", volume: "50K–100K", price: "$200K / year" },
   { plan: "Scale", volume: "100K–250K", price: "$400K / year" },
-  { plan: "Essential", volume: "250K–500K", price: "$800K / year" },
-  { plan: "Essential", volume: "500K–1M", price: "$1.6M / year" },
+  { plan: "Advanced", volume: "250K–500K", price: "$800K / year" },
+  { plan: "Premier", volume: "500K–1M", price: "$1.6M / year" },
   { plan: "Enterprise", volume: "1M+", price: "Custom" },
 ] as const;
 
