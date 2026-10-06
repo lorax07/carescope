@@ -2,17 +2,21 @@ import type { SampleCondition } from "../samples";
 import { CONDITION_LABEL } from "../samples";
 import type { WorkflowStage } from "../workflowStages";
 
-const ICON = {
-  viewBox: "0 0 16 16",
-  width: 12,
-  height: 12,
-  "aria-hidden": true,
-} as const;
-
-function StageGlyph({ stage, filled }: { stage: WorkflowStage; filled: boolean }) {
+export function StageGlyph({
+  stage,
+  filled,
+  size = 12,
+}: {
+  stage: WorkflowStage;
+  filled: boolean;
+  size?: number;
+}) {
   const color = filled ? stage.color : "#c5cdd8";
   const common = {
-    ...ICON,
+    viewBox: "0 0 16 16",
+    width: size,
+    height: size,
+    "aria-hidden": true,
     fill: filled ? color : "none",
     stroke: color,
     strokeWidth: filled ? 1.2 : 1.45,
@@ -78,6 +82,19 @@ function StageGlyph({ stage, filled }: { stage: WorkflowStage; filled: boolean }
     <svg {...common}>
       <path d="M8 2.2 13.8 8 8 13.8 2.2 8 8 2.2Z" />
     </svg>
+  );
+}
+
+export function SequenceStageMark({ stages }: { stages: WorkflowStage[] }) {
+  const shown = stages.slice(0, 6);
+  return (
+    <span className="sequence-stage-mark" aria-hidden="true">
+      {shown.map((stage) => (
+        <i key={stage.id}>
+          <StageGlyph stage={stage} filled size={8} />
+        </i>
+      ))}
+    </span>
   );
 }
 

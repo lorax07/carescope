@@ -15,35 +15,22 @@ import { StageConditionCell } from "../components/StageConditionCell";
 import { isSampleFlagged, reasonsForSample, useResultFlags } from "../resultFlags";
 import {
   approveSamples,
+  CONDITION_LABEL,
   isOnHold,
   isResulted,
   reviewStatus,
   testNames,
   useReviewApprovals,
   useSamples,
+  type SampleCondition,
   type SampleRecord,
 } from "../samples";
+import { matchesConditionFilter, matchesQuickFilter, type QuickFilter } from "../sampleFilters";
 import { useWorkflowStages } from "../workflowStages";
 
-type QuickFilter = "all" | "stat" | "testing" | "review" | "hold" | `priority:${string}`;
 type ReviewFilter = "all" | "individual" | "batch";
 
-const QUICK_FILTERS: { id: QuickFilter; label: string }[] = [
-  { id: "all", label: "All open" },
-  { id: "stat", label: "STAT" },
-  { id: "testing", label: "In testing" },
-  { id: "review", label: "Review" },
-  { id: "hold", label: "On hold" },
-];
-
-function matchesQuickFilter(sample: SampleRecord, filter: QuickFilter): boolean {
-  if (filter === "all") return true;
-  if (filter.startsWith("priority:")) return sample.priority === filter.slice("priority:".length);
-  if (filter === "stat") return sample.priority === "STAT";
-  if (filter === "testing") return sample.status === "testing";
-  if (filter === "review") return sample.status === "review";
-  return isOnHold(sample);
-}
+const CONDITION_OPTIONS = Object.entries(CONDITION_LABEL) as [SampleCondition, string][];
 
 function wildcardMatch(text: string, query: string): boolean {
   const cleaned = query.trim();
@@ -300,6 +287,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [filter, setFilter] = useState<QuickFilter>("all");
+  const [conditionFilters, setConditionFilters] = useState<SampleCondition[]>([]);
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
   const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [resultWindow, setResultWindow] = useState<{ samples: SampleRecord[]; authorize: boolean } | null>(null);
@@ -308,7 +296,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [clientFilters, setClientFilters] = useState<string[]>([]);
   const [clientQuery, setClientQuery] = useState("");
   const [rowQuery, setRowQuery] = useState("");
-  const [openFilter, setOpenFilter] = useState<"tests" | "clients" | null>(null);
+  const [openFilter, setOpenFilter] = useState<"tests" | "clients" | "condition" | null>(null);
   const [tableSort, setTableSort] = useState<{ field: "tests" | "clients"; direction: "asc" | "desc" } | null>(null);
   const [testingOpen, setTestingOpen] = useState(false);
   const copy = VIEW_COPY[view];
@@ -318,6 +306,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const clientOptions = [...new Set(contextRows.map((sample) => sample.client))].sort();
   const rows = contextRows
     .filter((sample) => matchesQuickFilter(sample, filter))
+    .filter((sample) => matchesConditionFilter(sample, conditionFilters))
     .filter((sample) => testFilters.length === 0 || testFilters.some((test) => testNames(sample).includes(test)))
     .filter((sample) => wildcardMatch(testNames(sample).join(" "), testQuery))
     .filter((sample) => clientFilters.length === 0 || clientFilters.includes(sample.client))
@@ -366,6 +355,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
 
   function resetTableFilters() {
     setFilter("all");
+    setConditionFilters([]);
     setReviewFilter("all");
     setTestFilters([]);
     setClientFilters([]);
@@ -374,6 +364,12 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
     setRowQuery("");
     setOpenFilter(null);
     setTableSort(null);
+  }
+
+  function toggleCondition(label: string) {
+    const match = CONDITION_OPTIONS.find(([, name]) => name === label)?.[0];
+    if (!match) return;
+    setConditionFilters((current) => (current.length === 1 && current[0] === match ? [] : [match]));
   }
   const pageButtons = buttons.filter((button) => button.enabled && button.views.includes(view) && button.id !== "viewResults");
   const viewResultsButton = buttons.find((button) => button.id === "viewResults");
@@ -429,7 +425,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       : view === "testing"
         ? [{ id: "all" as QuickFilter, label: "In Testing" }]
         : view === "home"
-          ? QUICK_FILTERS
+          ? stages.map((stage) => ({ id: `stage:${stage.id}` as QuickFilter, label: stage.label }))
           : [];
   const statusSearchLabel = view === "release" ? "Ready for Release" : view === "testing" ? "In Testing" : view === "review" ? "In Review" : "All open";
 
@@ -557,7 +553,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           <SearchableFilter label="In Review" query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active />
         ) : null}
         {view !== "review" ? (
-          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active={filter === "all"} />
+          <SearchableFilter label={statusSearchLabel} query={rowQuery} onQuery={setRowQuery} onActivate={resetTableFilters} active={filter === "all" && conditionFilters.length === 0} />
         ) : null}
         {view === "review"
           ? (["individual", "batch"] as const).map((item) => (
@@ -585,6 +581,18 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
                 {item.label}
               </button>
             ))}
+        <SearchableFilter
+          label="Condition"
+          options={CONDITION_OPTIONS.map(([, name]) => name)}
+          selected={conditionFilters.map((item) => CONDITION_LABEL[item])}
+          query=""
+          open={openFilter === "condition"}
+          onOpenChange={(open) => setOpenFilter(open ? "condition" : null)}
+          onToggle={toggleCondition}
+          onClear={() => setConditionFilters([])}
+          onQuery={() => undefined}
+          active={conditionFilters.length > 0}
+        />
       </div>
 
       <section className="lims-panel">

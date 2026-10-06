@@ -7,10 +7,12 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
+import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
+import { DEFAULT_WORKFLOW_STAGES, useWorkflowStages } from "./workflowStages";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -252,12 +254,17 @@ function AppFrame() {
   openEdgeRef.current = openEdge;
   draggingRef.current = dragging;
   const dockRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLButtonElement>(null);
   const suppressClick = useRef(false);
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }));
   const [insets, setInsets] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const [headerH, setHeaderH] = useState(62);
+  const [logoW, setLogoW] = useState(72);
+  const [topSlot, setTopSlot] = useState(0);
   const now = useLocalClock();
+  const stages = useWorkflowStages();
   const edge = openEdge;
-  const horizontal = edge === "top";
   const signedInName = lims?.username ?? "M. Chen";
   const railInitials =
     signedInName
@@ -308,13 +315,29 @@ function AppFrame() {
         ? { left: Math.ceil(box.right + gap), right: 0, top: 0, bottom: 0 }
         : edge === "right"
           ? { left: 0, right: Math.ceil(window.innerWidth - box.left + gap), top: 0, bottom: 0 }
-          : { left: 0, right: 0, top: Math.ceil(box.bottom + gap), bottom: 0 };
+          : { left: 0, right: 0, top: 0, bottom: 0 };
     setInsets((current) =>
       current.left === next.left && current.right === next.right && current.top === next.top && current.bottom === next.bottom
         ? current
         : next,
     );
-  }, [navOpen, navPos, edge, viewport, infraOpen, horizontal, dragging, settling, docked, dockTick]);
+  }, [navOpen, navPos, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
+
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const logo = logoRef.current;
+    const dock = dockRef.current;
+    if (logo) setLogoW(Math.ceil(logo.getBoundingClientRect().right) + 12);
+    if (edge === "top" && docked && !dragging && !settling && dock) {
+      setTopSlot(Math.max(0, Math.ceil(dock.getBoundingClientRect().width)));
+      const dockH = Math.ceil(dock.getBoundingClientRect().height);
+      const headerHgt = header?.offsetHeight ?? 62;
+      setHeaderH(Math.max(headerHgt, dockH));
+    } else {
+      setTopSlot(0);
+      if (header) setHeaderH(header.offsetHeight);
+    }
+  }, [navOpen, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
     if (!docked || dragging || settling) return;
@@ -502,6 +525,9 @@ function AppFrame() {
           "--nav-right": `${insets.right}px`,
           "--nav-top": `${insets.top}px`,
           "--nav-bottom": `${insets.bottom}px`,
+          "--header-h": `${headerH}px`,
+          "--header-logo-w": `${logoW}px`,
+          "--top-nav-slot": `${topSlot}px`,
         } as CSSProperties
       }
       onClickCapture={onShellClickCapture}
@@ -521,21 +547,6 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
-        <button
-          type="button"
-          className="sequence-nav-toggle"
-          aria-expanded={navOpen}
-          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            beginNavDrag(event, { toggle: true });
-          }}
-        >
-          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
-          <span className="sequence-dot-mark" aria-hidden="true">
-            {Array.from({ length: 6 }, (_, index) => <i key={index} />)}
-          </span>
-        </button>
         {navOpen ? null : (
           <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
             <nav className="lims-nav" aria-label="LIMS modules">
@@ -698,22 +709,38 @@ function AppFrame() {
       ) : null}
       </div>
 
+      <header className="lims-topbar" ref={headerRef}>
+        <button
+          ref={logoRef}
+          type="button"
+          className="sequence-nav-toggle"
+          aria-expanded={navOpen}
+          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            beginNavDrag(event, { toggle: true });
+          }}
+        >
+          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
+          <SequenceStageMark stages={stages.length ? stages : DEFAULT_WORKFLOW_STAGES} />
+        </button>
+        <div className="lims-topbar-nav-slot" aria-hidden="true" />
+        <div className="lims-search">
+          <input
+            type="search"
+            placeholder="Search accession, order, client…"
+            aria-label="Search laboratory records"
+          />
+        </div>
+        <div className="lims-topbar-meta">
+          <time className="lims-chip" dateTime={now.toISOString()}>
+            {signedInName} · {now.toLocaleString()}
+          </time>
+          <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
+        </div>
+      </header>
+
       <div className="lims-main">
-        <header className="lims-topbar">
-          <div className="lims-search">
-            <input
-              type="search"
-              placeholder="Search accession, order, client…"
-              aria-label="Search laboratory records"
-            />
-          </div>
-          <div className="lims-topbar-meta">
-            <time className="lims-chip" dateTime={now.toISOString()}>
-              {signedInName} · {now.toLocaleString()}
-            </time>
-            <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
-          </div>
-        </header>
         <div
           ref={workspaceRef}
           className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}`}
