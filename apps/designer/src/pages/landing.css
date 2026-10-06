@@ -1438,6 +1438,16 @@
   margin: 0;
 }
 
+.lp-native-pair-title {
+  display: block;
+  margin: 0 0 0.18rem;
+  color: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
 .lp-native-pair article.is-sequence {
   background: #e7f8f5;
 }

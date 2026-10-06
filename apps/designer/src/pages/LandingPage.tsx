@@ -105,24 +105,34 @@ const TOPICS: Topic[] = [
 
 const OPERATIONS_PAIRS = [
   {
-    issue: "The sample queue lives in spreadsheets, inboxes, and conversations at the bench.",
-    solution: "Home, Testing, Review, and Release are stages of the same accession, so the queue is the work.",
+    issueTitle: "Work is scattered.",
+    issue: "Samples live across spreadsheets and inboxes.",
+    solutionTitle: "One connected queue.",
+    solution: "Samples move through one workflow.",
   },
   {
-    issue: "Priority, holds, and location are tracked outside the workflow.",
-    solution: "Priority, site, and hold stay on the sample. The list shows open, in testing, in review, or ready for release.",
+    issueTitle: "Details are disconnected.",
+    issue: "Priority, holds, and location live elsewhere.",
+    solutionTitle: "Everything stays together.",
+    solution: "Key sample details are visible in one place.",
   },
   {
-    issue: "Instrument status and the current run step are only visible by walking to the bench.",
-    solution: "A current run shows the instrument, the step, the samples, and the control panel when it is integrated.",
+    issueTitle: "Testing is hard to see.",
+    issue: "Run status often lives at the bench.",
+    solutionTitle: "Testing is visible.",
+    solution: "See runs, instruments, steps, and samples.",
   },
   {
-    issue: "Flags, reviewer identity, and release evidence are assembled after testing is finished.",
-    solution: "Review covers a sample or a batch, with flags, a reviewer PIN, and authorization before release.",
+    issueTitle: "Review is a separate step.",
+    issue: "Release evidence gets assembled later.",
+    solutionTitle: "Review is built in.",
+    solution: "Review and release from the workflow.",
   },
   {
-    issue: "Deviations, CAPA, signatures, and the audit trail live in separate binders until an inspection.",
-    solution: "Sequence Compliance keeps that quality work on the accession, so the audit trail is the inspection file.",
+    issueTitle: "Compliance is fragmented.",
+    issue: "Quality records live in separate places.",
+    solutionTitle: "Compliance stays connected.",
+    solution: "Keep records and audit history together.",
   },
 ] as const;
 
@@ -149,7 +159,16 @@ const INTEGRATION_PAIRS = [
   },
 ] as const;
 
-function CompareLists({ pairs }: { pairs: readonly { issue: string; solution: string }[] }) {
+function CompareLists({
+  pairs,
+}: {
+  pairs: readonly {
+    issue: string;
+    solution: string;
+    issueTitle?: string;
+    solutionTitle?: string;
+  }[];
+}) {
   return (
     <div className="lp-native-comparison lp-native-lists lp-native-pairs">
       <div className="lp-native-pairs-head-row">
@@ -167,14 +186,20 @@ function CompareLists({ pairs }: { pairs: readonly { issue: string; solution: st
         <div className="lp-native-pair" key={pair.issue}>
           <article>
             <span>{index + 1}</span>
-            <p>{pair.issue}</p>
+            <div>
+              {pair.issueTitle ? <strong className="lp-native-pair-title">{pair.issueTitle}</strong> : null}
+              <p>{pair.issue}</p>
+            </div>
           </article>
           <span className="lp-native-pairs-solves" aria-hidden="true">
             →
           </span>
           <article className="is-sequence">
             <span>{index + 1}</span>
-            <p>{pair.solution}</p>
+            <div>
+              {pair.solutionTitle ? <strong className="lp-native-pair-title">{pair.solutionTitle}</strong> : null}
+              <p>{pair.solution}</p>
+            </div>
           </article>
         </div>
       ))}
