@@ -111,11 +111,11 @@ export const MARKETING_MODULES: MarketingModule[] = [
       "The account, the agreement, and the laboratory work live apart. A client call starts with three searches, and the person on the phone cannot see the accessions already in the lab.",
     solutionTitle: "One client record for the account and the work",
     solution:
-      "Sequence Client holds contacts, agreements, pipeline, and the laboratory work under that name. It is the same account table Sequence Revenue and the sample pages use.",
+      "Sequence Client holds contacts, agreements, pipeline, issues, and the laboratory work under that name. It is the same account table Sequence Revenue and the sample pages use.",
     points: [
-      "Accounts, owners, and health sit on the client record",
-      "Open opportunities stay with the account",
-      "Accessions for that client come from the laboratory queue",
+      "Work queues show which clients need a person today",
+      "Health is explained from holds, denials, issues, and overdue tasks",
+      "Accessions and claims stay on their own records",
     ],
     icon: (
       <svg viewBox="0 0 32 32" width="28" height="28">

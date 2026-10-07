@@ -1835,6 +1835,15 @@ a {
   align-items: flex-start;
 }
 
+.rcm-health-block {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rcm-health-block:last-child {
+  border-bottom: 0;
+}
+
 .rcm-subnav {
   margin-bottom: 0.55rem;
 }

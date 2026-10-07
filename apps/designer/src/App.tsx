@@ -11,6 +11,7 @@ import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { RCM_SUBNAV } from "./pages/rcm/RcmShell";
+import { CRM_SUBNAV } from "./pages/crm/CrmShell";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 import { DEFAULT_WORKFLOW_STAGES, useWorkflowStages } from "./workflowStages";
@@ -699,41 +700,44 @@ function AppFrame() {
                 {item.label}
               </NavLink>
             ))}
-          {NAV.map((item) => (
+          {NAV.map((item) => {
+            const nested =
+              item.to === "/app/billing" ? RCM_SUBNAV.filter((sub) => !sub.end) : item.to === "/app/connectivity" ? CRM_SUBNAV.filter((sub) => !sub.end) : [];
+            const section = sectionFromPath(item.to);
+            const parent = nested.length > 0;
+            return (
             <Fragment key={item.to}>
             <NavLink
-              key={item.to}
               to={item.to}
               onClick={() => {
-                sectionTabs.showSection(sectionFromPath(item.to));
+                sectionTabs.showSection(section);
               }}
               className={({ isActive }) =>
-                `lims-nav-item${item.to === "/app/billing" ? " is-core-parent" : ""}${isActive ? " active" : ""}`
+                `lims-nav-item${parent ? " is-core-parent" : ""}${isActive ? " active" : ""}`
               }
-              end={item.to === "/app/billing"}
+              end={parent}
             >
               <span className="lims-nav-icon">
-                <NavIcon name={sectionFromPath(item.to)} />
+                <NavIcon name={section} />
               </span>
               {item.label}
             </NavLink>
-            {item.to === "/app/billing"
-              ? RCM_SUBNAV.filter((sub) => !sub.end).map((sub) => (
+            {nested.map((sub) => (
                   <NavLink
                     key={sub.to}
                     to={sub.to}
-                    onClick={() => sectionTabs.showSection("billing")}
+                    onClick={() => sectionTabs.showSection(section)}
                     className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
                   >
                     <span className="lims-nav-icon">
-                      <NavIcon name="billing" />
+                      <NavIcon name={section} />
                     </span>
                     {sub.label}
                   </NavLink>
-                ))
-              : null}
+                ))}
             </Fragment>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="lims-sidebar-foot">

@@ -45,7 +45,7 @@ export const LAB_MODULE_CATALOG: LabModuleDef[] = [
     label: "Sequence Client",
     positioning: "This is an RCM for accounts, pipeline, and lab work",
     capabilities:
-      "Shared account table, contacts, pipeline, activities, service agreements, laboratory work, revenue handoff",
+      "Shared account table, client 360, contacts, activities, tasks, opportunities, client health, communications, service issues, agreements, CRM analytics, revenue and laboratory handoff",
   },
   {
     id: "quality_compliance",

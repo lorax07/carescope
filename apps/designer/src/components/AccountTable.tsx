@@ -5,7 +5,7 @@ import { accountRevenueLabel, useRevenue } from "../revenueCycle";
 import { useSamples } from "../samples";
 
 export function accountPath(accountId: string): string {
-  return `/app/connectivity?account=${accountId}`;
+  return `/app/connectivity/clients/${accountId}`;
 }
 
 export function AccountLink({ name }: { name: string }) {

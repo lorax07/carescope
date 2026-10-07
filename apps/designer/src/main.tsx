@@ -32,7 +32,18 @@ import { RcmDenialsPage } from "./pages/rcm/RcmDenialsPage";
 import { RcmOverviewPage } from "./pages/rcm/RcmOverviewPage";
 import { RcmPaymentsPage } from "./pages/rcm/RcmPaymentsPage";
 import { RcmQueuesPage } from "./pages/rcm/RcmQueuesPage";
-import { SequenceClientPage } from "./pages/SequenceClientPage";
+import { CrmActivitiesPage } from "./pages/crm/CrmActivitiesPage";
+import { CrmAnalyticsPage } from "./pages/crm/CrmAnalyticsPage";
+import { CrmClientDetailPage } from "./pages/crm/CrmClientDetailPage";
+import { CrmClientsPage } from "./pages/crm/CrmClientsPage";
+import { CrmCommunicationsPage } from "./pages/crm/CrmCommunicationsPage";
+import { CrmContactsPage } from "./pages/crm/CrmContactsPage";
+import { CrmDocumentsPage } from "./pages/crm/CrmDocumentsPage";
+import { CrmHealthPage } from "./pages/crm/CrmHealthPage";
+import { CrmIssuesPage } from "./pages/crm/CrmIssuesPage";
+import { CrmOpportunitiesPage } from "./pages/crm/CrmOpportunitiesPage";
+import { CrmOverviewPage } from "./pages/crm/CrmOverviewPage";
+import { CrmTasksPage } from "./pages/crm/CrmTasksPage";
 import { InsightsChatPage } from "./pages/InsightsChatPage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { WorkflowDesignPage } from "./pages/WorkflowDesignPage";
@@ -47,6 +58,13 @@ function BillingIndex() {
     return <Navigate to={`/app/billing/capture?${params.toString()}`} replace />;
   }
   return <RcmOverviewPage />;
+}
+
+function ClientIndex() {
+  const [params] = useSearchParams();
+  const account = params.get("account");
+  if (account) return <Navigate to={`/app/connectivity/clients/${account}`} replace />;
+  return <CrmOverviewPage />;
 }
 
 function WorkflowRedirect() {
@@ -100,7 +118,18 @@ createRoot(document.getElementById("root")!).render(
           <Route path="results" element={<ResultsPage />} />
           <Route path="instruments/:instrumentId" element={<InstrumentRecordPage />} />
           <Route path="instruments" element={<InstrumentInterfacePage />} />
-          <Route path="connectivity" element={<SequenceClientPage />} />
+          <Route path="connectivity/clients/:accountId" element={<CrmClientDetailPage />} />
+          <Route path="connectivity/clients" element={<CrmClientsPage />} />
+          <Route path="connectivity/contacts" element={<CrmContactsPage />} />
+          <Route path="connectivity/activities" element={<CrmActivitiesPage />} />
+          <Route path="connectivity/tasks" element={<CrmTasksPage />} />
+          <Route path="connectivity/opportunities" element={<CrmOpportunitiesPage />} />
+          <Route path="connectivity/health" element={<CrmHealthPage />} />
+          <Route path="connectivity/communications" element={<CrmCommunicationsPage />} />
+          <Route path="connectivity/issues" element={<CrmIssuesPage />} />
+          <Route path="connectivity/documents" element={<CrmDocumentsPage />} />
+          <Route path="connectivity/analytics" element={<CrmAnalyticsPage />} />
+          <Route path="connectivity" element={<ClientIndex />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="quality" element={<QualityPage />} />
           <Route path="billing/claims/:claimId" element={<RcmClaimDetailPage />} />
