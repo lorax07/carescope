@@ -25,6 +25,16 @@ const NAV = [
   { to: "/app/insights", label: "Sequence Insights" },
 ] as const;
 
+function nestedNavFor(to: string) {
+  if (to === "/app/billing") return RCM_SUBNAV.filter((sub) => !sub.end);
+  if (to === "/app/connectivity") return CRM_SUBNAV.filter((sub) => !sub.end);
+  return [];
+}
+
+function navGlyph(to: string, fallback: string) {
+  return to.split("/").filter(Boolean).at(-1) ?? fallback;
+}
+
 function useLocalClock(): Date {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -173,11 +183,180 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "clients") {
+    return (
+      <svg {...common}>
+        <circle cx="9" cy="8" r="2.1" />
+        <circle cx="16" cy="9" r="1.8" />
+        <path d="M4.6 18.5a4.2 4.2 0 0 1 8.4 0M13.2 18.5a3.4 3.4 0 0 1 6.2 0" />
+      </svg>
+    );
+  }
+  if (name === "contacts") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="8" r="2.4" />
+        <path d="M6 19a6 6 0 0 1 12 0" />
+      </svg>
+    );
+  }
+  if (name === "activities") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 8v4.5L15 14" />
+      </svg>
+    );
+  }
+  if (name === "tasks") {
+    return (
+      <svg {...common}>
+        <path d="M8 6h11M8 12h11M8 18h11" />
+        <path d="m4 6 1.2 1.2L7.2 5M4 12l1.2 1.2L7.2 11M4 18l1.2 1.2L7.2 17" />
+      </svg>
+    );
+  }
+  if (name === "opportunities") {
+    return (
+      <svg {...common}>
+        <path d="M5 16 10 10l3 3 6-7" />
+        <path d="M15 6h4v4" />
+      </svg>
+    );
+  }
+  if (name === "health") {
+    return (
+      <svg {...common}>
+        <path d="M12 19s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7a3.8 3.8 0 0 1 7 2.8C19 14.6 12 19 12 19z" />
+      </svg>
+    );
+  }
+  if (name === "communications") {
+    return (
+      <svg {...common}>
+        <path d="M5 6h14v9H8l-3 3V6z" />
+      </svg>
+    );
+  }
+  if (name === "issues") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 8v5M12 16.5h.01" />
+      </svg>
+    );
+  }
+  if (name === "documents") {
+    return (
+      <svg {...common}>
+        <path d="M7 4h7l4 4v12H7V4z" />
+        <path d="M14 4v4h4" />
+      </svg>
+    );
+  }
+  if (name === "analytics") {
+    return (
+      <svg {...common}>
+        <path d="M5 19V10M10 19V5M15 19v-7M20 19V8" />
+      </svg>
+    );
+  }
+  if (name === "claims") {
+    return (
+      <svg {...common}>
+        <rect x="5" y="4" width="14" height="16" rx="1.5" />
+        <path d="M8 9h8M8 13h8M8 17h5" />
+      </svg>
+    );
+  }
+  if (name === "queues") {
+    return (
+      <svg {...common}>
+        <path d="M4 7h16M4 12h16M4 17h10" />
+      </svg>
+    );
+  }
+  if (name === "payments") {
+    return (
+      <svg {...common}>
+        <rect x="3.5" y="6" width="17" height="12" rx="2" />
+        <path d="M3.5 10h17" />
+      </svg>
+    );
+  }
+  if (name === "denials") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8" />
+        <path d="m9 9 6 6M15 9l-6 6" />
+      </svg>
+    );
+  }
+  if (name === "ar") {
+    return (
+      <svg {...common}>
+        <path d="M5 19 9.5 8h5L19 19M7.2 14h9.6" />
+      </svg>
+    );
+  }
+  if (name === "config") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 4.5v2.2M12 17.3v2.2M4.5 12h2.2M17.3 12h2.2M6.4 6.4l1.6 1.6M16 16l1.6 1.6M17.6 6.4 16 8M8 16l-1.6 1.6" />
+      </svg>
+    );
+  }
   return (
     <svg {...common}>
       <path d="M4 16.5 9 12l3 2.5 6-7" />
       <path d="M14 7.5h4.5V12" />
     </svg>
+  );
+}
+
+function ModuleNavItems({ compact, includeNested }: { compact: boolean; includeNested: boolean }) {
+  const sectionTabs = useSectionTabs();
+  return (
+    <>
+      {NAV.map((item) => {
+        const nested = includeNested ? nestedNavFor(item.to) : [];
+        const section = sectionFromPath(item.to);
+        const parent = nestedNavFor(item.to).length > 0;
+        return (
+          <Fragment key={item.to}>
+            <NavLink
+              to={item.to}
+              title={compact ? item.label : undefined}
+              aria-label={compact ? item.label : undefined}
+              end={parent}
+              onClick={() => sectionTabs.showSection(section)}
+              className={({ isActive }) => `lims-nav-item${parent ? " is-core-parent" : ""}${isActive ? " active" : ""}`}
+            >
+              <span className="lims-nav-icon">
+                <NavIcon name={section} />
+              </span>
+              {compact ? null : item.label}
+            </NavLink>
+            {nested.map((sub) => (
+              <NavLink
+                key={sub.to}
+                to={sub.to}
+                title={compact ? sub.label : undefined}
+                aria-label={compact ? sub.label : undefined}
+                onClick={() => sectionTabs.showSection(section)}
+                className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+              >
+                <span className="lims-nav-icon">
+                  <NavIcon name={navGlyph(sub.to, section)} />
+                </span>
+                {compact ? null : sub.label}
+              </NavLink>
+            ))}
+          </Fragment>
+        );
+      })}
+    </>
   );
 }
 
@@ -640,20 +819,7 @@ function AppFrame() {
                   </span>
                 </NavLink>
               ))}
-              {NAV.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  title={item.label}
-                  aria-label={item.label}
-                  onClick={() => sectionTabs.showSection(sectionFromPath(item.to))}
-                  className={({ isActive }) => `lims-nav-item${isActive ? " active" : ""}`}
-                >
-                  <span className="lims-nav-icon">
-                    <NavIcon name={sectionFromPath(item.to)} />
-                  </span>
-                </NavLink>
-              ))}
+              <ModuleNavItems compact includeNested={edge !== "top"} />
             </nav>
             <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
               {railInitials}
@@ -700,44 +866,7 @@ function AppFrame() {
                 {item.label}
               </NavLink>
             ))}
-          {NAV.map((item) => {
-            const nested =
-              item.to === "/app/billing" ? RCM_SUBNAV.filter((sub) => !sub.end) : item.to === "/app/connectivity" ? CRM_SUBNAV.filter((sub) => !sub.end) : [];
-            const section = sectionFromPath(item.to);
-            const parent = nested.length > 0;
-            return (
-            <Fragment key={item.to}>
-            <NavLink
-              to={item.to}
-              onClick={() => {
-                sectionTabs.showSection(section);
-              }}
-              className={({ isActive }) =>
-                `lims-nav-item${parent ? " is-core-parent" : ""}${isActive ? " active" : ""}`
-              }
-              end={parent}
-            >
-              <span className="lims-nav-icon">
-                <NavIcon name={section} />
-              </span>
-              {item.label}
-            </NavLink>
-            {nested.map((sub) => (
-                  <NavLink
-                    key={sub.to}
-                    to={sub.to}
-                    onClick={() => sectionTabs.showSection(section)}
-                    className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
-                  >
-                    <span className="lims-nav-icon">
-                      <NavIcon name={section} />
-                    </span>
-                    {sub.label}
-                  </NavLink>
-                ))}
-            </Fragment>
-            );
-          })}
+          <ModuleNavItems compact={false} includeNested={edge !== "top"} />
         </nav>
 
         <div className="lims-sidebar-foot">

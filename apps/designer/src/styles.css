@@ -568,6 +568,7 @@ a {
   flex-wrap: nowrap;
   align-items: center;
   align-content: center;
+  overflow: visible;
 }
 
 .lims-nav-dock.is-docked.is-open.is-top .lims-sidebar {
@@ -757,6 +758,9 @@ a {
   flex-direction: column;
   gap: 0.15rem;
   flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .lims-nav-item {
@@ -809,6 +813,16 @@ a {
 .lims-nav-dock.is-top .lims-nav-item.is-core-child,
 .lims-nav-dock.is-bottom .lims-nav-item.is-core-child {
   margin-left: 0;
+}
+
+.lims-icon-rail .lims-nav-item.is-core-child {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.lims-icon-rail .lims-nav-item.is-core-child .lims-nav-icon {
+  width: 2.1rem;
+  height: 2.1rem;
 }
 
 .lims-sidebar .lims-nav-item.is-core-parent {
