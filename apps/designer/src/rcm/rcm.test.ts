@@ -23,6 +23,8 @@ function sample(): SampleRecord {
     priority: "Routine",
     custody: "Review bench",
     site: "North Lab",
+    labId: "lab-north",
+    instanceId: "demo",
     batchId: null,
   };
 }

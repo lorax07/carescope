@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { readLimsSession } from "./limsSession";
+import { currentInstanceId, labIdFromSite, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type SignatureMeaning = "authorship" | "review" | "approval" | "closure";
 
@@ -32,6 +33,7 @@ export type Deviation = {
   description: string;
   accessionId: string;
   site: string;
+  labId?: string;
   reporter: string;
   status: DeviationStatus;
   containment: string;
@@ -50,6 +52,7 @@ export type Effectiveness = "" | "effective" | "not-effective";
 export type Capa = {
   id: string;
   title: string;
+  labId?: string;
   sourceId: string;
   status: CapaStatus;
   rootCause: string;
@@ -72,6 +75,7 @@ export type ValidationImpact = "" | "none" | "partial" | "full";
 export type ChangeControl = {
   id: string;
   title: string;
+  labId?: string;
   description: string;
   proposer: string;
   status: ChangeStatus;
@@ -91,6 +95,7 @@ export type ControlledDocument = {
   code: string;
   version: number;
   title: string;
+  labId?: string;
   docType: "SOP" | "Method" | "Policy";
   status: DocumentStatus;
   author: string;
@@ -104,6 +109,7 @@ export type ControlledDocument = {
 
 export type QualitySystem = {
   version: 1;
+  instanceId?: string;
   nextAudit: number;
   nextDeviation: number;
   deviations: Deviation[];
@@ -168,6 +174,10 @@ export const DISPOSITIONS: { id: Exclude<Disposition, "">; label: string }[] = [
 ];
 
 const STORAGE_KEY = "carescope.quality.v1";
+
+function qualityKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("quality_compliance", "system", instanceId);
+}
 
 function hash(value: string): string {
   let hashValue = 2166136261;
@@ -282,6 +292,7 @@ function reject(system: QualitySystem, recordId: string, actor: string, reason: 
 function blankDeviation(values: Pick<Deviation, "id" | "kind" | "title" | "description" | "accessionId" | "site" | "reporter">): Deviation {
   return {
     ...values,
+    labId: labIdFromSite(values.site),
     status: "reported",
     containment: "",
     investigation: "",
@@ -517,9 +528,10 @@ function seal(
   audit(system, { at, actor: signer, recordId: record.id, action, reason: `${SIGNATURE_MEANING[meaning]} ${reason}`.trim() });
 }
 
-export function seedQuality(): QualitySystem {
+export function seedQuality(instanceId = currentInstanceId()): QualitySystem {
   const system: QualitySystem = {
     version: 1,
+    instanceId,
     nextAudit: 1000,
     nextDeviation: 119,
     deviations: [],
@@ -687,25 +699,31 @@ export function seedQuality(): QualitySystem {
   return system;
 }
 
-function readQuality(): QualitySystem | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as QualitySystem;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.deviations) || !Array.isArray(parsed.audit)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
+function readQuality(instanceId = currentInstanceId()): QualitySystem | null {
+  const parsed = readJson<QualitySystem>(qualityKey(instanceId), instanceId === "demo" ? [STORAGE_KEY] : []);
+  if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.deviations) || !Array.isArray(parsed.audit)) return null;
+  parsed.instanceId = instanceId;
+  parsed.deviations = parsed.deviations.map((row) => ({ ...row, labId: row.labId || labIdFromSite(row.site) }));
+  return parsed;
 }
 
-let quality: QualitySystem = readQuality() ?? seedQuality();
+const qualityByInstance = new Map<string, QualitySystem>();
 const listeners = new Set<() => void>();
 
+function qualityFor(instanceId = currentInstanceId()): QualitySystem {
+  const cached = qualityByInstance.get(instanceId);
+  if (cached) return cached;
+  const loaded = readQuality(instanceId) ?? seedQuality(instanceId);
+  qualityByInstance.set(instanceId, loaded);
+  return loaded;
+}
+
 function commit(next: QualitySystem) {
-  quality = next;
+  const instanceId = next.instanceId || currentInstanceId();
+  next.instanceId = instanceId;
+  qualityByInstance.set(instanceId, next);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    writeJson(qualityKey(instanceId), next);
   } catch {
     /* The quality record still updates in memory when storage is unavailable. */
   }
@@ -713,6 +731,7 @@ function commit(next: QualitySystem) {
 }
 
 function update(mutator: (draft: QualitySystem) => void) {
+  const quality = qualityFor();
   const draft = structuredClone(quality);
   mutator(draft);
   if (JSON.stringify(draft) === JSON.stringify(quality)) return;
@@ -720,13 +739,13 @@ function update(mutator: (draft: QualitySystem) => void) {
 }
 
 export function getQuality(): QualitySystem {
-  return quality;
+  return qualityFor();
 }
 
 export function useQuality(): QualitySystem {
-  const [state, setState] = useState(quality);
+  const [state, setState] = useState(() => qualityFor());
   useEffect(() => {
-    const sync = () => setState(quality);
+    const sync = () => setState(qualityFor());
     listeners.add(sync);
     return () => {
       listeners.delete(sync);

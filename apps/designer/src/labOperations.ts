@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { currentInstanceId, currentLabId, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type LabMenuView = "overview" | "home" | "testing" | "review" | "release";
 
@@ -46,6 +47,12 @@ export type LabOperationsConfig = {
 
 const KEY = "carescope.labOperations";
 const EVENT = "carescope-lab-ops";
+
+type OperationsByLab = Record<string, LabOperationsConfig>;
+
+function operationsKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("lab_operations", "config", instanceId);
+}
 
 export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
   priorities: ["STAT", "Rush", "Routine"],
@@ -152,27 +159,40 @@ export function labMenuPath(view: LabMenuView): string {
   return `/app/ops/${view}`;
 }
 
-export function readLabOperations(): LabOperationsConfig {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return DEFAULT_LAB_OPERATIONS;
-    const parsed = JSON.parse(raw) as LabOperationsConfig;
-    if (!Array.isArray(parsed.priorities) || !Array.isArray(parsed.menu)) {
-      return DEFAULT_LAB_OPERATIONS;
-    }
-    return {
-      priorities: parsed.priorities,
-      menu: mergeMenu(parsed.menu),
-      columns: mergeColumns(parsed.columns),
-      buttons: mergeButtons(parsed.buttons),
-    };
-  } catch {
-    return DEFAULT_LAB_OPERATIONS;
-  }
+function normalizeConfig(parsed: LabOperationsConfig | undefined): LabOperationsConfig | null {
+  if (!parsed || !Array.isArray(parsed.priorities) || !Array.isArray(parsed.menu)) return null;
+  return {
+    priorities: parsed.priorities,
+    menu: mergeMenu(parsed.menu),
+    columns: mergeColumns(parsed.columns),
+    buttons: mergeButtons(parsed.buttons),
+  };
 }
 
-export function saveLabOperations(config: LabOperationsConfig): void {
-  localStorage.setItem(KEY, JSON.stringify(config));
+function readOperationsMap(instanceId = currentInstanceId()): OperationsByLab {
+  const scoped = readJson<OperationsByLab | LabOperationsConfig>(operationsKey(instanceId), [KEY]);
+  if (!scoped) return {};
+  if ("priorities" in scoped && Array.isArray((scoped as LabOperationsConfig).priorities)) {
+    const config = normalizeConfig(scoped as LabOperationsConfig);
+    return config ? { "": config } : {};
+  }
+  const map: OperationsByLab = {};
+  for (const [labId, config] of Object.entries(scoped)) {
+    const normalized = normalizeConfig(config);
+    if (normalized) map[labId] = normalized;
+  }
+  return map;
+}
+
+export function readLabOperations(labId = currentLabId()): LabOperationsConfig {
+  const map = readOperationsMap();
+  return map[labId] ?? map[""] ?? DEFAULT_LAB_OPERATIONS;
+}
+
+export function saveLabOperations(config: LabOperationsConfig, labId = currentLabId()): void {
+  const map = readOperationsMap();
+  map[labId || ""] = config;
+  writeJson(operationsKey(), map);
   window.dispatchEvent(new Event(EVENT));
 }
 

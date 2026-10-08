@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { currentInstanceId, labIdFromSite, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type InstrumentDoc = {
   name: string;
@@ -17,6 +18,7 @@ export type InstrumentRecord = {
   sequenceId: string | null;
   sample: string | null;
   site: string;
+  instanceId?: string;
   interfaceType: string;
   validation: InstrumentDoc[];
   calibration: InstrumentDoc[];
@@ -25,6 +27,19 @@ export type InstrumentRecord = {
 
 const KEY = "carescope.instruments.added";
 const EVENT = "carescope-instruments";
+
+function instrumentsKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("instrument_integration", "instruments", instanceId);
+}
+
+function withInstrumentScope(item: InstrumentRecord, instanceId: string): InstrumentRecord {
+  return {
+    ...item,
+    clientId: item.clientId ?? "client-apex",
+    labId: item.labId || labIdFromSite(item.site),
+    instanceId: item.instanceId || instanceId,
+  };
+}
 
 export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   {
@@ -138,27 +153,16 @@ export const SEEDED_INSTRUMENTS: InstrumentRecord[] = [
   },
 ];
 
-function readAdded(): InstrumentRecord[] {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as InstrumentRecord[];
-    return Array.isArray(parsed)
-      ? parsed.map((item) => ({
-          ...item,
-          clientId: item.clientId ?? "client-apex",
-          labId: item.labId ?? (item.site?.toLowerCase().includes("east") ? "lab-east" : "lab-north"),
-        }))
-      : [];
-  } catch {
-    return [];
-  }
+function allInstruments(instanceId = currentInstanceId()): InstrumentRecord[] {
+  const parsed = readJson<InstrumentRecord[]>(instrumentsKey(instanceId), [KEY]);
+  const added = Array.isArray(parsed) ? parsed.map((item) => withInstrumentScope(item, instanceId)) : [];
+  return [...SEEDED_INSTRUMENTS.map((item) => withInstrumentScope(item, instanceId)), ...added];
 }
 
 export function useInstruments(): InstrumentRecord[] {
-  const [added, setAdded] = useState(readAdded);
+  const [rows, setRows] = useState(() => allInstruments());
   useEffect(() => {
-    const sync = () => setAdded(readAdded());
+    const sync = () => setRows(allInstruments());
     window.addEventListener(EVENT, sync);
     window.addEventListener("storage", sync);
     return () => {
@@ -166,11 +170,11 @@ export function useInstruments(): InstrumentRecord[] {
       window.removeEventListener("storage", sync);
     };
   }, []);
-  return [...SEEDED_INSTRUMENTS, ...added];
+  return rows;
 }
 
 export function findInstrument(id: string): InstrumentRecord | undefined {
-  return [...SEEDED_INSTRUMENTS, ...readAdded()].find((item) => item.id === id);
+  return allInstruments().find((item) => item.id === id);
 }
 
 export function addInstrument(input: {
@@ -181,10 +185,12 @@ export function addInstrument(input: {
   clientId?: string;
   labId?: string;
 }): InstrumentRecord {
+  const instanceId = currentInstanceId();
   const record: InstrumentRecord = {
     id: `inst-${Date.now()}`,
     clientId: input.clientId ?? "client-apex",
-    labId: input.labId ?? (input.site.toLowerCase().includes("east") ? "lab-east" : "lab-north"),
+    labId: input.labId || labIdFromSite(input.site),
+    instanceId,
     name: input.name.trim(),
     model: input.model.trim(),
     status: "Idle",
@@ -197,8 +203,9 @@ export function addInstrument(input: {
     calibration: [],
     maintenance: [{ name: "Added to Sequence", date: new Date().toISOString().slice(0, 10), detail: "Awaiting qualification" }],
   };
-  const next = [...readAdded(), record];
-  localStorage.setItem(KEY, JSON.stringify(next));
+  const existing = readJson<InstrumentRecord[]>(instrumentsKey(instanceId), [KEY]);
+  const next = [...(Array.isArray(existing) ? existing : []), record];
+  writeJson(instrumentsKey(instanceId), next);
   window.dispatchEvent(new Event(EVENT));
   return record;
 }

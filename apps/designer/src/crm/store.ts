@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CRM_ACCOUNTS, type CrmAccount } from "../crmAccounts";
 import { readLimsSession } from "../limsSession";
+import { currentInstanceId, moduleStorageKey, readJson, writeJson } from "../storageScope";
 import { useQuality, type Deviation } from "../qualitySystem";
 import { findSample, useSamples, type SampleRecord } from "../samples";
 import { rollup, type Charge, type Cycle, useRevenue } from "../revenueCycle";
@@ -26,12 +27,7 @@ import { PIPELINE_STAGES } from "./types";
 const EVENT = "carescope-crm";
 
 export function crmTenantId(): string {
-  try {
-    const session = readLimsSession();
-    return session?.databaseName || session?.clientName || "demo";
-  } catch {
-    return "demo";
-  }
+  return currentInstanceId();
 }
 
 export function crmActor(): string {
@@ -48,7 +44,7 @@ export function crmCanWrite(): boolean {
 }
 
 function storageKey(tenantId: string): string {
-  return `carescope.crm.v1:${tenantId}`;
+  return moduleStorageKey("connectivity", "overlay", tenantId);
 }
 
 function stamp(): string {
@@ -192,15 +188,9 @@ function seedOverlay(tenantId: string): CrmOverlay {
 }
 
 function readOverlay(tenantId: string): CrmOverlay {
-  try {
-    const raw = localStorage.getItem(storageKey(tenantId));
-    if (!raw) return seedOverlay(tenantId);
-    const parsed = JSON.parse(raw) as CrmOverlay;
-    if (!parsed || parsed.version !== 1 || parsed.tenantId !== tenantId) return seedOverlay(tenantId);
-    return parsed;
-  } catch {
-    return seedOverlay(tenantId);
-  }
+  const parsed = readJson<CrmOverlay>(storageKey(tenantId), [`carescope.crm.v1:${tenantId}`]);
+  if (!parsed || parsed.version !== 1 || parsed.tenantId !== tenantId) return seedOverlay(tenantId);
+  return parsed;
 }
 
 const overlays = new Map<string, CrmOverlay>();
@@ -217,7 +207,7 @@ function overlayFor(tenantId: string): CrmOverlay {
 function commit(overlay: CrmOverlay) {
   overlays.set(overlay.tenantId, overlay);
   try {
-    localStorage.setItem(storageKey(overlay.tenantId), JSON.stringify(overlay));
+    writeJson(storageKey(overlay.tenantId), overlay);
   } catch {
     /* Keep the overlay in memory if storage is full. */
   }
