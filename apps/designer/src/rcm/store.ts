@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { readLimsSession } from "../limsSession";
+import { currentInstanceId, moduleStorageKey, readJson, writeJson } from "../storageScope";
 import {
   getCycle,
   money,
@@ -16,12 +17,7 @@ import type { AuditEvent, Claim, Denial, Payment, Remittance, RcmNote, RcmOverla
 const EVENT = "carescope-rcm";
 
 export function rcmTenantId(): string {
-  try {
-    const session = readLimsSession();
-    return session?.databaseName || session?.clientName || "demo";
-  } catch {
-    return "demo";
-  }
+  return currentInstanceId();
 }
 
 export function rcmActor(): string {
@@ -38,7 +34,7 @@ export function rcmCanWrite(): boolean {
 }
 
 function storageKey(tenantId: string): string {
-  return `carescope.rcm.v1:${tenantId}`;
+  return moduleStorageKey("billing_revenue", "overlay", tenantId);
 }
 
 function seedOverlay(tenantId: string, cycle: Cycle): RcmOverlay {
@@ -152,15 +148,9 @@ function seedOverlay(tenantId: string, cycle: Cycle): RcmOverlay {
 }
 
 function readOverlay(tenantId: string, cycle: Cycle): RcmOverlay {
-  try {
-    const raw = localStorage.getItem(storageKey(tenantId));
-    if (!raw) return seedOverlay(tenantId, cycle);
-    const parsed = JSON.parse(raw) as RcmOverlay;
-    if (!parsed || parsed.version !== 1 || parsed.tenantId !== tenantId) return seedOverlay(tenantId, cycle);
-    return parsed;
-  } catch {
-    return seedOverlay(tenantId, cycle);
-  }
+  const parsed = readJson<RcmOverlay>(storageKey(tenantId), [`carescope.rcm.v1:${tenantId}`]);
+  if (!parsed || parsed.version !== 1 || parsed.tenantId !== tenantId) return seedOverlay(tenantId, cycle);
+  return parsed;
 }
 
 const overlays = new Map<string, RcmOverlay>();
@@ -183,7 +173,7 @@ function stamp(): string {
 function commit(overlay: RcmOverlay) {
   overlays.set(overlay.tenantId, overlay);
   try {
-    localStorage.setItem(storageKey(overlay.tenantId), JSON.stringify(overlay));
+    writeJson(storageKey(overlay.tenantId), overlay);
   } catch {
     /* Keep the overlay in memory if storage is full. */
   }

@@ -196,7 +196,16 @@ function InfrastructureCase({
         <div className="is-sql-head">
           <h3>Database IDE</h3>
           <div className="is-sql-chips">
-            {["SHOW TABLES", "SELECT * FROM labs", "SELECT * FROM samples", "SELECT * FROM instruments", "SELECT * FROM contacts"].map(
+            {[
+              "SHOW TABLES",
+              "SHOW INSTANCES",
+              "SELECT * FROM labs",
+              "SELECT * FROM lab_operations.samples",
+              "SELECT * FROM lab_operations.samples WHERE lab_id = 'lab-north'",
+              "SELECT * FROM quality_compliance.deviations",
+              "SELECT * FROM billing_revenue.claims",
+              "SELECT * FROM contacts",
+            ].map(
               (example) => (
                 <button key={example} type="button" className="is-chip-btn" onClick={() => setSql(example)}>
                   {example}
@@ -236,7 +245,10 @@ function InfrastructureCase({
           </tbody>
         </table>
       ) : (
-        <p className="is-muted">Run SHOW TABLES or SELECT * FROM a known table to inspect this environment.</p>
+        <p className="is-muted">
+          Each module is a storage instance in this account environment. Lab groups are lab_id on the rows. Run SHOW
+          TABLES, SHOW INSTANCES, or SELECT * FROM a module table.
+        </p>
       )}
       </div>
     </div>

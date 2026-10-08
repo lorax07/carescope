@@ -125,6 +125,8 @@ describe("quality system", () => {
       site: "North Lab",
     }, "M. Chen", TODAY).ok).toBe(true);
     expect(system.deviations[0]?.id).toBe("DEV-119");
+    expect(system.deviations[0]?.labId).toBe("lab-north");
+    expect(system.instanceId).toBe("demo");
     expect(system.audit.length).toBeGreaterThan(before);
     expect(system.audit.at(-1)?.action).toBe("Deviation reported");
   });

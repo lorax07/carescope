@@ -9,6 +9,7 @@ import type {
   QueryResult,
   TicketMessage,
 } from "./api";
+import { INFRA_QUERY_HELP, moduleInstanceList, moduleInstanceTables, selectModuleTable } from "./moduleTables";
 
 export type LabModuleId =
   | "lab_operations"
@@ -162,12 +163,7 @@ export function buildDossier(client: Client, labs: Lab[]): ClientDossier {
       host: `db.${client.slug}.intrasite.internal`,
       region: "us-east-1",
       isolation: "dedicated_database",
-      tables: [
-        { name: "labs", rows: labs.length },
-        { name: "samples", rows: 128 + labs.length * 40 },
-        { name: "instruments", rows: labs.length * 4 },
-        { name: "contacts", rows: 4 },
-      ],
+      tables: moduleInstanceTables(labs),
       environments,
     },
     architecture,
@@ -314,61 +310,19 @@ export function runInfraQuery(
       })),
     };
   }
-  const select = /^SELECT \* FROM ([a-zA-Z_]+)$/i.exec(normalized);
+  if (upper === "SHOW INSTANCES") {
+    return moduleInstanceList(labs, dossier, environmentId);
+  }
+  const select =
+    /^SELECT \* FROM ([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)?)(?: WHERE lab_id\s*=\s*'([^']*)')?$/i.exec(
+      normalized,
+    );
   if (!select) {
-    throw new Error("This IDE accepts SHOW TABLES or SELECT * FROM labs|samples|instruments|contacts.");
+    throw new Error(INFRA_QUERY_HELP);
   }
-  const table = select[1].toLowerCase();
-  if (table === "labs") {
-    return {
-      columns: ["id", "name", "slug", "site_code", "status", "modules"],
-      rows: labs.map((lab) => ({
-        id: lab.id,
-        name: lab.name,
-        slug: lab.slug,
-        site_code: lab.siteCode,
-        status: lab.status,
-        modules: lab.modules.join(", "),
-      })),
-    };
+  try {
+    return selectModuleTable(select[1], labs, dossier, environmentId, environmentScale(environmentId), select[2]);
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : INFRA_QUERY_HELP);
   }
-  if (table === "contacts") {
-    return {
-      columns: ["id", "name", "role", "email", "phone"],
-      rows: dossier.contacts.map((contact) => ({
-        id: contact.id,
-        name: contact.name,
-        role: contact.role,
-        email: contact.email,
-        phone: contact.phone,
-      })),
-    };
-  }
-  if (table === "samples") {
-    const count = dossier.infrastructure.tables.find((item) => item.name === "samples")?.rows ?? 8;
-    const preview = Math.min(12, Math.max(3, Math.round(count * environmentScale(environmentId))));
-    return {
-      columns: ["id", "accession", "lab_id", "status"],
-      rows: Array.from({ length: preview }, (_, index) => ({
-        id: `smp-${index + 1}`,
-        accession: `A-${1000 + index}`,
-        lab_id: labs[index % Math.max(labs.length, 1)]?.id ?? "",
-        status: index % 3 === 0 ? "released" : "in_process",
-      })),
-    };
-  }
-  if (table === "instruments") {
-    const count = dossier.infrastructure.tables.find((item) => item.name === "instruments")?.rows ?? 4;
-    const preview = Math.min(12, count);
-    return {
-      columns: ["id", "name", "lab_id", "status"],
-      rows: Array.from({ length: preview }, (_, index) => ({
-        id: `ins-${index + 1}`,
-        name: `Analyzer ${index + 1}`,
-        lab_id: labs[index % Math.max(labs.length, 1)]?.id ?? "",
-        status: "online",
-      })),
-    };
-  }
-  throw new Error(`Unknown table '${table}'.`);
 }
