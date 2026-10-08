@@ -1,10 +1,10 @@
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { SettingsDialog } from "./components/SettingsDialog";
-import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { findInstrument } from "./instruments";
-import { labMenuPath, useLabOperations } from "./labOperations";
+import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { SequenceStageMark } from "./components/StageConditionCell";
@@ -12,6 +12,7 @@ import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { RCM_SUBNAV } from "./pages/rcm/RcmShell";
 import { CRM_SUBNAV } from "./pages/crm/CrmShell";
+import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 import { DEFAULT_WORKFLOW_STAGES, useWorkflowStages } from "./workflowStages";
@@ -315,45 +316,151 @@ function NavIcon({ name }: { name: string }) {
   );
 }
 
-function ModuleNavItems({ compact, includeNested }: { compact: boolean; includeNested: boolean }) {
+function ParentMark({ slug, fallback }: { slug: ModuleSlug | null; fallback: string }) {
+  if (slug) return <ModuleGlyph slug={slug} size={16} />;
+  return <NavIcon name={fallback} />;
+}
+
+function NavCaret({ open, label, onToggle }: { open: boolean; label: string; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      className={`lims-nav-caret${open ? " is-open" : ""}`}
+      aria-expanded={open}
+      aria-label={`${open ? "Collapse" : "Expand"} ${label}`}
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onToggle();
+      }}
+    >
+      <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+        <path d="M4 6.2 8 10l4-3.8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
+
+function ShellNav({
+  compact,
+  includeNested,
+  operationLinks,
+  openGroups,
+  currentGroup,
+  onToggleGroup,
+}: {
+  compact: boolean;
+  includeNested: boolean;
+  operationLinks: LabMenuItem[];
+  openGroups: Record<string, boolean>;
+  currentGroup: ReturnType<typeof pathToNavGroup>;
+  onToggleGroup: (key: string) => void;
+}) {
   const sectionTabs = useSectionTabs();
+  const overviewLink = operationLinks.find((item) => item.view === "overview");
+  const coreLinks = operationLinks.filter((item) => item.view !== "overview");
+  const groupOpen = (key: string) => openGroups[key] ?? currentGroup === key;
+  const moduleActive = (slug: ModuleSlug | null) => Boolean(slug && sectionToModuleSlug(sectionTabs.section) === slug);
+
+  function parentClass(slug: ModuleSlug | null, hasChildren: boolean, isActive: boolean) {
+    return `lims-nav-item${hasChildren ? " is-core-parent" : ""}${isActive ? " active" : ""}${moduleActive(slug) ? " is-module-active" : ""}`;
+  }
+
+  function parentStyle(slug: ModuleSlug | null): CSSProperties | undefined {
+    return slug ? ({ "--module-color": MODULE_CARD_COLOR[slug] } as CSSProperties) : undefined;
+  }
+
   return (
     <>
-      {NAV.map((item) => {
-        const nested = includeNested ? nestedNavFor(item.to) : [];
-        const section = sectionFromPath(item.to);
-        const parent = nestedNavFor(item.to).length > 0;
-        return (
-          <Fragment key={item.to}>
+      {overviewLink ? (
+        <div className={`lims-nav-group${groupOpen("operations") ? " is-expanded" : ""}`}>
+          <div className="lims-nav-parent-row">
             <NavLink
-              to={item.to}
-              title={compact ? item.label : undefined}
-              aria-label={compact ? item.label : undefined}
-              end={parent}
-              onClick={() => sectionTabs.showSection(section)}
-              className={({ isActive }) => `lims-nav-item${parent ? " is-core-parent" : ""}${isActive ? " active" : ""}`}
+              to={labMenuPath(overviewLink.view)}
+              end
+              title={compact ? overviewLink.label : undefined}
+              aria-label={compact ? overviewLink.label : undefined}
+              onClick={() => sectionTabs.showSection(overviewLink.view)}
+              className={({ isActive }) => parentClass("operations", true, isActive)}
+              style={parentStyle("operations")}
             >
               <span className="lims-nav-icon">
-                <NavIcon name={section} />
+                <ParentMark slug="operations" fallback="overview" />
               </span>
-              {compact ? null : item.label}
+              {compact ? null : overviewLink.label}
             </NavLink>
-            {nested.map((sub) => (
+            {includeNested && coreLinks.length > 0 ? (
+              <NavCaret open={groupOpen("operations")} label={overviewLink.label} onToggle={() => onToggleGroup("operations")} />
+            ) : null}
+          </div>
+          {includeNested && groupOpen("operations") ? (
+            <div className="lims-nav-children" role="group" aria-label={`${overviewLink.label} pages`}>
+              {coreLinks.map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={labMenuPath(item.view)}
+                  title={compact ? item.label : undefined}
+                  aria-label={compact ? item.label : undefined}
+                  onClick={() => sectionTabs.showSection(item.view)}
+                  className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={item.view} />
+                  </span>
+                  {compact ? null : item.label}
+                </NavLink>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {NAV.map((item) => {
+        const nested = nestedNavFor(item.to);
+        const section = sectionFromPath(item.to);
+        const slug = pathToModuleSlug(item.to);
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : null;
+        const hasChildren = nested.length > 0;
+        const open = Boolean(group && groupOpen(group));
+        return (
+          <div key={item.to} className={`lims-nav-group${open ? " is-expanded" : ""}`}>
+            <div className="lims-nav-parent-row">
               <NavLink
-                key={sub.to}
-                to={sub.to}
-                title={compact ? sub.label : undefined}
-                aria-label={compact ? sub.label : undefined}
+                to={item.to}
+                title={compact ? item.label : undefined}
+                aria-label={compact ? item.label : undefined}
+                end={hasChildren}
                 onClick={() => sectionTabs.showSection(section)}
-                className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                className={({ isActive }) => parentClass(slug, hasChildren, isActive)}
+                style={parentStyle(slug)}
               >
                 <span className="lims-nav-icon">
-                  <NavIcon name={navGlyph(sub.to, section)} />
+                  <ParentMark slug={slug} fallback={section} />
                 </span>
-                {compact ? null : sub.label}
+                {compact ? null : item.label}
               </NavLink>
-            ))}
-          </Fragment>
+              {includeNested && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
+            </div>
+            {includeNested && open ? (
+              <div className="lims-nav-children" role="group" aria-label={`${item.label} pages`}>
+                {nested.map((sub) => (
+                  <NavLink
+                    key={sub.to}
+                    to={sub.to}
+                    title={compact ? sub.label : undefined}
+                    aria-label={compact ? sub.label : undefined}
+                    onClick={() => sectionTabs.showSection(section)}
+                    className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                  >
+                    <span className="lims-nav-icon">
+                      <NavIcon name={navGlyph(sub.to, section)} />
+                    </span>
+                    {compact ? null : sub.label}
+                  </NavLink>
+                ))}
+              </div>
+            ) : null}
+          </div>
         );
       })}
     </>
@@ -408,6 +515,7 @@ export function AppShell() {
 }
 
 function AppFrame() {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [dockWidth, setDockWidth] = useState(440);
@@ -421,6 +529,8 @@ function AppFrame() {
   const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const currentGroup = pathToNavGroup(location.pathname);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [navPos, setNavPos] = useState({ x: EDGE_PAD, y: EDGE_PAD });
   const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
   const [docked, setDocked] = useState(true);
@@ -462,6 +572,11 @@ function AppFrame() {
       setSignupOpen(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!currentGroup) return;
+    setOpenGroups((current) => ({ ...current, [currentGroup]: true }));
+  }, [currentGroup]);
 
   useEffect(() => {
     const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
@@ -682,8 +797,15 @@ function AppFrame() {
 
   function onRailPointerDown(event: ReactPointerEvent<HTMLElement>) {
     const target = event.target as HTMLElement;
-    if (target.closest(".lims-rail-user")) return;
+    if (target.closest(".lims-rail-user, .lims-nav-caret")) return;
     beginNavDrag(event, { toggle: Boolean(target.closest(".lims-rail-logo")) });
+  }
+
+  function toggleNavGroup(key: string) {
+    setOpenGroups((current) => ({
+      ...current,
+      [key]: !(current[key] ?? currentGroup === key),
+    }));
   }
 
   function onShellClickCapture(event: ReactMouseEvent) {
@@ -709,8 +831,6 @@ function AppFrame() {
   }
 
   const operationLinks = labOps.menu.filter((item) => item.enabled && item.label.trim());
-  const overviewLink = operationLinks.find((item) => item.view === "overview");
-  const coreLinks = operationLinks.filter((item) => item.view !== "overview");
 
   const labEnvironment = (
         <div className="lims-site-block">
@@ -804,22 +924,14 @@ function AppFrame() {
         {navOpen ? null : (
           <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
             <nav className="lims-nav" aria-label="LIMS modules">
-              {operationLinks.map((item) => (
-                <NavLink
-                  key={item.id}
-                  to={labMenuPath(item.view)}
-                  end={item.view === "overview"}
-                  title={item.label}
-                  aria-label={item.label}
-                  onClick={() => sectionTabs.showSection(item.view)}
-                  className={({ isActive }) => `lims-nav-item${item.view !== "overview" ? " is-core-child" : " is-core-parent"}${isActive ? " active" : ""}`}
-                >
-                  <span className="lims-nav-icon">
-                    <NavIcon name={item.view} />
-                  </span>
-                </NavLink>
-              ))}
-              <ModuleNavItems compact includeNested={edge !== "top"} />
+              <ShellNav
+                compact
+                includeNested={edge !== "top"}
+                operationLinks={operationLinks}
+                openGroups={openGroups}
+                currentGroup={currentGroup}
+                onToggleGroup={toggleNavGroup}
+              />
             </nav>
             <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
               {railInitials}
@@ -835,38 +947,14 @@ function AppFrame() {
         )}
 
         <nav className="lims-nav" aria-label="LIMS modules">
-          {overviewLink ? (
-            <NavLink
-              key={overviewLink.id}
-              to={labMenuPath(overviewLink.view)}
-              end
-              onClick={() => sectionTabs.showSection(overviewLink.view)}
-              className={({ isActive }) => `lims-nav-item is-core-parent${isActive ? " active" : ""}`}
-            >
-              <span className="lims-nav-icon">
-                <NavIcon name={overviewLink.view} />
-              </span>
-              {overviewLink.label}
-            </NavLink>
-          ) : null}
-          {coreLinks.map((item) => (
-              <NavLink
-                key={item.id}
-                to={labMenuPath(item.view)}
-                onClick={() => {
-                  sectionTabs.showSection(item.view);
-                }}
-                className={({ isActive }) =>
-                  `lims-nav-item is-core-child${isActive ? " active" : ""}`
-                }
-              >
-                <span className="lims-nav-icon">
-                  <NavIcon name={item.view} />
-                </span>
-                {item.label}
-              </NavLink>
-            ))}
-          <ModuleNavItems compact={false} includeNested={edge !== "top"} />
+          <ShellNav
+            compact={false}
+            includeNested={edge !== "top"}
+            operationLinks={operationLinks}
+            openGroups={openGroups}
+            currentGroup={currentGroup}
+            onToggleGroup={toggleNavGroup}
+          />
         </nav>
 
         <div className="lims-sidebar-foot">
