@@ -909,10 +909,11 @@ a {
 .lims-icon-rail .lims-nav-children {
   align-items: flex-end;
   gap: 0.22rem;
-  width: calc(100% - 0.35rem);
-  margin-left: 0.7rem;
-  padding: 0.05rem 0.15rem 0.15rem 0.45rem;
-  border-left: 2px solid #e4e9f1;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0.08rem 0.15rem 0.2rem 1.2rem;
+  border-left: 2px solid #c9d4e3;
 }
 
 .lims-icon-rail .lims-nav-item.is-core-child {
