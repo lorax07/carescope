@@ -10,8 +10,7 @@ import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
-import { RCM_SUBNAV } from "./pages/rcm/RcmShell";
-import { CRM_SUBNAV } from "./pages/crm/CrmShell";
+import { CLIENT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
 import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
@@ -27,8 +26,8 @@ const NAV = [
 ] as const;
 
 function nestedNavFor(to: string) {
-  if (to === "/app/billing") return RCM_SUBNAV.filter((sub) => !sub.end);
-  if (to === "/app/connectivity") return CRM_SUBNAV.filter((sub) => !sub.end);
+  if (to === "/app/billing") return REVENUE_CHAPTERS;
+  if (to === "/app/connectivity") return CLIENT_CHAPTERS;
   return [];
 }
 
@@ -358,6 +357,7 @@ function ShellNav({
   onToggleGroup: (key: string) => void;
 }) {
   const sectionTabs = useSectionTabs();
+  const { pathname } = useLocation();
   const overviewLink = operationLinks.find((item) => item.view === "overview");
   const coreLinks = operationLinks.filter((item) => item.view !== "overview");
   const groupOpen = (key: string) => openGroups[key] ?? currentGroup === key;
@@ -447,10 +447,14 @@ function ShellNav({
                   <NavLink
                     key={sub.to}
                     to={sub.to}
-                    title={compact ? sub.label : undefined}
+                    title={compact ? sub.question : sub.label}
                     aria-label={compact ? sub.label : undefined}
                     onClick={() => sectionTabs.showSection(section)}
-                    className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                    className={() => {
+                      const chapters = group === "billing" ? REVENUE_CHAPTERS : CLIENT_CHAPTERS;
+                      const on = chapterForPath(chapters, pathname)?.id === sub.id;
+                      return `lims-nav-item is-core-child${on ? " active" : ""}`;
+                    }}
                   >
                     <span className="lims-nav-icon">
                       <NavIcon name={navGlyph(sub.to, section)} />

@@ -24,22 +24,25 @@ export function RcmQueuesPage() {
   );
 
   return (
-    <RcmShell title="Work queues" lede="Exception-driven work. Each queue is one operational question, not a dump of the ledger.">
-      <section className="lims-panel billing-panel">
-        <div className="billing-areas" role="tablist" aria-label="Work queues">
+    <RcmShell title="Exceptions" lede="Each row is one reason money is stuck. Open the question, then work the records.">
+      <section className="lims-panel billing-panel exception-desk">
+        <ul className="exception-menu" aria-label="Exception queues">
           {counts.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={item.id === active}
-              className={`btn${item.id === active ? " is-on" : ""}`}
-              onClick={() => setParams({ queue: item.id }, { replace: true })}
-            >
-              {item.label} {item.count ? `(${item.count})` : ""}
-            </button>
+            <li key={item.id}>
+              <button
+                type="button"
+                className={item.id === active ? "is-on" : undefined}
+                aria-current={item.id === active ? "true" : undefined}
+                onClick={() => setParams({ queue: item.id }, { replace: true })}
+              >
+                <strong>{item.label}</strong>
+                <span>{item.question}</span>
+                <em>{item.count}</em>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
+        <div>
         <p className="billing-note">{meta.question}</p>
         {active === "capture" ? (
           <p className="billing-note">
@@ -98,6 +101,7 @@ export function RcmQueuesPage() {
         ) : (
           <RcmEmpty title="This queue is empty." detail="When new exceptions land, they will appear here with an owner and a next action." />
         )}
+        </div>
       </section>
     </RcmShell>
   );

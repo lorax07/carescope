@@ -22,7 +22,7 @@ export function CrmTasksPage() {
   return (
     <CrmShell title="Tasks" lede="What someone owes a client today. Tasks keep their own status, separate from client status and issue status.">
       <section className="lims-panel billing-panel">
-        <div className="billing-areas" role="tablist" aria-label="Task queues">
+        <div className="chapter-tools" role="group" aria-label="Task status">
           {[
             { id: "open", label: "Open" },
             { id: "done", label: "Done" },
@@ -31,10 +31,9 @@ export function CrmTasksPage() {
             <button
               key={item.id}
               type="button"
-              role="tab"
-              aria-selected={mine === item.id}
-              className={`btn${mine === item.id ? " is-on" : ""}`}
-              onClick={() => setParams({ scope: item.id }, { replace: true })}
+              className={mine === item.id ? "is-on" : undefined}
+              aria-pressed={mine === item.id}
+              onClick={() => setParams({ scope: item.id, ...(client !== "all" ? { client } : {}) }, { replace: true })}
             >
               {item.label}
             </button>

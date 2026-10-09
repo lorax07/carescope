@@ -1,20 +1,8 @@
-import { NavLink } from "react-router-dom";
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
+import { CLIENT_CHAPTERS, ModuleChapters } from "../moduleChapters";
 
-export const CRM_SUBNAV = [
-  { to: "/app/connectivity", label: "Overview", end: true, question: "How is the client portfolio doing and what needs attention?" },
-  { to: "/app/connectivity/clients", label: "Clients", end: false, question: "Who are the clients and how is each relationship?" },
-  { to: "/app/connectivity/contacts", label: "Contacts", end: false, question: "Who should Sequence talk to?" },
-  { to: "/app/connectivity/activities", label: "Activities", end: false, question: "What has happened recently?" },
-  { to: "/app/connectivity/tasks", label: "Tasks", end: false, question: "What do I need to do today?" },
-  { to: "/app/connectivity/opportunities", label: "Opportunities", end: false, question: "Where can the relationship grow?" },
-  { to: "/app/connectivity/health", label: "Client health", end: false, question: "Why is a client at risk, and what should we do?" },
-  { to: "/app/connectivity/communications", label: "Communications", end: false, question: "What conversations have we had?" },
-  { to: "/app/connectivity/issues", label: "Service", end: false, question: "What is going wrong for a client?" },
-  { to: "/app/connectivity/documents", label: "Documents", end: false, question: "What agreements and files sit on the account?" },
-  { to: "/app/connectivity/analytics", label: "Analytics", end: false, question: "What patterns are in the client portfolio?" },
-] as const;
+export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
 export function CrmShell({
   title,
@@ -37,13 +25,7 @@ export function CrmShell({
         </div>
         {actions ? <div className="rcm-header-actions">{actions}</div> : null}
       </div>
-      <nav className="billing-areas rcm-subnav" aria-label="Client submodules">
-        {CRM_SUBNAV.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} title={item.question} className={({ isActive }) => `btn${isActive ? " is-on" : ""}`}>
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+      <ModuleChapters chapters={CLIENT_CHAPTERS} label="Sequence Client areas" />
       {children}
     </div>
   );
