@@ -22,6 +22,7 @@ import {
 } from "./pages/ModulePages";
 import { QualityPage } from "./pages/QualityPage";
 import { InstrumentInterfacePage, InstrumentRecordPage } from "./pages/InstrumentInterfacePage";
+import { InstrumentAcquirePage, InstrumentQueuePage, InstrumentReviewPage } from "./pages/instruments/InstrumentWork";
 import { BillingPage } from "./pages/BillingPage";
 import { RcmAnalyticsPage } from "./pages/rcm/RcmAnalyticsPage";
 import { RcmArPage } from "./pages/rcm/RcmArPage";
@@ -116,6 +117,10 @@ createRoot(document.getElementById("root")!).render(
           <Route path="samples" element={<SamplesPage view="home" />} />
           <Route path="tests" element={<TestsPage />} />
           <Route path="results" element={<ResultsPage />} />
+          <Route path="instruments/queue" element={<InstrumentQueuePage />} />
+          <Route path="instruments/acquire" element={<InstrumentAcquirePage />} />
+          <Route path="instruments/review/:runId" element={<InstrumentReviewPage />} />
+          <Route path="instruments/review" element={<InstrumentReviewPage />} />
           <Route path="instruments/:instrumentId" element={<InstrumentRecordPage />} />
           <Route path="instruments" element={<InstrumentInterfacePage />} />
           <Route path="connectivity/clients/:accountId" element={<CrmClientDetailPage />} />

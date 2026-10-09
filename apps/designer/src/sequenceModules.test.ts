@@ -18,7 +18,8 @@ describe("sequence module nav mapping", () => {
     expect(pathToNavGroup("/app/ops/testing")).toBe("operations");
     expect(pathToNavGroup("/app/connectivity/clients")).toBe("connectivity");
     expect(pathToNavGroup("/app/billing/claims")).toBe("billing");
-    expect(pathToNavGroup("/app/instruments")).toBeNull();
+    expect(pathToNavGroup("/app/instruments")).toBe("instruments");
+    expect(pathToNavGroup("/app/instruments/queue")).toBe("instruments");
   });
 
   it("maps parent routes onto landing module marks", () => {

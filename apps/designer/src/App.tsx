@@ -11,6 +11,7 @@ import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { CLIENT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
+import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
@@ -28,6 +29,7 @@ const NAV = [
 function nestedNavFor(to: string) {
   if (to === "/app/billing") return REVENUE_CHAPTERS;
   if (to === "/app/connectivity") return CLIENT_CHAPTERS;
+  if (to === "/app/instruments") return INSTRUMENT_CHAPTERS;
   return [];
 }
 
@@ -419,7 +421,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -447,11 +449,12 @@ function ShellNav({
                   <NavLink
                     key={sub.to}
                     to={sub.to}
+                    end={sub.end}
                     title={compact ? sub.question : sub.label}
                     aria-label={compact ? sub.label : undefined}
                     onClick={() => sectionTabs.showSection(section)}
                     className={() => {
-                      const chapters = group === "billing" ? REVENUE_CHAPTERS : CLIENT_CHAPTERS;
+                      const chapters = group === "billing" ? REVENUE_CHAPTERS : group === "instruments" ? INSTRUMENT_CHAPTERS : CLIENT_CHAPTERS;
                       const on = chapterForPath(chapters, pathname)?.id === sub.id;
                       return `lims-nav-item is-core-child${on ? " active" : ""}`;
                     }}
