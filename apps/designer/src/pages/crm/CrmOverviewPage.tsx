@@ -27,6 +27,7 @@ export function CrmOverviewPage() {
       <section className="lims-panel billing-panel">
         <div className="lims-panel-head">
           <h2>Portfolio</h2>
+          <Link to="/app/connectivity/analytics">Patterns</Link>
         </div>
         <div className="rcm-metric-grid">
           {metrics.map((card) => (

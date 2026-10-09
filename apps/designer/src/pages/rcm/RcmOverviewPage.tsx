@@ -48,7 +48,7 @@ export function RcmOverviewPage() {
         <section className="lims-panel billing-panel">
           <div className="lims-panel-head">
             <h2>Work that needs someone</h2>
-            <Link to="/app/billing/queues">Open queues</Link>
+            <Link to="/app/billing/queues">Open exceptions</Link>
           </div>
           {attention.length ? (
             <ul className="rcm-attention">
