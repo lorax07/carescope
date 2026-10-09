@@ -12,6 +12,7 @@ export type ModuleChapter = {
   to: string;
   label: string;
   question: string;
+  end?: boolean;
   tools: ChapterTool[];
 };
 
@@ -140,7 +141,7 @@ export function ModuleChapters({
         {chapters.map((chapter) => {
           const on = current?.id === chapter.id;
           return (
-            <NavLink key={chapter.id} to={chapter.to} className={on ? "is-on" : undefined} aria-current={on ? "page" : undefined}>
+            <NavLink key={chapter.id} to={chapter.to} end={chapter.end} className={on ? "is-on" : undefined} aria-current={on ? "page" : undefined}>
               <strong>{chapter.label}</strong>
               <span>{chapter.question}</span>
             </NavLink>
