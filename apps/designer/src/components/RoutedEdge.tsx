@@ -1,6 +1,8 @@
 import { BaseEdge, EdgeLabelRenderer, type EdgeProps } from "@xyflow/react";
 import { createContext, useContext } from "react";
+import { connectionMarkPoint, connectionVisual, endpointIcon } from "../connectionTypes";
 import { labelAnchor, pointsToPath, type Point } from "../workflowLayout";
+import { ConnectionTypeIcon } from "./ConnectionTypeIcon";
 
 export const WorkflowRoutesContext = createContext<Record<string, Point[]>>({});
 
@@ -38,6 +40,7 @@ export function RoutedEdge({
   targetX,
   targetY,
   label,
+  data,
   markerEnd,
   style,
   interactionWidth,
@@ -57,19 +60,34 @@ export function RoutedEdge({
     { x: targetX, y: targetY },
   );
   const anchor = labelAnchor(points);
+  const mark = connectionMarkPoint(points);
+  const record = data as { connectionType?: string; startEndChoice?: string } | undefined;
+  const visual = connectionVisual({
+    connectionType: record?.connectionType,
+    startEndChoice: record?.startEndChoice,
+    label: typeof label === "string" ? label : undefined,
+  });
+  const icon = endpointIcon(visual);
   return (
     <>
       <BaseEdge id={id} path={pointsToPath(points)} markerEnd={markerEnd} style={style} interactionWidth={interactionWidth} />
-      {label ? (
-        <EdgeLabelRenderer>
+      <EdgeLabelRenderer>
+        <div
+          className="wf-connection-mark"
+          data-connection-icon={icon}
+          style={{ transform: `translate(-50%, -50%) translate(${mark.x}px, ${mark.y}px)` }}
+        >
+          <ConnectionTypeIcon kind={icon} />
+        </div>
+        {label ? (
           <div
             className="wf-routed-label"
             style={{ transform: `translate(-50%, -50%) translate(${anchor.x}px, ${anchor.y}px)` }}
           >
             {label}
           </div>
-        </EdgeLabelRenderer>
-      ) : null}
+        ) : null}
+      </EdgeLabelRenderer>
     </>
   );
 }

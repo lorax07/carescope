@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Edge } from "@xyflow/react";
+import type { NodeConnectionType, StartEndChoice } from "../connectionTypes";
+import { ConnectionTypeSelect } from "./ConnectionTypeSelect";
 import type { WfFlowNode } from "./WorkflowNode";
 
-export type NodeConnectionType = "Trigger" | "Decision tree" | "End";
+export type { NodeConnectionType, StartEndChoice };
 
 export type DecisionChoice = {
   operator: string;
@@ -14,6 +16,7 @@ export type NewNodeConnection = {
   source: string;
   target: string;
   connectionType: NodeConnectionType;
+  startEndChoice?: StartEndChoice;
   triggerAction?: string;
   decisions?: DecisionChoice[];
 };
@@ -58,6 +61,7 @@ export function NodeDetailsPanel({
 }) {
   const [tab, setTab] = useState<"details" | "connections">(initialTab);
   const [connectionType, setConnectionType] = useState<NodeConnectionType>("Trigger");
+  const [startEndChoice, setStartEndChoice] = useState<StartEndChoice>("Start");
   const [triggerAction, setTriggerAction] = useState<(typeof TRIGGER_ACTIONS)[number]>("Update Status");
   const [targetId, setTargetId] = useState("");
   const [decisionCount, setDecisionCount] = useState(2);
@@ -104,7 +108,11 @@ export function NodeDetailsPanel({
         <div className="node-sidebar-body">
           <div className="node-sidebar-heading"><span style={{ background: selected.data.color ?? "#1b6ef3" }} /><div><p>Build one connection</p><h2>{selected.data.label}</h2></div></div>
           <label>From node<select value={selected.id} disabled><option value={selected.id}>{selected.data.label}</option></select></label>
-          <label>Connection type<select value={connectionType} onChange={(event) => setConnectionType(event.target.value as NodeConnectionType)}><option>Trigger</option><option>Decision tree</option><option>End</option></select></label>
+          <ConnectionTypeSelect value={connectionType} onChange={setConnectionType} />
+
+          {connectionType === "Start/End" ? (
+            <label>Start/End choice<select value={startEndChoice} onChange={(event) => setStartEndChoice(event.target.value as StartEndChoice)}><option>Start</option><option>End</option></select></label>
+          ) : null}
 
           {connectionType === "Trigger" ? (
             <label>Trigger action<select value={triggerAction} onChange={(event) => setTriggerAction(event.target.value as (typeof TRIGGER_ACTIONS)[number])}>{TRIGGER_ACTIONS.map((action) => <option key={action}>{action}</option>)}</select></label>
@@ -130,6 +138,7 @@ export function NodeDetailsPanel({
               source: selected.id,
               target: targetId,
               connectionType,
+              startEndChoice: connectionType === "Start/End" ? startEndChoice : undefined,
               triggerAction: connectionType === "Trigger" ? triggerAction : undefined,
               decisions: connectionType === "Decision tree" ? decisions : undefined,
             });
