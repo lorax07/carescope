@@ -763,6 +763,7 @@ function ChangeDetail({ id }: { id: string }) {
   const actor = qualityActor();
   const record = system.changes.find((item) => item.id === id);
   const [impact, setImpact] = useState("");
+  const [code, setCode] = useState("SOP-QA-004");
   const [body, setBody] = useState("");
   const [note, setNote] = useState("");
   const [reason, setReason] = useState("");
@@ -788,7 +789,8 @@ function ChangeDetail({ id }: { id: string }) {
         </PinForm>
       ) : null}
       {record.status === "assessment" && !record.documentId ? (
-        <PinForm actor={actor} recordId={record.id} meaning="authorship" label="Revise SOP-QA-004" onSubmit={() => reviseDocument({ code: "SOP-QA-004", title: "Deviation, nonconformance, and CAPA handling", body: body || "Contain, investigate, and train before the new version is effective.", changeId: record.id }, actor)}>
+        <PinForm actor={actor} recordId={record.id} meaning="authorship" label="Revise document" onSubmit={() => reviseDocument({ code, title: code, body: body || "Revise the controlled text before this version is effective.", changeId: record.id, docType: "SOP" }, actor)}>
+          <label>Document code<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
           <label>Revised body<textarea value={body} onChange={(event) => setBody(event.target.value)} /></label>
         </PinForm>
       ) : null}
