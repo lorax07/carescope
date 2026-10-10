@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
-import { CLIENT_CHAPTERS, ModuleChapters } from "../moduleChapters";
+import { CLIENT_CHAPTERS } from "../moduleChapters";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
@@ -29,7 +29,6 @@ export function CrmShell({
           {actions ? <div className="rcm-header-actions">{actions}</div> : null}
         </div>
       )}
-      <ModuleChapters chapters={CLIENT_CHAPTERS} label="Sequence Client areas" />
       {children}
     </div>
   );

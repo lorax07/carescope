@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { greetingName, paymentBars, projectMatches, projectTone } from "./pages/crm/clientStudio";
+import { greetingName, nextChartZoom, paymentBars, projectMatches, projectTone } from "./pages/crm/clientStudio";
 
 describe("client studio", () => {
   it("places payments on the day they posted", () => {
@@ -26,6 +26,14 @@ describe("client studio", () => {
     expect(projectMatches("Negotiation", "priority")).toBe(true);
     expect(projectMatches("Discovery", "recommended")).toBe(true);
     expect(projectMatches("Won", "active")).toBe(false);
+  });
+
+  it("zooms the revenue chart with control and the wheel", () => {
+    expect(nextChartZoom(1, -120, true)).toBeGreaterThan(1);
+    expect(nextChartZoom(1, 120, true)).toBeLessThan(1);
+    expect(nextChartZoom(1, -120, false)).toBe(1);
+    expect(nextChartZoom(0.6, 40, true)).toBe(0.6);
+    expect(nextChartZoom(2.75, -40, true)).toBe(2.75);
   });
 
   it("greets a person by the name after an initial", () => {
