@@ -90,12 +90,14 @@ export function nextChartZoom(current: number, deltaY: number, modified: boolean
   return Math.min(CHART_ZOOM_MAX, Math.max(CHART_ZOOM_MIN, next));
 }
 
-export function RevenueChart({ series }: { series: number[] }) {
+export function RevenueChart({ series, format = "money" }: { series: number[]; format?: "money" | "count" }) {
   const [zoom, setZoom] = useState(1);
   const scroller = useRef<HTMLDivElement>(null);
   const max = Math.max(...series, 1);
   const peak = series.reduce((best, value, index) => (value > (series[best] ?? 0) ? index : best), 0);
   const peakValue = series[peak] ?? 0;
+  const axisLabel = (value: number) => (format === "count" ? String(Math.round(value)) : `$${Math.round(value / 100).toLocaleString("en-US")}`);
+  const peakLabel = format === "count" ? String(Math.round(peakValue)) : money(peakValue).replace(/\.00$/, "");
   useEffect(() => {
     const node = scroller.current;
     if (!node) return;
@@ -113,13 +115,13 @@ export function RevenueChart({ series }: { series: number[] }) {
       ref={scroller}
       tabIndex={0}
       data-chart-zoom={zoom}
-      aria-label={`Collected revenue by day. The highest day is day ${peak + 1} at ${money(peakValue)}. Hold Control and scroll up to zoom in, or scroll down to zoom out.`}
+      aria-label={format === "count" ? `Signed records by day. The highest day is day ${peak + 1} with ${peakLabel}. Hold Control and scroll up to zoom in, or scroll down to zoom out.` : `Collected revenue by day. The highest day is day ${peak + 1} at ${money(peakValue)}. Hold Control and scroll up to zoom in, or scroll down to zoom out.`}
     >
       <div className="client-chart-zoom" style={{ zoom }}>
         <div className="client-chart" role="presentation">
           <div className="client-chart-axis">
             {[1, 0.66, 0.33].map((step) => (
-              <span key={step}>${Math.round((max * step) / 100).toLocaleString("en-US")}</span>
+              <span key={step}>{axisLabel(max * step)}</span>
             ))}
           </div>
           <div className="client-chart-plot">
@@ -128,7 +130,7 @@ export function RevenueChart({ series }: { series: number[] }) {
               const isPeak = index === peak && peakValue > 0;
               return (
                 <div key={index} className={`client-chart-col${isPeak ? " is-peak" : ""}`}>
-                  {isPeak ? <b>{money(value).replace(/\.00$/, "")}</b> : null}
+                  {isPeak ? <b>{peakLabel}</b> : null}
                   <span>
                     {Array.from({ length: dots }, (_, dot) => (
                       <i key={dot} />

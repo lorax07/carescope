@@ -81,6 +81,23 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
  * Sequence Revenue, as a billing lead would use it.
  * Setup stays off this row. Performance is the only reporting stop.
  */
+/** Sequence Compliance work areas. The overview stays on the module home. */
+export const COMPLIANCE_CHAPTERS: ModuleChapter[] = [
+  { id: "events", to: "/app/quality/events", label: "Events", question: "Report, triage, and close quality events.", hideTools: true, tools: [{ to: "/app/quality/events", label: "Events", match: "/app/quality/events" }] },
+  { id: "deviations", to: "/app/quality/deviations", label: "Deviations", question: "Deviations and nonconformances.", hideTools: true, tools: [{ to: "/app/quality/deviations", label: "Deviations", match: "/app/quality/deviations" }] },
+  { id: "capa", to: "/app/quality/capa", label: "CAPA", question: "Corrective and preventive actions.", hideTools: true, tools: [{ to: "/app/quality/capa", label: "CAPA", match: "/app/quality/capa" }] },
+  { id: "documents", to: "/app/quality/documents", label: "Documents", question: "Controlled documents and revisions.", hideTools: true, tools: [{ to: "/app/quality/documents", label: "Documents", match: "/app/quality/documents" }] },
+  { id: "training", to: "/app/quality/training", label: "Training", question: "Read-and-understand and competency.", hideTools: true, tools: [{ to: "/app/quality/training", label: "Training", match: "/app/quality/training" }] },
+  { id: "changes", to: "/app/quality/changes", label: "Changes", question: "Controlled change from proposal to close.", hideTools: true, tools: [{ to: "/app/quality/changes", label: "Changes", match: "/app/quality/changes" }] },
+  { id: "audits", to: "/app/quality/audits", label: "Audits", question: "Internal and external audits and findings.", hideTools: true, tools: [{ to: "/app/quality/audits", label: "Audits", match: "/app/quality/audits" }] },
+  { id: "risks", to: "/app/quality/risks", label: "Risks", question: "Risk register and residual risk.", hideTools: true, tools: [{ to: "/app/quality/risks", label: "Risks", match: "/app/quality/risks" }] },
+  { id: "equipment", to: "/app/quality/equipment", label: "Equipment", question: "Calibration, restriction, and release.", hideTools: true, tools: [{ to: "/app/quality/equipment", label: "Equipment", match: "/app/quality/equipment" }] },
+  { id: "suppliers", to: "/app/quality/suppliers", label: "Suppliers", question: "Approved suppliers and issues.", hideTools: true, tools: [{ to: "/app/quality/suppliers", label: "Suppliers", match: "/app/quality/suppliers" }] },
+  { id: "complaints", to: "/app/quality/complaints", label: "Complaints", question: "Complaints and quality feedback.", hideTools: true, tools: [{ to: "/app/quality/complaints", label: "Complaints", match: "/app/quality/complaints" }] },
+  { id: "metrics", to: "/app/quality/metrics", label: "Metrics", question: "Trends and management review.", hideTools: true, tools: [{ to: "/app/quality/metrics", label: "Metrics", match: "/app/quality/metrics" }] },
+  { id: "admin", to: "/app/quality/admin", label: "Administration", question: "Categories, scale, and approval policy.", hideTools: true, tools: [{ to: "/app/quality/admin", label: "Administration", match: "/app/quality/admin" }] },
+];
+
 export const REVENUE_CHAPTERS: ModuleChapter[] = [
   {
     id: "claims",
