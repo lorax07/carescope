@@ -87,6 +87,7 @@ export const REVENUE_CHAPTERS: ModuleChapter[] = [
     to: "/app/billing/claims",
     label: "Claims",
     question: "Every claim, from charge capture to submission.",
+    hideTools: true,
     tools: [
       { to: "/app/billing/claims", label: "Claims", match: "/app/billing/claims" },
       { to: "/app/billing/capture", label: "Charge capture", match: "/app/billing/capture" },
@@ -97,6 +98,7 @@ export const REVENUE_CHAPTERS: ModuleChapter[] = [
     to: "/app/billing/queues",
     label: "Exceptions",
     question: "What is blocked until someone acts.",
+    hideTools: true,
     tools: [{ to: "/app/billing/queues", label: "Exceptions", match: "/app/billing/queues" }],
   },
   {
@@ -104,6 +106,7 @@ export const REVENUE_CHAPTERS: ModuleChapter[] = [
     to: "/app/billing/payments",
     label: "Cash",
     question: "What was paid, refused, or still owed.",
+    hideTools: true,
     tools: [
       { to: "/app/billing/payments", label: "Payments", match: "/app/billing/payments" },
       { to: "/app/billing/denials", label: "Denials", match: "/app/billing/denials" },
@@ -115,6 +118,7 @@ export const REVENUE_CHAPTERS: ModuleChapter[] = [
     to: "/app/billing/analytics",
     label: "Performance",
     question: "The patterns behind the money.",
+    hideTools: true,
     tools: [{ to: "/app/billing/analytics", label: "Performance", match: "/app/billing/analytics" }],
   },
 ];

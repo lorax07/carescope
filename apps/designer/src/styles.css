@@ -6984,12 +6984,18 @@ button.palette-category-title {
   vertical-align: middle;
 }
 
-.client-table a {
+.client-table a,
+.client-person-inline {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: inherit;
   text-decoration: none;
+}
+
+.client-person-inline b,
+.client-person-inline small {
+  display: block;
 }
 
 .client-table b,

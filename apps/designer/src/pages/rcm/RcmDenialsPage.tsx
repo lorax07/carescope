@@ -20,14 +20,19 @@ export function RcmDenialsPage() {
   }, [overlay.denials]);
 
   return (
-    <RcmShell title="Denials" lede="Why money was refused, who owns recovery, and which patterns keep coming back.">
-      <section className="lims-panel billing-panel">
-        <div className="lims-panel-head">
+    <RcmShell studio title="Denials" lede="Why money was refused, who owns recovery, and which patterns keep coming back.">
+      <header className="client-board-head">
+        <h1>Denials</h1>
+        <Link to="/app/billing/payments">Cash</Link>
+        <Link to="/app/billing/ar">Receivables</Link>
+      </header>
+      <section className="client-card client-projects is-scroll">
+        <header>
           <h2>Denial work queue</h2>
-        </div>
+        </header>
         {overlay.denials.length ? (
-          <div className="lims-table-wrap">
-            <table className="lims-table">
+          <div className="client-table-wrap">
+            <table className="client-table">
               <thead>
                 <tr>
                   <th>Claim</th>
@@ -90,13 +95,13 @@ export function RcmDenialsPage() {
           <input value={cause} onChange={(event) => setCause(event.target.value)} />
         </label>
       </section>
-      <section className="lims-panel billing-panel">
-        <div className="lims-panel-head">
+      <section className="client-card client-projects is-scroll">
+        <header>
           <h2>Root-cause pattern</h2>
-        </div>
+        </header>
         {roots.length ? (
-          <div className="lims-table-wrap">
-            <table className="lims-table">
+          <div className="client-table-wrap">
+            <table className="client-table">
               <thead>
                 <tr>
                   <th>Cause</th>

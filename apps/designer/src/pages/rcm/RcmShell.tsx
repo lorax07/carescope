@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
-import { ModuleChapters, REVENUE_CHAPTERS } from "../moduleChapters";
+import { REVENUE_CHAPTERS } from "../moduleChapters";
 
 export const RCM_SUBNAV = REVENUE_CHAPTERS;
 
@@ -8,30 +8,33 @@ export function RcmShell({
   title,
   lede,
   actions,
+  studio,
   children,
 }: {
   title: string;
   lede: string;
   actions?: ReactNode;
+  studio?: boolean;
   children: ReactNode;
 }) {
   const onSetup = useLocation().pathname.startsWith("/app/billing/config");
   return (
-    <div className="lims-page rcm-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Sequence Revenue</p>
-          <h1>{title}</h1>
-          <p className="lims-page-lede">{lede}</p>
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
+      {studio ? null : (
+        <div className="lims-page-header">
+          <div>
+            <p className="lims-eyebrow">Sequence Revenue</p>
+            <h1>{title}</h1>
+            <p className="lims-page-lede">{lede}</p>
+          </div>
+          <div className="rcm-header-actions">
+            <Link className={`module-setup-link${onSetup ? " is-on" : ""}`} to="/app/billing/config">
+              Billing setup
+            </Link>
+            {actions}
+          </div>
         </div>
-        <div className="rcm-header-actions">
-          <Link className={`module-setup-link${onSetup ? " is-on" : ""}`} to="/app/billing/config">
-            Billing setup
-          </Link>
-          {actions}
-        </div>
-      </div>
-      <ModuleChapters chapters={REVENUE_CHAPTERS} label="Sequence Revenue areas" />
+      )}
       {children}
     </div>
   );

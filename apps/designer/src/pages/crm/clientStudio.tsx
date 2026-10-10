@@ -292,13 +292,23 @@ export function clientBudget(card: ClientCard): string {
   return open?.amount || card.account.revenue;
 }
 
-export function SourceBars({ groups, note }: { groups: { label: string; count: number; tone: string }[]; note: string }) {
+export function SourceBars({
+  groups,
+  note,
+  href = "/app/connectivity/analytics",
+  title = "Clients source",
+}: {
+  groups: { label: string; count: number; tone: string }[];
+  note: string;
+  href?: string;
+  title?: string;
+}) {
   const max = Math.max(...groups.map((group) => group.count), 1);
   return (
     <section className="client-card client-source">
       <header>
-        <h2>Clients source</h2>
-        <Link to="/app/connectivity/analytics" aria-label="Open Growth Hub">→</Link>
+        <h2>{title}</h2>
+        <Link to={href} aria-label="Open source detail">→</Link>
       </header>
       <div className="client-source-bars">
         {groups.map((group) => (
