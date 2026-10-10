@@ -21,6 +21,11 @@ export function CrmTasksPage() {
 
   return (
     <CrmShell title="Tasks" lede="What someone owes a client today. Tasks keep their own status, separate from client status and issue status.">
+      <div className="client-board-links">
+        <Link to="/app/connectivity/communications">Messages</Link>
+        <Link to="/app/connectivity/activities">Activity</Link>
+        <Link to="/app/connectivity/issues">Issues</Link>
+      </div>
       <section className="lims-panel billing-panel">
         <div className="chapter-tools" role="group" aria-label="Task status">
           {[

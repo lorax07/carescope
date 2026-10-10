@@ -1,118 +1,185 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { pageRows, useCrm, type DerivedHealth } from "../../crm";
-import { money } from "../../revenueCycle";
+import { addClientAccount, useCrm, type ClientCard } from "../../crm";
+import { ClientAssist, ClientAvatar, SourceBars, clientBudget } from "./clientStudio";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 
+const FILTERS = [
+  { id: "all", label: "All Clients" },
+  { id: "active", label: "Active" },
+  { id: "watch", label: "Watch" },
+  { id: "hold", label: "On hold" },
+] as const;
+
+function matchesFilter(card: ClientCard, filter: string): boolean {
+  if (filter === "active") return card.account.status === "Active" && card.health !== "At risk" && card.health !== "Critical";
+  if (filter === "watch") return card.health === "Watch" || card.health === "At risk" || card.health === "Critical";
+  if (filter === "hold") return card.account.status === "On hold";
+  return true;
+}
+
 export function CrmClientsPage() {
-  const { cards } = useCrm();
+  const { cards, actor, canWrite, accounts } = useCrm();
   const [params, setParams] = useSearchParams();
-  const [query, setQuery] = useState("");
-  const status = params.get("status") || "all";
-  const health = params.get("health") || "all";
-  const page = Number(params.get("page") || "1");
+  const [query, setQuery] = useState(params.get("q") || "");
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
+  const [saved, setSaved] = useState<string[]>([]);
+  const filter = params.get("view") || (params.get("status") === "On hold" ? "hold" : params.get("health") === "At risk" || params.get("health") === "Critical" ? "watch" : "all");
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return cards.filter((card) => {
-      if (status !== "all" && card.account.status !== status) return false;
-      if (health !== "all" && card.health !== health) return false;
+      if (!matchesFilter(card, filter)) return false;
       if (!needle) return true;
-      const hay = `${card.account.name} ${card.account.number} ${card.account.owner} ${card.account.industry} ${card.account.contact} ${card.account.contacts.map((item) => `${item.name} ${item.email} ${item.phone}`).join(" ")}`;
-      return hay.toLowerCase().includes(needle);
+      const people = card.account.contacts.map((item) => `${item.name} ${item.role}`).join(" ");
+      return `${card.account.name} ${card.account.contact} ${card.account.industry} ${card.account.owner} ${people}`.toLowerCase().includes(needle);
     });
-  }, [cards, query, status, health]);
-  const paged = pageRows(filtered, page);
+  }, [cards, filter, query]);
 
-  function setFilter(key: string, value: string) {
+  const signed = accounts.reduce((sum, account) => sum + account.agreements.filter((item) => item.status === "Active").length, 0);
+  const negotiating = accounts.reduce((sum, account) => sum + account.opportunities.filter((item) => item.stage === "Negotiation" || item.stage === "Proposal").length, 0);
+  const sources = ["Client", "Insurance", "Self-pay"].map((label, index) => ({
+    label,
+    count: accounts.filter((account) => account.billTo === label).length,
+    tone: ["is-rose", "is-mint", "is-lilac"][index] ?? "is-mint",
+  }));
+  const quiet = [...sources].sort((a, b) => a.count - b.count)[0];
+
+  function setFilter(next: string) {
     const copy = new URLSearchParams(params);
-    if (value === "all") copy.delete(key);
-    else copy.set(key, value);
-    if (key !== "page") copy.delete("page");
+    if (next === "all") copy.delete("view");
+    else copy.set("view", next);
+    copy.delete("status");
+    copy.delete("health");
+    copy.delete("page");
     setParams(copy, { replace: true });
   }
 
   return (
-    <CrmShell title="Clients" lede="Search the same Sequence Client accounts used in the laboratory and in Sequence Revenue. Health here is explained, not scored.">
-      <section className="lims-panel billing-panel">
-        <div className="lims-panel-head rcm-toolbar">
-          <h2>{filtered.length} clients</h2>
-          <label>
-            Search
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, ID, contact, email, phone, owner" aria-label="Search clients" />
-          </label>
-          <label>
-            Status
-            <select value={status} onChange={(event) => setFilter("status", event.target.value)} aria-label="Filter by client status">
-              <option value="all">All</option>
-              <option value="Active">Active</option>
-              <option value="On hold">On hold</option>
-            </select>
-          </label>
-          <label>
-            Health
-            <select value={health} onChange={(event) => setFilter("health", event.target.value)} aria-label="Filter by client health">
-              <option value="all">All</option>
-              {(["Healthy", "Watch", "At risk", "Critical"] as DerivedHealth[]).map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        {paged.rows.length ? (
-          <div className="lims-table-wrap">
-            <table className="lims-table">
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Owner</th>
-                  <th>Health</th>
-                  <th>Status</th>
-                  <th>Open work</th>
-                  <th>Issues</th>
-                  <th>Tasks</th>
-                  <th>A/R</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.rows.map((card) => (
-                  <tr key={card.account.id}>
-                    <td>
-                      <Link className="lims-linkish" to={`/app/connectivity/clients/${card.account.id}`}>
-                        {card.account.name}
-                      </Link>
-                      <small className="rcm-muted">
-                        {" "}
-                        {card.account.number} · {card.account.industry}
-                      </small>
-                    </td>
-                    <td>{card.account.owner}</td>
-                    <td>{card.health}</td>
-                    <td>{card.account.status}</td>
-                    <td>{card.openWork}</td>
-                    <td>{card.openIssues}</td>
-                    <td>{card.openTasks}</td>
-                    <td>{money(card.arCents)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <CrmEmpty title="No clients match." detail="Clear the search or status filter." />
-        )}
-        {paged.pages > 1 ? (
-          <p className="billing-note">
-            Page {paged.page} of {paged.pages}{" "}
-            {paged.page < paged.pages ? (
-              <button type="button" className="btn" onClick={() => setFilter("page", String(paged.page + 1))}>
-                Next
+    <CrmShell studio title="Client" lede="The people on Sequence Client accounts.">
+      <div className="client-board">
+        <div className="client-board-main">
+          <header className="client-board-head">
+            <h1>Manage Clients</h1>
+            <label>
+              <span className="sr-only">Search clients</span>
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search clients" />
+            </label>
+            {canWrite ? (
+              <button type="button" className="client-add" onClick={() => setAdding(true)}>
+                Add new Client
               </button>
             ) : null}
-          </p>
-        ) : null}
-      </section>
+          </header>
+          <div className="client-board-links">
+            <Link to="/app/connectivity/contacts">People</Link>
+            <Link to="/app/connectivity/documents">Agreements</Link>
+            <Link to="/app/connectivity/health">Health</Link>
+          </div>
+          <div className="client-pills" role="tablist" aria-label="Client filter">
+            {FILTERS.map((item) => (
+              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "is-on" : undefined} onClick={() => setFilter(item.id)}>
+                {item.label}
+              </button>
+            ))}
+          </div>
+          {filtered.length ? (
+            <div className="client-grid">
+              {filtered.flatMap((card) => {
+                const people = card.account.contacts.length ? card.account.contacts : [{ name: card.account.contact, role: "Primary contact", email: "", phone: "" }];
+                return people.map((person) => (
+                  <article key={`${card.account.id}-${person.name}`} className="client-person">
+                    <button
+                      type="button"
+                      className={saved.includes(`${card.account.id}:${person.name}`) ? "is-saved" : undefined}
+                      aria-label={`Save ${person.name}`}
+                      aria-pressed={saved.includes(`${card.account.id}:${person.name}`)}
+                      onClick={() =>
+                        setSaved((current) =>
+                          current.includes(`${card.account.id}:${person.name}`)
+                            ? current.filter((item) => item !== `${card.account.id}:${person.name}`)
+                            : [...current, `${card.account.id}:${person.name}`],
+                        )
+                      }
+                    >
+                      ★
+                    </button>
+                    <Link to={`/app/connectivity/clients/${card.account.id}`}>
+                      <ClientAvatar name={person.name} />
+                      <b>{person.name}</b>
+                      <small>{person.role}</small>
+                      <em>{card.account.name}</em>
+                    </Link>
+                    <dl>
+                      <div>
+                        <dt>From</dt>
+                        <dd>{card.account.billTo}</dd>
+                      </div>
+                      <div>
+                        <dt>Sector</dt>
+                        <dd>{card.account.industry}</dd>
+                      </div>
+                      <div>
+                        <dt>Budget</dt>
+                        <dd>{clientBudget(card)}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                ));
+              })}
+            </div>
+          ) : (
+            <CrmEmpty title="No clients match." detail="Clear the search or choose All Clients." />
+          )}
+        </div>
+        <aside className="client-board-side">
+          <section className="client-card client-contracts">
+            <div className="client-contract-bar" aria-hidden="true">
+              <span style={{ width: `${signed + negotiating === 0 ? 50 : Math.round((signed / (signed + negotiating)) * 100)}%` }} />
+            </div>
+            <div>
+              <strong>{signed}</strong>
+              <small>Signed contracts</small>
+            </div>
+            <div>
+              <strong>{negotiating}</strong>
+              <small>Ongoing negotiations</small>
+            </div>
+          </section>
+          <SourceBars
+            groups={sources}
+            note={quiet ? `${quiet.label} is the smallest source, with ${quiet.count} account${quiet.count === 1 ? "" : "s"}.` : "Sources appear as accounts are billed."}
+          />
+          <ClientAssist actor={actor} hint="A saved star stays on this screen until you leave it." />
+        </aside>
+      </div>
+      {adding ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setAdding(false)}>
+          <form
+            className="lims-modal client-add-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-client-title"
+            onClick={(event) => event.stopPropagation()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              addClientAccount(draft);
+              setAdding(false);
+              setDraft({ name: "", contact: "", role: "", industry: "" });
+            }}
+          >
+            <div className="lims-dialog-bar">
+              <h2 id="add-client-title">Add new Client</h2>
+              <button type="button" className="btn" onClick={() => setAdding(false)}>Close</button>
+            </div>
+            <label>Account name<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
+            <label>Primary contact<input value={draft.contact} onChange={(event) => setDraft({ ...draft, contact: event.target.value })} required /></label>
+            <label>Role<input value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Lab director" /></label>
+            <label>Sector<input value={draft.industry} onChange={(event) => setDraft({ ...draft, industry: event.target.value })} placeholder="Pharmaceutical" /></label>
+            <button type="submit" className="btn btn-primary">Save client</button>
+          </form>
+        </div>
+      ) : null}
     </CrmShell>
   );
 }

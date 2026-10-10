@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import { money } from "../../revenueCycle";
 import { CrmEmpty, CrmShell } from "./CrmShell";
+import { SourceBars } from "./clientStudio";
 
 export function CrmAnalyticsPage() {
-  const { cards, overlay, opportunities } = useCrm();
+  const { cards, overlay, opportunities, accounts } = useCrm();
   const byHealth = useMemo(() => {
     const tally = new Map<string, number>();
     for (const card of cards) tally.set(card.health, (tally.get(card.health) ?? 0) + 1);
@@ -33,7 +34,15 @@ export function CrmAnalyticsPage() {
   }, [cards]);
 
   return (
-    <CrmShell title="Client analytics" lede="Portfolio concentration, health, and pipeline from the same account, accession, and revenue records.">
+    <CrmShell title="Growth Hub" lede="Where the client book is concentrated, and which sources can still grow.">
+      <SourceBars
+        groups={["Client", "Insurance", "Self-pay"].map((label, index) => ({
+          label,
+          count: accounts.filter((account) => account.billTo === label).length,
+          tone: ["is-rose", "is-mint", "is-lilac"][index] ?? "is-mint",
+        }))}
+        note="Source is the bill-to on the account: the client, an insurance payer, or self-pay."
+      />
       <section className="lims-panel billing-panel">
         <div className="lims-panel-head">
           <h2>Health mix</h2>
