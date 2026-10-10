@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { formatMoney, useRcm } from "../../rcm";
+import { SourceBars } from "../crm/clientStudio";
 import { RcmEmpty, RcmShell } from "./RcmShell";
+import { RevenueAssist } from "./revenueStudio";
 
 type Slice = { key: string; billed: number; paid: number; balance: number; denied: number; count: number };
 
@@ -28,7 +30,7 @@ function Rate({ value }: { value: number }) {
 }
 
 export function RcmAnalyticsPage() {
-  const { claims, overlay, metrics } = useRcm();
+  const { claims, overlay, metrics, actor } = useRcm();
   const payers = useMemo(
     () =>
       tally(
@@ -82,71 +84,84 @@ export function RcmAnalyticsPage() {
     return [...map.entries()].sort((a, b) => b[1].cents - a[1].cents);
   }, [overlay.denials]);
 
+  const routes = [
+    { label: "Insurance", count: claims.filter((claim) => claim.route === "837P").length, tone: "is-mint" },
+    { label: "Client", count: claims.filter((claim) => claim.route === "Invoice").length, tone: "is-rose" },
+    { label: "Self-pay", count: claims.filter((claim) => claim.route === "Statement").length, tone: "is-lilac" },
+  ];
+  const quiet = [...routes].sort((a, b) => a.count - b.count)[0];
+
   return (
-    <RcmShell title="Revenue analytics" lede="Patterns across payers, clients, and procedures. Every rate here is the same ledger the work queues use.">
-      <section className="lims-panel billing-panel">
-        <div className="lims-panel-head">
-          <h2>Performance</h2>
-        </div>
-        <div className="rcm-metric-grid is-compact">
-          <Link className="rcm-metric" to="/app/billing/claims">
-            <small>Clean claim rate</small>
-            <strong>{metrics.cleanRate}%</strong>
-            <Rate value={metrics.cleanRate} />
-          </Link>
-          <Link className="rcm-metric" to="/app/billing/denials">
-            <small>Denial rate</small>
-            <strong>{metrics.denialRate}%</strong>
-            <Rate value={metrics.denialRate} />
-          </Link>
-          <Link className="rcm-metric" to="/app/billing/payments">
-            <small>Collection rate</small>
-            <strong>{metrics.collectionRate}%</strong>
-            <Rate value={metrics.collectionRate} />
-          </Link>
-          <Link className="rcm-metric" to="/app/billing/ar">
-            <small>Days in A/R</small>
-            <strong>{metrics.daysInAr}</strong>
-            <span>Average age of open balances</span>
-          </Link>
-        </div>
-      </section>
-      <div className="rcm-split">
-        <SliceTable title="Payer performance" href="/app/billing/ar" rows={payers} empty="No payer activity on the ledger yet." />
-        <SliceTable title="Client performance" href="/app/billing/ar" rows={clients} empty="No client balances to compare." />
-      </div>
-      <div className="rcm-split">
-        <SliceTable title="Test and procedure" href="/app/billing/claims" rows={tests} empty="Capture charges to see procedure yield." />
-        <section className="lims-panel billing-panel">
-          <div className="lims-panel-head">
-            <h2>Denial root cause</h2>
-            <Link to="/app/billing/denials">Denials</Link>
+    <RcmShell studio title="Performance" lede="Patterns across payers, clients, and procedures.">
+      <div className="client-home">
+        <div className="client-home-main">
+          <header className="client-board-head">
+            <h1>Performance</h1>
+          </header>
+          <div className="client-kpis">
+            <Link className="client-kpi" to="/app/billing/claims">
+              <header>
+                <span>Clean claims</span>
+                <em className="is-up">{metrics.cleanRate}%</em>
+              </header>
+              <strong>{metrics.cleanRate}%</strong>
+              <Rate value={metrics.cleanRate} />
+            </Link>
+            <Link className="client-kpi" to="/app/billing/denials">
+              <header>
+                <span>Denial rate</span>
+                <em className={metrics.denialRate ? "is-down" : "is-up"}>{metrics.denialRate}%</em>
+              </header>
+              <strong>{metrics.denialRate}%</strong>
+              <Rate value={metrics.denialRate} />
+            </Link>
+            <Link className="client-kpi" to="/app/billing/payments">
+              <header>
+                <span>Collection rate</span>
+                <em className={metrics.collectionRate >= 50 ? "is-up" : "is-down"}>{metrics.collectionRate}%</em>
+              </header>
+              <strong>{metrics.collectionRate}%</strong>
+              <small>{metrics.daysInAr} days in A/R</small>
+            </Link>
           </div>
-          {causes.length ? (
-            <div className="lims-table-wrap">
-              <table className="lims-table">
-                <thead>
-                  <tr>
-                    <th>Cause</th>
-                    <th>Count</th>
-                    <th>Impact</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {causes.map(([label, stats]) => (
-                    <tr key={label}>
-                      <td>{label}</td>
-                      <td>{stats.count}</td>
-                      <td>{formatMoney(stats.cents)}</td>
+          <SliceTable title="Payer performance" href="/app/billing/ar" rows={payers} empty="No payer activity on the ledger yet." />
+          <SliceTable title="Client performance" href="/app/billing/claims" rows={clients} empty="No client balances to compare." />
+          <SliceTable title="Test and procedure" href="/app/billing/claims" rows={tests} empty="Capture charges to see procedure yield." />
+        </div>
+        <aside className="client-home-side">
+          <SourceBars href="/app/billing/claims" title="Claim source" groups={routes} note={quiet ? `${quiet.label} is the quietest route on the book.` : "Routes appear as claims are captured."} />
+          <section className="client-card client-projects is-scroll">
+            <header>
+              <h2>Denial root cause</h2>
+              <Link to="/app/billing/denials">Denials</Link>
+            </header>
+            {causes.length ? (
+              <div className="client-table-wrap">
+                <table className="client-table">
+                  <thead>
+                    <tr>
+                      <th>Cause</th>
+                      <th>Count</th>
+                      <th>Impact</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <RcmEmpty title="No root causes assigned." detail="Tag denials so recurrence is visible here." />
-          )}
-        </section>
+                  </thead>
+                  <tbody>
+                    {causes.map(([label, stats]) => (
+                      <tr key={label}>
+                        <td>{label}</td>
+                        <td>{stats.count}</td>
+                        <td>{formatMoney(stats.cents)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <RcmEmpty title="No root causes assigned." detail="Tag denials so recurrence is visible here." />
+            )}
+          </section>
+          <RevenueAssist actor={actor} hint="Rates use the same ledger as the work queues." />
+        </aside>
       </div>
     </RcmShell>
   );
@@ -154,14 +169,14 @@ export function RcmAnalyticsPage() {
 
 function SliceTable({ title, href, rows, empty }: { title: string; href: string; rows: Slice[]; empty: string }) {
   return (
-    <section className="lims-panel billing-panel">
-      <div className="lims-panel-head">
+    <section className="client-card client-projects is-scroll">
+      <header>
         <h2>{title}</h2>
         <Link to={href}>Open</Link>
-      </div>
+      </header>
       {rows.length ? (
-        <div className="lims-table-wrap">
-          <table className="lims-table">
+        <div className="client-table-wrap">
+          <table className="client-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -172,7 +187,7 @@ function SliceTable({ title, href, rows, empty }: { title: string; href: string;
               </tr>
             </thead>
             <tbody>
-              {rows.slice(0, 12).map((row) => (
+              {rows.map((row) => (
                 <tr key={row.key}>
                   <td>{row.key}</td>
                   <td>{row.count}</td>
