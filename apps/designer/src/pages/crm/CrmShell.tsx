@@ -8,23 +8,27 @@ export function CrmShell({
   title,
   lede,
   actions,
+  studio,
   children,
 }: {
   title: string;
   lede: string;
   actions?: ReactNode;
+  studio?: boolean;
   children: ReactNode;
 }) {
   return (
-    <div className="lims-page rcm-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Sequence Client</p>
-          <h1>{title}</h1>
-          <p className="lims-page-lede">{lede}</p>
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
+      {studio ? null : (
+        <div className="lims-page-header">
+          <div>
+            <p className="lims-eyebrow">Sequence Client</p>
+            <h1>{title}</h1>
+            <p className="lims-page-lede">{lede}</p>
+          </div>
+          {actions ? <div className="rcm-header-actions">{actions}</div> : null}
         </div>
-        {actions ? <div className="rcm-header-actions">{actions}</div> : null}
-      </div>
+      )}
       <ModuleChapters chapters={CLIENT_CHAPTERS} label="Sequence Client areas" />
       {children}
     </div>

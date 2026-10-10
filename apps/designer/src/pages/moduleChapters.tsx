@@ -13,6 +13,8 @@ export type ModuleChapter = {
   label: string;
   question: string;
   end?: boolean;
+  /** Keep the tools for routing without a second row of links. */
+  hideTools?: boolean;
   tools: ChapterTool[];
 };
 
@@ -22,41 +24,46 @@ export type ModuleChapter = {
  */
 export const CLIENT_CHAPTERS: ModuleChapter[] = [
   {
-    id: "accounts",
+    id: "client",
     to: "/app/connectivity/clients",
-    label: "Accounts",
-    question: "The clients, the people, and the agreements.",
+    label: "Client",
+    question: "The people and accounts you work with.",
+    hideTools: true,
     tools: [
-      { to: "/app/connectivity/clients", label: "Clients", match: "/app/connectivity/clients" },
+      { to: "/app/connectivity/clients", label: "Client", match: "/app/connectivity/clients" },
       { to: "/app/connectivity/contacts", label: "People", match: "/app/connectivity/contacts" },
       { to: "/app/connectivity/documents", label: "Agreements", match: "/app/connectivity/documents" },
       { to: "/app/connectivity/health", label: "Health", match: "/app/connectivity/health" },
     ],
   },
   {
-    id: "follow-up",
+    id: "tasks",
     to: "/app/connectivity/tasks",
-    label: "Follow-up",
-    question: "What you owe them, and what you already said.",
+    label: "Tasks",
+    question: "What is due for a client.",
+    hideTools: true,
     tools: [
       { to: "/app/connectivity/tasks", label: "Tasks", match: "/app/connectivity/tasks" },
       { to: "/app/connectivity/communications", label: "Messages", match: "/app/connectivity/communications" },
       { to: "/app/connectivity/activities", label: "Activity", match: "/app/connectivity/activities" },
+      { to: "/app/connectivity/issues", label: "Issues", match: "/app/connectivity/issues" },
     ],
   },
   {
-    id: "service",
-    to: "/app/connectivity/issues",
-    label: "Service",
-    question: "What is going wrong, and who is fixing it.",
-    tools: [{ to: "/app/connectivity/issues", label: "Issues", match: "/app/connectivity/issues" }],
+    id: "projects",
+    to: "/app/connectivity/opportunities",
+    label: "Projects",
+    question: "Work moving through the laboratory.",
+    hideTools: true,
+    tools: [{ to: "/app/connectivity/opportunities", label: "Projects", match: "/app/connectivity/opportunities" }],
   },
   {
-    id: "pipeline",
-    to: "/app/connectivity/opportunities",
-    label: "Pipeline",
-    question: "Where the relationship can grow.",
-    tools: [{ to: "/app/connectivity/opportunities", label: "Opportunities", match: "/app/connectivity/opportunities" }],
+    id: "growth",
+    to: "/app/connectivity/analytics",
+    label: "Growth Hub",
+    question: "Where the book of business can grow.",
+    hideTools: true,
+    tools: [{ to: "/app/connectivity/analytics", label: "Growth Hub", match: "/app/connectivity/analytics" }],
   },
 ];
 
@@ -133,7 +140,7 @@ export function ModuleChapters({
 }) {
   const { pathname } = useLocation();
   const current = chapterForPath(chapters, pathname);
-  const tools = current && current.tools.length > 1 ? current.tools : [];
+  const tools = current && !current.hideTools && current.tools.length > 1 ? current.tools : [];
 
   return (
     <>

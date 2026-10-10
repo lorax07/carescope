@@ -10,17 +10,18 @@ describe("client and revenue chapters", () => {
   });
 
   it("places client pages in the area an account manager would open", () => {
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/clients/acc-helix")?.id).toBe("accounts");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/contacts")?.id).toBe("accounts");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/documents")?.id).toBe("accounts");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/health")?.id).toBe("accounts");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/tasks")?.id).toBe("follow-up");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/communications")?.id).toBe("follow-up");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/activities")?.id).toBe("follow-up");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/issues")?.id).toBe("service");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/opportunities")?.id).toBe("pipeline");
+    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Tasks", "Projects", "Growth Hub"]);
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/clients/acc-helix")?.id).toBe("client");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/contacts")?.id).toBe("client");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/documents")?.id).toBe("client");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/health")?.id).toBe("client");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/tasks")?.id).toBe("tasks");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/communications")?.id).toBe("tasks");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/activities")?.id).toBe("tasks");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/issues")?.id).toBe("tasks");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/opportunities")?.id).toBe("projects");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/analytics")?.id).toBe("growth");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity")).toBeNull();
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/analytics")).toBeNull();
   });
 
   it("places revenue pages in the area a billing lead would open", () => {

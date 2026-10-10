@@ -352,8 +352,42 @@ function isStage(value: string): value is OpportunityStage {
   return PIPELINE_STAGES.includes(value as OpportunityStage);
 }
 
+function listedAccounts(overlay: CrmOverlay): CrmAccount[] {
+  const extras = overlay.extraAccounts ?? [];
+  return extras.length ? [...CRM_ACCOUNTS, ...extras] : CRM_ACCOUNTS;
+}
+
+export function addClientAccount(input: { name: string; contact: string; role: string; industry: string }) {
+  const name = input.name.trim();
+  const contact = input.contact.trim();
+  if (!name || !contact) return;
+  const overlay = currentOverlay();
+  const account: CrmAccount = {
+    id: `acc-${crypto.randomUUID().slice(0, 8)}`,
+    number: `ACC-${1000 + (overlay.extraAccounts?.length ?? 0) + CRM_ACCOUNTS.length}`,
+    name,
+    relationship: "Client",
+    industry: input.industry.trim() || "Laboratory",
+    owner: crmActor(),
+    contact,
+    status: "Active",
+    health: "Healthy",
+    revenue: "$0 open",
+    billTo: "Client",
+    payer: `${name} AP`,
+    pricing: "List",
+    contacts: [{ name: contact, role: input.role.trim() || "Primary contact", email: "", phone: "" }],
+    activities: [],
+    agreements: [],
+    opportunities: [],
+  };
+  overlay.extraAccounts = [...(overlay.extraAccounts ?? []), account];
+  audit(overlay, "account", account.id, "create", "", name);
+  commit(overlay);
+}
+
 function opportunities(tenantId: string, overlay: CrmOverlay): OpportunityRecord[] {
-  return CRM_ACCOUNTS.flatMap((account) =>
+  return listedAccounts(overlay).flatMap((account) =>
     account.opportunities.map((item) => {
       const extra = overlay.opportunityNext[item.id];
       return {
@@ -478,9 +512,10 @@ export function snapshot(cycle: Cycle, samples: SampleRecord[]): CrmSnapshot {
   const tenantId = crmTenantId();
   const overlay = overlayFor(tenantId);
   const books = rollup(cycle.charges);
-  const contacts = allContacts(CRM_ACCOUNTS, tenantId);
+  const accounts = listedAccounts(overlay);
+  const contacts = allContacts(accounts, tenantId);
   const opportunityRows = opportunities(tenantId, overlay);
-  const cards = CRM_ACCOUNTS.map((account) => {
+  const cards = accounts.map((account) => {
     const accountIssues = overlay.issues.filter((item) => item.accountId === account.id);
     const accountTasks = overlay.tasks.filter((item) => item.accountId === account.id);
     const signals = signalsFor(account, cycle.charges, samples, overlay.issues, overlay.tasks);
@@ -497,7 +532,7 @@ export function snapshot(cycle: Cycle, samples: SampleRecord[]): CrmSnapshot {
       collectedCents: finance?.collected ?? 0,
     };
   });
-  return { tenantId, actor: crmActor(), canWrite: crmCanWrite(), overlay, accounts: CRM_ACCOUNTS, contacts, opportunities: opportunityRows, cards };
+  return { tenantId, actor: crmActor(), canWrite: crmCanWrite(), overlay, accounts, contacts, opportunities: opportunityRows, cards };
 }
 
 export function useCrm() {
@@ -521,17 +556,17 @@ export function useCrm() {
     charges: cycle.charges,
     deviations: quality.deviations,
     activitiesFor: (accountId: string) => {
-      const account = CRM_ACCOUNTS.find((item) => item.id === accountId);
+      const account = state.accounts.find((item) => item.id === accountId);
       if (!account) return [] as CrmActivity[];
       return projectedActivities(account, samples, cycle.charges, quality.deviations, state.overlay, state.tenantId);
     },
     documentsFor: (accountId: string) => {
-      const account = CRM_ACCOUNTS.find((item) => item.id === accountId);
+      const account = state.accounts.find((item) => item.id === accountId);
       if (!account) return [] as CrmDocument[];
       return documentsFor(account, state.overlay, state.tenantId);
     },
     contactsFor: (accountId: string) => {
-      const account = CRM_ACCOUNTS.find((item) => item.id === accountId);
+      const account = state.accounts.find((item) => item.id === accountId);
       return account ? contactsFor(account, state.tenantId) : [];
     },
   };
