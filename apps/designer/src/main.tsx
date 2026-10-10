@@ -20,7 +20,7 @@ import {
   ResultsPage,
   InventoryPage,
 } from "./pages/ModulePages";
-import { QualityPage } from "./pages/QualityPage";
+import { ComplianceOverview, ComplianceSection } from "./pages/quality/complianceWorkspace";
 import { InstrumentInterfacePage, InstrumentRecordPage } from "./pages/InstrumentInterfacePage";
 import { InstrumentAcquirePage, InstrumentQueuePage, InstrumentReviewPage } from "./pages/instruments/InstrumentWork";
 import { BillingPage } from "./pages/BillingPage";
@@ -137,7 +137,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="connectivity/analytics" element={<CrmAnalyticsPage />} />
           <Route path="connectivity" element={<ClientIndex />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="quality" element={<QualityPage />} />
+          <Route path="quality/:section/:id?" element={<ComplianceSection />} />
+          <Route path="quality" element={<ComplianceOverview />} />
           <Route path="billing/claims/:claimId" element={<RcmClaimDetailPage />} />
           <Route path="billing/claims" element={<RcmClaimsPage />} />
           <Route path="billing/queues" element={<RcmQueuesPage />} />

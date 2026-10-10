@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLIENT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./moduleChapters";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./moduleChapters";
 
 describe("client and revenue chapters", () => {
   it("keeps revenue to four work areas and adds Inbox beside the client areas", () => {
@@ -35,5 +35,27 @@ describe("client and revenue chapters", () => {
     expect(chapterForPath(REVENUE_CHAPTERS, "/app/billing/analytics")?.id).toBe("performance");
     expect(chapterForPath(REVENUE_CHAPTERS, "/app/billing")).toBeNull();
     expect(chapterForPath(REVENUE_CHAPTERS, "/app/billing/config")).toBeNull();
+  });
+
+  it("places compliance pages under Sequence Compliance and leaves the overview unmatched", () => {
+    expect(COMPLIANCE_CHAPTERS.map((chapter) => chapter.label)).toEqual([
+      "Events",
+      "Deviations",
+      "CAPA",
+      "Documents",
+      "Training",
+      "Changes",
+      "Audits",
+      "Risks",
+      "Equipment",
+      "Suppliers",
+      "Complaints",
+      "Metrics",
+      "Administration",
+    ]);
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality")).toBeNull();
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/events/DEV-118")?.id).toBe("events");
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/capa/CAPA-015")?.id).toBe("capa");
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/admin")?.id).toBe("admin");
   });
 });

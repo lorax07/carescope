@@ -10,7 +10,7 @@ import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
-import { CLIENT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
 import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
@@ -30,6 +30,7 @@ function nestedNavFor(to: string) {
   if (to === "/app/billing") return REVENUE_CHAPTERS;
   if (to === "/app/connectivity") return CLIENT_CHAPTERS;
   if (to === "/app/instruments") return INSTRUMENT_CHAPTERS;
+  if (to === "/app/quality") return COMPLIANCE_CHAPTERS;
   return [];
 }
 
@@ -309,11 +310,27 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
-  if (name === "config") {
+  if (name === "config" || name === "admin") {
     return (
       <svg {...common}>
         <circle cx="12" cy="12" r="3" />
         <path d="M12 4.5v2.2M12 17.3v2.2M4.5 12h2.2M17.3 12h2.2M6.4 6.4l1.6 1.6M16 16l1.6 1.6M17.6 6.4 16 8M8 16l-1.6 1.6" />
+      </svg>
+    );
+  }
+  if (name === "events" || name === "deviations" || name === "capa" || name === "audits" || name === "complaints") {
+    return (
+      <svg {...common}>
+        <path d="M12 4.5 20 18H4L12 4.5z" />
+        <path d="M12 10v4M12 16.5h.01" />
+      </svg>
+    );
+  }
+  if (name === "training" || name === "changes" || name === "risks" || name === "equipment" || name === "suppliers" || name === "metrics") {
+    return (
+      <svg {...common}>
+        <rect x="5" y="4" width="14" height="16" rx="2" />
+        <path d="M8 9h8M8 13h8M8 17h5" />
       </svg>
     );
   }
@@ -429,7 +446,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -462,7 +479,7 @@ function ShellNav({
                     aria-label={compact ? sub.label : undefined}
                     onClick={() => sectionTabs.showSection(section)}
                     className={() => {
-                      const chapters = group === "billing" ? REVENUE_CHAPTERS : group === "instruments" ? INSTRUMENT_CHAPTERS : CLIENT_CHAPTERS;
+                      const chapters = group === "billing" ? REVENUE_CHAPTERS : group === "instruments" ? INSTRUMENT_CHAPTERS : group === "quality" ? COMPLIANCE_CHAPTERS : CLIENT_CHAPTERS;
                       const on = chapterForPath(chapters, pathname)?.id === sub.id;
                       return `lims-nav-item is-core-child${on ? " active" : ""}`;
                     }}
