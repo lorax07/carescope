@@ -37,7 +37,7 @@ import { CrmActivitiesPage } from "./pages/crm/CrmActivitiesPage";
 import { CrmAnalyticsPage } from "./pages/crm/CrmAnalyticsPage";
 import { CrmClientDetailPage } from "./pages/crm/CrmClientDetailPage";
 import { CrmClientsPage } from "./pages/crm/CrmClientsPage";
-import { CrmCommunicationsPage } from "./pages/crm/CrmCommunicationsPage";
+import { CrmInboxPage } from "./pages/crm/CrmInboxPage";
 import { CrmContactsPage } from "./pages/crm/CrmContactsPage";
 import { CrmDocumentsPage } from "./pages/crm/CrmDocumentsPage";
 import { CrmHealthPage } from "./pages/crm/CrmHealthPage";
@@ -130,7 +130,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="connectivity/tasks" element={<CrmTasksPage />} />
           <Route path="connectivity/opportunities" element={<CrmOpportunitiesPage />} />
           <Route path="connectivity/health" element={<CrmHealthPage />} />
-          <Route path="connectivity/communications" element={<CrmCommunicationsPage />} />
+          <Route path="connectivity/inbox" element={<CrmInboxPage />} />
+          <Route path="connectivity/communications" element={<CrmInboxPage />} />
           <Route path="connectivity/issues" element={<CrmIssuesPage />} />
           <Route path="connectivity/documents" element={<CrmDocumentsPage />} />
           <Route path="connectivity/analytics" element={<CrmAnalyticsPage />} />

@@ -30,6 +30,7 @@ export function CrmOverviewPage() {
   return (
     <CrmShell studio title="Client overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
       <div className="client-home">
+        <h1 className="client-overview-title">Client Overview</h1>
         <div className="client-home-main">
           <div className="client-kpis">
             <StudioLink to="/app/connectivity/clients">
@@ -65,6 +66,7 @@ export function CrmOverviewPage() {
                 <span className="client-legend"><i /> Collected</span>
                 <span className="client-legend is-peak"><i /> Peak day</span>
                 <b>July 2026</b>
+                <small className="client-chart-hint">Ctrl + scroll to zoom</small>
               </div>
             </header>
             <div className="client-analytics-body">
@@ -82,7 +84,7 @@ export function CrmOverviewPage() {
             </div>
           </section>
 
-          <ProjectTable rows={opportunities} accounts={accounts} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
+          <ProjectTable scroll rows={opportunities} accounts={accounts} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
         </div>
 
         <aside className="client-home-side">

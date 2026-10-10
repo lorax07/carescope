@@ -20,7 +20,7 @@ export type ModuleChapter = {
 
 /**
  * Sequence Client, as an account manager would use it.
- * The briefing stays on the module home. These four are the places you work.
+ * The briefing stays on the module home. These are the places you work.
  */
 export const CLIENT_CHAPTERS: ModuleChapter[] = [
   {
@@ -44,7 +44,6 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
     hideTools: true,
     tools: [
       { to: "/app/connectivity/tasks", label: "Tasks", match: "/app/connectivity/tasks" },
-      { to: "/app/connectivity/communications", label: "Messages", match: "/app/connectivity/communications" },
       { to: "/app/connectivity/activities", label: "Activity", match: "/app/connectivity/activities" },
       { to: "/app/connectivity/issues", label: "Issues", match: "/app/connectivity/issues" },
     ],
@@ -64,6 +63,17 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
     question: "Where the book of business can grow.",
     hideTools: true,
     tools: [{ to: "/app/connectivity/analytics", label: "Growth Hub", match: "/app/connectivity/analytics" }],
+  },
+  {
+    id: "inbox",
+    to: "/app/connectivity/inbox",
+    label: "Inbox",
+    question: "Messages with the people on client accounts.",
+    hideTools: true,
+    tools: [
+      { to: "/app/connectivity/inbox", label: "Inbox", match: "/app/connectivity/inbox" },
+      { to: "/app/connectivity/communications", label: "Messages", match: "/app/connectivity/communications" },
+    ],
   },
 ];
 

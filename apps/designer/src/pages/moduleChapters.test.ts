@@ -2,21 +2,22 @@ import { describe, expect, it } from "vitest";
 import { CLIENT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./moduleChapters";
 
 describe("client and revenue chapters", () => {
-  it("keeps each module to four work areas", () => {
-    expect(CLIENT_CHAPTERS).toHaveLength(4);
+  it("keeps revenue to four work areas and adds Inbox beside the client areas", () => {
+    expect(CLIENT_CHAPTERS).toHaveLength(5);
     expect(REVENUE_CHAPTERS).toHaveLength(4);
-    expect(new Set(CLIENT_CHAPTERS.map((chapter) => chapter.id)).size).toBe(4);
+    expect(new Set(CLIENT_CHAPTERS.map((chapter) => chapter.id)).size).toBe(5);
     expect(new Set(REVENUE_CHAPTERS.map((chapter) => chapter.id)).size).toBe(4);
   });
 
   it("places client pages in the area an account manager would open", () => {
-    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Tasks", "Projects", "Growth Hub"]);
+    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Tasks", "Projects", "Growth Hub", "Inbox"]);
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/clients/acc-helix")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/contacts")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/documents")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/health")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/tasks")?.id).toBe("tasks");
-    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/communications")?.id).toBe("tasks");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/inbox")?.id).toBe("inbox");
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/communications")?.id).toBe("inbox");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/activities")?.id).toBe("tasks");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/issues")?.id).toBe("tasks");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/opportunities")?.id).toBe("projects");

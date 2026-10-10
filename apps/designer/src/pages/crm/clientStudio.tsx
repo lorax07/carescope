@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { ClientCard, OpportunityRecord } from "../../crm";
 import type { CrmAccount } from "../../crmAccounts";
@@ -78,33 +78,68 @@ export function projectMatches(stage: string, filter: ProjectFilter): boolean {
   return stage === "Discovery";
 }
 
+export const CHART_ZOOM_MIN = 0.6;
+export const CHART_ZOOM_MAX = 2.75;
+export const CHART_ZOOM_STEP = 0.15;
+
+/** Control or Command plus wheel changes chart zoom. Scroll up zooms in. */
+export function nextChartZoom(current: number, deltaY: number, modified: boolean): number {
+  if (!modified || deltaY === 0) return current;
+  const step = deltaY < 0 ? CHART_ZOOM_STEP : -CHART_ZOOM_STEP;
+  const next = Math.round((current + step) * 100) / 100;
+  return Math.min(CHART_ZOOM_MAX, Math.max(CHART_ZOOM_MIN, next));
+}
+
 export function RevenueChart({ series }: { series: number[] }) {
+  const [zoom, setZoom] = useState(1);
+  const scroller = useRef<HTMLDivElement>(null);
   const max = Math.max(...series, 1);
   const peak = series.reduce((best, value, index) => (value > (series[best] ?? 0) ? index : best), 0);
   const peakValue = series[peak] ?? 0;
+  useEffect(() => {
+    const node = scroller.current;
+    if (!node) return;
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      setZoom((current) => nextChartZoom(current, event.deltaY, true));
+    };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, []);
   return (
-    <div className="client-chart" role="img" aria-label={`Collected revenue by day. The highest day is day ${peak + 1} at ${money(peakValue)}.`}>
-      <div className="client-chart-axis">
-        {[1, 0.66, 0.33].map((step) => (
-          <span key={step}>${Math.round((max * step) / 100).toLocaleString("en-US")}</span>
-        ))}
-      </div>
-      <div className="client-chart-plot">
-        {series.map((value, index) => {
-          const dots = Math.max(1, Math.round((value / max) * 8));
-          const isPeak = index === peak && peakValue > 0;
-          return (
-            <div key={index} className={`client-chart-col${isPeak ? " is-peak" : ""}`}>
-              {isPeak ? <b>{money(value).replace(/\.00$/, "")}</b> : null}
-              <span>
-                {Array.from({ length: dots }, (_, dot) => (
-                  <i key={dot} />
-                ))}
-              </span>
-              {index % 5 === 0 || isPeak ? <small>{isPeak ? `Day ${index + 1}` : index + 1}</small> : <small />}
-            </div>
-          );
-        })}
+    <div
+      className="client-chart-scroll"
+      ref={scroller}
+      tabIndex={0}
+      data-chart-zoom={zoom}
+      aria-label={`Collected revenue by day. The highest day is day ${peak + 1} at ${money(peakValue)}. Hold Control and scroll up to zoom in, or scroll down to zoom out.`}
+    >
+      <div className="client-chart-zoom" style={{ zoom }}>
+        <div className="client-chart" role="presentation">
+          <div className="client-chart-axis">
+            {[1, 0.66, 0.33].map((step) => (
+              <span key={step}>${Math.round((max * step) / 100).toLocaleString("en-US")}</span>
+            ))}
+          </div>
+          <div className="client-chart-plot">
+            {series.map((value, index) => {
+              const dots = Math.max(1, Math.round((value / max) * 8));
+              const isPeak = index === peak && peakValue > 0;
+              return (
+                <div key={index} className={`client-chart-col${isPeak ? " is-peak" : ""}`}>
+                  {isPeak ? <b>{money(value).replace(/\.00$/, "")}</b> : null}
+                  <span>
+                    {Array.from({ length: dots }, (_, dot) => (
+                      <i key={dot} />
+                    ))}
+                  </span>
+                  {index % 5 === 0 || isPeak ? <small>{isPeak ? `Day ${index + 1}` : index + 1}</small> : <small />}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -164,6 +199,7 @@ export function ProjectTable({
   onFilter,
   query,
   onQuery,
+  scroll = false,
 }: {
   rows: OpportunityRecord[];
   accounts: CrmAccount[];
@@ -171,6 +207,7 @@ export function ProjectTable({
   onFilter: (filter: ProjectFilter) => void;
   query: string;
   onQuery: (query: string) => void;
+  scroll?: boolean;
 }) {
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -183,7 +220,7 @@ export function ProjectTable({
   const counts = PROJECT_FILTERS.map((item) => ({ ...item, count: rows.filter((row) => projectMatches(row.stage, item.id)).length }));
 
   return (
-    <section className="client-card client-projects">
+    <section className={`client-card client-projects${scroll ? " is-scroll" : ""}`}>
       <header>
         <h2>Manage Projects</h2>
         <label>
@@ -212,7 +249,7 @@ export function ProjectTable({
               </tr>
             </thead>
             <tbody>
-              {visible.slice(0, 6).map((row) => {
+              {visible.map((row) => {
                 const account = accounts.find((item) => item.id === row.accountId);
                 const tone = projectTone(row.stage);
                 const person = account?.contact || row.owner;

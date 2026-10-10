@@ -233,6 +233,14 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "inbox") {
+    return (
+      <svg {...common}>
+        <path d="M4 6h16v12H4z" />
+        <path d="m4 6 8 6 8-6" />
+      </svg>
+    );
+  }
   if (name === "communications") {
     return (
       <svg {...common}>
