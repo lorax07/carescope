@@ -92,7 +92,7 @@
 
 .lp-header-logo {
   display: block;
-  height: 3.85rem;
+  height: 39px;
   width: auto;
 }
 
@@ -3163,8 +3163,8 @@ body:has(.lp) {
 }
 
 .lp-header-logo {
-  height: 56px;
-  width: 224px;
+  height: 39px;
+  width: auto;
   image-rendering: auto;
 }
 
@@ -3245,7 +3245,7 @@ img.lp-logo-sequence {
   }
 
   .lp-header-logo {
-    height: 36px;
+    height: 25px;
     width: auto;
   }
 

@@ -39,8 +39,8 @@ export function SiteHeader() {
           <img
             className="lp-header-logo"
             src="/carescope-header-logo.png"
-            width={224}
-            height={56}
+            width={156}
+            height={39}
             alt="CareScope. Building Better Healthcare for Everyone."
           />
           <span className="lp-logo-rule" aria-hidden="true" />
