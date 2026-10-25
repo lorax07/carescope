@@ -4685,6 +4685,10 @@ img.lp-logo-sequence {
   padding-bottom: 0.4rem;
 }
 
+.lp-page #what-we-solve-heading.lp-display-head {
+  font-weight: 400;
+}
+
 .lp-friction {
   padding-top: 3.2rem;
   padding-bottom: 3.2rem;
