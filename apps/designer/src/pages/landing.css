@@ -4664,6 +4664,10 @@ img.lp-logo-sequence {
   text-align: left;
 }
 
+.lp-solve-banner {
+  padding: 0.6rem var(--lp-gutter) 2.4rem;
+}
+
 .lp-friction {
   padding: 3.2rem var(--lp-gutter);
 }

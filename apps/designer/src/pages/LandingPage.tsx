@@ -251,7 +251,10 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
 
 function WhatWeSolve() {
   return (
-    <div id="less-friction">
+    <section id="less-friction" aria-labelledby="what-we-solve-heading">
+      <div className="lp-section-head lp-solve-banner">
+        <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
+      </div>
       {TOPICS.map((topic, index) => (
         <section className={`lp-friction is-${topic.id}${index % 2 ? " is-flip" : ""}`} key={topic.id} aria-labelledby={`friction-${topic.id}`}>
           <div className="lp-friction-inner">
@@ -267,7 +270,7 @@ function WhatWeSolve() {
           </div>
         </section>
       ))}
-    </div>
+    </section>
   );
 }
 
