@@ -83,7 +83,7 @@ const TOPICS: Topic[] = [
   {
     id: "cost",
     label: "Make changes at a lower cost",
-    description: "Even small changes can turn into large, time-consuming projects—with multiple teams, systems and approvals.",
+    description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes.",
     visual: "Illustrative annual cost model",
     outcome: "Make changes in hours, not weeks.",
     icon: "↯",
