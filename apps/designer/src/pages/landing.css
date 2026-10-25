@@ -1117,7 +1117,13 @@
 }
 
 #less-friction {
+  box-sizing: border-box;
+  width: 100cqi;
+  max-width: 100cqi;
+  margin-left: calc(50% - 50cqi);
+  margin-right: calc(50% - 50cqi);
   scroll-margin-top: 5.25rem;
+  background: #e4dcf3;
 }
 
 .lp-solve-side-heading {
@@ -4668,24 +4674,21 @@ img.lp-logo-sequence {
   text-align: left;
 }
 
+.lp-solve-banner,
+.lp-friction {
+  padding-left: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
+  padding-right: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
+}
+
 .lp-solve-banner {
-  padding: 0.6rem var(--lp-gutter) 2.4rem;
+  padding-top: 2.4rem;
+  padding-bottom: 0.4rem;
 }
 
 .lp-friction {
-  padding: 3.2rem var(--lp-gutter);
-}
-
-.lp-friction.is-cost {
-  background: #e4ebf8;
-}
-
-.lp-friction.is-operations {
-  background: #f6efe3;
-}
-
-.lp-friction.is-integration {
-  background: #e4f3ea;
+  padding-top: 3.2rem;
+  padding-bottom: 3.2rem;
+  background: transparent;
 }
 
 .lp-friction-inner {
