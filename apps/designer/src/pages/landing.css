@@ -4690,9 +4690,27 @@ img.lp-logo-sequence {
 }
 
 .lp-friction {
-  padding-top: 3.2rem;
-  padding-bottom: 3.2rem;
+  box-sizing: border-box;
+  width: min(var(--lp-measure), calc(100% - 2rem));
+  margin: 0 auto 1rem;
+  padding-top: 2.6rem;
+  padding-bottom: 2.6rem;
+  border: 1px solid transparent;
+  border-radius: 18px;
   background: transparent;
+}
+
+.lp-friction.is-cost {
+  border-color: #3d7ee8;
+}
+
+.lp-friction.is-operations {
+  border-color: #d0893a;
+}
+
+.lp-friction.is-integration {
+  border-color: #2f8f62;
+  margin-bottom: 2rem;
 }
 
 .lp-friction-inner {
