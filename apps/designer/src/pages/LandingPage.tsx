@@ -499,8 +499,7 @@ function IndustrySpotlights() {
     <section className="lp-section lp-industries" id="industries" aria-labelledby="industry-spotlights-heading">
       <div className="lp-section-inner">
         <div className="lp-section-head">
-          <h2 id="industry-spotlights-heading" className="lp-display-head">Industries on one workflow</h2>
-          <p>The same accession, review, and release, shaped for the laboratory you run.</p>
+          <h2 id="industry-spotlights-heading" className="lp-display-head">Use Sequence wherever science is fundamental</h2>
         </div>
         <div className="lp-industry-mosaic">
           {INDUSTRY_SPOTLIGHTS.map((industry) => (

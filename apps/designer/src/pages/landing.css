@@ -4676,6 +4676,14 @@ img.lp-logo-sequence {
   line-height: 1.35;
 }
 
+.lp-page .lp-industries .lp-section-head:has(.lp-display-head) {
+  max-width: none;
+}
+
+.lp-page #industry-spotlights-heading.lp-display-head {
+  max-width: none;
+}
+
 .lp-industries {
   background: #f7f6f4;
 }
