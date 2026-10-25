@@ -18,9 +18,9 @@ export function LandingPage() {
         <SiteHeader />
         <section className="lp-showcase" aria-labelledby="showcase-heading">
           <h1 id="showcase-heading">
-            Modern Laboratory Software,
+            Modern Laboratory Software
             <br />
-            Build for change,
+            Build for change
             <br />
             Designed to scale
           </h1>

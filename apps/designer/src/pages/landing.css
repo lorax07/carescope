@@ -3972,7 +3972,7 @@ img.lp-logo-sequence {
   margin: 0;
   color: #16181d;
   font-family: Inter, "Sora", sans-serif;
-  font-size: clamp(3rem, 5.8vw, 5.15rem);
+  font-size: clamp(2.25rem, 4.15vw, 3.6rem);
   font-weight: 800;
   letter-spacing: -0.052em;
   line-height: 0.98;
@@ -4269,7 +4269,7 @@ img.lp-logo-sequence {
   }
 
   .lp-showcase h1 {
-    font-size: clamp(2.35rem, 10vw, 3.4rem);
+    font-size: clamp(1.7rem, 7vw, 2.4rem);
   }
 
   .lp-module-row {
