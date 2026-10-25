@@ -260,7 +260,6 @@ function WhatWeSolve() {
               <TopicInfographic id={topic.id} />
             </figure>
             <div className="lp-friction-copy">
-              <p>Less friction, more science</p>
               <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
               <p>{topic.description}</p>
               <h3>{topic.outcome}</h3>

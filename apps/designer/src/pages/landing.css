@@ -4651,15 +4651,6 @@ img.lp-logo-sequence {
   text-transform: uppercase;
 }
 
-.lp-friction-copy p:first-child {
-  margin: 0 0 0.55rem;
-  color: #5c6570;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .lp-friction-copy h2 {
   margin: 0;
   color: #16181d;
@@ -4670,7 +4661,7 @@ img.lp-logo-sequence {
   line-height: 1.05;
 }
 
-.lp-friction-copy p:nth-of-type(2) {
+.lp-friction-copy p {
   margin: 0.9rem 0 0;
   color: #3d4450;
   font-size: 1.02rem;
