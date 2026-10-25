@@ -627,25 +627,37 @@ function RegIcon({ code }: { code: string }) {
 
 function ComplianceSection() {
   return (
-    <section className="lp-section" id="compliance">
-      <div className="lp-section-inner">
-        <div className="lp-section-head">
-          <h2 className="lp-display-head">Governed for regulated environments</h2>
-          <p>
-            Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
-          </p>
-        </div>
-        <div className="lp-reg-grid">
-          {REGULATIONS.map((item) => (
-            <article className="lp-reg-card" key={item.code} tabIndex={0}>
-              <span className="lp-reg-icon" aria-hidden="true">
-                <RegIcon code={item.code} />
-              </span>
-              <b>{item.code}</b>
-              <small>{item.name}</small>
-              <p>{item.detail}</p>
-            </article>
-          ))}
+    <section className="lp-section lp-compliance" id="compliance" aria-labelledby="compliance-heading">
+      <div className="lp-compliance-stage">
+        <img
+          className="lp-compliance-photo"
+          src="/regulations/regulated-lab-background.jpg"
+          alt=""
+        />
+        <div className="lp-compliance-layout">
+          <div className="lp-compliance-copy">
+            <h2 id="compliance-heading">Governed for regulated environments</h2>
+            <p>
+              Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
+            </p>
+            <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
+              Try free for 30 days
+            </Link>
+          </div>
+          <div className="lp-reg-scroll" tabIndex={0} aria-label="Regulations">
+            {REGULATIONS.map((item) => (
+              <article className="lp-reg-card" key={item.code}>
+                <span className="lp-reg-icon" aria-hidden="true">
+                  <RegIcon code={item.code} />
+                </span>
+                <div className="lp-reg-copy">
+                  <b>{item.code}</b>
+                  <small>{item.name}</small>
+                  <p>{item.detail}</p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -3781,104 +3781,154 @@ img.lp-logo-sequence {
   background: #1b6ef3;
 }
 
-.lp-reg-grid {
+.lp-compliance.lp-section {
+  padding-top: 1.25rem;
+  padding-bottom: 2.5rem;
+  background: #f6f5f4;
+}
+
+.lp-compliance-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #d7e4f2 center / cover no-repeat;
+  background-image: url("/regulations/regulated-lab-background.jpg");
+}
+
+.lp-compliance-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 28% center;
+}
+
+.lp-compliance-layout {
+  position: relative;
+  z-index: 1;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(17rem, 1.1fr);
+  gap: 1.6rem;
+  align-items: center;
+  min-height: 38rem;
+  padding: 2.3rem 1.35rem 2.3rem 2.4rem;
+}
+
+.lp-compliance-copy {
+  max-width: 22rem;
+}
+
+.lp-compliance-copy h2 {
+  margin: 0;
+  color: #10243f;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(2.15rem, 3.6vw, 3.35rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+}
+
+.lp-compliance-copy p {
+  margin: 1rem 0 0;
+  color: #243044;
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.lp-compliance-copy .lp-pill {
+  margin-top: 1.45rem;
+}
+
+.lp-reg-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 32.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 36, 63, 0.35) transparent;
+}
+
+.lp-reg-scroll:focus-visible {
+  outline: 2px solid #1b6ef3;
+  outline-offset: 4px;
 }
 
 .lp-reg-card {
-  position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  justify-content: flex-end;
-  gap: 0.28rem;
-  aspect-ratio: 1;
-  min-height: 132px;
-  overflow: hidden;
-  padding: 0.85rem;
-  border: 1px solid rgba(15, 31, 68, 0.08);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #f7f9fc 0%, #e7eef8 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 16px rgba(15, 31, 68, 0.05);
+  gap: 0.9rem;
+  margin: 0;
+  padding: 1rem 1.05rem;
+  border: 0;
+  border-radius: 16px;
+  background: #1b6ef3;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(16, 36, 63, 0.16);
 }
 
 .lp-reg-icon {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
   width: 2.7rem;
   height: 2.7rem;
   border-radius: 0.8rem;
-  background: #fff;
-  color: #1d4e89;
-  box-shadow: 0 8px 18px rgba(15, 31, 68, 0.08);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
 }
 
-.lp-reg-card::before {
-  content: none;
+.lp-reg-copy {
+  min-width: 0;
 }
 
 .lp-reg-card b,
-.lp-reg-card small {
-  position: relative;
-  z-index: 1;
+.lp-reg-card small,
+.lp-reg-card p {
+  display: block;
 }
 
 .lp-reg-card b {
-  color: #0b1f44;
-  font-size: clamp(0.82rem, 1.1vw, 1rem);
+  color: #fff;
+  font-size: 1rem;
   letter-spacing: -0.03em;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .lp-reg-card small {
-  margin-top: 0.28rem;
-  color: #243044;
-  font-size: 0.68rem;
+  margin-top: 0.15rem;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.84rem;
   line-height: 1.3;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .lp-reg-card p {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  padding: 0.75rem;
-  background: #0b1f44;
-  color: #fff;
-  font-size: 0.74rem;
+  margin: 0.35rem 0 0;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.86rem;
   line-height: 1.4;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 180ms ease, transform 180ms ease;
 }
 
-.lp-reg-card:hover p,
-.lp-reg-card:focus-visible p,
-.lp-reg-card:focus p {
-  opacity: 1;
-  transform: none;
-}
+@media (max-width: 900px) {
+  .lp-compliance-layout {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 1.6rem 1rem 1.15rem;
+  }
 
-@media (max-width: 1100px) {
-  .lp-reg-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .lp-compliance-copy {
+    max-width: none;
+  }
+
+  .lp-reg-scroll {
+    max-height: 24rem;
   }
 }
 
 @media (max-width: 640px) {
-  .lp-reg-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .lp-page-card {
     min-height: 0;
   }
