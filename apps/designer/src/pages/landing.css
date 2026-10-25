@@ -3943,6 +3943,7 @@ img.lp-logo-sequence {
 
 /* Homepage top — soft pastel field, centered headline, dark pill actions */
 .lp-home {
+  container-type: inline-size;
   background-color: #f6f5f4;
   background-image:
     radial-gradient(ellipse 42% 70% at -2% 28%, rgba(255, 176, 210, 0.9), rgba(255, 176, 210, 0) 68%),
@@ -4598,9 +4599,12 @@ img.lp-logo-sequence {
 }
 
 .lp-why {
-  margin: 0 0 2.4rem;
+  box-sizing: border-box;
+  width: 100cqi;
+  max-width: 100cqi;
+  margin: 0 calc(50% - 50cqi) 2.4rem;
   padding: 4.2rem 1.6rem 3.6rem;
-  border-radius: 22px;
+  border-radius: 0;
   background: #1b2836;
   color: #fff;
   text-align: center;
