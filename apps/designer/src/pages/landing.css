@@ -4702,14 +4702,17 @@ img.lp-logo-sequence {
 
 .lp-friction.is-cost {
   border-color: #3d7ee8;
+  background: #e4ebf8;
 }
 
 .lp-friction.is-operations {
   border-color: #d0893a;
+  background: #f6efe3;
 }
 
 .lp-friction.is-integration {
   border-color: #2f8f62;
+  background: #e4f3ea;
   margin-bottom: 2rem;
 }
 
