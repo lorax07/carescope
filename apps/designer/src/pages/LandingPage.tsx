@@ -82,7 +82,7 @@ type Topic = {
 const TOPICS: Topic[] = [
   {
     id: "cost",
-    label: "The Cost of Change",
+    label: "Make changes at a lower cost",
     description: "Even small changes can turn into large, time-consuming projects—with multiple teams, systems and approvals.",
     visual: "Illustrative annual cost model",
     outcome: "Make changes in hours, not weeks.",
@@ -90,7 +90,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "operations",
-    label: "Operational and compliance friction",
+    label: "Reduce errors caused by disconnected systems and custom integrations",
     description: "Disconnected queues, manual handoffs, and compliance evidence assembled after the fact slow the lab and raise the chance of error.",
     visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
     outcome: "One accession from receive through release, with the evidence already on the work.",
