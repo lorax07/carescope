@@ -75,7 +75,7 @@ type Topic = {
   label: string;
   description: string;
   visual: string;
-  outcome: string;
+  points: readonly [string, string];
   icon: string;
 };
 
@@ -85,7 +85,7 @@ const TOPICS: Topic[] = [
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes.",
     visual: "Illustrative annual cost model",
-    outcome: "Make changes in hours, not weeks.",
+    points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
   {
@@ -93,7 +93,7 @@ const TOPICS: Topic[] = [
     label: "Reduce errors caused by disconnected systems and custom integrations",
     description: "Disconnected queues, manual handoffs, and compliance evidence assembled after the fact slow the lab and raise the chance of error.",
     visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
-    outcome: "One accession from receive through release, with the evidence already on the work.",
+    points: ["Samples move through one workflow.", "Review and release from the workflow."],
     icon: "⌘",
   },
   {
@@ -101,7 +101,7 @@ const TOPICS: Topic[] = [
     label: "Integration and Contractor dependency",
     description: "Traditional LIMS changes depend on outside contractors and a separate interface for every system the laboratory touches.",
     visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
-    outcome: "Run the laboratory in Sequence, without handing the change to a contractor.",
+    points: ["Publish a workflow without a contractor.", "Six modules on one platform."],
     icon: "⌕",
   },
 ];
@@ -256,16 +256,35 @@ function WhatWeSolve() {
         <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
       </div>
       {TOPICS.map((topic, index) => (
-        <section className={`lp-friction is-${topic.id}${index % 2 ? " is-flip" : ""}`} key={topic.id} aria-labelledby={`friction-${topic.id}`}>
+        <section className={`lp-friction is-${topic.id}${index % 2 === 0 ? " is-flip" : ""}`} key={topic.id} aria-labelledby={`friction-${topic.id}`}>
           <div className="lp-friction-inner">
             <figure className="lp-friction-visual">
-              <figcaption>{topic.visual}</figcaption>
-              <TopicInfographic id={topic.id} />
+              <div className="lp-friction-screen">
+                <TopicInfographic id={topic.id} />
+              </div>
+              <figcaption className="lp-sr">{topic.visual}</figcaption>
             </figure>
             <div className="lp-friction-copy">
               <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
               <p>{topic.description}</p>
-              <h3>{topic.outcome}</h3>
+              <ul className="lp-friction-points">
+                {topic.points.map((point) => (
+                  <li key={point}>
+                    <span className="lp-friction-mark" aria-hidden="true">
+                      <svg viewBox="0 0 16 16" width="15" height="15">
+                        <path
+                          fill="currentColor"
+                          d="M8 1.15 9.05 5.1h4.15L10.05 7.5l1.1 3.95L8 9.05 4.85 11.45 5.95 7.5 2.8 5.1h4.15L8 1.15z"
+                        />
+                      </svg>
+                    </span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+              <Link to="/app?signup=1" className="lp-friction-cta">
+                Try free for 30 days
+              </Link>
             </div>
           </div>
         </section>

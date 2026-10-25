@@ -1122,8 +1122,9 @@
   max-width: 100cqi;
   margin-left: calc(50% - 50cqi);
   margin-right: calc(50% - 50cqi);
+  padding-bottom: 2.6rem;
   scroll-margin-top: 5.25rem;
-  background: #e4dcf3;
+  background: #fff;
 }
 
 .lp-solve-side-heading {
@@ -4676,13 +4677,14 @@ img.lp-logo-sequence {
 
 .lp-solve-banner,
 .lp-friction {
+  box-sizing: border-box;
   padding-left: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
   padding-right: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
 }
 
 .lp-solve-banner {
-  padding-top: 2.4rem;
-  padding-bottom: 0.4rem;
+  padding-top: 3.4rem;
+  padding-bottom: 0.6rem;
 }
 
 .lp-page #what-we-solve-heading.lp-display-head {
@@ -4690,37 +4692,23 @@ img.lp-logo-sequence {
 }
 
 .lp-friction {
-  box-sizing: border-box;
-  width: min(var(--lp-measure), calc(100% - 2rem));
-  margin: 0 auto 1rem;
-  padding-top: 2.6rem;
-  padding-bottom: 2.6rem;
-  border: 1px solid transparent;
-  border-radius: 18px;
+  margin: 0;
+  padding-top: 2.1rem;
+  padding-bottom: 2.1rem;
+  border: 0;
+  border-radius: 0;
   background: transparent;
-}
-
-.lp-friction.is-cost {
-  border-color: #3d7ee8;
-  background: #e4ebf8;
-}
-
-.lp-friction.is-operations {
-  border-color: #d0893a;
-  background: #f6efe3;
-}
-
-.lp-friction.is-integration {
-  border-color: #2f8f62;
-  background: #e4f3ea;
-  margin-bottom: 2rem;
 }
 
 .lp-friction-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
-  gap: 2rem;
+  grid-template-columns: minmax(0, 1.18fr) minmax(16rem, 0.82fr);
+  gap: clamp(1.6rem, 4vw, 4.2rem);
   align-items: center;
+}
+
+.lp-friction.is-flip .lp-friction-inner {
+  grid-template-columns: minmax(16rem, 0.82fr) minmax(0, 1.18fr);
 }
 
 .lp-friction.is-flip .lp-friction-visual {
@@ -4732,45 +4720,104 @@ img.lp-logo-sequence {
 }
 
 .lp-friction-visual {
+  position: relative;
   margin: 0;
-  padding: 1rem 1rem 1.1rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 16px 36px rgba(22, 24, 29, 0.06);
+  padding: 1.05rem;
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 90% at 85% 0%, rgba(120, 150, 230, 0.38), transparent 56%),
+    radial-gradient(80% 80% at 8% 100%, rgba(50, 70, 140, 0.45), transparent 52%),
+    #1a2744;
+  box-shadow: 0 22px 48px rgba(16, 24, 40, 0.16);
 }
 
-.lp-friction-visual figcaption {
-  margin-bottom: 0.7rem;
-  color: #5c6570;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.lp-friction-screen {
+  padding: 0.95rem 1rem 1rem;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.lp-friction-screen .lp-native-total strong {
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+}
+
+.lp-friction-screen .lp-native-pairs.is-supplied .lp-native-pair {
+  gap: 1rem;
+  padding: 0.55rem 0;
+}
+
+.lp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .lp-friction-copy h2 {
   margin: 0;
   color: #16181d;
   font-family: Inter, "Sora", sans-serif;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 1.05;
+  font-size: clamp(1.65rem, 2.5vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
 }
 
 .lp-friction-copy p {
-  margin: 0.9rem 0 0;
-  color: #3d4450;
-  font-size: 1.02rem;
+  margin: 0.85rem 0 0;
+  color: #4a5160;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
-.lp-friction-copy h3 {
-  margin: 1.15rem 0 0;
-  color: #10243f;
-  font-size: 1.15rem;
-  letter-spacing: -0.03em;
-  line-height: 1.35;
+.lp-friction-points {
+  display: grid;
+  gap: 0.48rem;
+  margin: 1.05rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-friction-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: #3c4450;
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.lp-friction-mark {
+  display: inline-flex;
+  flex: none;
+  margin-top: 0.16rem;
+  color: #6d5efc;
+}
+
+.lp-friction-cta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1.3rem;
+  padding: 0.62rem 1.05rem;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: #fff;
+  color: #1c1e22;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.lp-friction-cta:hover {
+  border-color: #bdbdbd;
+  background: #fafafa;
+  color: #1c1e22;
 }
 
 .lp-page .lp-industries .lp-section-head:has(.lp-display-head) {
@@ -4892,9 +4939,19 @@ img.lp-logo-sequence {
     border-left: 0;
   }
 
-  .lp-friction.is-flip .lp-friction-visual,
+  .lp-friction-inner,
+  .lp-friction.is-flip .lp-friction-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-friction-copy,
   .lp-friction.is-flip .lp-friction-copy {
-    order: initial;
+    order: 1;
+  }
+
+  .lp-friction-visual,
+  .lp-friction.is-flip .lp-friction-visual {
+    order: 2;
   }
 
   .lp-industry-tile.is-navy {
