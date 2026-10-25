@@ -35,7 +35,7 @@ export function ModuleStoryPage() {
               Open this module
             </Link>
             <Link to="/app?signup=1" className="lp-nav-text">
-              Request a Demo
+              Try free for 30 days
             </Link>
           </div>
         </div>

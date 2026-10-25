@@ -3789,30 +3789,37 @@ img.lp-logo-sequence {
 
 .lp-reg-card {
   position: relative;
-  display: grid;
-  align-content: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.28rem;
   aspect-ratio: 1;
   min-height: 132px;
   overflow: hidden;
-  padding: 0.8rem;
+  padding: 0.85rem;
   border: 1px solid rgba(15, 31, 68, 0.08);
   border-radius: 12px;
-  background-color: #e8eef6;
-  background-image: var(--reg-image);
-  background-position: center;
-  background-size: cover;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 16px rgba(15, 31, 68, 0.05);
+  background: linear-gradient(180deg, #f7f9fc 0%, #e7eef8 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 8px 16px rgba(15, 31, 68, 0.05);
+}
+
+.lp-reg-icon {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #1d4e89;
+  box-shadow: 0 8px 18px rgba(15, 31, 68, 0.08);
 }
 
 .lp-reg-card::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 62%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 46%, rgba(255, 255, 255, 0.9) 100%);
-  pointer-events: none;
+  content: none;
 }
 
 .lp-reg-card b,
@@ -3961,7 +3968,7 @@ img.lp-logo-sequence {
 }
 
 .lp-showcase h1 {
-  max-width: 16em;
+  max-width: 18em;
   margin: 0;
   color: #16181d;
   font-family: Inter, "Sora", sans-serif;
@@ -4533,5 +4540,261 @@ img.lp-logo-sequence {
 
   .lp-price-modules {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.lp-film-space {
+  height: 4.75rem;
+}
+
+.lp-why {
+  margin: 0 var(--lp-gutter) 2.4rem;
+  padding: 4.2rem 1.6rem 3.6rem;
+  border-radius: 22px;
+  background: #1b2836;
+  color: #fff;
+  text-align: center;
+}
+
+.lp-why h2 {
+  margin: 0 0 2.6rem;
+  color: #fff;
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+  font-size: clamp(2.1rem, 4vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.lp-why-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.lp-why-stats article {
+  padding: 0 1.4rem;
+}
+
+.lp-why-stats article + article {
+  border-left: 1px solid rgba(255, 255, 255, 0.38);
+}
+
+.lp-why strong {
+  display: block;
+  color: #e4f15a;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(2.5rem, 4.4vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.lp-why p {
+  max-width: 16rem;
+  margin: 0.9rem auto 0;
+  color: #fff;
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.lp-page .lp-section-head h2.lp-module-lead {
+  max-width: 16em;
+}
+
+.lp-friction {
+  padding: 3.2rem var(--lp-gutter);
+}
+
+.lp-friction.is-cost {
+  background: #e4ebf8;
+}
+
+.lp-friction.is-operations {
+  background: #f6efe3;
+}
+
+.lp-friction.is-integration {
+  background: #e4f3ea;
+}
+
+.lp-friction-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+  gap: 2rem;
+  align-items: center;
+}
+
+.lp-friction.is-flip .lp-friction-visual {
+  order: 2;
+}
+
+.lp-friction.is-flip .lp-friction-copy {
+  order: 1;
+}
+
+.lp-friction-visual {
+  margin: 0;
+  padding: 1rem 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 36px rgba(22, 24, 29, 0.06);
+}
+
+.lp-friction-visual figcaption {
+  margin-bottom: 0.7rem;
+  color: #5c6570;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lp-friction-copy p:first-child {
+  margin: 0 0 0.55rem;
+  color: #5c6570;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lp-friction-copy h2 {
+  margin: 0;
+  color: #16181d;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.lp-friction-copy p:nth-of-type(2) {
+  margin: 0.9rem 0 0;
+  color: #3d4450;
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.lp-friction-copy h3 {
+  margin: 1.15rem 0 0;
+  color: #10243f;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
+}
+
+.lp-industries {
+  background: #f7f6f4;
+}
+
+.lp-industry-mosaic {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.lp-industry-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 230px;
+  padding: 1.2rem 1.15rem 1.15rem;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(22, 24, 29, 0.05);
+}
+
+.lp-industry-tile.is-navy {
+  grid-row: span 2;
+  background: #1b2836;
+  color: #fff;
+}
+
+.lp-industry-tile.is-navy p,
+.lp-industry-tile.is-navy li {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.lp-industry-mark {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-bottom: 0.9rem;
+  border-radius: 0.85rem;
+  background: #eef3f8;
+  color: #1d4e89;
+}
+
+.lp-industry-tile.is-navy .lp-industry-mark {
+  background: rgba(228, 241, 90, 0.16);
+  color: #e4f15a;
+}
+
+.lp-industry-tile.is-green .lp-industry-mark { background: #e5f5ea; color: #1d7a45; }
+.lp-industry-tile.is-slate .lp-industry-mark { background: #eef1f5; color: #3d4a5c; }
+.lp-industry-tile.is-amber .lp-industry-mark { background: #f8f0dc; color: #8a5a12; }
+.lp-industry-tile.is-rose .lp-industry-mark { background: #fde8e4; color: #a33b32; }
+.lp-industry-tile.is-teal .lp-industry-mark { background: #e3f4f4; color: #0f6e72; }
+.lp-industry-tile.is-violet .lp-industry-mark { background: #eee9f8; color: #5b45a8; }
+.lp-industry-tile.is-blush .lp-industry-mark { background: #f8e8f1; color: #9a3d6e; }
+
+.lp-industry-tile h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.lp-industry-tile p {
+  margin: 0.55rem 0 0;
+  color: #445066;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.lp-industry-tile ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: auto 0 0;
+  padding: 1rem 0 0;
+  list-style: none;
+}
+
+.lp-industry-tile li {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(16, 36, 63, 0.06);
+  color: #243044;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.lp-industry-tile.is-navy li {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 900px) {
+  .lp-why-stats,
+  .lp-friction-inner,
+  .lp-industry-mosaic {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-why-stats article + article {
+    margin-top: 1.6rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.38);
+    border-left: 0;
+  }
+
+  .lp-friction.is-flip .lp-friction-visual,
+  .lp-friction.is-flip .lp-friction-copy {
+    order: initial;
+  }
+
+  .lp-industry-tile.is-navy {
+    grid-row: auto;
   }
 }

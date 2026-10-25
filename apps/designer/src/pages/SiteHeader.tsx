@@ -85,7 +85,7 @@ export function SiteHeader() {
             <Link to="/intrasite">Sign in</Link>
           </nav>
           <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-            Request a Demo
+            Try free for 30 days
           </Link>
         </div>
       </div>

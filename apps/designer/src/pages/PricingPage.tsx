@@ -147,7 +147,7 @@ export function PricingPage() {
         <section className="lp-price-close">
           <h2>Match a plan to your laboratory</h2>
           <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-            Request a Demo
+            Try free for 30 days
           </Link>
         </section>
       </main>

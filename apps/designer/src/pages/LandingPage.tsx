@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
@@ -18,9 +18,11 @@ export function LandingPage() {
         <SiteHeader />
         <section className="lp-showcase" aria-labelledby="showcase-heading">
           <h1 id="showcase-heading">
-            The laboratory platform
+            Modern Laboratory Software,
             <br />
-            that keeps you moving.
+            Build for change,
+            <br />
+            Designed to scale
           </h1>
           <p>
             CareScope Sequence brings your lab workflows, data and systems together — so you can make changes
@@ -28,7 +30,7 @@ export function LandingPage() {
           </p>
           <div className="lp-showcase-actions">
             <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-              Request a Demo
+              Try free for 30 days
             </Link>
             <a href="#modules" className="lp-pill lp-pill-light">
               Explore modules
@@ -38,7 +40,8 @@ export function LandingPage() {
 
         <div className="lp">
       <LimsFilm />
-      <ServedMarquee />
+      <div className="lp-film-space" aria-hidden="true" />
+      <WhyChoose />
       <PlatformBand />
       <WhatWeSolve />
       <IndustrySpotlights />
@@ -247,130 +250,25 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
 }
 
 function WhatWeSolve() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [activeId, setActiveId] = useState(TOPICS[0].id);
-  const [paused, setPaused] = useState(false);
-  const activeIndex = TOPICS.findIndex((item) => item.id === activeId);
-  const active = TOPICS[activeIndex] ?? TOPICS[0];
-
-  useEffect(() => {
-    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setTimeout(() => {
-      setActiveId((current) => {
-        const index = TOPICS.findIndex((item) => item.id === current);
-        return TOPICS[(index + 1) % TOPICS.length].id;
-      });
-    }, 5000);
-    return () => window.clearTimeout(timer);
-  }, [activeId, paused]);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    const update = () => {
-      const rect = section.getBoundingClientRect();
-      const view = window.innerHeight;
-      const enter = 1 - (rect.top - view * 0.12) / (view * 0.42);
-      const leave = (rect.bottom - view * 0.08) / (view * 0.38);
-      const spotlight = Math.min(1, Math.max(0, Math.min(enter, leave)));
-      section.style.setProperty("--spotlight", spotlight.toFixed(3));
-    };
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, []);
-
-  function moveTab(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") return;
-    event.preventDefault();
-    let next = activeIndex;
-    if (event.key === "ArrowRight") next = (activeIndex + 1) % TOPICS.length;
-    if (event.key === "ArrowLeft") next = (activeIndex - 1 + TOPICS.length) % TOPICS.length;
-    if (event.key === "Home") next = 0;
-    if (event.key === "End") next = TOPICS.length - 1;
-    setActiveId(TOPICS[next].id);
-    document.getElementById(`solve-tab-${TOPICS[next].id}`)?.focus();
-  }
-
   return (
-    <section
-      className="lp-section lp-spotlight"
-      id="less-friction"
-      ref={sectionRef}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false);
-      }}
-    >
-      <div className="lp-section-inner lp-solve-board">
-        <div className="lp-solve-intro">
-          <h2 className="lp-display-head">Less friction, more science</h2>
-          <p>
-            CareScope Sequence eliminates the biggest operational, technical and compliance challenges labs face—so
-            you can focus on what matters most: better patient outcomes.
-          </p>
-        </div>
-
-        <div className="lp-solve-jumps" role="tablist" aria-label="What we solve topics" onKeyDown={moveTab}>
-          {TOPICS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              id={`solve-tab-${item.id}`}
-              aria-selected={item.id === active.id}
-              aria-controls="solve-active-panel"
-              tabIndex={item.id === active.id ? 0 : -1}
-              className={item.id === active.id ? "is-on" : undefined}
-              onClick={() => setActiveId(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <article
-          className="lp-solve-card"
-          id="solve-active-panel"
-          role="tabpanel"
-          aria-labelledby={`solve-tab-${active.id}`}
-          key={active.id}
-        >
-          <div className="lp-solve-card-head">
-            <span>{activeIndex + 1}</span>
-            <div>
-              <h3>{active.label}</h3>
-              <p>{active.description}</p>
+    <div id="less-friction">
+      {TOPICS.map((topic, index) => (
+        <section className={`lp-friction is-${topic.id}${index % 2 ? " is-flip" : ""}`} key={topic.id} aria-labelledby={`friction-${topic.id}`}>
+          <div className="lp-friction-inner">
+            <figure className="lp-friction-visual">
+              <figcaption>{topic.visual}</figcaption>
+              <TopicInfographic id={topic.id} />
+            </figure>
+            <div className="lp-friction-copy">
+              <p>Less friction, more science</p>
+              <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
+              <p>{topic.description}</p>
+              <h3>{topic.outcome}</h3>
             </div>
           </div>
-          <figure className="lp-solve-visual">
-            <figcaption>{active.visual}</figcaption>
-            <TopicInfographic id={active.id} />
-          </figure>
-          <div className="lp-solve-outcome">
-            <span aria-hidden="true">{active.icon}</span>
-            <div>
-              <p>How Sequence helps</p>
-              <h4>{active.outcome}</h4>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -408,33 +306,32 @@ function LimsFilm() {
   );
 }
 
-const BUSINESSES_SERVED = [
-  "Pharmaceutical",
-  "Clinical diagnostics",
-  "Food & beverage",
-  "Agriculture",
-  "Environmental",
-  "Chemicals",
-  "Petrochemicals",
-  "Manufacturing",
-  "Cosmetics",
-  "Biologics",
+const WHY_CHOOSE = [
+  {
+    figure: "6",
+    caption: "Modules for operations, instruments, compliance, client, revenue, and insights.",
+  },
+  {
+    figure: "30 days",
+    caption: "Try Sequence free and run a laboratory workflow before you commit.",
+  },
+  {
+    figure: "1 record",
+    caption: "The accession, the evidence, and the release stay on the same workflow.",
+  },
 ] as const;
 
-function ServedMarquee() {
+function WhyChoose() {
   return (
-    <section className="lp-served" aria-labelledby="served-heading">
-      <h2 id="served-heading">Businesses we have served</h2>
-      <div className="lp-served-viewport">
-        <div className="lp-served-track">
-          {[0, 1].map((copy) => (
-            <ul key={copy} aria-hidden={copy === 1}>
-              {BUSINESSES_SERVED.map((name) => (
-                <li key={`${copy}-${name}`}>{name}</li>
-              ))}
-            </ul>
-          ))}
-        </div>
+    <section className="lp-why" aria-labelledby="why-sequence-heading">
+      <h2 id="why-sequence-heading">Why choose Sequence</h2>
+      <div className="lp-why-stats">
+        {WHY_CHOOSE.map((item) => (
+          <article key={item.figure}>
+            <strong>{item.figure}</strong>
+            <p>{item.caption}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -446,7 +343,11 @@ function PlatformBand() {
   return (
     <section className="lp-section lp-platform" id="modules" aria-labelledby="platform-heading">
       <div className="lp-section-inner">
-        <h2 id="platform-heading" className="sr-only">Laboratory modules</h2>
+        <div className="lp-section-head">
+          <h2 id="platform-heading" className="lp-display-head lp-module-lead">
+            No makeshift integrations, just genuine tools tailored for laboratory operation
+          </h2>
+        </div>
         <ul className="lp-module-row">
           {MARKETING_MODULES.map((pillar) => (
             <li key={pillar.slug} className={MODULES_BOUNCING_UP.has(pillar.slug) ? "is-up" : "is-down"}>
@@ -469,100 +370,153 @@ const INDUSTRY_SPOTLIGHTS = [
   {
     title: "Pharmaceutical",
     summary: "Control stability, release, and batch records from one governed laboratory workflow.",
-    points: ["Method and specification control", "Review, approval, and certificate release", "Complete audit history for every change"],
+    points: ["Method control", "Certificate release", "Audit history"],
+    tone: "navy",
   },
   {
     title: "Agriculture",
     summary: "Follow soil, crop, feed, and residue samples from the field through the reported result.",
-    points: ["Field-to-lab chain of custody", "High-volume accessioning", "Client-ready certificates"],
+    points: ["Chain of custody", "High-volume intake", "Client certificates"],
+    tone: "green",
   },
   {
     title: "Manufacturing",
     summary: "Connect incoming material, in-process checks, and final quality release without extra systems.",
-    points: ["Specification-driven routing", "Instrument and batch traceability", "Faster controlled changes"],
+    points: ["Spec routing", "Batch traceability", "Controlled change"],
+    tone: "slate",
   },
   {
-    title: "Chemicals / Petrochemicals",
+    title: "Chemicals",
     summary: "Standardize methods, solutions, instrument runs, and certificates across complex matrices.",
-    points: ["Run and reagent traceability", "Repeatable method setup", "Governed result release"],
+    points: ["Run traceability", "Method setup", "Governed release"],
+    tone: "amber",
   },
   {
     title: "Food & Beverage",
     summary: "Move microbiology, chemistry, and safety testing through one visible operating workflow.",
-    points: ["Priority and hold management", "Batch and individual review", "Release evidence in one record"],
+    points: ["Holds and priority", "Batch review", "Release evidence"],
+    tone: "rose",
   },
   {
     title: "Environmental",
     summary: "Manage large sample intakes, custody movements, analysis, and compliance reporting together.",
-    points: ["Custody at every movement", "Multi-site operations", "Defensible reporting packages"],
+    points: ["Custody movement", "Multi-site work", "Reporting packages"],
+    tone: "teal",
   },
   {
     title: "Clinical",
     summary: "Keep accessioning, testing, review, and release aligned for diagnostic laboratory teams.",
-    points: ["Clear work queues", "Controlled authorization", "Protected operational history"],
+    points: ["Clear queues", "Authorization", "Operational history"],
+    tone: "violet",
   },
   {
     title: "Cosmetics",
     summary: "Coordinate formulation testing, stability, and quality release with less operational friction.",
-    points: ["Stability study tracking", "Review before release", "Versioned quality workflows"],
+    points: ["Stability studies", "Review before release", "Versioned workflows"],
+    tone: "blush",
   },
 ] as const;
 
-function IndustrySpotlights() {
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % INDUSTRY_SPOTLIGHTS.length);
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [paused]);
-
+function IndustryMark({ title }: { title: string }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: 28,
+    height: 28,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.6,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  if (title === "Pharmaceutical") {
+    return (
+      <svg {...common}>
+        <path d="M9 3h6" />
+        <path d="M10 3v6.2L6.2 18A3.4 3.4 0 0 0 9.3 22h5.4a3.4 3.4 0 0 0 3.1-4L14 9.2V3" />
+      </svg>
+    );
+  }
+  if (title === "Agriculture") {
+    return (
+      <svg {...common}>
+        <path d="M12 21V10" />
+        <path d="M12 14c-4 0-6-2.2-7-5 3 .2 5.2 1.6 7 5Z" />
+        <path d="M12 12c3.6 0 6-2 7.2-5-2.6.4-5 1.8-7.2 5Z" />
+      </svg>
+    );
+  }
+  if (title === "Manufacturing") {
+    return (
+      <svg {...common}>
+        <path d="M3 20V10l5 3V10l5 3V8l8 4v8" />
+        <path d="M3 20h18" />
+      </svg>
+    );
+  }
+  if (title === "Chemicals") {
+    return (
+      <svg {...common}>
+        <path d="M8 3h8" />
+        <path d="M9 3v5L5.5 16A3.2 3.2 0 0 0 8.4 21h7.2a3.2 3.2 0 0 0 2.9-5L15 8V3" />
+        <path d="M8.5 14h7" />
+      </svg>
+    );
+  }
+  if (title === "Food & Beverage") {
+    return (
+      <svg {...common}>
+        <path d="M7 3v8a3 3 0 0 0 6 0V3" />
+        <path d="M10 3v8" />
+        <path d="M17 3v6.5a2.2 2.2 0 0 1-2.2 2.2H14" />
+        <path d="M7 21h10" />
+      </svg>
+    );
+  }
+  if (title === "Environmental") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M4 12h16M12 4c2.4 2.2 3.6 4.8 3.6 8s-1.2 5.8-3.6 8c-2.4-2.2-3.6-4.8-3.6-8s1.2-5.8 3.6-8Z" />
+      </svg>
+    );
+  }
+  if (title === "Clinical") {
+    return (
+      <svg {...common}>
+        <path d="M12 21s-7-4.2-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.8-7 9-7 9Z" />
+      </svg>
+    );
+  }
   return (
-    <section
-      className="lp-section lp-industry-spotlights"
-      id="industries"
-      aria-labelledby="industry-spotlights-heading"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
+    <svg {...common}>
+      <path d="m12 3 1.4 4.2L18 8.5l-3.4 2.6L15.8 16 12 13.6 8.2 16l1.2-4.9L6 8.5l4.6-1.3L12 3Z" />
+    </svg>
+  );
+}
+
+function IndustrySpotlights() {
+  return (
+    <section className="lp-section lp-industries" id="industries" aria-labelledby="industry-spotlights-heading">
       <div className="lp-section-inner">
         <div className="lp-section-head">
-          <h2 id="industry-spotlights-heading" className="lp-display-head">Industry Spotlights</h2>
-          <p>See how Sequence supports the laboratories testing products across regulated and everyday industries.</p>
+          <h2 id="industry-spotlights-heading" className="lp-display-head">Industries on one workflow</h2>
+          <p>The same accession, review, and release, shaped for the laboratory you run.</p>
         </div>
-        <div className="lp-page-stage" aria-live="polite">
-          <div className="lp-page-track" style={{ transform: `translateX(-${index * 100}%)` }}>
-            {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
-              <article className="lp-page-card" key={industry.title} aria-hidden={industryIndex !== index}>
-                <header>
-                  <span>Page {String(industryIndex + 1).padStart(2, "0")}</span>
-                  <b>{industry.title}</b>
-                </header>
-                <h3>{industry.title}</h3>
-                <p>{industry.summary}</p>
-                <ul>
-                  {industry.points.map((point) => <li key={point}>{point}</li>)}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-        <div className="lp-page-nav" role="tablist" aria-label="Industry spotlight pages">
-          {INDUSTRY_SPOTLIGHTS.map((industry, industryIndex) => (
-            <button
-              type="button"
-              role="tab"
-              key={industry.title}
-              aria-selected={industryIndex === index}
-              aria-label={`Show ${industry.title}`}
-              className={industryIndex === index ? "is-on" : undefined}
-              onClick={() => setIndex(industryIndex)}
-            />
+        <div className="lp-industry-mosaic">
+          {INDUSTRY_SPOTLIGHTS.map((industry) => (
+            <article className={`lp-industry-tile is-${industry.tone}`} key={industry.title}>
+              <span className="lp-industry-mark" aria-hidden="true">
+                <IndustryMark title={industry.title} />
+              </span>
+              <h3>{industry.title}</h3>
+              <p>{industry.summary}</p>
+              <ul>
+                {industry.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </article>
           ))}
         </div>
       </div>
@@ -571,19 +525,107 @@ function IndustrySpotlights() {
 }
 
 const REGULATIONS = [
-  { code: "21 CFR 11", name: "Electronic records and signatures", detail: "Controls for trustworthy electronic records, audit trails, and legally binding signatures.", image: "/regulations/reg-cfr-11.jpg" },
-  { code: "21 CFR 58", name: "Good Laboratory Practice", detail: "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens.", image: "/regulations/reg-cfr-58.jpg" },
-  { code: "21 CFR 210", name: "Drug manufacturing practice", detail: "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture.", image: "/regulations/reg-cfr-210.jpg" },
-  { code: "21 CFR 211", name: "Finished pharmaceuticals", detail: "Production, laboratory control, record, and distribution requirements for finished drug products.", image: "/regulations/reg-cfr-211.jpg" },
-  { code: "21 CFR 820", name: "Quality system regulation", detail: "Medical-device quality system requirements for design, production, and recorded evidence.", image: "/regulations/reg-cfr-820.jpg" },
-  { code: "ISO 17025", name: "Testing laboratory competence", detail: "Requirements for impartial, technically competent testing and calibration laboratories.", image: "/regulations/reg-iso-17025.jpg" },
-  { code: "ISO 15189", name: "Medical laboratories", detail: "Quality and competence requirements for clinical laboratory examination services.", image: "/regulations/reg-iso-15189.jpg" },
-  { code: "CLIA", name: "Clinical laboratory quality", detail: "U.S. standards for accurate, reliable, and timely patient laboratory testing.", image: "/regulations/reg-clia.jpg" },
-  { code: "CAP", name: "Laboratory accreditation", detail: "Inspection expectations for quality management, analytical performance, and documentation.", image: "/regulations/reg-cap.jpg" },
-  { code: "EU Annex 11", name: "Computerized systems", detail: "European GMP expectations for validated systems, audit trails, and data integrity.", image: "/regulations/reg-annex-11.jpg" },
-  { code: "ICH Q7", name: "API good manufacturing", detail: "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems.", image: "/regulations/reg-ich-q7.jpg" },
-  { code: "HIPAA", name: "Protected health information", detail: "Safeguards for patient information handled by clinical and diagnostic laboratory operations.", image: "/regulations/reg-hipaa.jpg" },
+  { code: "21 CFR 11", name: "Electronic records and signatures", detail: "Controls for trustworthy electronic records, audit trails, and legally binding signatures." },
+  { code: "21 CFR 58", name: "Good Laboratory Practice", detail: "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens." },
+  { code: "21 CFR 210", name: "Drug manufacturing practice", detail: "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture." },
+  { code: "21 CFR 211", name: "Finished pharmaceuticals", detail: "Production, laboratory control, record, and distribution requirements for finished drug products." },
+  { code: "21 CFR 820", name: "Quality system regulation", detail: "Medical-device quality system requirements for design, production, and recorded evidence." },
+  { code: "ISO 17025", name: "Testing laboratory competence", detail: "Requirements for impartial, technically competent testing and calibration laboratories." },
+  { code: "ISO 15189", name: "Medical laboratories", detail: "Quality and competence requirements for clinical laboratory examination services." },
+  { code: "CLIA", name: "Clinical laboratory quality", detail: "U.S. standards for accurate, reliable, and timely patient laboratory testing." },
+  { code: "CAP", name: "Laboratory accreditation", detail: "Inspection expectations for quality management, analytical performance, and documentation." },
+  { code: "EU Annex 11", name: "Computerized systems", detail: "European GMP expectations for validated systems, audit trails, and data integrity." },
+  { code: "ICH Q7", name: "API good manufacturing", detail: "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems." },
+  { code: "HIPAA", name: "Protected health information", detail: "Safeguards for patient information handled by clinical and diagnostic laboratory operations." },
 ] as const;
+
+function RegIcon({ code }: { code: string }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    width: 28,
+    height: 28,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.6,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  const paths: Record<string, ReactNode> = {
+    "21 CFR 11": (
+      <>
+        <path d="M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+        <path d="M14 4v4h4M8 14h5M8 17h3" />
+      </>
+    ),
+    "21 CFR 58": (
+      <>
+        <rect x="6" y="3" width="12" height="18" rx="2" />
+        <path d="M9 8h6M9 12h6M9 16h4" />
+      </>
+    ),
+    "21 CFR 210": (
+      <>
+        <path d="M4 20V9l5 3V9l5 3V7l6 3v10" />
+        <path d="M4 20h16" />
+      </>
+    ),
+    "21 CFR 211": (
+      <>
+        <rect x="7" y="3" width="10" height="18" rx="5" />
+        <path d="M7 10h10" />
+      </>
+    ),
+    "21 CFR 820": (
+      <>
+        <path d="M12 3.5 19 6.5v5.2c0 4.2-2.8 7.2-7 8.8-4.2-1.6-7-4.6-7-8.8V6.5L12 3.5Z" />
+        <path d="m9 12 2 2 4-4" />
+      </>
+    ),
+    "ISO 17025": (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="m8.8 12.2 2.1 2.1 4.3-4.6" />
+      </>
+    ),
+    "ISO 15189": (
+      <>
+        <path d="M12 21s-7-4.4-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 3.8C19 16.6 12 21 12 21Z" />
+      </>
+    ),
+    CLIA: (
+      <>
+        <path d="M9 3h6" />
+        <path d="M10 3v5.5L6.5 18A3.2 3.2 0 0 0 9.4 22h5.2a3.2 3.2 0 0 0 2.9-4L14 8.5V3" />
+      </>
+    ),
+    CAP: (
+      <>
+        <circle cx="12" cy="9" r="4" />
+        <path d="M8 14.5 6.5 21l5.5-2.4L17.5 21 16 14.5" />
+      </>
+    ),
+    "EU Annex 11": (
+      <>
+        <rect x="4" y="4" width="16" height="6" rx="1.5" />
+        <rect x="4" y="14" width="16" height="6" rx="1.5" />
+        <path d="M8 7h.01M8 17h.01" />
+      </>
+    ),
+    "ICH Q7": (
+      <>
+        <path d="M8 3h8M9 3v6l-3.2 6.2A3 3 0 0 0 8.4 21h7.2a3 3 0 0 0 2.6-5.8L15 9V3" />
+      </>
+    ),
+    HIPAA: (
+      <>
+        <rect x="6" y="10" width="12" height="10" rx="2" />
+        <path d="M8 10V8a4 4 0 0 1 8 0v2" />
+      </>
+    ),
+  };
+  return <svg {...common}>{paths[code]}</svg>;
+}
 
 function ComplianceSection() {
   return (
@@ -597,12 +639,10 @@ function ComplianceSection() {
         </div>
         <div className="lp-reg-grid">
           {REGULATIONS.map((item) => (
-            <article
-              className="lp-reg-card"
-              key={item.code}
-              tabIndex={0}
-              style={{ "--reg-image": `url("${item.image}")` } as CSSProperties}
-            >
+            <article className="lp-reg-card" key={item.code} tabIndex={0}>
+              <span className="lp-reg-icon" aria-hidden="true">
+                <RegIcon code={item.code} />
+              </span>
               <b>{item.code}</b>
               <small>{item.name}</small>
               <p>{item.detail}</p>
