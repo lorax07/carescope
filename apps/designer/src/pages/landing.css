@@ -4739,10 +4739,17 @@ img.lp-logo-sequence {
 
 .lp-page .lp-industries .lp-section-head:has(.lp-display-head) {
   max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  text-align: right;
 }
 
 .lp-page #industry-spotlights-heading.lp-display-head {
   max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: 400;
+  text-align: right;
 }
 
 .lp-industries {
