@@ -4151,7 +4151,7 @@ img.lp-logo-sequence {
 
 .lp-home .lp-platform {
   padding-top: 1.6rem;
-  padding-bottom: 2.4rem;
+  padding-bottom: 4.8rem;
   background: transparent;
   overflow: visible;
 }
@@ -4649,8 +4649,19 @@ img.lp-logo-sequence {
   line-height: 1.4;
 }
 
+.lp-page .lp-section-head:has(h2.lp-module-lead) {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  text-align: left;
+}
+
 .lp-page .lp-section-head h2.lp-module-lead {
   max-width: 16em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: 400;
+  text-align: left;
 }
 
 .lp-friction {
