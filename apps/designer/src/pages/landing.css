@@ -3419,16 +3419,124 @@ img.lp-logo-sequence {
 }
 
 .lp-lims-film {
-  margin: 0.5rem 0 0;
-  padding: 0 var(--lp-gutter);
+  position: relative;
+  box-sizing: border-box;
+  width: 100cqi;
+  max-width: 100cqi;
+  margin: 0.5rem calc(50% - 50cqi) 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-.lp-lims-film video {
+.lp-film-stage {
+  position: relative;
+  height: clamp(16rem, 36vw, 32rem);
+}
+
+.lp-film-card {
+  position: absolute;
+  top: 46%;
+  margin: 0;
+  transition: left 0.7s ease, width 0.7s ease, transform 0.7s ease;
+  transform: translateY(-50%);
+}
+
+.lp-film-card.is-instant {
+  transition: none;
+}
+
+.lp-film-card.is-left {
+  left: 2%;
+  z-index: 1;
+  width: 26%;
+}
+
+.lp-film-card.is-center {
+  left: 30%;
+  z-index: 2;
+  width: 40%;
+}
+
+.lp-film-card.is-right {
+  left: 72%;
+  z-index: 1;
+  width: 26%;
+}
+
+.lp-film-card.is-playing.is-center {
+  left: 27%;
+  z-index: 3;
+  width: 46%;
+}
+
+.lp-film-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #101826;
+  box-shadow: 0 16px 36px rgba(16, 24, 40, 0.16);
+}
+
+.lp-film-card.is-center .lp-film-frame {
+  box-shadow: 0 22px 48px rgba(16, 24, 40, 0.22);
+}
+
+.lp-film-card video {
   display: block;
   width: 100%;
-  border-radius: 16px;
-  border: 1px solid #e7e5e4;
-  background: #0f1c2e;
+  aspect-ratio: 1920 / 1200;
+  object-fit: cover;
+  background: #101826;
+}
+
+.lp-film-card p {
+  margin: 0.55rem 0 0;
+  color: #16181d;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.lp-film-card.is-center p {
+  font-size: 1.02rem;
+}
+
+.lp-film-glyph {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-35%, -50%);
+  border-style: solid;
+  border-width: 0.65rem 0 0.65rem 1.05rem;
+  border-color: transparent transparent transparent #fff;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+.lp-film-card.is-center .lp-film-glyph {
+  border-width: 0.95rem 0 0.95rem 1.55rem;
+}
+
+.lp-film-hit {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lp-film-hit:focus-visible {
+  outline: 2px solid #1c1e22;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-film-card {
+    transition: none;
+  }
 }
 
 .lp-section-head h2,
@@ -4272,7 +4380,7 @@ img.lp-logo-sequence {
 }
 
 .lp-home .lp-lims-film {
-  margin-bottom: 3.1rem;
+  margin-bottom: 1.4rem;
 }
 
 .lp-served {
