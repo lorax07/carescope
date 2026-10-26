@@ -1428,6 +1428,47 @@
   height: 0.55rem;
 }
 
+.lp-native-cost.is-compare .lp-native-total strong {
+  font-size: clamp(1.15rem, 1.7vw, 1.65rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.lp-cost-range {
+  position: relative;
+  height: 0.55rem;
+  margin-top: 0.15rem;
+  border-radius: 3px;
+  background: rgba(15, 28, 46, 0.08);
+}
+
+.lp-cost-range i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 4px;
+  border-radius: 3px;
+  background: #243776;
+}
+
+.lp-cost-side.is-sequence .lp-cost-range i {
+  background: #087f74;
+}
+
+.lp-cost-range-note {
+  margin: 0.4rem 0 0;
+  color: #62708a;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.lp-cost-sources a {
+  color: #243776;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .lp-native-comparison {
   display: grid;
   gap: 1rem;
@@ -4903,7 +4944,9 @@ img.lp-logo-sequence {
 }
 
 .lp-friction-screen .lp-native-cost.is-compare .lp-native-total strong {
-  font-size: clamp(1.7rem, 2.2vw, 2.2rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.65rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
 }
 
 .lp-friction-screen .lp-native-pairs.is-supplied .lp-native-pair {

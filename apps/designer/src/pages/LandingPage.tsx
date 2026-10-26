@@ -84,7 +84,7 @@ const TOPICS: Topic[] = [
     id: "cost",
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
-    visual: "Illustrative annual cost of change, Traditional LIMS beside Sequence",
+    visual: "Average cost per change, Traditional LIMS beside Sequence, with the published range and two sources",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
@@ -217,78 +217,83 @@ function CompareLists({
   );
 }
 
-function CostInfographic() {
-  const rows = [
-    { label: "Vendor customization", traditional: 142, traditionalShare: 49, sequence: 0, sequenceShare: 0 },
-    { label: "Integrations", traditional: 61, traditionalShare: 21, sequence: 0, sequenceShare: 0 },
-    { label: "Internal IT", traditional: 38, traditionalShare: 13, sequence: 9, sequenceShare: 23 },
-    { label: "Lab staff", traditional: 27, traditionalShare: 9, sequence: 18, sequenceShare: 46 },
-    { label: "Validation/QA", traditional: 19, traditionalShare: 7, sequence: 12, sequenceShare: 31 },
-  ] as const;
-  const scale = 142;
+const COST_SCALE_THOUSANDS = 2800;
 
+function CostInfographic() {
   return (
     <div className="lp-native-cost is-compare">
-      <CostColumn
+      <CostRange
         title="Traditional LIMS"
         tone="traditional"
-        total={287}
-        rows={rows.map((row, index) => ({
-          label: row.label,
-          amount: row.traditional,
-          share: row.traditionalShare,
-          index,
-        }))}
-        scale={scale}
+        lowLabel="$37K"
+        highLabel="$2.8M"
+        low={37}
+        high={2800}
+        note="Upgrades and redeployment"
       />
-      <CostColumn
+      <CostRange
         title="Sequence"
         tone="sequence"
-        total={39}
-        rows={rows.map((row, index) => ({
-          label: row.label,
-          amount: row.sequence,
-          share: row.sequenceShare,
-          index,
-        }))}
-        scale={scale}
+        lowLabel="$5K"
+        highLabel="$21K"
+        low={5}
+        high={21}
+        note="Published implementation menu"
       />
-      <p>Both columns are the same illustrative annual cost of change, not an industry average or a Sequence price. Sequence shows vendor customization and integrations at zero.</p>
+      <p className="lp-cost-sources">
+        Bars share a scale from $0 to $2.8 million. These are published ranges, not a calculated mean.{" "}
+        <a href="https://sabineindustrial.com/research/what-a-lims-really-costs/" target="_blank" rel="noreferrer">
+          Sabine Industrial, What a LIMS Really Costs (2026)
+        </a>
+        , a review of public contracts for 39 laboratories: upgrades and redeployment from $37,296 to about $2.8 million.
+        Large-laboratory implementation in that review is $603,200 to $13.4 million and is not on this scale.{" "}
+        <a href="https://www.scientific-computing.com/feature/value-pre-validated-lims" target="_blank" rel="noreferrer">
+          Scientific Computing World, The value of pre-validated LIMS
+        </a>
+        : validation is normally 40 to 60 percent of project time and cost; one example was a $720,000 implementation.
+        Sequence’s $5,000 to $21,000 is its published one-time menu for core installation, database transfer, and validation deliverables, not a figure from these studies.
+      </p>
     </div>
   );
 }
 
-function CostColumn({
+function CostRange({
   title,
   tone,
-  total,
-  rows,
-  scale,
+  lowLabel,
+  highLabel,
+  low,
+  high,
+  note,
 }: {
   title: string;
   tone: "traditional" | "sequence";
-  total: number;
-  scale: number;
-  rows: readonly { label: string; amount: number; share: number; index: number }[];
+  lowLabel: string;
+  highLabel: string;
+  low: number;
+  high: number;
+  note: string;
 }) {
+  const left = (low / COST_SCALE_THOUSANDS) * 100;
+  const width = ((high - low) / COST_SCALE_THOUSANDS) * 100;
+
   return (
     <article className={`lp-cost-side is-${tone}`}>
       <h3>{title}</h3>
       <div className="lp-native-total">
-        <strong>${total}K</strong>
-        <small>Annual cost of change</small>
+        <strong>
+          {lowLabel}–{highLabel}
+        </strong>
+        <small>Average cost per change</small>
       </div>
-      <div className="lp-native-bars">
-        {rows.map((row) => (
-          <div className={`lp-native-bar is-${row.index + 1}`} key={row.label}>
-            <div>
-              <b>{row.label}</b>
-              <span>{row.amount === 0 ? "$0" : `$${row.amount}K`} <small>({row.share}%)</small></span>
-            </div>
-            <i style={{ width: `${(row.amount / scale) * 100}%` }} />
-          </div>
-        ))}
+      <div
+        className="lp-cost-range"
+        role="img"
+        aria-label={`${title} average cost per change, ${lowLabel} to ${highLabel}, ${note}`}
+      >
+        <i style={{ left: `${left}%`, width: `${width}%` }} />
       </div>
+      <p className="lp-cost-range-note">{note}</p>
     </article>
   );
 }
