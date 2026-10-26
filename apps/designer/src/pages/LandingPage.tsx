@@ -39,8 +39,7 @@ export function LandingPage() {
         </section>
 
         <div className="lp">
-      <LimsFilm />
-      <div className="lp-film-space" aria-hidden="true" />
+      <CoreHero />
       <WhyChoose />
       <PlatformBand />
       <WhatWeSolve />
@@ -341,169 +340,56 @@ function WhatWeSolve() {
   );
 }
 
-const FILM_CHAPTERS = [
-  {
-    title: "Lab Operations",
-    start: 3,
-    end: 14,
-  },
-  {
-    title: "Instrument integration",
-    start: 17,
-    end: 27,
-  },
-  {
-    title: "Sequence Insights",
-    start: 28,
-    end: 42,
-  },
-] as const;
+const HERO_STAGES = ["Received", "Testing", "Review", "Released"] as const;
 
-function filmSlot(index: number, active: number) {
-  const count = FILM_CHAPTERS.length;
-  let delta = index - active;
-  if (delta > count / 2) delta -= count;
-  if (delta < -count / 2) delta += count;
-  if (delta < 0) return "left";
-  if (delta > 0) return "right";
-  return "center";
-}
-
-function filmJumper(from: number, to: number) {
-  if (from === to) return null;
-  for (let index = 0; index < FILM_CHAPTERS.length; index += 1) {
-    const before = filmSlot(index, from);
-    const after = filmSlot(index, to);
-    if ((before === "left" && after === "right") || (before === "right" && after === "left")) return index;
-  }
-  return null;
-}
-
-function LimsFilm() {
-  const [active, setActive] = useState(0);
-  const [playing, setPlaying] = useState<number | null>(null);
-  const [instant, setInstant] = useState<number | null>(null);
-  const activeRef = useRef(0);
-  const reducedMotion = usePrefersReducedMotion();
-
-  useEffect(() => {
-    if (instant === null) return;
-    const frame = window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => setInstant(null));
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [instant, active]);
-
-  useEffect(() => {
-    if (playing !== null || reducedMotion) return;
-    const timer = window.setInterval(() => {
-      const from = activeRef.current;
-      const next = (from - 1 + FILM_CHAPTERS.length) % FILM_CHAPTERS.length;
-      setInstant(filmJumper(from, next));
-      activeRef.current = next;
-      setActive(next);
-    }, 5000);
-    return () => window.clearInterval(timer);
-  }, [playing, reducedMotion]);
-
-  function choose(index: number) {
-    const from = activeRef.current;
-    if (from !== index) {
-      setInstant(filmJumper(from, index));
-      activeRef.current = index;
-      setActive(index);
-    }
-    setPlaying(index);
-  }
-
+function CoreHero() {
   return (
-    <section className="lp-lims-film" aria-roledescription="carousel" aria-label="Sequence in the laboratory">
-      <div className="lp-film-stage">
-        {FILM_CHAPTERS.map((chapter, index) => (
-          <FilmCard
-            key={chapter.title}
-            chapter={chapter}
-            slot={filmSlot(index, active)}
-            instant={instant === index}
-            playing={playing === index}
-            onChoose={() => choose(index)}
-            onFinish={() => setPlaying((current) => (current === index ? null : current))}
-          />
-        ))}
+    <section className="lp-core-hero" aria-labelledby="core-hero-caption">
+      <div className="lp-core-stage">
+        <div className="lp-core-glow" aria-hidden="true" />
+        <div className="lp-core-rig" aria-hidden="true">
+          <div className="lp-core-shadow" />
+          <article className="lp-core-window">
+            <header className="lp-core-chrome">
+              <img src="/sequence-logo.png" alt="" />
+              <span>Core</span>
+            </header>
+            <div className="lp-core-body">
+              <p className="lp-core-kicker">Accession</p>
+              <h2>SCP-20491</h2>
+              <p className="lp-core-meta">
+                HPLC Assay · USP
+                <span>Aether Pharma</span>
+              </p>
+              <ol className="lp-core-stages">
+                {HERO_STAGES.map((stage) => (
+                  <li key={stage}>{stage}</li>
+                ))}
+              </ol>
+              <div className="lp-core-track">
+                <span className="lp-core-track-fill" />
+                <span className="lp-core-orb" />
+              </div>
+              <svg className="lp-core-trace" viewBox="0 0 640 80">
+                <path d="M4 58C28 58 48 54 70 46S110 22 140 40 180 66 220 48 270 12 320 30 370 62 420 40 470 18 520 34 570 52 636 28" />
+              </svg>
+            </div>
+            <div className="lp-core-sheen" />
+          </article>
+          <p className="lp-core-float is-instrument">
+            <span>Instrument</span>
+            <strong>Agilent 1260 HPLC</strong>
+          </p>
+          <p className="lp-core-float is-release">
+            <span>Same record</span>
+            <strong>Ready to release</strong>
+          </p>
+        </div>
       </div>
+      <p className="lp-core-caption" id="core-hero-caption">
+        One record, from receipt to release.
+      </p>
     </section>
-  );
-}
-
-function FilmCard({
-  chapter,
-  slot,
-  instant,
-  playing,
-  onChoose,
-  onFinish,
-}: {
-  chapter: (typeof FILM_CHAPTERS)[number];
-  slot: "left" | "center" | "right";
-  instant: boolean;
-  playing: boolean;
-  onChoose: () => void;
-  onFinish: () => void;
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (!playing) {
-      video.pause();
-      const showFrame = () => {
-        if (Math.abs(video.currentTime - chapter.start) > 0.35) video.currentTime = chapter.start;
-      };
-      if (video.readyState >= 1) showFrame();
-      else video.addEventListener("loadedmetadata", showFrame, { once: true });
-      return;
-    }
-    const begin = () => {
-      video.currentTime = chapter.start;
-      video.muted = false;
-      video.play().catch(() => {
-        video.muted = true;
-        void video.play();
-      });
-    };
-    if (video.readyState >= 1) begin();
-    else video.addEventListener("loadedmetadata", begin, { once: true });
-  }, [playing, chapter.start]);
-
-  return (
-    <article className={`lp-film-card is-${slot}${instant ? " is-instant" : ""}${playing ? " is-playing" : ""}`}>
-      <div className="lp-film-frame">
-        <video
-          ref={videoRef}
-          src="/lims-in-action.mp4"
-          muted
-          playsInline
-          preload="metadata"
-          controls={playing}
-          aria-label={chapter.title}
-          onTimeUpdate={(event) => {
-            if (!playing) return;
-            const video = event.currentTarget;
-            if (video.currentTime >= chapter.end) {
-              video.pause();
-              video.currentTime = chapter.start;
-              onFinish();
-            }
-          }}
-        />
-        {playing ? null : <span className="lp-film-glyph" aria-hidden="true" />}
-      </div>
-      <p>{chapter.title}</p>
-      {playing ? null : (
-        <button type="button" className="lp-film-hit" aria-label={`Play ${chapter.title}`} onClick={onChoose} />
-      )}
-    </article>
   );
 }
 
