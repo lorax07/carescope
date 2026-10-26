@@ -39,23 +39,16 @@ describe("client and revenue chapters", () => {
 
   it("places compliance pages under Sequence Compliance and leaves the overview unmatched", () => {
     expect(COMPLIANCE_CHAPTERS.map((chapter) => chapter.label)).toEqual([
-      "Events",
       "Deviations",
       "CAPA",
       "Documents",
-      "Training",
       "Changes",
       "Audits",
-      "Risks",
-      "Equipment",
-      "Suppliers",
-      "Complaints",
-      "Metrics",
-      "Administration",
     ]);
     expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality")).toBeNull();
-    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/events/DEV-118")?.id).toBe("events");
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/events/DEV-118")?.id).toBe("deviations");
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/deviations")?.id).toBe("deviations");
     expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/capa/CAPA-015")?.id).toBe("capa");
-    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/admin")?.id).toBe("admin");
+    expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/admin")).toBeNull();
   });
 });
