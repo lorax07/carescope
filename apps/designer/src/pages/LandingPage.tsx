@@ -83,7 +83,7 @@ const TOPICS: Topic[] = [
   {
     id: "cost",
     label: "Make changes at a lower cost",
-    description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes.",
+    description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
     visual: "Illustrative annual cost model",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
@@ -98,10 +98,10 @@ const TOPICS: Topic[] = [
   },
   {
     id: "integration",
-    label: "Integration and Contractor dependency",
-    description: "Traditional LIMS changes depend on outside contractors and a separate interface for every system the laboratory touches.",
-    visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
-    points: ["Publish a workflow without a contractor.", "Six modules on one platform."],
+    label: "Build your entire laboratory business using Sequence",
+    description: "Most laboratory systems don't grow to meet your operational needs when you need support customers, refine quality or manage revenue and expenses. Sequence eases your growing pains with state of the art modules that seamlessly plug into your core system and allow you to grow faster than the competition.",
+    visual: "Each Sequence module sits beside the Traditional LIMS problem it removes",
+    points: ["Modules plug into the core system.", "Support customers, quality, and revenue as you grow."],
     icon: "⌕",
   },
 ];
@@ -141,24 +141,28 @@ const OPERATIONS_PAIRS = [
 
 const INTEGRATION_PAIRS = [
   {
-    issue: "Instruments, billing, reporting, and files each depend on a separate interface.",
-    solution: "Operations, Instruments, Compliance, Client, Revenue, and Insights are modules of one platform.",
+    issue: "Sample status lives in spreadsheets, inboxes, and the bench.",
+    solution: "Sequence Operations receives, tests, reviews, and releases one record.",
   },
   {
-    issue: "Connecting an instrument waits on a vendor and a programmer.",
-    solution: "Add an instrument by identity, interface, and place, and see whether its sequence is running.",
+    issue: "A new instrument waits on a vendor interface and a programmer.",
+    solution: "Sequence Instruments shows identity, interface, place, and whether a sequence is running.",
   },
   {
-    issue: "A workflow change passes through a contractor, IT, and a project manager before the lab can use it.",
-    solution: "The lab drafts, reviews, and publishes the workflow in the designer, without handing it to a contractor.",
+    issue: "Deviations, CAPA, and the audit trail are rebuilt for the inspection.",
+    solution: "Sequence Compliance records quality work as it happens.",
   },
   {
-    issue: "The client account and the accessions in the laboratory are different systems.",
-    solution: "Sequence Client keeps contacts, agreements, and the laboratory work under the same account.",
+    issue: "The client account and the laboratory work are different systems.",
+    solution: "Sequence Client keeps contacts, agreements, and accessions on one account.",
   },
   {
-    issue: "Charges and operating questions wait on a billing tool or a report request after release.",
-    solution: "Sequence Revenue bills the accession. Insights answers from that laboratory’s accounts, work, and revenue.",
+    issue: "Charges and denials start after the result is already released.",
+    solution: "Sequence Revenue bills the accession from the same account and work.",
+  },
+  {
+    issue: "A question about the laboratory waits on a report request.",
+    solution: "Sequence Insights answers from that laboratory’s accounts, work, and revenue.",
   },
 ] as const;
 
