@@ -5,6 +5,8 @@ const KEY = "carescope.lims.session";
 
 export type LimsSession = {
   username: string;
+  userId?: string;
+  displayName?: string;
   clientName: string;
   labName: string;
   labId?: string;

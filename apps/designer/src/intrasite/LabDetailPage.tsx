@@ -13,6 +13,7 @@ import { AccountHistoryPanel } from "./ClientCases";
 import { LAB_MODULE_CATALOG, moduleLabel } from "./catalog";
 import { ModuleCase } from "./ModuleCase";
 import { WorkflowStagesEditor } from "../components/WorkflowStagesEditor";
+import { LAB_RESOURCE_ACCESS_EVENT, grantedUserIds, setLabResourceAccess } from "../labResourceAccess";
 
 export function IntrasiteLabDetailPage() {
   const { id = "", labId = "" } = useParams();
@@ -24,6 +25,14 @@ export function IntrasiteLabDetailPage() {
   const [catalog, setCatalog] = useState<ModuleCatalogItem[]>(LAB_MODULE_CATALOG);
   const [error, setError] = useState<string | null>(null);
   const [moduleOpen, setModuleOpen] = useState(false);
+  const [resourceUsers, setResourceUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const sync = () => setResourceUsers(grantedUserIds(labId));
+    sync();
+    window.addEventListener(LAB_RESOURCE_ACCESS_EVENT, sync);
+    return () => window.removeEventListener(LAB_RESOURCE_ACCESS_EVENT, sync);
+  }, [labId]);
 
   async function refresh() {
     const result = await getClient(id);
@@ -109,6 +118,33 @@ export function IntrasiteLabDetailPage() {
                 ))
               )}
             </div>
+          </section>
+
+          <section className="is-panel">
+            <h2>User privileges</h2>
+            <p className="is-muted">
+              Lab resources stays out of a person’s menu until you grant that person access here.
+            </p>
+            <ul className="is-privilege-list">
+              {(client ? [...client.businessContacts, ...client.internalResources] : [])
+                .filter((person, index, all) => all.findIndex((item) => item.id === person.id) === index)
+                .map((person) => (
+                  <li key={person.id}>
+                    <div>
+                      <strong>{person.name}</strong>
+                      <small>{person.roles.join(", ")}</small>
+                    </div>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={resourceUsers.includes(person.id)}
+                        onChange={(event) => setLabResourceAccess(lab.id, person.id, event.target.checked)}
+                      />
+                      Lab resources
+                    </label>
+                  </li>
+                ))}
+            </ul>
           </section>
 
           {lab.modules.includes("lab_operations") ? (

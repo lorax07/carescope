@@ -8,6 +8,7 @@ import { IntrasiteLabDetailPage } from "./intrasite/LabDetailPage";
 import { IntrasiteClientsPage } from "./intrasite/ClientsPage";
 import { IntrasiteLoginPage } from "./intrasite/LoginPage";
 import { IntrasiteShell } from "./intrasite/IntrasiteShell";
+import { LabResourcesPage } from "./pages/LabResourcesPage";
 import { LandingPage } from "./pages/LandingPage";
 import { ModuleStoryPage } from "./pages/ModuleStoryPage";
 import { PricingPage } from "./pages/PricingPage";
@@ -150,6 +151,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="billing/capture" element={<BillingPage />} />
           <Route path="billing" element={<BillingIndex />} />
           <Route path="insights" element={<InsightsChatPage />} />
+          <Route path="resources" element={<LabResourcesPage />} />
+          <Route path="resources/:resourceId" element={<LabResourcesPage />} />
           <Route path="design" element={<WorkflowDesignPage />} />
           <Route path="workflows" element={<LibraryPage />} />
           <Route path="workflows/:id" element={<DesignerPage />} />

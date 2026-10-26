@@ -7850,3 +7850,81 @@ button.client-kpi.is-on {
   }
 }
 
+.lab-resources {
+  max-width: 720px;
+  padding: 1.35rem 1.4rem 1.2rem;
+  border-radius: 18px;
+  background: #0e0e10;
+  color: #fff;
+}
+
+.lab-resources header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.lab-resources-mark {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  width: 18px;
+  margin-top: 0.28rem;
+}
+
+.lab-resources-mark i {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  background: #fff;
+}
+
+.lab-resources h1 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.lab-resources header p {
+  margin: 0.25rem 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+.lab-resources-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 1.5rem;
+  margin-top: 1.15rem;
+}
+
+.lab-resources-grid a {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.2rem;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lab-resources-grid a:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lab-resources-grid svg {
+  flex: none;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+@media (max-width: 720px) {
+  .lab-resources-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
