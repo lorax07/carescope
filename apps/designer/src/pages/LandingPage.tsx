@@ -176,18 +176,14 @@ function CompareLists({
     solutionTitle?: string;
   }[];
 }) {
-  const supplied = pairs.some((pair) => pair.issueTitle || pair.solutionTitle);
   return (
-    <div className={`lp-native-comparison lp-native-lists lp-native-pairs${supplied ? " is-supplied" : ""}`}>
+    <div className="lp-native-comparison lp-native-lists lp-native-pairs is-supplied">
       <div className="lp-native-pairs-head-row">
         <div className="lp-native-pairs-head">
           <h5>Traditional LIMS</h5>
-          {supplied ? null : <p>The problems</p>}
         </div>
-        {supplied ? null : <span className="lp-native-pairs-gap" aria-hidden="true" />}
         <div className="lp-native-pairs-head is-sequence">
           <h5>Sequence</h5>
-          {supplied ? null : <p>How Sequence solves them</p>}
         </div>
       </div>
       {pairs.map((pair) => (
@@ -195,18 +191,13 @@ function CompareLists({
           <article>
             <div>
               {pair.issueTitle ? <strong className="lp-native-pair-title">{pair.issueTitle}</strong> : null}
-              <p>{pair.issue}</p>
+              <p className={pair.issueTitle ? undefined : "lp-native-pair-title"}>{pair.issue}</p>
             </div>
           </article>
-          {supplied ? null : (
-            <span className="lp-native-pairs-solves" aria-hidden="true">
-              →
-            </span>
-          )}
           <article className="is-sequence">
             <div>
               {pair.solutionTitle ? <strong className="lp-native-pair-title">{pair.solutionTitle}</strong> : null}
-              <p>{pair.solution}</p>
+              <p className={pair.solutionTitle ? undefined : "lp-native-pair-title"}>{pair.solution}</p>
             </div>
           </article>
         </div>
