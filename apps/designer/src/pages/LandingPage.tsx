@@ -427,7 +427,11 @@ function PlatformBand() {
       <div className="lp-section-inner">
         <div className="lp-section-head">
           <h2 id="platform-heading" className="lp-display-head lp-module-lead">
-            No makeshift integrations, just genuine tools tailored for laboratory operation
+            No makeshift integrations,
+            <br />
+            just genuine tools
+            <br />
+            tailored for laboratory operation
           </h2>
         </div>
         <ul className="lp-module-row">
