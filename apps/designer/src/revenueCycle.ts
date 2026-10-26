@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { accountById, accountByName, CRM_ACCOUNTS, type CrmAccount } from "./crmAccounts";
 import { findSample, useSamples, type SampleRecord } from "./samples";
+import { currentInstanceId, labIdFromSite, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type BillRoute = "837P" | "Invoice" | "Statement";
 
@@ -57,10 +58,13 @@ export type Charge = {
   accountOverride: string;
   manualHold: string;
   events: LedgerEvent[];
+  labId?: string;
+  instanceId?: string;
 };
 
 export type Cycle = {
   version: 1;
+  instanceId?: string;
   fees: FeeLine[];
   contracts: ContractLine[];
   charges: Charge[];
@@ -135,6 +139,10 @@ const CONTRACTS: ContractLine[] = [
 ];
 
 const STORAGE_KEY = "carescope.revenue.cycle.v1";
+
+function cycleKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("billing_revenue", "cycle", instanceId);
+}
 
 export function money(cents: number): string {
   return (cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -313,9 +321,10 @@ function seededCharge(values: Omit<Charge, "labOverride" | "accountOverride" | "
   return { labOverride: "", accountOverride: "", manualHold: "", ...values };
 }
 
-export function seedCycle(): Cycle {
+export function seedCycle(instanceId = currentInstanceId()): Cycle {
   return {
     version: 1,
+    instanceId,
     fees: FEES.map((fee) => ({ ...fee })),
     contracts: CONTRACTS.map((contract) => ({ ...contract })),
     nextCharge: 1005,
@@ -520,6 +529,8 @@ export function applyCapture(cycle: Cycle, sample: SampleRecord, account: CrmAcc
       orderId: sample.orderId,
       accountId: account.id,
       accountName: account.name,
+      labId: sample.labId || labIdFromSite(sample.site),
+      instanceId: cycle.instanceId,
       test,
       cpt: priced.cpt,
       cptDescription: priced.description,
@@ -687,25 +698,30 @@ export function syncCycle(cycle: Cycle, samples: SampleRecord[]) {
   }
 }
 
-function readCycle(): Cycle | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Cycle;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.charges) || !Array.isArray(parsed.fees)) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
+function readCycle(instanceId = currentInstanceId()): Cycle | null {
+  const parsed = readJson<Cycle>(cycleKey(instanceId), instanceId === "demo" ? [STORAGE_KEY] : []);
+  if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.charges) || !Array.isArray(parsed.fees)) return null;
+  parsed.instanceId = instanceId;
+  return parsed;
 }
 
-let cycle: Cycle = readCycle() ?? seedCycle();
+const cycleByInstance = new Map<string, Cycle>();
 const listeners = new Set<() => void>();
 
+function cycleFor(instanceId = currentInstanceId()): Cycle {
+  const cached = cycleByInstance.get(instanceId);
+  if (cached) return cached;
+  const loaded = readCycle(instanceId) ?? seedCycle(instanceId);
+  cycleByInstance.set(instanceId, loaded);
+  return loaded;
+}
+
 function commit(next: Cycle) {
-  cycle = next;
+  const instanceId = next.instanceId || currentInstanceId();
+  next.instanceId = instanceId;
+  cycleByInstance.set(instanceId, next);
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    writeJson(cycleKey(instanceId), next);
   } catch {
     /* The ledger still updates in memory when storage is unavailable. */
   }
@@ -713,6 +729,7 @@ function commit(next: Cycle) {
 }
 
 function update(mutator: (draft: Cycle) => void) {
+  const cycle = cycleFor();
   const draft = structuredClone(cycle);
   mutator(draft);
   if (JSON.stringify(draft) === JSON.stringify(cycle)) return;
@@ -720,20 +737,21 @@ function update(mutator: (draft: Cycle) => void) {
 }
 
 export function getCycle(): Cycle {
-  return cycle;
+  return cycleFor();
 }
 
 export function useRevenue(): Cycle {
   const samples = useSamples();
-  const [state, setState] = useState(cycle);
+  const [state, setState] = useState(() => cycleFor());
   useEffect(() => {
-    const sync = () => setState(cycle);
+    const sync = () => setState(cycleFor());
     listeners.add(sync);
     return () => {
       listeners.delete(sync);
     };
   }, []);
   useEffect(() => {
+    const cycle = cycleFor();
     const draft = structuredClone(cycle);
     syncCycle(draft, samples);
     if (JSON.stringify(draft) === JSON.stringify(cycle)) return;
@@ -746,7 +764,7 @@ export function captureAccession(accessionId: string): { ids: string[]; skipped:
   const sample = findSample(accessionId);
   const account = sample ? accountByName(sample.client) : undefined;
   if (!sample || !account) return { ids: [], skipped: [] };
-  const draft = structuredClone(cycle);
+  const draft = structuredClone(cycleFor());
   const result = applyCapture(draft, sample, account);
   if (result.ids.length) commit(draft);
   return result;

@@ -26,7 +26,9 @@ import type {
   WorkflowTrigger,
 } from "@carescope/workflow-core";
 import { workflowService } from "../platform";
-import { NodeDetailsPanel, type NewNodeConnection, type NodeConnectionType } from "../components/NodeDetailsPanel";
+import { NodeDetailsPanel, type NewNodeConnection, type NodeConnectionType, type StartEndChoice } from "../components/NodeDetailsPanel";
+import { CONNECTION_TYPES, connectionVisual, dropdownIcon } from "../connectionTypes";
+import { ConnectionTypeIcon } from "../components/ConnectionTypeIcon";
 import { WorkflowNode as WfNodeView, type WfFlowNode } from "../components/WorkflowNode";
 import { RoutedEdge, WorkflowRoutesContext } from "../components/RoutedEdge";
 import { autoArrange, measureRoutes, rerouteMoved, routeWorkflow, type LayoutNode } from "../workflowLayout";
@@ -185,7 +187,7 @@ function toFlowEdges(def: WorkflowDefinition): Edge[] {
       label: e.label,
       type: "routed",
       data: {
-        connectionType: e.edgeType === "conditional" ? "Decision tree" : e.label === "End" ? "End" : "Trigger",
+        ...connectionVisual({ edgeType: e.edgeType, label: e.label }),
         condition: e.condition,
       },
       markerEnd: { type: MarkerType.ArrowClosed, color },
@@ -228,7 +230,7 @@ export function DesignerPage() {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [nodePanelTab, setNodePanelTab] = useState<"details" | "connections">("details");
-  const [pendingConnection, setPendingConnection] = useState<{ source: string; type: NodeConnectionType } | null>(null);
+  const [pendingConnection, setPendingConnection] = useState<{ source: string; type: NodeConnectionType; startEndChoice: StartEndChoice } | null>(null);
   const [nodeContextMenu, setNodeContextMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [simResult, setSimResult] = useState<SimulationResult | null>(null);
@@ -637,7 +639,7 @@ export function DesignerPage() {
         ? connection.triggerAction ?? "Update Status"
         : connection.connectionType === "Decision tree"
           ? `Decision tree · ${connection.decisions?.length ?? 1}`
-          : "End";
+          : connection.startEndChoice ?? "End";
     const nextEdge: Edge = {
       id: crypto.randomUUID(),
       source: connection.source,
@@ -646,6 +648,7 @@ export function DesignerPage() {
       label,
       data: {
         connectionType: connection.connectionType,
+        startEndChoice: connection.connectionType === "Start/End" ? connection.startEndChoice ?? "End" : undefined,
         triggerAction: connection.triggerAction,
         condition: connection.decisions ? JSON.stringify(connection.decisions) : undefined,
       },
@@ -929,7 +932,12 @@ export function DesignerPage() {
               }}
               onNodeClick={(_, node) => {
                 if (pendingConnection && pendingConnection.source !== node.id) {
-                  addNodeConnection({ source: pendingConnection.source, target: node.id, connectionType: pendingConnection.type });
+                  addNodeConnection({
+                    source: pendingConnection.source,
+                    target: node.id,
+                    connectionType: pendingConnection.type,
+                    startEndChoice: pendingConnection.type === "Start/End" ? pendingConnection.startEndChoice : undefined,
+                  });
                 }
               }}
               onPaneClick={() => setNodeContextMenu(null)}
@@ -964,17 +972,17 @@ export function DesignerPage() {
       {nodeContextMenu ? (
         <div className="node-context-menu" style={{ left: nodeContextMenu.x, top: nodeContextMenu.y }}>
           <p>Add node connection</p>
-          {(["Trigger", "Decision tree", "End"] as NodeConnectionType[]).map((type) => (
+          {CONNECTION_TYPES.map((type) => (
             <button type="button" key={type} onClick={() => {
-              setPendingConnection({ source: nodeContextMenu.nodeId, type });
+              setPendingConnection({ source: nodeContextMenu.nodeId, type, startEndChoice: "Start" });
               setNodeContextMenu(null);
               setStatusMsg(`Select the destination node for the ${type.toLowerCase()} connection`);
-            }}>{type}<span>→</span></button>
+            }}><ConnectionTypeIcon kind={dropdownIcon(type)} />{type}<span>→</span></button>
           ))}
         </div>
       ) : null}
 
-      {pendingConnection ? <div className="connection-mode-banner"><span>Connection mode</span>Select the destination node<button type="button" onClick={() => setPendingConnection(null)}>Cancel</button></div> : null}
+      {pendingConnection ? <div className="connection-mode-banner"><span>Connection mode</span>{pendingConnection.type}{pendingConnection.type === "Start/End" ? <label className="connection-choice">Start/End choice<select value={pendingConnection.startEndChoice} onChange={(event) => setPendingConnection({ ...pendingConnection, startEndChoice: event.target.value as StartEndChoice })}><option>Start</option><option>End</option></select></label> : null}Select the destination node<button type="button" onClick={() => setPendingConnection(null)}>Cancel</button></div> : null}
 
       {screenPreviewOpen && selectedScreen ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setScreenPreviewOpen(false)}>

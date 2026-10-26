@@ -68,6 +68,95 @@ CREATE TABLE IF NOT EXISTS labs (
 );
 ALTER TABLE labs ADD COLUMN IF NOT EXISTS modules TEXT NOT NULL DEFAULT '["lab_operations"]';
 ALTER TABLE labs ADD COLUMN IF NOT EXISTS administrator TEXT NOT NULL DEFAULT '';
+CREATE SCHEMA IF NOT EXISTS lab_operations;
+CREATE SCHEMA IF NOT EXISTS instrument_integration;
+CREATE SCHEMA IF NOT EXISTS connectivity;
+CREATE SCHEMA IF NOT EXISTS quality_compliance;
+CREATE SCHEMA IF NOT EXISTS billing_revenue;
+CREATE SCHEMA IF NOT EXISTS insights;
+CREATE TABLE IF NOT EXISTS lab_operations.samples (
+  id TEXT PRIMARY KEY,
+  accession TEXT NOT NULL,
+  lab_id TEXT NOT NULL,
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  account_id TEXT NOT NULL DEFAULT '',
+  site TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS lab_operations_samples_lab ON lab_operations.samples (lab_id);
+CREATE TABLE IF NOT EXISTS lab_operations.workflow_stages (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL,
+  instance_id TEXT NOT NULL,
+  stage TEXT NOT NULL,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS lab_operations_stages_lab ON lab_operations.workflow_stages (lab_id);
+CREATE TABLE IF NOT EXISTS instrument_integration.instruments (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  lab_id TEXT NOT NULL,
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS instruments_lab ON instrument_integration.instruments (lab_id);
+CREATE TABLE IF NOT EXISTS quality_compliance.deviations (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS quality_deviations_lab ON quality_compliance.deviations (lab_id);
+CREATE TABLE IF NOT EXISTS quality_compliance.capas (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS quality_compliance.changes (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS quality_compliance.documents (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS billing_revenue.charges (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS billing_charges_lab ON billing_revenue.charges (lab_id);
+CREATE TABLE IF NOT EXISTS billing_revenue.claims (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS billing_claims_lab ON billing_revenue.claims (lab_id);
+CREATE TABLE IF NOT EXISTS connectivity.accounts (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  name TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS connectivity.contacts (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  name TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS insights.metrics (
+  id TEXT PRIMARY KEY,
+  lab_id TEXT NOT NULL DEFAULT '',
+  instance_id TEXT NOT NULL,
+  value TEXT NOT NULL
+);
 `;
 
 function adminUrl(databaseUrl: string): string {

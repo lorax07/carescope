@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { InstrumentRecordView } from "../components/InstrumentRecordView";
 import { addInstrument, findInstrument, useInstruments, type InstrumentRecord } from "../instruments";
+import { InstrumentChrome } from "./instruments/InstrumentChrome";
+import { InstrumentApiNote } from "./instruments/InstrumentWork";
 
 const STEPS = ["Identity", "Interface", "Place"] as const;
 
@@ -42,15 +44,9 @@ export function InstrumentInterfacePage() {
   }
 
   return (
-    <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Equipment</p>
-          <h1>Sequence Instruments</h1>
-          <p className="lims-page-lede">Integrated instruments, their status, and whether a sequence is running.</p>
-        </div>
-      </div>
+    <InstrumentChrome title="Registry" lede="Laboratory instruments on file, plus adapters that can accept a run. A connected instrument is not automatically ready.">
       <SectionTabStrip mainLabel="Instruments" />
+      <InstrumentApiNote />
 
       <section className="lims-panel instrument-workflow">
         <div className="lims-panel-head">
@@ -125,7 +121,7 @@ export function InstrumentInterfacePage() {
               <tr>
                 <th>Instrument</th>
                 <th>Status</th>
-                <th>Sequence</th>
+                <th>Sequence on file</th>
                 <th>Site</th>
                 <th>Interface</th>
               </tr>
@@ -167,7 +163,7 @@ export function InstrumentInterfacePage() {
           </div>
         </div>
       ) : null}
-    </div>
+    </InstrumentChrome>
   );
 }
 
