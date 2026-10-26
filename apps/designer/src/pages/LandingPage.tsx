@@ -83,7 +83,7 @@ const TOPICS: Topic[] = [
     id: "cost",
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
-    visual: "Published LIMS cost ranges for small, midsize, and large laboratories, with the two sources",
+    visual: "Published cost of one custom LIMS change beside Sequence’s published menu",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
@@ -205,62 +205,55 @@ function CompareLists({
   );
 }
 
-const LAB_COST_SIZES = [
+const CHANGE_SCALE = 74394;
+
+const CHANGE_COSTS = [
   {
-    name: "Small",
-    who: "About 10 users, one site",
-    range: "$43K–$62K",
-    low: 43,
-    high: 62,
+    name: "Traditional LIMS",
+    who: "One custom change",
+    range: "$950–$74K",
+    low: 950,
+    high: 74394,
+    tone: "is-traditional",
+    note: "Cost of a custom change",
     rows: [
-      ["Maintenance", "$16K–$25K/yr"],
-      ["License", "$4K–$34K/yr"],
+      ["Instrument interface", "$950–$3,825"],
+      ["Report amendment", "$20,000"],
+      ["Results interface", "$74,394"],
     ],
   },
   {
-    name: "Midsize",
-    who: "10–40 users",
-    range: "$135K–$984K",
-    low: 135,
-    high: 984,
+    name: "Sequence",
+    who: "Published one-time menu",
+    range: "$5K–$21K",
+    low: 5000,
+    high: 21000,
+    tone: "is-sequence",
+    note: "Published menu",
     rows: [
-      ["Maintenance", "$23K–$171K/yr"],
-      ["License", "$69K–$98K/yr"],
-    ],
-  },
-  {
-    name: "Large",
-    who: "Several sites",
-    range: "$603K–$13.4M",
-    low: 603,
-    high: 13400,
-    rows: [
-      ["Maintenance", "$40K–$407K/yr"],
-      ["License", "$284K/yr"],
+      ["Database transfer", "$8,000"],
+      ["Core installation", "$5,000"],
+      ["Validation deliverables", "$8,000"],
     ],
   },
 ] as const;
 
 function CostInfographic() {
   return (
-    <div className="lp-native-cost is-compare is-sizes">
-      {LAB_COST_SIZES.map((size) => (
-        <article className="lp-cost-side is-traditional" key={size.name}>
-          <h3>{size.name}</h3>
-          <p className="lp-cost-who">{size.who}</p>
+    <div className="lp-native-cost is-compare">
+      {CHANGE_COSTS.map((side) => (
+        <article className={`lp-cost-side ${side.tone}`} key={side.name}>
+          <h3>{side.name}</h3>
+          <p className="lp-cost-who">{side.who}</p>
           <div className="lp-native-total">
-            <strong>{size.range}</strong>
-            <small>Implementation</small>
+            <strong>{side.range}</strong>
+            <small>{side.note}</small>
           </div>
-          <div
-            className="lp-cost-range"
-            role="img"
-            aria-label={`${size.name} laboratories, implementation ${size.range}`}
-          >
-            <i style={{ left: `${(size.low / size.high) * 100}%`, width: `${((size.high - size.low) / size.high) * 100}%` }} />
+          <div className="lp-cost-range" role="img" aria-label={`${side.name}, ${side.who}, ${side.range}`}>
+            <i style={{ left: `${(side.low / CHANGE_SCALE) * 100}%`, width: `${((side.high - side.low) / CHANGE_SCALE) * 100}%` }} />
           </div>
           <ul className="lp-cost-lines">
-            {size.rows.map(([label, value]) => (
+            {side.rows.map(([label, value]) => (
               <li key={label}>
                 <b>{label}</b>
                 <span>{value}</span>
@@ -270,15 +263,11 @@ function CostInfographic() {
         </article>
       ))}
       <p className="lp-cost-sources">
-        Implementation, maintenance, and license follow the ranges{" "}
+        The Traditional LIMS range is the cost of one custom change in{" "}
         <a href="https://sabineindustrial.com/research/what-a-lims-really-costs/" target="_blank" rel="noreferrer">
           Sabine Industrial, What a LIMS Really Costs (2026)
-        </a>{" "}
-        published by lab size, from public contracts for 39 laboratories. Small is about ten users or fewer at one site; midsize is ten to forty; large is several sites or an enterprise system. Each bar is scaled to that size. The large license figure is one four-lab program at $284,468 a year.{" "}
-        <a href="https://www.scientific-computing.com/feature/value-pre-validated-lims" target="_blank" rel="noreferrer">
-          Scientific Computing World, The value of pre-validated LIMS
         </a>
-        : validation is normally 40 to 60 percent of project time and cost. Sequence’s published one-time menu is $5,000 to $21,000 and is not a figure from these studies.
+        : instrument interfaces $950 to $3,825, one report amendment $20,000, and one results interface $74,394. These are public contract figures, not an average. Both bars use that $74,394 scale. Sequence’s published menu is Database Transfer $8,000, Core System Installation $5,000, and Validation Deliverables $8,000, taken separately or together ($5,000 to $21,000). That menu is not a figure from the study.
       </p>
     </div>
   );
