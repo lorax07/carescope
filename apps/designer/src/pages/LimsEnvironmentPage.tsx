@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getClient, type Lab, type QueryEnvironment } from "../intrasite/api";
+import { getClient, type AccountPerson, type Lab, type QueryEnvironment } from "../intrasite/api";
 import { demoGetClient } from "../intrasite/demo";
 import { hasCustomPassword, passwordMatches } from "../limsPassword";
 import { LIMS_USERNAME, writeLimsSession } from "../limsSession";
@@ -19,6 +19,7 @@ export function LimsEnvironmentPage() {
     databaseName: string;
     errorLog: string;
     lastBackup: string;
+    people: AccountPerson[];
   } | null>(null);
   const [missing, setMissing] = useState(false);
 
@@ -42,6 +43,9 @@ export function LimsEnvironmentPage() {
             databaseName: env.databaseName,
             errorLog: env.id === "qa" ? "1 warning · driver retry" : "Clear",
             lastBackup: lastBackupFor(env.id),
+            people: [...detail.client.businessContacts, ...detail.client.internalResources].filter(
+              (person, index, all) => all.findIndex((item) => item.id === person.id) === index,
+            ),
           });
         }
       } catch {
@@ -56,17 +60,22 @@ export function LimsEnvironmentPage() {
 
   function signIn(event: FormEvent) {
     event.preventDefault();
-    if (username.trim() !== LIMS_USERNAME || !passwordMatches(password)) {
+    const typed = username.trim();
+    const person = context?.people.find((item) => item.name.toLowerCase() === typed.toLowerCase());
+    const asAdmin = typed.toLowerCase() === LIMS_USERNAME;
+    if ((!person && !asAdmin) || !passwordMatches(password)) {
       setError(
         hasCustomPassword()
           ? "That username or password is not correct."
-          : "Use admin and password to enter this environment.",
+          : "Use admin or a person’s name, and password, to enter this environment.",
       );
       return;
     }
     if (!context) return;
     writeLimsSession({
-      username: LIMS_USERNAME,
+      username: person?.name ?? LIMS_USERNAME,
+      userId: person?.id,
+      displayName: person?.name,
       clientName: context.clientName,
       labName: context.labName,
       labId,
@@ -97,7 +106,7 @@ export function LimsEnvironmentPage() {
                 "Sign in with your account password."
               ) : (
                 <>
-                  Sign in with <code>admin</code> / <code>password</code>.
+                  Sign in with <code>admin</code> or a person’s name, and <code>password</code>.
                 </>
               )}
             </p>
@@ -146,7 +155,7 @@ function lastBackupFor(envId: string): string {
 }
 
 async function loadClient(clientId: string): Promise<{
-  client: { name: string };
+  client: { name: string; businessContacts: AccountPerson[]; internalResources: AccountPerson[] };
   labs: Lab[];
   dossier: { infrastructure: { environments: QueryEnvironment[] } };
 }> {

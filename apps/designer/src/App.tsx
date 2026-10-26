@@ -5,6 +5,7 @@ import { InstrumentRecordView } from "./components/InstrumentRecordView";
 import { SandboxSignupModal } from "./components/SandboxSignupModal";
 import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations";
+import { LAB_RESOURCES, LAB_RESOURCE_ACCESS_EVENT, userCanSeeLabResources } from "./labResourceAccess";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
@@ -332,6 +333,20 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "resources" || name === "patients" || name === "inventory" || name === "sites" || name === "storage" || name === "lots" || name === "reference") {
+    const mark = name === "patients" ? "M12 12a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 1.5c-3.2 0-6 1.6-6 3.5v1h12v-1c0-1.9-2.8-3.5-6-3.5z"
+      : name === "inventory" ? "M12 3.5 20 8v8l-8 4.5L4 16V8l8-4.5z"
+      : name === "sites" ? "M4 20h16M6.5 20V9L12 5l5.5 4v11"
+      : name === "storage" ? "M12 20s5.5-4.6 5.5-8.2a5.5 5.5 0 0 0-11 0C6.5 15.4 12 20 12 20z"
+      : name === "lots" ? "M5 7h14M5 12h14M5 17h14"
+      : name === "reference" ? "M7 12a2 2 0 1 0 0 .01M16 7a2 2 0 1 0 0 .01M16 17a2 2 0 1 0 0 .01M9 11l5-3M9 13l5 3"
+      : "M8 8h.01M16 8h.01M8 16h.01M16 16h.01";
+    return (
+      <svg {...common}>
+        <path d={mark} />
+      </svg>
+    );
+  }
   return (
     <svg {...common}>
       <path d="M4 16.5 9 12l3 2.5 6-7" />
@@ -373,6 +388,7 @@ function ShellNav({
   openGroups,
   currentGroup,
   onToggleGroup,
+  showResources,
 }: {
   compact: boolean;
   includeNested: boolean;
@@ -380,6 +396,7 @@ function ShellNav({
   openGroups: Record<string, boolean>;
   currentGroup: ReturnType<typeof pathToNavGroup>;
   onToggleGroup: (key: string) => void;
+  showResources: boolean;
 }) {
   const sectionTabs = useSectionTabs();
   const { pathname } = useLocation();
@@ -432,6 +449,47 @@ function ShellNav({
                 >
                   <span className="lims-nav-icon">
                     <NavIcon name={item.view} />
+                  </span>
+                  {compact ? null : item.label}
+                </NavLink>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {showResources ? (
+        <div className={`lims-nav-group${groupOpen("resources") ? " is-expanded" : ""}`}>
+          <div className="lims-nav-parent-row">
+            <NavLink
+              to="/app/resources"
+              end
+              title={compact ? "Lab Resources" : undefined}
+              aria-label={compact ? "Lab Resources" : undefined}
+              onClick={() => sectionTabs.showSection("resources")}
+              className={({ isActive }) => parentClass(null, true, isActive || pathname.startsWith("/app/resources"))}
+            >
+              <span className="lims-nav-icon">
+                <NavIcon name="resources" />
+              </span>
+              {compact ? null : "Lab Resources"}
+            </NavLink>
+            {includeNested ? (
+              <NavCaret open={groupOpen("resources")} label="Lab Resources" onToggle={() => onToggleGroup("resources")} />
+            ) : null}
+          </div>
+          {includeNested && groupOpen("resources") ? (
+            <div className="lims-nav-children" role="group" aria-label="Lab Resources pages">
+              {LAB_RESOURCES.map((item) => (
+                <NavLink
+                  key={item.id}
+                  to={`/app/resources/${item.id}`}
+                  title={compact ? item.label : undefined}
+                  aria-label={compact ? item.label : undefined}
+                  onClick={() => sectionTabs.showSection("resources")}
+                  className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                >
+                  <span className="lims-nav-icon">
+                    <NavIcon name={item.id} />
                   </span>
                   {compact ? null : item.label}
                 </NavLink>
@@ -507,6 +565,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
       quality: "Sequence Compliance",
       billing: "Sequence Revenue",
       insights: "Sequence Insights",
+      resources: "Lab Resources",
     }[section] ??
     "Workspace"
   );
@@ -554,6 +613,19 @@ function AppFrame() {
     () => searchParams.get("signup") === "1"
   );
   const lims = readLimsSession();
+  const [showResources, setShowResources] = useState(() => userCanSeeLabResources(lims?.labId, lims?.userId));
+  useEffect(() => {
+    const sync = () => {
+      const session = readLimsSession();
+      setShowResources(userCanSeeLabResources(session?.labId, session?.userId));
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener(LAB_RESOURCE_ACCESS_EVENT, sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener(LAB_RESOURCE_ACCESS_EVENT, sync);
+    };
+  }, []);
   const labOps = useLabOperations();
   const sectionTabs = useSectionTabs();
   const [infraOpen, setInfraOpen] = useState(false);
@@ -587,7 +659,7 @@ function AppFrame() {
   const [topSlot, setTopSlot] = useState(0);
   const now = useLocalClock();
   const edge = openEdge;
-  const signedInName = lims?.username ?? "M. Chen";
+  const signedInName = lims?.displayName ?? lims?.username ?? "M. Chen";
   const railInitials =
     signedInName
       .split(/\s+/)
@@ -960,6 +1032,7 @@ function AppFrame() {
                 openGroups={openGroups}
                 currentGroup={currentGroup}
                 onToggleGroup={toggleNavGroup}
+                showResources={showResources}
               />
             </nav>
             <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
@@ -983,14 +1056,15 @@ function AppFrame() {
             openGroups={openGroups}
             currentGroup={currentGroup}
             onToggleGroup={toggleNavGroup}
+            showResources={showResources}
           />
         </nav>
 
         <div className="lims-sidebar-foot">
           <div className="lims-user">
-            <span className="lims-avatar">{lims ? "AD" : "MC"}</span>
+            <span className="lims-avatar">{railInitials}</span>
             <div>
-              <b>{lims ? lims.username : "M. Chen"}</b>
+              <b>{signedInName}</b>
               <small>{lims ? `${lims.clientName} LIMS` : "Lab Analyst"}</small>
             </div>
             <button

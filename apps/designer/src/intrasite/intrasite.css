@@ -895,6 +895,41 @@
   font-style: normal;
 }
 
+.is-privilege-list {
+  display: grid;
+  gap: 0;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.is-privilege-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.15rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.is-privilege-list strong,
+.is-privilege-list small {
+  display: block;
+}
+
+.is-privilege-list small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.is-privilege-list label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .is-shell {
     grid-template-columns: 1fr;
