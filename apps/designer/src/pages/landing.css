@@ -3471,8 +3471,113 @@ img.lp-logo-sequence {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: clamp(28rem, 48vw, 39rem);
+  min-height: clamp(30rem, 56vw, 44rem);
   perspective: 1700px;
+}
+
+.lp-core-product {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  animation: lp-hero-product 28s linear infinite;
+}
+
+.lp-core-software {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  animation: lp-hero-software 28s linear infinite;
+}
+
+@keyframes lp-hero-product {
+  0%, 40% { opacity: 1; transform: scale(1); }
+  50%, 94% { opacity: 0; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(0.98); }
+}
+
+@keyframes lp-hero-software {
+  0%, 40% { opacity: 0; transform: scale(0.94); }
+  50%, 94% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.03); }
+}
+
+.lp-core-screen {
+  position: relative;
+  width: min(68rem, 90%);
+  aspect-ratio: 1440 / 900;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #eef1f6;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 34px 80px rgba(48, 28, 16, 0.18);
+}
+
+.lp-core-screen img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lp-core-screen img.is-record {
+  animation: lp-hero-record 28s linear infinite;
+}
+
+@keyframes lp-hero-record {
+  0%, 74% { opacity: 0; }
+  80%, 94% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.lp-core-cursor {
+  position: absolute;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  overflow: visible;
+  fill: #fff;
+  stroke: #16181d;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 3px rgba(16, 24, 29, 0.35));
+  animation: lp-hero-cursor 28s linear infinite;
+}
+
+@keyframes lp-hero-cursor {
+  0%, 44% { opacity: 0; left: 8%; top: 28%; }
+  50% { opacity: 1; left: 8%; top: 28%; }
+  58% { left: 86%; top: 16.8%; }
+  66% { left: 21.3%; top: 56.3%; }
+  74%, 76% { opacity: 1; left: 12.4%; top: 67.8%; }
+  86% { left: 42%; top: 53%; }
+  93% { left: 66%; top: 14.4%; }
+  97%, 100% { opacity: 0; left: 66%; top: 14.4%; }
+}
+
+.lp-core-click {
+  position: absolute;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 2px solid #1b6ef3;
+  border-radius: 50%;
+  opacity: 0;
+  animation: lp-hero-click 28s linear infinite;
+}
+
+@keyframes lp-hero-click {
+  0%, 73% { opacity: 0; left: 12.4%; top: 67.8%; transform: scale(0.4); }
+  74.5% { opacity: 0.95; transform: scale(0.7); }
+  78% { opacity: 0; left: 12.4%; top: 67.8%; transform: scale(1.8); }
+  90% { opacity: 0; left: 66%; top: 14.4%; transform: scale(0.4); }
+  91.5% { opacity: 0.95; transform: scale(0.7); }
+  94% { opacity: 0; transform: scale(1.8); }
 }
 
 .lp-core-glow {
@@ -3871,6 +3976,23 @@ img.lp-logo-sequence {
   .lp-core-float.is-release {
     opacity: 1;
     transform: translate3d(0, 0, 80px);
+  }
+
+  .lp-core-product,
+  .lp-core-software,
+  .lp-core-screen img.is-record,
+  .lp-core-cursor,
+  .lp-core-click {
+    animation: none;
+  }
+
+  .lp-core-product {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lp-core-software {
+    opacity: 0;
   }
 }
 

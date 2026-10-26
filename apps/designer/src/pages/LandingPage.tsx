@@ -316,6 +316,7 @@ function CoreHero() {
   return (
     <section className="lp-core-hero" aria-labelledby="core-hero-caption">
       <div className="lp-core-stage">
+        <div className="lp-core-product">
         <div className="lp-core-glow" aria-hidden="true" />
         <div className="lp-core-rig" aria-hidden="true">
           <div className="lp-core-shadow" />
@@ -354,6 +355,17 @@ function CoreHero() {
             <span>Same record</span>
             <strong>Ready to release</strong>
           </p>
+        </div>
+        </div>
+        <div className="lp-core-software" aria-hidden="true">
+          <div className="lp-core-screen">
+            <img className="is-queue" src="/hero-software-queue.png" alt="" />
+            <img className="is-record" src="/hero-software-record.png" alt="" />
+            <span className="lp-core-click" />
+            <svg className="lp-core-cursor" viewBox="0 0 18 18">
+              <path d="M1 1v14.2l3.7-3.6 2.7 5.4 2.2-1.1-2.7-5.3 4.6-.2L1 1z" />
+            </svg>
+          </div>
         </div>
       </div>
       <p className="lp-core-caption" id="core-hero-caption">
