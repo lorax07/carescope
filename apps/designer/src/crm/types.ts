@@ -1,3 +1,5 @@
+import type { CrmAccount } from "../crmAccounts";
+
 export type ContactType =
   | "ordering_provider"
   | "office_manager"
@@ -175,6 +177,7 @@ export type CrmOverlay = {
   nextActivity: number;
   nextNote: number;
   nextAudit: number;
+  extraAccounts?: CrmAccount[];
 };
 
 export const CONTACT_TYPE_LABEL: Record<ContactType, string> = {

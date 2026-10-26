@@ -20,8 +20,9 @@ import {
   ResultsPage,
   InventoryPage,
 } from "./pages/ModulePages";
-import { QualityPage } from "./pages/QualityPage";
+import { ComplianceOverview, ComplianceSection } from "./pages/quality/complianceWorkspace";
 import { InstrumentInterfacePage, InstrumentRecordPage } from "./pages/InstrumentInterfacePage";
+import { InstrumentAcquirePage, InstrumentQueuePage, InstrumentReviewPage } from "./pages/instruments/InstrumentWork";
 import { BillingPage } from "./pages/BillingPage";
 import { RcmAnalyticsPage } from "./pages/rcm/RcmAnalyticsPage";
 import { RcmArPage } from "./pages/rcm/RcmArPage";
@@ -36,7 +37,7 @@ import { CrmActivitiesPage } from "./pages/crm/CrmActivitiesPage";
 import { CrmAnalyticsPage } from "./pages/crm/CrmAnalyticsPage";
 import { CrmClientDetailPage } from "./pages/crm/CrmClientDetailPage";
 import { CrmClientsPage } from "./pages/crm/CrmClientsPage";
-import { CrmCommunicationsPage } from "./pages/crm/CrmCommunicationsPage";
+import { CrmInboxPage } from "./pages/crm/CrmInboxPage";
 import { CrmContactsPage } from "./pages/crm/CrmContactsPage";
 import { CrmDocumentsPage } from "./pages/crm/CrmDocumentsPage";
 import { CrmHealthPage } from "./pages/crm/CrmHealthPage";
@@ -116,6 +117,10 @@ createRoot(document.getElementById("root")!).render(
           <Route path="samples" element={<SamplesPage view="home" />} />
           <Route path="tests" element={<TestsPage />} />
           <Route path="results" element={<ResultsPage />} />
+          <Route path="instruments/queue" element={<InstrumentQueuePage />} />
+          <Route path="instruments/acquire" element={<InstrumentAcquirePage />} />
+          <Route path="instruments/review/:runId" element={<InstrumentReviewPage />} />
+          <Route path="instruments/review" element={<InstrumentReviewPage />} />
           <Route path="instruments/:instrumentId" element={<InstrumentRecordPage />} />
           <Route path="instruments" element={<InstrumentInterfacePage />} />
           <Route path="connectivity/clients/:accountId" element={<CrmClientDetailPage />} />
@@ -125,13 +130,15 @@ createRoot(document.getElementById("root")!).render(
           <Route path="connectivity/tasks" element={<CrmTasksPage />} />
           <Route path="connectivity/opportunities" element={<CrmOpportunitiesPage />} />
           <Route path="connectivity/health" element={<CrmHealthPage />} />
-          <Route path="connectivity/communications" element={<CrmCommunicationsPage />} />
+          <Route path="connectivity/inbox" element={<CrmInboxPage />} />
+          <Route path="connectivity/communications" element={<CrmInboxPage />} />
           <Route path="connectivity/issues" element={<CrmIssuesPage />} />
           <Route path="connectivity/documents" element={<CrmDocumentsPage />} />
           <Route path="connectivity/analytics" element={<CrmAnalyticsPage />} />
           <Route path="connectivity" element={<ClientIndex />} />
           <Route path="inventory" element={<InventoryPage />} />
-          <Route path="quality" element={<QualityPage />} />
+          <Route path="quality/:section/:id?" element={<ComplianceSection />} />
+          <Route path="quality" element={<ComplianceOverview />} />
           <Route path="billing/claims/:claimId" element={<RcmClaimDetailPage />} />
           <Route path="billing/claims" element={<RcmClaimsPage />} />
           <Route path="billing/queues" element={<RcmQueuesPage />} />

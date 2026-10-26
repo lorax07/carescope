@@ -10,8 +10,8 @@ import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
-import { RCM_SUBNAV } from "./pages/rcm/RcmShell";
-import { CRM_SUBNAV } from "./pages/crm/CrmShell";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
+import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
@@ -27,8 +27,10 @@ const NAV = [
 ] as const;
 
 function nestedNavFor(to: string) {
-  if (to === "/app/billing") return RCM_SUBNAV.filter((sub) => !sub.end);
-  if (to === "/app/connectivity") return CRM_SUBNAV.filter((sub) => !sub.end);
+  if (to === "/app/billing") return REVENUE_CHAPTERS;
+  if (to === "/app/connectivity") return CLIENT_CHAPTERS;
+  if (to === "/app/instruments") return INSTRUMENT_CHAPTERS;
+  if (to === "/app/quality") return COMPLIANCE_CHAPTERS;
   return [];
 }
 
@@ -232,6 +234,14 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "inbox") {
+    return (
+      <svg {...common}>
+        <path d="M4 6h16v12H4z" />
+        <path d="m4 6 8 6 8-6" />
+      </svg>
+    );
+  }
   if (name === "communications") {
     return (
       <svg {...common}>
@@ -300,11 +310,27 @@ function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
-  if (name === "config") {
+  if (name === "config" || name === "admin") {
     return (
       <svg {...common}>
         <circle cx="12" cy="12" r="3" />
         <path d="M12 4.5v2.2M12 17.3v2.2M4.5 12h2.2M17.3 12h2.2M6.4 6.4l1.6 1.6M16 16l1.6 1.6M17.6 6.4 16 8M8 16l-1.6 1.6" />
+      </svg>
+    );
+  }
+  if (name === "events" || name === "deviations" || name === "capa" || name === "audits" || name === "complaints") {
+    return (
+      <svg {...common}>
+        <path d="M12 4.5 20 18H4L12 4.5z" />
+        <path d="M12 10v4M12 16.5h.01" />
+      </svg>
+    );
+  }
+  if (name === "training" || name === "changes" || name === "risks" || name === "equipment" || name === "suppliers" || name === "metrics") {
+    return (
+      <svg {...common}>
+        <rect x="5" y="4" width="14" height="16" rx="2" />
+        <path d="M8 9h8M8 13h8M8 17h5" />
       </svg>
     );
   }
@@ -358,6 +384,7 @@ function ShellNav({
   onToggleGroup: (key: string) => void;
 }) {
   const sectionTabs = useSectionTabs();
+  const { pathname } = useLocation();
   const overviewLink = operationLinks.find((item) => item.view === "overview");
   const coreLinks = operationLinks.filter((item) => item.view !== "overview");
   const groupOpen = (key: string) => openGroups[key] ?? currentGroup === key;
@@ -419,7 +446,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -447,10 +474,15 @@ function ShellNav({
                   <NavLink
                     key={sub.to}
                     to={sub.to}
-                    title={compact ? sub.label : undefined}
+                    end={sub.end}
+                    title={compact ? sub.question : sub.label}
                     aria-label={compact ? sub.label : undefined}
                     onClick={() => sectionTabs.showSection(section)}
-                    className={({ isActive }) => `lims-nav-item is-core-child${isActive ? " active" : ""}`}
+                    className={() => {
+                      const chapters = group === "billing" ? REVENUE_CHAPTERS : group === "instruments" ? INSTRUMENT_CHAPTERS : group === "quality" ? COMPLIANCE_CHAPTERS : CLIENT_CHAPTERS;
+                      const on = chapterForPath(chapters, pathname)?.id === sub.id;
+                      return `lims-nav-item is-core-child${on ? " active" : ""}`;
+                    }}
                   >
                     <span className="lims-nav-icon">
                       <NavIcon name={navGlyph(sub.to, section)} />

@@ -58,30 +58,36 @@ export function RcmArPage() {
   }
 
   return (
-    <RcmShell title="Accounts receivable" lede="Outstanding balances by aging, client, payer, and route. Large and aging balances are the work, not a static report.">
-      <section className="lims-panel billing-panel">
-        <div className="lims-panel-head">
+    <RcmShell studio title="Receivables" lede="Outstanding balances by aging, client, payer, and route.">
+      <header className="client-board-head">
+        <h1>Receivables</h1>
+        <Link to="/app/billing/payments">Cash</Link>
+        <Link to="/app/billing/denials">Denials</Link>
+      </header>
+      <section className="client-card">
+        <header>
           <h2>Aging</h2>
           <strong>{formatMoney(metrics.ar)}</strong>
-        </div>
-        <div className="rcm-aging">
+        </header>
+        <div className="client-pills" role="tablist" aria-label="Aging">
           {totals.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={bucket === item.id ? "is-on" : ""}
+              role="tab"
+              aria-selected={bucket === item.id}
+              className={bucket === item.id ? "is-on" : undefined}
               onClick={() => setFilter("bucket", bucket === item.id ? "all" : item.id)}
             >
-              <span>{item.label}</span>
-              <strong>{formatMoney(item.cents)}</strong>
+              {item.label} <em>{formatMoney(item.cents)}</em>
             </button>
           ))}
         </div>
-        <p className="billing-note">
+        <p className="client-empty">
           {formatMoney(metrics.atRisk)} is at risk in 91+ and denied balances. Days in A/R: {metrics.daysInAr}.
         </p>
       </section>
-      <section className="lims-panel billing-panel">
+      <section className="client-card client-projects is-scroll">
         <div className="lims-panel-head rcm-toolbar">
           <h2>{filtered.length} accounts</h2>
           <label>
@@ -121,8 +127,8 @@ export function RcmArPage() {
           </label>
         </div>
         {paged.rows.length ? (
-          <div className="lims-table-wrap">
-            <table className="lims-table">
+          <div className="client-table-wrap">
+            <table className="client-table">
               <thead>
                 <tr>
                   <th>Claim</th>

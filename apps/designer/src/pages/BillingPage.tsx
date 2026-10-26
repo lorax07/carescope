@@ -204,28 +204,21 @@ export function BillingPage() {
         </div>
       </div>
 
-      <section className="lims-panel billing-panel">
-        <div className="billing-areas" role="tablist" aria-label="Revenue cycle">
-          {STAGES.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={item.id === stage}
-              className={`btn${item.id === stage ? " is-on" : ""}`}
-              onClick={() => chooseStage(item.id)}
-            >
-              {item.label} ({counts[item.id]})
-            </button>
-          ))}
-        </div>
-        {notice ? <p className="billing-note" aria-live="polite">{notice}</p> : null}
-      </section>
+      {notice ? <p className="billing-note" aria-live="polite">{notice}</p> : null}
 
       <div className="rcm-workbench">
         <section className="lims-panel">
           <div className="lims-panel-head">
-            <h2>{STAGES.find((item) => item.id === stage)?.label}</h2>
+            <label className="module-stage-pick">
+              <span>Stage</span>
+              <select aria-label="Charge capture stage" value={stage} onChange={(event) => chooseStage(event.target.value as WorkStage)}>
+                {STAGES.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label} ({counts[item.id]})
+                  </option>
+                ))}
+              </select>
+            </label>
             <select aria-label="Account" value={accountFilter} onChange={(event) => chooseAccount(event.target.value)}>
               <option value="all">All accounts</option>
               {CRM_ACCOUNTS.map((account) => (

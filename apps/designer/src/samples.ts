@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { currentInstanceId, labIdFromSite, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type SampleStage = "received" | "accessioning" | "processing" | "testing" | "review" | "released";
 export type SampleStatus = SampleStage;
@@ -20,6 +21,8 @@ export type SampleRecord = {
   priority: "STAT" | "Rush" | "Routine";
   custody: string;
   site: string;
+  labId: string;
+  instanceId: string;
   /** Set when the sample was logged into a batch. Null means it is reviewed alone. */
   batchId: string | null;
 };
@@ -36,7 +39,7 @@ const ACCOUNT = {
  * Logged samples for one account. Sample ID is assigned by log order across
  * every lab on the account, so East Lab and North Lab share one sequence.
  */
-const LOGGED: Omit<SampleRecord, "sampleId">[] = [
+const LOGGED: Omit<SampleRecord, "sampleId" | "labId" | "instanceId">[] = [
   {
     ...ACCOUNT_FIELDS("SCP-20458", "ORD-44071"),
     received: "2026-07-24 09:44",
@@ -205,6 +208,14 @@ function ACCOUNT_FIELDS(accessionId: string, orderId: string, batchId: string | 
   };
 }
 
+function withScope(row: Omit<SampleRecord, "sampleId" | "labId" | "instanceId"> & Partial<Pick<SampleRecord, "labId" | "instanceId">>, instanceId: string): Omit<SampleRecord, "sampleId"> {
+  return {
+    ...row,
+    labId: row.labId || labIdFromSite(row.site),
+    instanceId: row.instanceId || instanceId,
+  };
+}
+
 const approvedIds = new Set<string>(["SCP-20479"]);
 const approvalListeners = new Set<() => void>();
 
@@ -237,14 +248,21 @@ export function isStopped(sample: SampleRecord): boolean {
   return sample.condition === "cancelled" || sample.condition === "rejected";
 }
 
-export function withAccountSampleIds(rows: Omit<SampleRecord, "sampleId">[]): SampleRecord[] {
+export function withAccountSampleIds(
+  rows: Array<Omit<SampleRecord, "sampleId" | "labId" | "instanceId"> & Partial<Pick<SampleRecord, "labId" | "instanceId">>>,
+): SampleRecord[] {
   const counters = new Map<string, number>();
   return [...rows]
     .sort((a, b) => a.received.localeCompare(b.received) || a.accessionId.localeCompare(b.accessionId))
     .map((row) => {
       const next = (counters.get(row.accountId) ?? 0) + 1;
       counters.set(row.accountId, next);
-      return { ...row, sampleId: next };
+      return {
+        ...row,
+        sampleId: next,
+        labId: row.labId || labIdFromSite(row.site),
+        instanceId: row.instanceId || "demo",
+      };
     });
 }
 
@@ -265,54 +283,92 @@ function migrateStatus(status: string | undefined, condition: string | undefined
   };
 }
 
-function normalizeSample(row: SampleRecord): SampleRecord | null {
+function normalizeSample(row: SampleRecord, instanceId = currentInstanceId()): SampleRecord | null {
   if (!row || typeof row.sampleId !== "number" || typeof row.accountId !== "string") return null;
   const migrated = migrateStatus(row.status, row.condition);
-  return { ...row, status: migrated.status, condition: migrated.condition };
+  return {
+    ...row,
+    status: migrated.status,
+    condition: migrated.condition,
+    labId: row.labId || labIdFromSite(row.site),
+    instanceId: row.instanceId || instanceId,
+  };
 }
 
-function readLogged(): SampleRecord[] {
-  try {
-    const raw = localStorage.getItem(LOGGED_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as SampleRecord[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeSample).filter((row): row is SampleRecord => Boolean(row));
-  } catch {
-    return [];
-  }
+const LOGGED_EVENT = "carescope-samples";
+
+function samplesKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("lab_operations", "samples", instanceId);
 }
 
-let samples: SampleRecord[] = [...withAccountSampleIds(LOGGED), ...readLogged()];
+function readLogged(instanceId = currentInstanceId()): SampleRecord[] {
+  const parsed = readJson<SampleRecord[]>(samplesKey(instanceId), [LOGGED_KEY]);
+  if (!Array.isArray(parsed)) return [];
+  return parsed.map((row) => normalizeSample(row, instanceId)).filter((row): row is SampleRecord => Boolean(row));
+}
+
+function seedFor(instanceId: string): SampleRecord[] {
+  return withAccountSampleIds(LOGGED.map((row) => withScope(row, instanceId)));
+}
+
+const sampleCache = new Map<string, SampleRecord[]>();
+
+function samplesFor(instanceId = currentInstanceId()): SampleRecord[] {
+  const cached = sampleCache.get(instanceId);
+  if (cached) return cached;
+  const loaded = [...seedFor(instanceId), ...readLogged(instanceId)];
+  sampleCache.set(instanceId, loaded);
+  return loaded;
+}
+
+function persistLogged(instanceId: string, rows: SampleRecord[]): void {
+  const seeded = new Set(LOGGED.map((row) => row.accessionId));
+  writeJson(
+    samplesKey(instanceId),
+    rows.filter((row) => row.instanceId === instanceId && !seeded.has(row.accessionId)),
+  );
+}
+
+let samples: SampleRecord[] = samplesFor();
 
 function notifySamples(): void {
   sampleListeners.forEach((listener) => listener());
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(LOGGED_EVENT));
+}
+
+function refreshSamples(): SampleRecord[] {
+  samples = samplesFor(currentInstanceId());
+  return samples;
 }
 
 export function useSamples(): SampleRecord[] {
-  const [rows, setRows] = useState(() => samples);
+  const [rows, setRows] = useState(() => refreshSamples());
   useEffect(() => {
-    const sync = () => setRows(samples);
+    const sync = () => setRows(refreshSamples());
     sampleListeners.add(sync);
+    window.addEventListener(LOGGED_EVENT, sync);
+    window.addEventListener("storage", sync);
     return () => {
       sampleListeners.delete(sync);
+      window.removeEventListener(LOGGED_EVENT, sync);
+      window.removeEventListener("storage", sync);
     };
   }, []);
   return rows;
 }
 
 export function getSamples(): SampleRecord[] {
-  return samples;
+  return refreshSamples();
 }
 
 export const SAMPLE_ACCOUNT = ACCOUNT;
 
 export function nextSampleId(accountId: string): number {
-  return samples.reduce((max, sample) => (sample.accountId === accountId ? Math.max(max, sample.sampleId) : max), 0) + 1;
+  return refreshSamples().reduce((max, sample) => (sample.accountId === accountId ? Math.max(max, sample.sampleId) : max), 0) + 1;
 }
 
 export function nextAccessionId(): string {
-  const highest = samples.reduce((max, sample) => {
+  const highest = refreshSamples().reduce((max, sample) => {
     const value = Number(sample.accessionId.replace(/\D/g, ""));
     return Number.isFinite(value) ? Math.max(max, value) : max;
   }, 0);
@@ -334,10 +390,12 @@ export type SampleLog = {
   tests: string;
   priority: SampleRecord["priority"];
   site: string;
+  labId?: string;
 };
 
 /** Logs a sample and assigns the next Sample ID for that account. */
 export function logSample(input: SampleLog): SampleRecord {
+  const instanceId = currentInstanceId();
   const sample: SampleRecord = {
     ...input,
     sampleId: nextSampleId(input.accountId),
@@ -347,10 +405,13 @@ export function logSample(input: SampleLog): SampleRecord {
     condition: "normal",
     custody: "Intake",
     batchId: null,
+    labId: input.labId || labIdFromSite(input.site),
+    instanceId,
   };
-  samples = [...samples, sample];
-  const seeded = new Set(LOGGED.map((row) => row.accessionId));
-  localStorage.setItem(LOGGED_KEY, JSON.stringify(samples.filter((row) => !seeded.has(row.accessionId))));
+  const next = [...samplesFor(instanceId), sample];
+  sampleCache.set(instanceId, next);
+  samples = next;
+  persistLogged(instanceId, next);
   notifySamples();
   return sample;
 }
@@ -414,12 +475,13 @@ export function sampleBatchId(sample: SampleRecord, assigned: Map<string, string
 }
 
 export function findSample(id: string): SampleRecord | undefined {
+  const rows = refreshSamples();
   const sampleId = Number(id);
   if (Number.isInteger(sampleId) && sampleId > 0) {
-    const match = samples.find((sample) => sample.sampleId === sampleId);
+    const match = rows.find((sample) => sample.sampleId === sampleId);
     if (match) return match;
   }
-  return samples.find((sample) => sample.accessionId === id);
+  return rows.find((sample) => sample.accessionId === id);
 }
 
 export const STATUS_LABEL: Record<SampleStatus, string> = {

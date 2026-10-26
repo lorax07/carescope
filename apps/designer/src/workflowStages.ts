@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { readLimsSession } from "./limsSession";
+import { currentInstanceId, currentLabId as sessionLabId, moduleStorageKey, readJson, writeJson } from "./storageScope";
 
 export type StageIconId = "inbox" | "tag" | "flask" | "activity" | "eye" | "check" | "beaker" | "flag" | "diamond";
 
@@ -35,6 +35,10 @@ const STORE = "carescope.workflowStages.v1";
 const EVENT = "carescope-workflow-stages";
 const DEFAULT_LAB = "default";
 
+function stagesKey(instanceId = currentInstanceId()): string {
+  return moduleStorageKey("lab_operations", "workflow_stages", instanceId);
+}
+
 type StageMap = Record<string, WorkflowStage[]>;
 
 function isHex(color: string): boolean {
@@ -46,18 +50,12 @@ function isIcon(value: string): value is StageIconId {
 }
 
 export function currentLabId(): string {
-  return readLimsSession()?.labId || DEFAULT_LAB;
+  return sessionLabId() || DEFAULT_LAB;
 }
 
 function readMap(): StageMap {
-  try {
-    const raw = localStorage.getItem(STORE);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as StageMap;
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
+  const parsed = readJson<StageMap>(stagesKey(), [STORE]);
+  return parsed && typeof parsed === "object" ? parsed : {};
 }
 
 export function normalizeStages(saved: WorkflowStage[] | undefined): WorkflowStage[] {
@@ -84,10 +82,10 @@ export function readWorkflowStages(labId = currentLabId()): WorkflowStage[] {
   return normalizeStages(map[labId] ?? (labId === DEFAULT_LAB ? undefined : map[DEFAULT_LAB]));
 }
 
-export function saveWorkflowStages(stages: WorkflowStage[], labId = currentLabId()): void {
+export function saveWorkflowStages(stages: WorkflowStage[], labId = currentLabId() || DEFAULT_LAB): void {
   const map = readMap();
   map[labId] = normalizeStages(stages);
-  localStorage.setItem(STORE, JSON.stringify(map));
+  writeJson(stagesKey(), map);
   window.dispatchEvent(new Event(EVENT));
 }
 

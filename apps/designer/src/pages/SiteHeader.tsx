@@ -39,8 +39,8 @@ export function SiteHeader() {
           <img
             className="lp-header-logo"
             src="/carescope-header-logo.png"
-            width={224}
-            height={56}
+            width={156}
+            height={39}
             alt="CareScope. Building Better Healthcare for Everyone."
           />
           <span className="lp-logo-rule" aria-hidden="true" />
@@ -85,7 +85,7 @@ export function SiteHeader() {
             <Link to="/intrasite">Sign in</Link>
           </nav>
           <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-            Request a Demo
+            Try free for 30 days
           </Link>
         </div>
       </div>

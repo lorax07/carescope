@@ -37,7 +37,7 @@ const SAMPLES = withAccountSampleIds([
     site: "North Lab",
     batchId: "B-1184",
   },
-] satisfies Omit<SampleRecord, "sampleId">[]);
+] satisfies Array<Omit<SampleRecord, "sampleId" | "labId" | "instanceId">>);
 
 describe("business brief", () => {
   const charges = seedCycle().charges;

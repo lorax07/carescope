@@ -1,45 +1,40 @@
-import { NavLink } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
+import { REVENUE_CHAPTERS } from "../moduleChapters";
 
-export const RCM_SUBNAV = [
-  { to: "/app/billing", label: "Overview", end: true, question: "How is revenue performing and what needs attention?" },
-  { to: "/app/billing/claims", label: "Claims", end: false, question: "What claims are moving through the revenue cycle?" },
-  { to: "/app/billing/queues", label: "Work queues", end: false, question: "What requires someone to take action?" },
-  { to: "/app/billing/payments", label: "Payments", end: false, question: "What money has been received or still needs posting?" },
-  { to: "/app/billing/denials", label: "Denials", end: false, question: "Why wasn’t money paid and what can we recover?" },
-  { to: "/app/billing/ar", label: "A/R", end: false, question: "What money is still outstanding?" },
-  { to: "/app/billing/config", label: "Configuration", end: false, question: "How are clients, payers, and services billed?" },
-  { to: "/app/billing/analytics", label: "Analytics", end: false, question: "What patterns are affecting revenue?" },
-] as const;
+export const RCM_SUBNAV = REVENUE_CHAPTERS;
 
 export function RcmShell({
   title,
   lede,
   actions,
+  studio,
   children,
 }: {
   title: string;
   lede: string;
   actions?: ReactNode;
+  studio?: boolean;
   children: ReactNode;
 }) {
+  const onSetup = useLocation().pathname.startsWith("/app/billing/config");
   return (
-    <div className="lims-page rcm-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Sequence Revenue</p>
-          <h1>{title}</h1>
-          <p className="lims-page-lede">{lede}</p>
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
+      {studio ? null : (
+        <div className="lims-page-header">
+          <div>
+            <p className="lims-eyebrow">Sequence Revenue</p>
+            <h1>{title}</h1>
+            <p className="lims-page-lede">{lede}</p>
+          </div>
+          <div className="rcm-header-actions">
+            <Link className={`module-setup-link${onSetup ? " is-on" : ""}`} to="/app/billing/config">
+              Billing setup
+            </Link>
+            {actions}
+          </div>
         </div>
-        {actions ? <div className="rcm-header-actions">{actions}</div> : null}
-      </div>
-      <nav className="billing-areas rcm-subnav" aria-label="Revenue submodules">
-        {RCM_SUBNAV.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} title={item.question} className={({ isActive }) => `btn${isActive ? " is-on" : ""}`}>
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
+      )}
       {children}
     </div>
   );
