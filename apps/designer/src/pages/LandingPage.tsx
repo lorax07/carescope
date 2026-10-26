@@ -91,9 +91,9 @@ const TOPICS: Topic[] = [
   {
     id: "operations",
     label: "Reduce errors caused by disconnected systems and custom integrations",
-    description: "Disconnected queues, manual handoffs, and compliance evidence assembled after the fact slow the lab and raise the chance of error.",
+    description: "Multiple software integrations means that when 1 link in the chain is broken, the risk of cascading failure downstream is imminent. Sequence is built to reduce the need of disconnected systems so your IT team doesn't have to worry about fixing integration failures.",
     visual: "Each Sequence answer sits beside the Traditional LIMS problem it removes",
-    points: ["Samples move through one workflow.", "Review and release from the workflow."],
+    points: ["One broken link does not cascade downstream.", "IT does not have to fix integration failures."],
     icon: "⌘",
   },
   {
