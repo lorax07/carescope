@@ -374,16 +374,39 @@ function CoreHero() {
 
 const WHY_CHOOSE = [
   {
-    figure: "6",
-    caption: "Modules for operations, instruments, compliance, client, revenue, and insights.",
+    n: "01",
+    title: ["Fewer integrations.", "Less complexity."],
+    body: "Reduce the number of systems you need to manage so your team can focus on what matters most.",
+    icon: (
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="3" />
+        <circle cx="7" cy="8.5" r="2.5" />
+        <circle cx="25" cy="8.5" r="2.5" />
+        <circle cx="16" cy="25" r="2.5" />
+        <path d="M9.2 10 13.4 14M22.8 10 18.6 14M16 19v3.4" />
+      </svg>
+    ),
   },
   {
-    figure: "30 days",
-    caption: "Try Sequence free and run a laboratory workflow before you commit.",
+    n: "02",
+    title: ["Make changes faster.", "Stay agile."],
+    body: "Simpler workflows and a modular design give you the flexibility to adapt and grow without the delays.",
+    icon: (
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="19" cy="16" r="7" />
+        <path d="M19 12.2V16l2.6 1.7M7 11.5h4.2M5 16h5.2M7 20.5h4.2" />
+      </svg>
+    ),
   },
   {
-    figure: "1 record",
-    caption: "The accession, the evidence, and the release stay on the same workflow.",
+    n: "03",
+    title: ["Built for growth.", "Long-term value."],
+    body: "Scale your laboratory operations with a platform that grows with you — today and tomorrow.",
+    icon: (
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M6 25V15M13 25V11M20 25V16M27 25V7" />
+      </svg>
+    ),
   },
 ] as const;
 
@@ -393,9 +416,17 @@ function WhyChoose() {
       <h2 id="why-sequence-heading">Why choose Sequence</h2>
       <div className="lp-why-stats">
         {WHY_CHOOSE.map((item) => (
-          <article key={item.figure}>
-            <strong>{item.figure}</strong>
-            <p>{item.caption}</p>
+          <article key={item.n}>
+            <div className="lp-why-mark">
+              <span className="lp-why-num">{item.n}</span>
+              <span className="lp-why-icon">{item.icon}</span>
+            </div>
+            <h3>
+              {item.title[0]}
+              <br />
+              {item.title[1]}
+            </h3>
+            <p>{item.body}</p>
           </article>
         ))}
       </div>
