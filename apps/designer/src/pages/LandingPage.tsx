@@ -84,7 +84,7 @@ const TOPICS: Topic[] = [
     id: "cost",
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
-    visual: "Average cost per change, Traditional LIMS beside Sequence, with the published range and two sources",
+    visual: "Published LIMS cost ranges for small, midsize, and large laboratories, with the two sources",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
@@ -215,84 +215,82 @@ function CompareLists({
   );
 }
 
-const COST_SCALE_THOUSANDS = 2800;
+const LAB_COST_SIZES = [
+  {
+    name: "Small",
+    who: "About 10 users, one site",
+    range: "$43K–$62K",
+    low: 43,
+    high: 62,
+    rows: [
+      ["Maintenance", "$16K–$25K/yr"],
+      ["License", "$4K–$34K/yr"],
+    ],
+  },
+  {
+    name: "Midsize",
+    who: "10–40 users",
+    range: "$135K–$984K",
+    low: 135,
+    high: 984,
+    rows: [
+      ["Maintenance", "$23K–$171K/yr"],
+      ["License", "$69K–$98K/yr"],
+    ],
+  },
+  {
+    name: "Large",
+    who: "Several sites",
+    range: "$603K–$13.4M",
+    low: 603,
+    high: 13400,
+    rows: [
+      ["Maintenance", "$40K–$407K/yr"],
+      ["License", "$284K/yr"],
+    ],
+  },
+] as const;
 
 function CostInfographic() {
   return (
-    <div className="lp-native-cost is-compare">
-      <CostRange
-        title="Traditional LIMS"
-        tone="traditional"
-        lowLabel="$37K"
-        highLabel="$2.8M"
-        low={37}
-        high={2800}
-        note="Upgrades and redeployment"
-      />
-      <CostRange
-        title="Sequence"
-        tone="sequence"
-        lowLabel="$5K"
-        highLabel="$21K"
-        low={5}
-        high={21}
-        note="Published implementation menu"
-      />
+    <div className="lp-native-cost is-compare is-sizes">
+      {LAB_COST_SIZES.map((size) => (
+        <article className="lp-cost-side is-traditional" key={size.name}>
+          <h3>{size.name}</h3>
+          <p className="lp-cost-who">{size.who}</p>
+          <div className="lp-native-total">
+            <strong>{size.range}</strong>
+            <small>Implementation</small>
+          </div>
+          <div
+            className="lp-cost-range"
+            role="img"
+            aria-label={`${size.name} laboratories, implementation ${size.range}`}
+          >
+            <i style={{ left: `${(size.low / size.high) * 100}%`, width: `${((size.high - size.low) / size.high) * 100}%` }} />
+          </div>
+          <ul className="lp-cost-lines">
+            {size.rows.map(([label, value]) => (
+              <li key={label}>
+                <b>{label}</b>
+                <span>{value}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
       <p className="lp-cost-sources">
-        Bars share a scale from $0 to $2.8 million. These are published ranges, not a calculated mean.{" "}
+        Implementation, maintenance, and license follow the ranges{" "}
         <a href="https://sabineindustrial.com/research/what-a-lims-really-costs/" target="_blank" rel="noreferrer">
           Sabine Industrial, What a LIMS Really Costs (2026)
-        </a>
-        , a review of public contracts for 39 laboratories: upgrades and redeployment from $37,296 to about $2.8 million.
-        Large-laboratory implementation in that review is $603,200 to $13.4 million and is not on this scale.{" "}
+        </a>{" "}
+        published by lab size, from public contracts for 39 laboratories. Small is about ten users or fewer at one site; midsize is ten to forty; large is several sites or an enterprise system. Each bar is scaled to that size. The large license figure is one four-lab program at $284,468 a year.{" "}
         <a href="https://www.scientific-computing.com/feature/value-pre-validated-lims" target="_blank" rel="noreferrer">
           Scientific Computing World, The value of pre-validated LIMS
         </a>
-        : validation is normally 40 to 60 percent of project time and cost; one example was a $720,000 implementation.
-        Sequence’s $5,000 to $21,000 is its published one-time menu for core installation, database transfer, and validation deliverables, not a figure from these studies.
+        : validation is normally 40 to 60 percent of project time and cost. Sequence’s published one-time menu is $5,000 to $21,000 and is not a figure from these studies.
       </p>
     </div>
-  );
-}
-
-function CostRange({
-  title,
-  tone,
-  lowLabel,
-  highLabel,
-  low,
-  high,
-  note,
-}: {
-  title: string;
-  tone: "traditional" | "sequence";
-  lowLabel: string;
-  highLabel: string;
-  low: number;
-  high: number;
-  note: string;
-}) {
-  const left = (low / COST_SCALE_THOUSANDS) * 100;
-  const width = ((high - low) / COST_SCALE_THOUSANDS) * 100;
-
-  return (
-    <article className={`lp-cost-side is-${tone}`}>
-      <h3>{title}</h3>
-      <div className="lp-native-total">
-        <strong>
-          {lowLabel}–{highLabel}
-        </strong>
-        <small>Average cost per change</small>
-      </div>
-      <div
-        className="lp-cost-range"
-        role="img"
-        aria-label={`${title} average cost per change, ${lowLabel} to ${highLabel}, ${note}`}
-      >
-        <i style={{ left: `${left}%`, width: `${width}%` }} />
-      </div>
-      <p className="lp-cost-range-note">{note}</p>
-    </article>
   );
 }
 

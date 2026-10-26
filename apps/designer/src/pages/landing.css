@@ -1382,6 +1382,11 @@
   align-items: start;
 }
 
+.lp-native-cost.is-sizes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 0.75rem;
+}
+
 .lp-native-cost.is-compare > p {
   grid-column: 1 / -1;
   margin-top: 0.85rem;
@@ -1409,6 +1414,40 @@
 .lp-cost-side + .lp-cost-side {
   padding-left: 1.2rem;
   border-left: 1px solid rgba(15, 28, 46, 0.12);
+}
+
+.lp-native-cost.is-sizes .lp-cost-side + .lp-cost-side {
+  padding-left: 0.7rem;
+}
+
+.lp-cost-who {
+  margin: 0.12rem 0 0;
+  color: #62708a;
+  font-size: 0.62rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.lp-cost-lines {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-cost-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  color: #243044;
+  font-size: 0.64rem;
+  line-height: 1.3;
+}
+
+.lp-cost-lines span {
+  font-weight: 800;
+  text-align: right;
 }
 
 .lp-native-cost.is-compare .lp-native-total {
@@ -5061,6 +5100,10 @@ img.lp-logo-sequence {
   line-height: 1.05;
 }
 
+.lp-friction-screen .lp-native-cost.is-sizes .lp-native-total strong {
+  font-size: clamp(0.88rem, 1.05vw, 1.08rem);
+}
+
 .lp-friction-screen .lp-native-pairs.is-supplied .lp-native-pair {
   gap: 0.75rem;
   padding: 0.28rem 0;
@@ -5260,6 +5303,7 @@ img.lp-logo-sequence {
   }
 
   .lp-native-cost.is-compare,
+  .lp-native-cost.is-sizes,
   .lp-friction-inner,
   .lp-friction.is-flip .lp-friction-inner {
     grid-template-columns: 1fr;
