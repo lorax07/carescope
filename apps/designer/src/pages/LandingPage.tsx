@@ -84,7 +84,7 @@ const TOPICS: Topic[] = [
     id: "cost",
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
-    visual: "Illustrative annual cost model",
+    visual: "Illustrative annual cost of change, Traditional LIMS beside Sequence",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
@@ -218,32 +218,78 @@ function CompareLists({
 }
 
 function CostInfographic() {
-  const costs = [
-    ["Vendor customization", "$142K", 49],
-    ["Integrations", "$61K", 21],
-    ["Internal IT", "$38K", 13],
-    ["Lab staff", "$27K", 9],
-    ["Validation/QA", "$19K", 7],
+  const rows = [
+    { label: "Vendor customization", traditional: 142, traditionalShare: 49, sequence: 0, sequenceShare: 0 },
+    { label: "Integrations", traditional: 61, traditionalShare: 21, sequence: 0, sequenceShare: 0 },
+    { label: "Internal IT", traditional: 38, traditionalShare: 13, sequence: 9, sequenceShare: 23 },
+    { label: "Lab staff", traditional: 27, traditionalShare: 9, sequence: 18, sequenceShare: 46 },
+    { label: "Validation/QA", traditional: 19, traditionalShare: 7, sequence: 12, sequenceShare: 31 },
   ] as const;
+  const scale = 142;
+
   return (
-    <div className="lp-native-cost">
+    <div className="lp-native-cost is-compare">
+      <CostColumn
+        title="Traditional LIMS"
+        tone="traditional"
+        total={287}
+        rows={rows.map((row, index) => ({
+          label: row.label,
+          amount: row.traditional,
+          share: row.traditionalShare,
+          index,
+        }))}
+        scale={scale}
+      />
+      <CostColumn
+        title="Sequence"
+        tone="sequence"
+        total={39}
+        rows={rows.map((row, index) => ({
+          label: row.label,
+          amount: row.sequence,
+          share: row.sequenceShare,
+          index,
+        }))}
+        scale={scale}
+      />
+      <p>Both columns are the same illustrative annual cost of change, not an industry average or a Sequence price. Sequence shows vendor customization and integrations at zero.</p>
+    </div>
+  );
+}
+
+function CostColumn({
+  title,
+  tone,
+  total,
+  rows,
+  scale,
+}: {
+  title: string;
+  tone: "traditional" | "sequence";
+  total: number;
+  scale: number;
+  rows: readonly { label: string; amount: number; share: number; index: number }[];
+}) {
+  return (
+    <article className={`lp-cost-side is-${tone}`}>
+      <h3>{title}</h3>
       <div className="lp-native-total">
-        <strong>$287K</strong>
-        <small>Total annual cost of change</small>
+        <strong>${total}K</strong>
+        <small>Annual cost of change</small>
       </div>
       <div className="lp-native-bars">
-        {costs.map(([label, value, percent], index) => (
-          <div className={`lp-native-bar is-${index + 1}`} key={label}>
+        {rows.map((row) => (
+          <div className={`lp-native-bar is-${row.index + 1}`} key={row.label}>
             <div>
-              <b>{label}</b>
-              <span>{value} <small>({percent}%)</small></span>
+              <b>{row.label}</b>
+              <span>{row.amount === 0 ? "$0" : `$${row.amount}K`} <small>({row.share}%)</small></span>
             </div>
-            <i style={{ width: `${percent * 1.82}%` }} />
+            <i style={{ width: `${(row.amount / scale) * 100}%` }} />
           </div>
         ))}
       </div>
-      <p>Figures are an illustrative annual cost model, not an industry average.</p>
-    </div>
+    </article>
   );
 }
 

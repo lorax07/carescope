@@ -1375,6 +1375,59 @@
   font-size: 0.7rem;
 }
 
+.lp-native-cost.is-compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 1.2rem;
+  align-items: start;
+}
+
+.lp-native-cost.is-compare > p {
+  grid-column: 1 / -1;
+  margin-top: 0.85rem;
+}
+
+.lp-cost-side h3 {
+  margin: 0;
+  color: #536887;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lp-cost-side.is-sequence h3,
+.lp-cost-side.is-sequence .lp-native-total strong {
+  color: #087f74;
+}
+
+.lp-cost-side + .lp-cost-side {
+  padding-left: 1.2rem;
+  border-left: 1px solid rgba(15, 28, 46, 0.12);
+}
+
+.lp-native-cost.is-compare .lp-native-total {
+  padding-bottom: 0.7rem;
+}
+
+.lp-native-cost.is-compare .lp-native-total strong {
+  font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+}
+
+.lp-native-cost.is-compare .lp-native-bars {
+  gap: 0.48rem;
+}
+
+.lp-native-cost.is-compare .lp-native-bar > div {
+  gap: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.lp-native-cost.is-compare .lp-native-bar > i {
+  min-width: 0;
+  height: 0.55rem;
+}
+
 .lp-native-comparison {
   display: grid;
   gap: 1rem;
@@ -4741,6 +4794,10 @@ img.lp-logo-sequence {
   font-size: clamp(2.2rem, 4vw, 3.2rem);
 }
 
+.lp-friction-screen .lp-native-cost.is-compare .lp-native-total strong {
+  font-size: clamp(1.7rem, 2.2vw, 2.2rem);
+}
+
 .lp-friction-screen .lp-native-pairs.is-supplied .lp-native-pair {
   gap: 1rem;
   padding: 0.55rem 0;
@@ -4939,9 +4996,18 @@ img.lp-logo-sequence {
     border-left: 0;
   }
 
+  .lp-native-cost.is-compare,
   .lp-friction-inner,
   .lp-friction.is-flip .lp-friction-inner {
     grid-template-columns: 1fr;
+  }
+
+  .lp-cost-side + .lp-cost-side {
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid rgba(15, 28, 46, 0.12);
   }
 
   .lp-friction-copy,
