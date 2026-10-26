@@ -4748,6 +4748,7 @@ img.lp-logo-sequence {
 
 .lp-page .lp-nav-links > a {
   display: inline-flex;
+  white-space: nowrap;
 }
 
 .lp-home .lp-nav-links,
@@ -5519,21 +5520,105 @@ img.lp-logo-sequence {
 }
 
 .lp-solve-banner {
-  padding-top: 3.4rem;
-  padding-bottom: 0.6rem;
+  padding-top: 0;
+  padding-bottom: 0.85rem;
 }
 
 .lp-page #what-we-solve-heading.lp-display-head {
+  width: max-content;
+  max-width: 100%;
+  margin-bottom: 0;
   font-weight: 400;
+  white-space: nowrap;
+}
+
+#less-friction {
+  width: 100cqi;
+  max-width: 100cqi;
+  margin-left: calc(50% - 50cqi);
+  margin-right: calc(50% - 50cqi);
+  background: #f6f5f4;
 }
 
 .lp-friction {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
-  padding-top: 2.1rem;
-  padding-bottom: 2.1rem;
+  padding-top: 5.4rem;
+  padding-bottom: 2.2rem;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: #f6f5f4;
+}
+
+.lp-friction.is-cost { z-index: 1; }
+.lp-friction.is-operations { z-index: 2; }
+.lp-friction.is-integration { z-index: 3; }
+
+.lp-friction .lp-solve-banner {
+  flex: none;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.lp-friction.is-cost.is-flip .lp-friction-inner {
+  grid-template-columns: minmax(15.5rem, 0.62fr) minmax(0, 1.55fr);
+}
+
+.lp-friction.is-cost .lp-friction-visual {
+  padding: 1.26rem;
+}
+
+.lp-friction.is-cost .lp-friction-screen {
+  padding: 1.14rem 1.2rem 1.2rem;
+}
+
+.lp-friction.is-cost .lp-native-cost.is-compare {
+  column-gap: 1.44rem;
+}
+
+.lp-friction.is-cost .lp-cost-side h3 {
+  font-size: 0.816rem;
+}
+
+.lp-friction.is-cost .lp-cost-who {
+  font-size: 0.744rem;
+}
+
+.lp-friction.is-cost .lp-cost-lines {
+  gap: 0.336rem;
+  margin-top: 0.66rem;
+}
+
+.lp-friction.is-cost .lp-cost-lines li {
+  gap: 0.336rem 0.54rem;
+  font-size: 0.768rem;
+}
+
+.lp-friction.is-cost .lp-cost-side + .lp-cost-side {
+  padding-left: 1.44rem;
+}
+
+.lp-friction.is-cost .lp-cost-range {
+  height: 0.66rem;
+}
+
+.lp-friction.is-cost .lp-cost-sources {
+  font-size: 0.7rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-friction {
+    position: relative;
+    top: auto;
+    min-height: 0;
+  }
 }
 
 .lp-friction-inner {
@@ -5778,6 +5863,13 @@ img.lp-logo-sequence {
     grid-template-columns: 1fr;
   }
 
+  .lp-friction {
+    position: relative;
+    top: auto;
+    min-height: 100dvh;
+    z-index: auto;
+  }
+
   .lp-why-stats article,
   .lp-why-stats article:first-child,
   .lp-why-stats article:last-child {
@@ -5794,7 +5886,8 @@ img.lp-logo-sequence {
   .lp-native-cost.is-compare,
   .lp-native-cost.is-sizes,
   .lp-friction-inner,
-  .lp-friction.is-flip .lp-friction-inner {
+  .lp-friction.is-flip .lp-friction-inner,
+  .lp-friction.is-cost.is-flip .lp-friction-inner {
     grid-template-columns: 1fr;
   }
 
