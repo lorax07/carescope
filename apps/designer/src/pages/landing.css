@@ -1396,6 +1396,11 @@
   text-transform: uppercase;
 }
 
+.lp-cost-side.is-traditional h3,
+.lp-cost-side.is-traditional .lp-native-total strong {
+  color: #ba4267;
+}
+
 .lp-cost-side.is-sequence h3,
 .lp-cost-side.is-sequence .lp-native-total strong {
   color: #087f74;
@@ -1448,7 +1453,7 @@
   bottom: 0;
   min-width: 4px;
   border-radius: 3px;
-  background: #243776;
+  background: #ba4267;
 }
 
 .lp-cost-side.is-sequence .lp-cost-range i {
@@ -1491,7 +1496,7 @@
 .lp-native-pairs-head h5,
 .lp-native-lists h5 {
   margin: 0;
-  color: #0b1f44;
+  color: #ba4267;
   font-size: 0.78rem;
 }
 
@@ -1508,10 +1513,7 @@
 }
 
 .lp-native-pair article {
-  display: grid;
-  grid-template-columns: 1.15rem minmax(0, 1fr);
-  gap: 0.55rem;
-  align-items: start;
+  display: block;
   min-height: 100%;
   padding: 0.55rem 0.7rem;
   border-radius: 8px;
@@ -1578,8 +1580,8 @@
 }
 
 .lp-native-pairs.is-supplied .lp-native-pair {
-  padding: 0.82rem 0;
-  border-bottom: 1px solid rgba(15, 28, 46, 0.1);
+  padding: 0.35rem 0;
+  border-bottom: 0;
 }
 
 .lp-native-pairs.is-supplied .lp-native-pair:last-child {
@@ -1590,17 +1592,26 @@
 .lp-native-pairs.is-supplied .lp-native-pair article,
 .lp-native-pairs.is-supplied .lp-native-pair article.is-sequence {
   display: block;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-  color: #1c2b40;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: #fff5f7;
+  color: #243044;
   font-size: 0.84rem;
   line-height: 1.45;
 }
 
+.lp-native-pairs.is-supplied .lp-native-pair article.is-sequence {
+  background: #e7f8f5;
+}
+
 .lp-native-pairs.is-supplied .lp-native-pair-title {
   margin-bottom: 0.12rem;
+  color: #ba4267;
   font-size: 0.92rem;
+}
+
+.lp-native-pairs.is-supplied .lp-native-pair article.is-sequence .lp-native-pair-title {
+  color: #087f74;
 }
 
 .lp-native-lists ul {
@@ -4950,8 +4961,8 @@ img.lp-logo-sequence {
 }
 
 .lp-friction-screen .lp-native-pairs.is-supplied .lp-native-pair {
-  gap: 1rem;
-  padding: 0.55rem 0;
+  gap: 0.75rem;
+  padding: 0.28rem 0;
 }
 
 .lp-sr {

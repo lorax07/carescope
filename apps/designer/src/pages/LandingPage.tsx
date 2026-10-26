@@ -190,10 +190,9 @@ function CompareLists({
           {supplied ? null : <p>How Sequence solves them</p>}
         </div>
       </div>
-      {pairs.map((pair, index) => (
+      {pairs.map((pair) => (
         <div className="lp-native-pair" key={pair.issue}>
           <article>
-            {supplied ? null : <span>{index + 1}</span>}
             <div>
               {pair.issueTitle ? <strong className="lp-native-pair-title">{pair.issueTitle}</strong> : null}
               <p>{pair.issue}</p>
@@ -205,7 +204,6 @@ function CompareLists({
             </span>
           )}
           <article className="is-sequence">
-            {supplied ? null : <span>{index + 1}</span>}
             <div>
               {pair.solutionTitle ? <strong className="lp-native-pair-title">{pair.solutionTitle}</strong> : null}
               <p>{pair.solution}</p>
