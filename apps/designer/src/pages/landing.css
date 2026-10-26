@@ -1650,12 +1650,14 @@
 
 .lp-native-pairs.is-supplied .lp-native-pair-title {
   margin-bottom: 0.12rem;
-  color: #ba4267;
+  color: #000;
   font-size: 0.92rem;
+  font-weight: 400;
 }
 
 .lp-native-pairs.is-supplied .lp-native-pair article.is-sequence .lp-native-pair-title {
-  color: #087f74;
+  color: #000;
+  font-weight: 400;
 }
 
 .lp-native-lists ul {
