@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
@@ -299,45 +299,56 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
   return <CompareLists pairs={INTEGRATION_PAIRS} />;
 }
 
+function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
+  return (
+    <section className={`lp-friction is-${topic.id}${flipped ? " is-flip" : ""}`} aria-labelledby={`friction-${topic.id}`}>
+      <div className="lp-friction-inner">
+        <figure className="lp-friction-visual">
+          <div className="lp-friction-screen">
+            <TopicInfographic id={topic.id} />
+          </div>
+          <figcaption className="lp-sr">{topic.visual}</figcaption>
+        </figure>
+        <div className="lp-friction-copy">
+          <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
+          <p>{topic.description}</p>
+          <ul className="lp-friction-points">
+            {topic.points.map((point) => (
+              <li key={point}>
+                <span className="lp-friction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="15" height="15">
+                    <path
+                      fill="currentColor"
+                      d="M8 1.15 9.05 5.1h4.15L10.05 7.5l1.1 3.95L8 9.05 4.85 11.45 5.95 7.5 2.8 5.1h4.15L8 1.15z"
+                    />
+                  </svg>
+                </span>
+                {point}
+              </li>
+            ))}
+          </ul>
+          <Link to="/app?signup=1" className="lp-friction-cta">
+            Try free for 30 days
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function WhatWeSolve() {
+  const [cost, ...rest] = TOPICS;
   return (
     <section id="less-friction" aria-labelledby="what-we-solve-heading">
       <div className="lp-section-head lp-solve-banner">
         <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
       </div>
-      {TOPICS.map((topic, index) => (
-        <section className={`lp-friction is-${topic.id}${index % 2 === 0 ? " is-flip" : ""}`} key={topic.id} aria-labelledby={`friction-${topic.id}`}>
-          <div className="lp-friction-inner">
-            <figure className="lp-friction-visual">
-              <div className="lp-friction-screen">
-                <TopicInfographic id={topic.id} />
-              </div>
-              <figcaption className="lp-sr">{topic.visual}</figcaption>
-            </figure>
-            <div className="lp-friction-copy">
-              <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
-              <p>{topic.description}</p>
-              <ul className="lp-friction-points">
-                {topic.points.map((point) => (
-                  <li key={point}>
-                    <span className="lp-friction-mark" aria-hidden="true">
-                      <svg viewBox="0 0 16 16" width="15" height="15">
-                        <path
-                          fill="currentColor"
-                          d="M8 1.15 9.05 5.1h4.15L10.05 7.5l1.1 3.95L8 9.05 4.85 11.45 5.95 7.5 2.8 5.1h4.15L8 1.15z"
-                        />
-                      </svg>
-                    </span>
-                    {point}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/app?signup=1" className="lp-friction-cta">
-                Try free for 30 days
-              </Link>
-            </div>
-          </div>
-        </section>
+      <section className="lp-rigor" aria-labelledby="rigor-heading">
+        <h2 id="rigor-heading" className="lp-rigor-heading">Build with regulatory rigor in mind</h2>
+        <TopicBlock topic={cost} flipped />
+      </section>
+      {rest.map((topic) => (
+        <TopicBlock key={topic.id} topic={topic} flipped={TOPICS.indexOf(topic) % 2 === 0} />
       ))}
     </section>
   );
@@ -595,18 +606,18 @@ function IndustrySpotlights() {
 }
 
 const REGULATIONS = [
-  { code: "21 CFR 11", name: "Electronic records and signatures", detail: "Controls for trustworthy electronic records, audit trails, and legally binding signatures." },
-  { code: "21 CFR 58", name: "Good Laboratory Practice", detail: "Nonclinical laboratory study controls covering personnel, records, equipment, and specimens." },
-  { code: "21 CFR 210", name: "Drug manufacturing practice", detail: "Minimum GMP requirements for the methods, facilities, and controls used in drug manufacture." },
-  { code: "21 CFR 211", name: "Finished pharmaceuticals", detail: "Production, laboratory control, record, and distribution requirements for finished drug products." },
-  { code: "21 CFR 820", name: "Quality system regulation", detail: "Medical-device quality system requirements for design, production, and recorded evidence." },
-  { code: "ISO 17025", name: "Testing laboratory competence", detail: "Requirements for impartial, technically competent testing and calibration laboratories." },
-  { code: "ISO 15189", name: "Medical laboratories", detail: "Quality and competence requirements for clinical laboratory examination services." },
-  { code: "CLIA", name: "Clinical laboratory quality", detail: "U.S. standards for accurate, reliable, and timely patient laboratory testing." },
-  { code: "CAP", name: "Laboratory accreditation", detail: "Inspection expectations for quality management, analytical performance, and documentation." },
-  { code: "EU Annex 11", name: "Computerized systems", detail: "European GMP expectations for validated systems, audit trails, and data integrity." },
-  { code: "ICH Q7", name: "API good manufacturing", detail: "GMP guidance for active pharmaceutical ingredient manufacturing and quality systems." },
-  { code: "HIPAA", name: "Protected health information", detail: "Safeguards for patient information handled by clinical and diagnostic laboratory operations." },
+  { code: "21 CFR 11", name: "Electronic records and signatures", meets: "Sequence binds each signature to the section it approves and keeps the audit trail on that same electronic record." },
+  { code: "21 CFR 58", name: "Good Laboratory Practice", meets: "Sequence Operations keeps the study sample, the instrument that tested it, and the people who handled it on one record." },
+  { code: "21 CFR 210", name: "Drug manufacturing practice", meets: "Sequence holds the batch steps, the holds, and the laboratory controls on the accession the laboratory is already running." },
+  { code: "21 CFR 211", name: "Finished pharmaceuticals", meets: "Sequence records laboratory control, review, and release on the finished-product accession instead of a separate batch file." },
+  { code: "21 CFR 820", name: "Quality system regulation", meets: "Sequence Compliance keeps the device change, the deviation, and the controlled document together, with the approval on the section it covers." },
+  { code: "ISO 17025", name: "Testing laboratory competence", meets: "Sequence keeps the method, the instrument, and the result on the testing record, and the audit trail shows who changed each one." },
+  { code: "ISO 15189", name: "Medical laboratories", meets: "Sequence Operations carries a clinical sample from receipt through review, with the site and any hold visible on that accession." },
+  { code: "CLIA", name: "Clinical laboratory quality", meets: "Sequence keeps the patient test, its review, and the released result on one accession." },
+  { code: "CAP", name: "Laboratory accreditation", meets: "Sequence Compliance keeps deviations, CAPA, and the audit trail in the same module the laboratory uses for the work." },
+  { code: "EU Annex 11", name: "Computerized systems", meets: "Sequence records who changed a workflow and keeps the audit trail on that change in the designer." },
+  { code: "ICH Q7", name: "API good manufacturing", meets: "Sequence keeps the ingredient batch, its tests, and the release decision on one record, and Sequence Compliance records a deviation beside that batch." },
+  { code: "HIPAA", name: "Protected health information", meets: "Sequence Client keeps the account and its accessions together, so the laboratory work stays on that account rather than a separate list." },
 ] as const;
 
 function RegIcon({ code }: { code: string }) {
@@ -697,7 +708,57 @@ function RegIcon({ code }: { code: string }) {
   return <svg {...common}>{paths[code]}</svg>;
 }
 
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
+
 function ComplianceSection() {
+  const [query, setQuery] = useState("");
+  const [cursor, setCursor] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const previousIndex = useRef(0);
+  const reducedMotion = usePrefersReducedMotion();
+  const normalized = query.trim().toLowerCase();
+  const matchIndex = normalized
+    ? REGULATIONS.findIndex((item) =>
+        `${item.code} ${item.name} ${item.meets}`.toLowerCase().includes(normalized),
+      )
+    : -1;
+  const searching = normalized.length > 0;
+
+  useEffect(() => {
+    if (searching || hovering || reducedMotion) return;
+    const timer = window.setInterval(() => {
+      setCursor((current) => (current + 1) % REGULATIONS.length);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [searching, hovering, reducedMotion]);
+
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    const index = searching ? matchIndex : cursor;
+    if (index < 0) return;
+    const card = scroller.querySelectorAll<HTMLElement>(".lp-reg-card")[index];
+    if (!card) return;
+    const top = searching
+      ? card.offsetTop - (scroller.clientHeight - card.offsetHeight) / 2
+      : card.offsetTop;
+    const behavior: ScrollBehavior =
+      reducedMotion || (!searching && index < previousIndex.current) ? "auto" : "smooth";
+    previousIndex.current = index;
+    scroller.scrollTo({ top: Math.max(0, top), behavior });
+  }, [cursor, matchIndex, searching, reducedMotion]);
+
   return (
     <section className="lp-section lp-compliance" id="compliance" aria-labelledby="compliance-heading">
       <div className="lp-compliance-stage">
@@ -708,24 +769,50 @@ function ComplianceSection() {
         />
         <div className="lp-compliance-layout">
           <div className="lp-compliance-copy">
-            <h2 id="compliance-heading">Governed for regulated environments</h2>
-            <p>
-              Immutable execution logs, signatures, document control, and site isolation keep audit evidence ready.
-            </p>
+            <h2 id="compliance-heading">
+              Sequence helps quality leadership feel at ease. The Core product and all modules continuously meet regulatory scrutiny across multiple industries.
+            </h2>
+            <label className="lp-reg-search">
+              <span className="lp-sr">Find your regulatory framework</span>
+              <input
+                type="search"
+                value={query}
+                placeholder="find your regulatory framework"
+                onChange={(event) => setQuery(event.target.value)}
+                aria-controls="regulation-carousel"
+              />
+            </label>
+            {searching && matchIndex < 0 ? (
+              <p className="lp-reg-empty" role="status">No framework matches that search.</p>
+            ) : null}
             <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
               Try free for 30 days
             </Link>
           </div>
-          <div className="lp-reg-scroll" tabIndex={0} aria-label="Regulations">
-            {REGULATIONS.map((item) => (
-              <article className="lp-reg-card" key={item.code}>
+          <div
+            className={`lp-reg-scroll${searching ? " is-searching" : ""}`}
+            id="regulation-carousel"
+            ref={scrollRef}
+            tabIndex={0}
+            aria-label="Regulations"
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            onFocus={() => setHovering(true)}
+            onBlur={() => setHovering(false)}
+          >
+            {REGULATIONS.map((item, index) => (
+              <article
+                className={`lp-reg-card${searching && index === matchIndex ? " is-focus" : ""}`}
+                key={item.code}
+                data-code={item.code}
+              >
                 <span className="lp-reg-icon" aria-hidden="true">
                   <RegIcon code={item.code} />
                 </span>
                 <div className="lp-reg-copy">
                   <b>{item.code}</b>
                   <small>{item.name}</small>
-                  <p>{item.detail}</p>
+                  <p className="lp-reg-more">{item.meets}</p>
                 </div>
               </article>
             ))}

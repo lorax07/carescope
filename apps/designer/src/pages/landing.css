@@ -3883,10 +3883,10 @@ img.lp-logo-sequence {
   margin: 0;
   color: #10243f;
   font-family: Inter, "Sora", sans-serif;
-  font-size: clamp(2.15rem, 3.6vw, 3.35rem);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
+  font-size: clamp(1.35rem, 2vw, 1.72rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.35;
 }
 
 .lp-compliance-copy p {
@@ -3897,19 +3897,57 @@ img.lp-logo-sequence {
 }
 
 .lp-compliance-copy .lp-pill {
-  margin-top: 1.45rem;
+  margin-top: 1.15rem;
+}
+
+.lp-reg-search {
+  display: block;
+  margin-top: 1.15rem;
+}
+
+.lp-reg-search input {
+  width: 100%;
+  max-width: 24rem;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid rgba(16, 36, 63, 0.16);
+  border-radius: 10px;
+  background: #fff;
+  color: #1c1e22;
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.lp-reg-search input::placeholder {
+  color: #6b7280;
+}
+
+.lp-reg-search input:focus {
+  outline: 2px solid #1b6ef3;
+  outline-offset: 2px;
+}
+
+.lp-reg-empty {
+  margin: 0.55rem 0 0;
+  color: #6b2433;
+  font-size: 0.9rem;
 }
 
 .lp-reg-scroll {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   max-height: 32.5rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 0.35rem;
+  padding: 0.85rem 0.85rem 0.85rem 0.35rem;
+  scroll-snap-type: y mandatory;
   scrollbar-width: thin;
   scrollbar-color: rgba(16, 36, 63, 0.35) transparent;
+}
+
+.lp-reg-scroll.is-searching {
+  scroll-snap-type: none;
 }
 
 .lp-reg-scroll:focus-visible {
@@ -3922,13 +3960,24 @@ img.lp-logo-sequence {
   flex-direction: row;
   align-items: flex-start;
   gap: 0.9rem;
-  margin: 0;
+  width: 82%;
+  margin: 0 auto;
   padding: 1rem 1.05rem;
   border: 0;
   border-radius: 16px;
   background: #e4dcf3;
   color: #2a2140;
   box-shadow: 0 10px 24px rgba(16, 36, 63, 0.08);
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform 0.45s ease, box-shadow 0.45s ease;
+  scroll-snap-align: start;
+}
+
+.lp-reg-card.is-focus {
+  z-index: 2;
+  transform: scale(1.2);
+  box-shadow: 0 18px 36px rgba(16, 36, 63, 0.2);
 }
 
 .lp-reg-icon {
@@ -3966,10 +4015,24 @@ img.lp-logo-sequence {
 }
 
 .lp-reg-card p {
-  margin: 0.35rem 0 0;
+  margin: 0;
   color: #4a3d66;
   font-size: 0.86rem;
   line-height: 1.4;
+}
+
+.lp-reg-more {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+}
+
+.lp-reg-card:hover .lp-reg-more,
+.lp-reg-card.is-focus .lp-reg-more {
+  max-height: 8.5rem;
+  margin-top: 0.45rem;
+  opacity: 1;
 }
 
 @media (max-width: 900px) {
@@ -3996,7 +4059,9 @@ img.lp-logo-sequence {
 
 @media (prefers-reduced-motion: reduce) {
   .lp-page-track,
-  .lp-page > .lp-nav {
+  .lp-page > .lp-nav,
+  .lp-reg-card,
+  .lp-reg-more {
     transition: none;
   }
 }
@@ -4729,10 +4794,52 @@ img.lp-logo-sequence {
 }
 
 .lp-solve-banner,
-.lp-friction {
+.lp-friction,
+.lp-rigor-heading {
   box-sizing: border-box;
   padding-left: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
   padding-right: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
+}
+
+.lp-rigor {
+  background: #7a1c2b;
+  color: #fff;
+  padding-top: 2.6rem;
+  padding-bottom: 0.5rem;
+}
+
+.lp-rigor-heading {
+  margin: 0;
+  padding-bottom: 0.35rem;
+  color: #fff;
+  font-family: Inter, "Sora", sans-serif;
+  font-size: clamp(1.7rem, 3vw, 2.45rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.lp-rigor .lp-friction-copy h2,
+.lp-rigor .lp-friction-copy p,
+.lp-rigor .lp-friction-points li {
+  color: #fff;
+}
+
+.lp-rigor .lp-friction-mark {
+  color: #ffc1cb;
+}
+
+.lp-rigor .lp-friction-cta {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #fff;
+}
+
+.lp-rigor .lp-friction-cta:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+  color: #fff;
 }
 
 .lp-solve-banner {
