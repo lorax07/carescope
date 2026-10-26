@@ -4080,6 +4080,9 @@ img.lp-logo-sequence {
 
 .lp-compliance-copy h2 {
   margin: 0;
+  padding: 0.95rem 1.05rem;
+  border-radius: 14px;
+  background: #fff;
   color: #10243f;
   font-family: Inter, "Sora", sans-serif;
   font-size: clamp(1.35rem, 2vw, 1.72rem);
@@ -5007,7 +5010,7 @@ img.lp-logo-sequence {
   max-width: 100cqi;
   margin-left: calc(50% - 50cqi);
   margin-right: calc(50% - 50cqi);
-  background: #7a1c2b;
+  background: #3b2463;
   color: #fff;
   padding-top: 2.6rem;
   padding-bottom: 0;
