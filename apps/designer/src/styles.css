@@ -161,7 +161,7 @@ a {
 }
 
 .lims-shell.is-nav-open .sequence-nav-toggle {
-  width: 5.2rem;
+  width: 8.2rem;
   border-radius: 10px;
   background: transparent;
   border-color: transparent;
@@ -194,7 +194,7 @@ a {
 
 .sequence-nav-wordmark img {
   display: block;
-  width: 4.8rem;
+  width: 7.5rem;
   height: auto;
 }
 
@@ -211,6 +211,12 @@ a {
 .lims-shell.is-nav-open .sequence-stage-mark {
   opacity: 0;
   transform: rotate(90deg) scale(0.62);
+}
+
+.sequence-stage-mark img {
+  display: block;
+  width: 1.55rem;
+  height: auto;
 }
 
 .sequence-stage-mark i {

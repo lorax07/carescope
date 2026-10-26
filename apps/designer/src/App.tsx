@@ -7,7 +7,6 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations";
 import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
-import { SequenceStageMark } from "./components/StageConditionCell";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
@@ -15,7 +14,6 @@ import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
-import { DEFAULT_WORKFLOW_STAGES, useWorkflowStages } from "./workflowStages";
 
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
@@ -588,7 +586,6 @@ function AppFrame() {
   const [logoStack, setLogoStack] = useState(52);
   const [topSlot, setTopSlot] = useState(0);
   const now = useLocalClock();
-  const stages = useWorkflowStages();
   const edge = openEdge;
   const signedInName = lims?.username ?? "M. Chen";
   const railInitials =
@@ -1029,7 +1026,7 @@ function AppFrame() {
           }}
         >
           <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
-          <SequenceStageMark stages={stages.length ? stages : DEFAULT_WORKFLOW_STAGES} />
+          <span className="sequence-stage-mark" aria-hidden="true"><img src="/sequence-q.png" alt="" /></span>
         </button>
         {edge === "top" ? <div className="lims-topbar-site">{labEnvironment}</div> : null}
         </div>
