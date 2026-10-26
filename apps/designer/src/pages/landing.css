@@ -4855,10 +4855,25 @@ img.lp-logo-sequence {
 }
 
 .lp-rigor {
+  box-sizing: border-box;
+  width: 100cqi;
+  max-width: 100cqi;
+  margin-left: calc(50% - 50cqi);
+  margin-right: calc(50% - 50cqi);
   background: #7a1c2b;
   color: #fff;
   padding-top: 2.6rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 0;
+  scroll-margin-top: 5.25rem;
+}
+
+.lp-rigor .lp-compliance.lp-section {
+  background: transparent;
+  border-top: 0;
+  padding-top: 1.1rem;
+  padding-bottom: 2.6rem;
+  padding-left: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
+  padding-right: max(var(--lp-gutter), calc((100% - var(--lp-measure)) / 2 + var(--lp-gutter)));
 }
 
 .lp-rigor-heading {
@@ -4871,28 +4886,6 @@ img.lp-logo-sequence {
   letter-spacing: -0.04em;
   line-height: 1.15;
   text-align: center;
-}
-
-.lp-rigor .lp-friction-copy h2,
-.lp-rigor .lp-friction-copy p,
-.lp-rigor .lp-friction-points li {
-  color: #fff;
-}
-
-.lp-rigor .lp-friction-mark {
-  color: #ffc1cb;
-}
-
-.lp-rigor .lp-friction-cta {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.78);
-  color: #fff;
-}
-
-.lp-rigor .lp-friction-cta:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: #fff;
-  color: #fff;
 }
 
 .lp-solve-banner {

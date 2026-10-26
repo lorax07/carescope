@@ -340,17 +340,12 @@ function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
 }
 
 function WhatWeSolve() {
-  const [cost, ...rest] = TOPICS;
   return (
     <section id="less-friction" aria-labelledby="what-we-solve-heading">
       <div className="lp-section-head lp-solve-banner">
         <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
       </div>
-      <section className="lp-rigor" aria-labelledby="rigor-heading">
-        <h2 id="rigor-heading" className="lp-rigor-heading">Build with regulatory rigor in mind</h2>
-        <TopicBlock topic={cost} flipped />
-      </section>
-      {rest.map((topic) => (
+      {TOPICS.map((topic) => (
         <TopicBlock key={topic.id} topic={topic} flipped={TOPICS.indexOf(topic) % 2 === 0} />
       ))}
     </section>
@@ -767,7 +762,9 @@ function ComplianceSection() {
   }, [cursor, matchIndex, searching, reducedMotion]);
 
   return (
-    <section className="lp-section lp-compliance" id="compliance" aria-labelledby="compliance-heading">
+    <section className="lp-rigor" id="compliance" aria-labelledby="rigor-heading">
+      <h2 id="rigor-heading" className="lp-rigor-heading">Build with regulatory rigor in mind</h2>
+      <div className="lp-section lp-compliance">
       <div className="lp-compliance-stage">
         <img
           className="lp-compliance-photo"
@@ -825,6 +822,7 @@ function ComplianceSection() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </section>
   );
