@@ -107,33 +107,23 @@ const TOPICS: Topic[] = [
 
 const OPERATIONS_PAIRS = [
   {
-    issueTitle: "Work is scattered.",
     issue: "Samples live across spreadsheets and inboxes.",
-    solutionTitle: "One connected queue.",
     solution: "Samples move through one workflow.",
   },
   {
-    issueTitle: "Details are disconnected.",
     issue: "Priority, holds, and location live elsewhere.",
-    solutionTitle: "Everything stays together.",
     solution: "Key sample details are visible in one place.",
   },
   {
-    issueTitle: "Testing is hard to see.",
     issue: "Run status often lives at the bench.",
-    solutionTitle: "Testing is visible.",
     solution: "See runs, instruments, steps, and samples.",
   },
   {
-    issueTitle: "Review is a separate step.",
     issue: "Release evidence gets assembled later.",
-    solutionTitle: "Review is built in.",
     solution: "Review and release from the workflow.",
   },
   {
-    issueTitle: "Compliance is fragmented.",
     issue: "Quality records live in separate places.",
-    solutionTitle: "Compliance stays connected.",
     solution: "Keep records and audit history together.",
   },
 ] as const;
@@ -167,13 +157,10 @@ const INTEGRATION_PAIRS = [
 
 function CompareLists({
   pairs,
+  colored = false,
 }: {
-  pairs: readonly {
-    issue: string;
-    solution: string;
-    issueTitle?: string;
-    solutionTitle?: string;
-  }[];
+  pairs: readonly { issue: string; solution: string }[];
+  colored?: boolean;
 }) {
   return (
     <div className="lp-native-comparison lp-native-lists lp-native-pairs is-supplied">
@@ -188,16 +175,10 @@ function CompareLists({
       {pairs.map((pair) => (
         <div className="lp-native-pair" key={pair.issue}>
           <article>
-            <div>
-              {pair.issueTitle ? <strong className="lp-native-pair-title">{pair.issueTitle}</strong> : null}
-              <p className={pair.issueTitle ? undefined : "lp-native-pair-title"}>{pair.issue}</p>
-            </div>
+            <p className={colored ? "lp-native-pair-title" : undefined}>{pair.issue}</p>
           </article>
           <article className="is-sequence">
-            <div>
-              {pair.solutionTitle ? <strong className="lp-native-pair-title">{pair.solutionTitle}</strong> : null}
-              <p className={pair.solutionTitle ? undefined : "lp-native-pair-title"}>{pair.solution}</p>
-            </div>
+            <p className={colored ? "lp-native-pair-title" : undefined}>{pair.solution}</p>
           </article>
         </div>
       ))}
@@ -276,7 +257,7 @@ function CostInfographic() {
 function TopicInfographic({ id }: { id: Topic["id"] }) {
   if (id === "cost") return <CostInfographic />;
   if (id === "operations") return <CompareLists pairs={OPERATIONS_PAIRS} />;
-  return <CompareLists pairs={INTEGRATION_PAIRS} />;
+  return <CompareLists pairs={INTEGRATION_PAIRS} colored />;
 }
 
 function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
