@@ -12,7 +12,7 @@ import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
 import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
 import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
-import { MODULE_CARD_COLOR, ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
+import { ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
@@ -409,10 +409,6 @@ function ShellNav({
     return `lims-nav-item${hasChildren ? " is-core-parent" : ""}${isActive ? " active" : ""}${moduleActive(slug) ? " is-module-active" : ""}`;
   }
 
-  function parentStyle(slug: ModuleSlug | null): CSSProperties | undefined {
-    return slug ? ({ "--module-color": MODULE_CARD_COLOR[slug] } as CSSProperties) : undefined;
-  }
-
   return (
     <>
       {overviewLink ? (
@@ -425,7 +421,6 @@ function ShellNav({
               aria-label={compact ? overviewLink.label : undefined}
               onClick={() => sectionTabs.showSection(overviewLink.view)}
               className={({ isActive }) => parentClass("operations", true, isActive)}
-              style={parentStyle("operations")}
             >
               <span className="lims-nav-icon">
                 <ParentMark slug="operations" fallback="overview" />
@@ -515,7 +510,6 @@ function ShellNav({
                 end={hasChildren}
                 onClick={() => sectionTabs.showSection(section)}
                 className={({ isActive }) => parentClass(slug, hasChildren, isActive)}
-                style={parentStyle(slug)}
               >
                 <span className="lims-nav-icon">
                   <ParentMark slug={slug} fallback={section} />

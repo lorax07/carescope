@@ -437,6 +437,17 @@ a {
   color: #6d5efc;
 }
 
+.lims-icon-rail .lims-nav-item.is-module-active .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-parent.active .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-module-active:hover .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-parent.active:hover .lims-nav-icon {
+  border-color: #6d5efc;
+  background: #6d5efc;
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+
 .lims-rail-user {
   display: grid;
   place-items: center;
@@ -874,14 +885,39 @@ a {
   transform: rotate(0deg);
 }
 
+.lims-nav-item.is-module-active,
+.lims-nav-item.is-core-parent.active {
+  color: #6d5efc;
+}
+
 .lims-nav-item.is-module-active .lims-nav-icon,
 .lims-nav-item.is-module-active.active .lims-nav-icon,
+.lims-nav-item.is-core-parent.active .lims-nav-icon,
 .lims-icon-rail .lims-nav-item.is-module-active .lims-nav-icon,
 .lims-icon-rail .lims-nav-item.is-module-active.active .lims-nav-icon,
-.lims-icon-rail .lims-nav-item.is-module-active:hover .lims-nav-icon {
-  background: var(--module-color);
-  border-color: color-mix(in srgb, var(--module-color) 62%, #1c1e22);
-  color: #1c1e22;
+.lims-icon-rail .lims-nav-item.is-core-parent.active .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-module-active:hover .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-parent.active:hover .lims-nav-icon {
+  background: #6d5efc;
+  border-color: #6d5efc;
+  color: #fff;
+  box-shadow: none;
+}
+
+.lims-nav-item.is-core-child.active {
+  color: #6d5efc;
+}
+
+.lims-sidebar .lims-nav-item.is-core-child.active {
+  background: #f4f1ff;
+}
+
+.lims-nav-item.is-core-child.active .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-child.active .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-child.active:hover .lims-nav-icon {
+  background: #ddd6fe;
+  border-color: #c4b8ff;
+  color: #6d5efc;
   box-shadow: none;
 }
 
@@ -942,9 +978,19 @@ a {
 }
 
 .lims-icon-rail .lims-nav-item.is-module-active:hover .lims-nav-icon,
-.lims-sidebar .lims-nav-item.is-module-active:hover .lims-nav-icon {
-  background: var(--module-color);
-  color: #1c1e22;
+.lims-icon-rail .lims-nav-item.is-core-parent.active:hover .lims-nav-icon,
+.lims-sidebar .lims-nav-item.is-module-active:hover .lims-nav-icon,
+.lims-sidebar .lims-nav-item.is-core-parent.active:hover .lims-nav-icon {
+  background: #6d5efc;
+  border-color: #6d5efc;
+  color: #fff;
+}
+
+.lims-sidebar .lims-nav-item.is-core-child.active:hover .lims-nav-icon,
+.lims-icon-rail .lims-nav-item.is-core-child.active:hover .lims-nav-icon {
+  background: #ddd6fe;
+  border-color: #c4b8ff;
+  color: #6d5efc;
 }
 
 .lims-nav-dock.is-top .lims-nav-group,
