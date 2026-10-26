@@ -204,9 +204,9 @@ const CHANGE_COSTS = [
     who: "Estimated cost of a change",
     tone: "is-sequence",
     rows: [
-      { label: "Estimated cost range for a small lab", value: "$1K–$4K", low: 640, high: 3600 },
-      { label: "Estimated cost range for a medium lab", value: "$2K–$11K", low: 1600, high: 10800 },
-      { label: "Estimated cost range for a major lab with multiple sites", value: "$3K–$18K", low: 3200, high: 18000 },
+      { label: "Estimated cost range for a small lab", value: "$5K–$18K", low: 5000, high: 18000 },
+      { label: "Estimated cost range for a medium lab", value: "$5K–$50K", low: 5000, high: 50000 },
+      { label: "Estimated cost range for a major lab with multiple sites", value: "$75K–$300K", low: 75000, high: 300000 },
     ],
   },
 ] as const;
@@ -245,7 +245,7 @@ function CostInfographic() {
         <a href="https://sabineindustrial.com/research/what-a-lims-really-costs/" target="_blank" rel="noreferrer">
           Sabine Industrial, What a LIMS Really Costs (2026)
         </a>
-        , not the implementation line. Small: a $6,200 change-order allowance and $30,600 in instrument interfaces. Medium: a $20,000 report amendment through a $132,200 version upgrade. Major, several sites: $196,800 in interfaces and integrations through a $654,400 upgrade. Bars share that $654,400 scale. Sequence has not published a change price by lab size. The estimates price a configuration, not an implementation, at the study’s $40 to $90 an hour contract rate: about 16 to 40 hours for a small lab, 40 to 120 hours for a medium lab, and 80 to 200 hours for a major lab, rounded to the ranges shown. Those hour counts are an estimate.
+        , not the implementation line. Small: a $6,200 change-order allowance and $30,600 in instrument interfaces. Medium: a $20,000 report amendment through a $132,200 version upgrade. Major, several sites: $196,800 in interfaces and integrations through a $654,400 upgrade. Bars share that $654,400 scale. Sequence has not published a change price by lab size. The ranges shown are estimates for a change: $5,000 to $18,000 for a small lab, $5,000 to $50,000 for a medium lab, and $75,000 to $300,000 for a major lab with multiple sites.
       </p>
     </div>
   );
