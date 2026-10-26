@@ -83,7 +83,7 @@ const TOPICS: Topic[] = [
     id: "cost",
     label: "Make changes at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
-    visual: "Published cost of one custom LIMS change beside Sequence’s published menu",
+    visual: "Cost of a change for a small, medium, and major multi-site lab, Traditional LIMS beside Sequence",
     points: ["Make changes in hours, not weeks.", "No complex integrations required."],
     icon: "↯",
   },
@@ -186,35 +186,27 @@ function CompareLists({
   );
 }
 
-const CHANGE_SCALE = 74394;
+const CHANGE_SCALE = 654400;
 
 const CHANGE_COSTS = [
   {
     name: "Traditional LIMS",
-    who: "One custom change",
-    range: "$950–$74K",
-    low: 950,
-    high: 74394,
+    who: "Cost of a change",
     tone: "is-traditional",
-    note: "Cost of a custom change",
     rows: [
-      ["Instrument interface", "$950–$3,825"],
-      ["Report amendment", "$20,000"],
-      ["Results interface", "$74,394"],
+      { label: "Cost range for a small lab", value: "$6.2K–$31K", low: 6200, high: 30600 },
+      { label: "Cost range for a medium lab", value: "$20K–$132K", low: 20000, high: 132200 },
+      { label: "Cost range for a major lab with multiple sites", value: "$197K–$654K", low: 196800, high: 654400 },
     ],
   },
   {
     name: "Sequence",
-    who: "Published one-time menu",
-    range: "$5K–$21K",
-    low: 5000,
-    high: 21000,
+    who: "Estimated cost of a change",
     tone: "is-sequence",
-    note: "Published menu",
     rows: [
-      ["Database transfer", "$8,000"],
-      ["Core installation", "$5,000"],
-      ["Validation deliverables", "$8,000"],
+      { label: "Estimated cost range for a small lab", value: "$1K–$4K", low: 640, high: 3600 },
+      { label: "Estimated cost range for a medium lab", value: "$2K–$11K", low: 1600, high: 10800 },
+      { label: "Estimated cost range for a major lab with multiple sites", value: "$3K–$18K", low: 3200, high: 18000 },
     ],
   },
 ] as const;
@@ -226,29 +218,34 @@ function CostInfographic() {
         <article className={`lp-cost-side ${side.tone}`} key={side.name}>
           <h3>{side.name}</h3>
           <p className="lp-cost-who">{side.who}</p>
-          <div className="lp-native-total">
-            <strong>{side.range}</strong>
-            <small>{side.note}</small>
-          </div>
-          <div className="lp-cost-range" role="img" aria-label={`${side.name}, ${side.who}, ${side.range}`}>
-            <i style={{ left: `${(side.low / CHANGE_SCALE) * 100}%`, width: `${((side.high - side.low) / CHANGE_SCALE) * 100}%` }} />
-          </div>
           <ul className="lp-cost-lines">
-            {side.rows.map(([label, value]) => (
-              <li key={label}>
-                <b>{label}</b>
-                <span>{value}</span>
+            {side.rows.map((row) => (
+              <li key={row.label}>
+                <b>{row.label}</b>
+                <span>{row.value}</span>
+                <div
+                  className="lp-cost-range"
+                  role="img"
+                  aria-label={`${side.name}, ${row.label}, ${row.value}`}
+                >
+                  <i
+                    style={{
+                      left: `${(row.low / CHANGE_SCALE) * 100}%`,
+                      width: `${Math.max(((row.high - row.low) / CHANGE_SCALE) * 100, 1.5)}%`,
+                    }}
+                  />
+                </div>
               </li>
             ))}
           </ul>
         </article>
       ))}
       <p className="lp-cost-sources">
-        The Traditional LIMS range is the cost of one custom change in{" "}
+        Traditional LIMS ranges are change lines in{" "}
         <a href="https://sabineindustrial.com/research/what-a-lims-really-costs/" target="_blank" rel="noreferrer">
           Sabine Industrial, What a LIMS Really Costs (2026)
         </a>
-        : instrument interfaces $950 to $3,825, one report amendment $20,000, and one results interface $74,394. These are public contract figures, not an average. Both bars use that $74,394 scale. Sequence’s published menu is Database Transfer $8,000, Core System Installation $5,000, and Validation Deliverables $8,000, taken separately or together ($5,000 to $21,000). That menu is not a figure from the study.
+        , not the implementation line. Small: a $6,200 change-order allowance and $30,600 in instrument interfaces. Medium: a $20,000 report amendment through a $132,200 version upgrade. Major, several sites: $196,800 in interfaces and integrations through a $654,400 upgrade. Bars share that $654,400 scale. Sequence has not published a change price by lab size. The estimates price a configuration, not an implementation, at the study’s $40 to $90 an hour contract rate: about 16 to 40 hours for a small lab, 40 to 120 hours for a medium lab, and 80 to 200 hours for a major lab. Those hour counts are an estimate.
       </p>
     </div>
   );
