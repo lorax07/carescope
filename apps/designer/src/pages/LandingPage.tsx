@@ -257,14 +257,12 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
   return <CompareLists pairs={INTEGRATION_PAIRS} colored />;
 }
 
-function TopicBlock({ topic, flipped, showHeading }: { topic: Topic; flipped: boolean; showHeading?: boolean }) {
+function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
   return (
     <section className={`lp-friction is-${topic.id}${flipped ? " is-flip" : ""}`} aria-labelledby={`friction-${topic.id}`}>
-      {showHeading ? (
-        <div className="lp-section-head lp-solve-banner">
-          <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
-        </div>
-      ) : null}
+      <div className="lp-section-head lp-solve-banner lp-solve-reserve" aria-hidden="true">
+        <h2 className="lp-display-head">What we solve</h2>
+      </div>
       <div className="lp-friction-inner">
         <figure className="lp-friction-visual">
           <div className="lp-friction-screen">
@@ -302,8 +300,11 @@ function TopicBlock({ topic, flipped, showHeading }: { topic: Topic; flipped: bo
 function WhatWeSolve() {
   return (
     <section id="less-friction" aria-labelledby="what-we-solve-heading">
+      <div className="lp-section-head lp-solve-banner lp-solve-pin">
+        <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
+      </div>
       {TOPICS.map((topic, index) => (
-        <TopicBlock key={topic.id} topic={topic} flipped={index % 2 === 0} showHeading={index === 0} />
+        <TopicBlock key={topic.id} topic={topic} flipped={index % 2 === 0} />
       ))}
     </section>
   );
