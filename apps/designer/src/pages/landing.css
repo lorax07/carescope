@@ -4928,7 +4928,7 @@ img.lp-logo-sequence {
   gap: 0.85rem;
   align-items: center;
   margin: 0;
-  padding: calc(2.2rem + 15px) 0 1.4rem;
+  padding: calc(2.2rem + 20px) 0 1.4rem;
   list-style: none;
 }
 
@@ -5491,8 +5491,10 @@ img.lp-logo-sequence {
   max-width: 100cqi;
   margin-left: calc(50% - 50cqi);
   margin-right: calc(50% - 50cqi);
-  background: #3b2463;
-  color: #fff;
+  background-color: #fff;
+  background-image: radial-gradient(circle, rgba(22, 24, 29, 0.32) 0.7px, transparent 0.85px);
+  background-size: 11px 11px;
+  color: #16181d;
   padding-top: 2.6rem;
   padding-bottom: 0;
   scroll-margin-top: 5.25rem;
@@ -5510,7 +5512,7 @@ img.lp-logo-sequence {
 .lp-rigor-heading {
   margin: 0;
   padding-bottom: 0.35rem;
-  color: #fff;
+  color: #16181d;
   font-family: Inter, "Sora", sans-serif;
   font-size: clamp(1.7rem, 3vw, 2.45rem);
   font-weight: 400;
@@ -5561,7 +5563,7 @@ img.lp-logo-sequence {
   max-width: none;
   height: auto;
   margin: 0;
-  padding: 0 0 0.85rem;
+  padding: 0 0 0.425rem;
   background: #f6f5f4;
   text-align: center;
   pointer-events: none;
@@ -5620,6 +5622,21 @@ img.lp-logo-sequence {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+.lp-solve-slides > .lp-friction.is-cost {
+  justify-content: flex-start;
+}
+
+.lp-solve-slides > .lp-friction.is-cost::before,
+.lp-solve-slides > .lp-friction.is-cost::after {
+  content: "";
+  flex: 1 0 0;
+  min-height: 0;
+}
+
+.lp-solve-slides > .lp-friction.is-cost::after {
+  flex-grow: 3;
 }
 
 .lp-friction.is-cost .lp-friction-visual {
@@ -5698,6 +5715,12 @@ img.lp-logo-sequence {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+  }
+
+  .lp-solve-slides > .lp-friction.is-cost::before,
+  .lp-solve-slides > .lp-friction.is-cost::after {
+    content: none;
+    display: none;
   }
 }
 
@@ -6011,6 +6034,12 @@ img.lp-logo-sequence {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+  }
+
+  .lp-solve-slides > .lp-friction.is-cost::before,
+  .lp-solve-slides > .lp-friction.is-cost::after {
+    content: none;
+    display: none;
   }
 
   .lp-solve-stage > .lp-solve-pin {
