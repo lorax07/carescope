@@ -91,7 +91,7 @@ type Topic = {
 const TOPICS: Topic[] = [
   {
     id: "cost",
-    label: "Make changes at a lower cost",
+    label: "Make changes faster and at a lower cost",
     description: "Traditional LIMS changes turn into large, time consuming projects with multiple teams and high cost. Sequence does not require complex integrations which immediately allows laboratories to build meaningful changes at a lower cost.",
     visual: "Cost of a change for a small, medium, and major multi-site lab, Traditional LIMS beside Sequence",
     points: ["Make changes in weeks, not months.", "No complex integrations required."],
