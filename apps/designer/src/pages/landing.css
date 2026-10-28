@@ -5551,11 +5551,11 @@ img.lp-logo-sequence {
   height: 100dvh;
   box-sizing: border-box;
   padding-top: 5.4rem;
-  overflow: hidden;
+  overflow: visible;
   background: #f6f5f4;
 }
 
-.lp-solve-stage > .lp-solve-pin {
+.lp-page .lp-solve-stage > .lp-section-head.lp-solve-pin {
   position: relative;
   z-index: 2;
   justify-self: center;
@@ -5564,7 +5564,7 @@ img.lp-logo-sequence {
   height: auto;
   margin: 0;
   padding: 0 0 0.425rem;
-  background: #f6f5f4;
+  background: transparent;
   text-align: center;
   pointer-events: none;
 }
