@@ -5524,8 +5524,7 @@ img.lp-logo-sequence {
   padding-bottom: 0.85rem;
 }
 
-.lp-page #what-we-solve-heading.lp-display-head,
-.lp-solve-reserve .lp-display-head {
+.lp-page #what-we-solve-heading.lp-display-head {
   width: max-content;
   max-width: 100%;
   margin-bottom: 0;
@@ -5533,12 +5532,38 @@ img.lp-logo-sequence {
   white-space: nowrap;
 }
 
-#less-friction {
-  width: 100cqi;
-  max-width: 100cqi;
-  margin-left: calc(50% - 50cqi);
-  margin-right: calc(50% - 50cqi);
+#less-friction.lp-solve-scroll {
+  height: 300dvh;
+  padding-bottom: 0;
   background: #f6f5f4;
+}
+
+.lp-solve-stage {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  box-sizing: border-box;
+  padding-top: 5.4rem;
+  overflow: hidden;
+  background: #f6f5f4;
+}
+
+.lp-solve-stage > .lp-solve-pin {
+  position: relative;
+  z-index: 2;
+  height: auto;
+  margin: -5px 0 0;
+  padding: 0 0 0.85rem;
+  background: #f6f5f4;
+  pointer-events: none;
+}
+
+.lp-solve-slides {
+  position: relative;
+  min-height: 0;
 }
 
 .lp-friction {
@@ -5568,22 +5593,27 @@ img.lp-logo-sequence {
   padding-left: 0;
 }
 
-#less-friction > .lp-solve-pin {
-  position: sticky;
-  top: calc(50dvh - 193px);
-  z-index: 5;
-  height: 0;
-  margin: 0;
-  padding: 0;
+.lp-solve-slides > .lp-friction,
+.lp-solve-slides > .lp-friction.is-cost,
+.lp-solve-slides > .lp-friction.is-operations,
+.lp-solve-slides > .lp-friction.is-integration {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  height: auto;
+  min-height: 0;
+  padding-top: 0.2rem;
+  padding-bottom: 1.2rem;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
-#less-friction > .lp-solve-pin .lp-display-head {
-  transform: translateY(-5px);
-}
-
-.lp-solve-reserve {
-  visibility: hidden;
+.lp-solve-slides > .lp-friction.is-active {
+  z-index: 1;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .lp-friction.is-cost .lp-friction-visual {
@@ -5638,6 +5668,30 @@ img.lp-logo-sequence {
     position: relative;
     top: auto;
     min-height: 0;
+  }
+
+  #less-friction.lp-solve-scroll {
+    height: auto;
+  }
+
+  .lp-solve-stage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    display: block;
+  }
+
+  .lp-solve-slides > .lp-friction,
+  .lp-solve-slides > .lp-friction.is-cost,
+  .lp-solve-slides > .lp-friction.is-operations,
+  .lp-solve-slides > .lp-friction.is-integration {
+    position: relative;
+    inset: auto;
+    height: auto;
+    min-height: 0;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 }
 
@@ -5890,19 +5944,32 @@ img.lp-logo-sequence {
     z-index: auto;
   }
 
-  #less-friction > .lp-solve-pin {
-    top: 4.6rem;
+  #less-friction.lp-solve-scroll {
     height: auto;
-    padding-bottom: 0.4rem;
-    background: #f6f5f4;
   }
 
-  #less-friction > .lp-solve-pin .lp-display-head {
-    transform: none;
+  .lp-solve-stage {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    display: block;
   }
 
-  .lp-solve-reserve {
-    display: none;
+  .lp-solve-slides > .lp-friction,
+  .lp-solve-slides > .lp-friction.is-cost,
+  .lp-solve-slides > .lp-friction.is-operations,
+  .lp-solve-slides > .lp-friction.is-integration {
+    position: relative;
+    inset: auto;
+    height: auto;
+    min-height: 100dvh;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .lp-solve-stage > .lp-solve-pin {
+    margin-top: 0;
   }
 
   .lp-why-stats article,
