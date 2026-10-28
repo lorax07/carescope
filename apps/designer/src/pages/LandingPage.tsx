@@ -591,7 +591,7 @@ function FounderQuote() {
             <span className="lp-founder-thumb" aria-hidden="true">LA</span>
             <span>Loris Azo, CEO, Carescope</span>
           </p>
-          <blockquote>
+          <blockquote className={reveal >= FOUNDER_LINES.length - 1 ? "is-closed" : undefined}>
             <h2 id="founder-quote-heading" className="lp-sr">From the founder</h2>
             {FOUNDER_LINES.map((line, index) => (
               <p key={index} className={`lp-founder-line${reveal >= index ? " is-on" : ""}`} aria-hidden={staged && reveal < index}>
