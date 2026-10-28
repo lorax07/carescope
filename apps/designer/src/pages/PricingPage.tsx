@@ -1,53 +1,19 @@
+import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { BuildPlanDialog } from "./BuildPlanDialog";
 import { MARKETING_MODULES } from "./marketingModules";
+import { CORE_PLANS, IMPLEMENTATION, SUPPORT, modulePriceLabel } from "./pricingQuote";
 import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
-const CORE_PLANS = [
-  { plan: "Starter", volume: "Under 10K", price: "1st year free, then $15K / year" },
-  { plan: "Essential", volume: "10K–25K", price: "$50K / year" },
-  { plan: "Professional", volume: "25K–50K", price: "$100K / year" },
-  { plan: "Growth", volume: "50K–100K", price: "$200K / year" },
-  { plan: "Scale", volume: "100K–250K", price: "$400K / year" },
-  { plan: "Advanced", volume: "250K–500K", price: "$800K / year" },
-  { plan: "Premier", volume: "500K–1M", price: "$1.6M / year" },
-  { plan: "Enterprise", volume: "1M+", price: "Custom" },
-] as const;
-
-const MODULE_PRICES: Record<string, string> = {
-  operations: "Included",
-  instruments: "+$1,500/mo",
-  compliance: "+$1,500/mo",
-  client: "+$1,000/mo",
-  revenue: "+$2,500/mo",
-  insights: "+$1,000/mo",
-};
-
-const IMPLEMENTATION = [
-  { name: "Database Transfer", price: "+$8,000" },
-  { name: "Core System Installation", price: "+$5,000" },
-  { name: "Validation Deliverables", price: "+$8,000" },
-] as const;
-
-const SUPPORT = [
-  {
-    name: "Standard",
-    price: "Included",
-    detail: "Monday to Friday, business hours, by email. A reply within one business day for the modules you subscribe to.",
-  },
-  {
-    name: "Priority",
-    price: "15% of the annual plan",
-    detail: "Phone and email during business hours. Critical issues are answered within 4 hours.",
-  },
-  {
-    name: "Premium",
-    price: "22% of the annual plan",
-    detail: "Critical issues are covered 24×7, with a reply within 1 hour, a named contact, and a quarterly review.",
-  },
-] as const;
-
 export function PricingPage() {
+  const [planOpen, setPlanOpen] = useState(false);
+  const openPlanRef = useRef<HTMLButtonElement>(null);
+  const closePlan = useCallback(() => {
+    setPlanOpen(false);
+    requestAnimationFrame(() => openPlanRef.current?.focus());
+  }, []);
+
   return (
     <div className="lp-page lp-pricing">
       <SiteHeader />
@@ -77,10 +43,10 @@ export function PricingPage() {
               </thead>
               <tbody>
                 {CORE_PLANS.map((row) => (
-                  <tr key={row.volume}>
+                  <tr key={row.id}>
                     <th scope="row">{row.plan}</th>
                     <td>{row.volume}</td>
-                    <td>{row.price}</td>
+                    <td>{row.priceLabel}</td>
                   </tr>
                 ))}
               </tbody>
@@ -101,7 +67,7 @@ export function PricingPage() {
                     {module.icon}
                   </span>
                   <strong>{module.title}</strong>
-                  <span className="lp-price-figure">{MODULE_PRICES[module.slug]}</span>
+                  <span className="lp-price-figure">{modulePriceLabel(module.slug)}</span>
                 </Link>
               </li>
             ))}
@@ -115,9 +81,9 @@ export function PricingPage() {
           </div>
           <ul className="lp-price-fees">
             {IMPLEMENTATION.map((item) => (
-              <li key={item.name}>
+              <li key={item.id}>
                 <h3>{item.name}</h3>
-                <strong>{item.price}</strong>
+                <strong>{item.priceLabel}</strong>
                 <span>One time</span>
               </li>
             ))}
@@ -135,9 +101,9 @@ export function PricingPage() {
           </div>
           <ul className="lp-price-support">
             {SUPPORT.map((tier) => (
-              <li key={tier.name}>
+              <li key={tier.id}>
                 <h3>{tier.name}</h3>
-                <strong>{tier.price}</strong>
+                <strong>{tier.priceLabel}</strong>
                 <p>{tier.detail}</p>
               </li>
             ))}
@@ -146,11 +112,12 @@ export function PricingPage() {
 
         <section className="lp-price-close">
           <h2>Match a plan to your laboratory</h2>
-          <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-            Try free for 30 days
-          </Link>
+          <button type="button" className="lp-pill lp-pill-dark" ref={openPlanRef} onClick={() => setPlanOpen(true)}>
+            Build your plan
+          </button>
         </section>
       </main>
+      {planOpen ? <BuildPlanDialog onClose={closePlan} /> : null}
 
       <footer className="lp-footer">
         <div className="lp-footer-inner lp-section-wide">
