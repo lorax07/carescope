@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
@@ -257,7 +257,22 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
   return <CompareLists pairs={INTEGRATION_PAIRS} colored />;
 }
 
-function TopicBlock({ topic, flipped, active }: { topic: Topic; flipped: boolean; active: boolean }) {
+function TopicBlock({
+  topic,
+  flipped,
+  active,
+  reveal,
+  staged,
+}: {
+  topic: Topic;
+  flipped: boolean;
+  active: boolean;
+  reveal: number;
+  staged: boolean;
+}) {
+  const showCopy = !staged || (active && reveal >= 1);
+  const showPoints = !staged || (active && reveal >= 2);
+  const showCta = !staged || (active && reveal >= 3);
   return (
     <section className={`lp-friction is-${topic.id}${flipped ? " is-flip" : ""}${active ? " is-active" : ""}`} aria-labelledby={`friction-${topic.id}`}>
       <div className="lp-friction-inner">
@@ -269,48 +284,64 @@ function TopicBlock({ topic, flipped, active }: { topic: Topic; flipped: boolean
         </figure>
         <div className="lp-friction-copy">
           <h2 id={`friction-${topic.id}`}>{topic.label}</h2>
-          <p>{topic.description}</p>
-          <ul className="lp-friction-points">
-            {topic.points.map((point) => (
-              <li key={point}>
-                <span className="lp-friction-mark" aria-hidden="true">
-                  <svg viewBox="0 0 16 16" width="15" height="15">
-                    <path
-                      fill="currentColor"
-                      d="M8 1.15 9.05 5.1h4.15L10.05 7.5l1.1 3.95L8 9.05 4.85 11.45 5.95 7.5 2.8 5.1h4.15L8 1.15z"
-                    />
-                  </svg>
-                </span>
-                {point}
-              </li>
-            ))}
-          </ul>
-          <Link to="/app?signup=1" className="lp-friction-cta">
-            Try free for 30 days
-          </Link>
+          <div className={`lp-reveal${showCopy ? " is-open" : ""}`} aria-hidden={!showCopy}>
+            <p>{topic.description}</p>
+          </div>
+          <div className={`lp-reveal${showPoints ? " is-open" : ""}`} aria-hidden={!showPoints}>
+            <ul className="lp-friction-points">
+              {topic.points.map((point) => (
+                <li key={point}>
+                  <span className="lp-friction-mark" aria-hidden="true">
+                    <svg viewBox="0 0 16 16" width="15" height="15">
+                      <path
+                        fill="currentColor"
+                        d="M8 1.15 9.05 5.1h4.15L10.05 7.5l1.1 3.95L8 9.05 4.85 11.45 5.95 7.5 2.8 5.1h4.15L8 1.15z"
+                      />
+                    </svg>
+                  </span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className={`lp-reveal${showCta ? " is-open" : ""}`} aria-hidden={!showCta}>
+            <Link to="/app?signup=1" className="lp-friction-cta" tabIndex={showCta ? undefined : -1}>
+              Try free for 30 days
+            </Link>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+function prefersStackedSolve() {
+  return window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches;
+}
+
 function WhatWeSolve() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [active, setActive] = useState(0);
+  const [staged, setStaged] = useState(() => (typeof window === "undefined" ? false : !prefersStackedSolve()));
+  const [beat, setBeat] = useState({ topic: 0, reveal: 0 });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const update = () => {
       const stacked = window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches;
       if (stacked) {
-        setActive(0);
+        setStaged(false);
+        setBeat((prev) => (prev.topic === 0 && prev.reveal === 0 ? prev : { topic: 0, reveal: 0 }));
         return;
       }
       const scrollable = section.offsetHeight - window.innerHeight;
       const progress = scrollable <= 0 ? 0 : Math.min(1, Math.max(0, -section.getBoundingClientRect().top / scrollable));
-      setActive(Math.min(TOPICS.length - 1, Math.floor(progress * TOPICS.length)));
+      const scaled = Math.min(TOPICS.length - 1e-4, progress * TOPICS.length);
+      const topic = Math.floor(scaled);
+      const reveal = Math.min(3, Math.floor((scaled - topic) * 4));
+      setStaged(true);
+      setBeat((prev) => (prev.topic === topic && prev.reveal === reveal ? prev : { topic, reveal }));
     };
 
     update();
@@ -323,14 +354,21 @@ function WhatWeSolve() {
   }, []);
 
   return (
-    <section id="less-friction" ref={sectionRef} className="lp-solve-scroll" aria-labelledby="what-we-solve-heading">
+    <section id="less-friction" ref={sectionRef} className={`lp-solve-scroll${staged ? " is-staged" : ""}`} aria-labelledby="what-we-solve-heading">
       <div className="lp-solve-stage">
         <div className="lp-section-head lp-solve-banner lp-solve-pin">
           <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
         </div>
         <div className="lp-solve-slides">
           {TOPICS.map((topic, index) => (
-            <TopicBlock key={topic.id} topic={topic} flipped={index % 2 === 0} active={index === active} />
+            <TopicBlock
+              key={topic.id}
+              topic={topic}
+              flipped={index % 2 === 0}
+              active={index === beat.topic}
+              reveal={beat.reveal}
+              staged={staged}
+            />
           ))}
         </div>
       </div>
