@@ -1,10 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { BuildPlanDialog } from "./BuildPlanDialog";
 import { MARKETING_MODULES } from "./marketingModules";
 import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
 export function LandingPage() {
+  const [planOpen, setPlanOpen] = useState(false);
+  const openPlanRef = useRef<HTMLButtonElement>(null);
+  const closePlan = useCallback(() => {
+    setPlanOpen(false);
+    requestAnimationFrame(() => openPlanRef.current?.focus());
+  }, []);
+
   useEffect(() => {
     if (window.location.hash !== "#less-friction") return;
     const frame = window.requestAnimationFrame(() => {
@@ -32,9 +40,9 @@ export function LandingPage() {
             <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
               Try free for 30 days
             </Link>
-            <a href="#modules" className="lp-pill lp-pill-light">
-              Explore modules
-            </a>
+            <button type="button" className="lp-pill lp-pill-light" ref={openPlanRef} onClick={() => setPlanOpen(true)}>
+              Build your plan
+            </button>
           </div>
         </section>
 
@@ -66,6 +74,7 @@ export function LandingPage() {
         </div>
       </footer>
         </div>
+      {planOpen ? <BuildPlanDialog onClose={closePlan} /> : null}
     </div>
   );
 }
