@@ -576,18 +576,20 @@ function FounderQuote() {
       aria-labelledby="founder-quote-heading"
     >
       <div className="lp-founder-stage">
-        <blockquote>
-          <h2 id="founder-quote-heading" className="lp-sr">From the founder</h2>
-          <footer className="lp-founder-by">
-            <cite>Loris Azo</cite>
-            <span>Founder, CEO</span>
-          </footer>
-          {FOUNDER_LINES.map((line, index) => (
-            <p key={index} className={`lp-founder-line${reveal >= index ? " is-on" : ""}`} aria-hidden={staged && reveal < index}>
-              {line}
-            </p>
-          ))}
-        </blockquote>
+        <div className="lp-founder-panel">
+          <p className="lp-founder-by">
+            <span className="lp-founder-thumb" aria-hidden="true">LA</span>
+            <span>Loris Azo, CEO, Carescope</span>
+          </p>
+          <blockquote>
+            <h2 id="founder-quote-heading" className="lp-sr">From the founder</h2>
+            {FOUNDER_LINES.map((line, index) => (
+              <p key={index} className={`lp-founder-line${reveal >= index ? " is-on" : ""}`} aria-hidden={staged && reveal < index}>
+                {line}
+              </p>
+            ))}
+          </blockquote>
+        </div>
       </div>
     </section>
   );

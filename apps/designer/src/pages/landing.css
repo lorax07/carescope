@@ -4929,7 +4929,10 @@ img.lp-logo-sequence {
   height: 240dvh;
   margin-left: calc(50% - 50cqi);
   margin-right: calc(50% - 50cqi);
-  background: #f7fbfb;
+  background:
+    radial-gradient(ellipse 80% 55% at 12% 0%, rgba(190, 214, 255, 0.85), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(214, 228, 255, 0.9), transparent 52%),
+    linear-gradient(180deg, #f7f9fd 0%, #e7eef8 100%);
 }
 
 .lp-founder-stage {
@@ -4940,34 +4943,20 @@ img.lp-logo-sequence {
   height: 100dvh;
   box-sizing: border-box;
   padding: 6.2rem 1.5rem 3.2rem;
-  background: #f7fbfb;
+  background:
+    radial-gradient(ellipse 80% 55% at 12% 0%, rgba(190, 214, 255, 0.85), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(214, 228, 255, 0.9), transparent 52%),
+    linear-gradient(180deg, #f7f9fd 0%, #e7eef8 100%);
 }
 
-.lp-founder-stage::before,
-.lp-founder-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.lp-founder-stage::before {
-  background-image: radial-gradient(circle, rgba(186, 214, 212, 0.9) 0.55px, transparent 0.8px);
-  background-size: 16px 16px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.55) 40%, rgba(0, 0, 0, 0.2) 100%);
-}
-
-.lp-founder-stage::after {
-  background-image: radial-gradient(circle, #6aada8 1.35px, transparent 1.6px);
-  background-size: 7px 7px;
-  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.2) 22%, rgba(0, 0, 0, 0.75) 62%, #000 100%);
-}
-
-.lp-founder blockquote {
+.lp-founder-panel {
   position: relative;
   z-index: 1;
   max-width: 46rem;
+  text-align: center;
+}
+
+.lp-founder blockquote {
   margin: 0;
   text-align: center;
 }
@@ -4976,7 +4965,7 @@ img.lp-logo-sequence {
   content: "“";
   display: block;
   margin-bottom: 0.35rem;
-  color: #6aa8a3;
+  color: #5b7ec9;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 4.4rem;
   line-height: 0.7;
@@ -5034,24 +5023,30 @@ img.lp-logo-sequence {
 }
 
 .lp-founder-by {
-  margin: 0.15rem 0 1.15rem;
-}
-
-.lp-founder-by cite {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0 0 0.85rem;
   color: #1c2422;
   font-family: Inter, "Sora", sans-serif;
-  font-size: 1.15rem;
-  font-style: normal;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 650;
   letter-spacing: -0.03em;
 }
 
-.lp-founder-by span {
-  display: block;
-  margin-top: 0.2rem;
-  color: #5d6b68;
-  font-size: 0.98rem;
+.lp-founder-thumb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.15rem;
+  height: 3.15rem;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #8eb0f2 0%, #1d4e89 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
 @media (max-width: 900px) {
