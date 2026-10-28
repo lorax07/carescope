@@ -4849,6 +4849,11 @@ img.lp-logo-sequence {
   color: #fff;
 }
 
+.lp a.lp-pill-dark,
+.lp a.lp-pill-dark:hover {
+  color: #fff;
+}
+
 .lp-pill-light {
   background: rgba(255, 255, 255, 0.42);
   border: 1px solid #ddd8d2;
@@ -4858,6 +4863,11 @@ img.lp-logo-sequence {
 .lp-pill-light:hover {
   background: #fff;
   border-color: #cfc9c2;
+  color: #1c1e22;
+}
+
+.lp a.lp-pill-light,
+.lp a.lp-pill-light:hover {
   color: #1c1e22;
 }
 
