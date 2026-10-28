@@ -5039,6 +5039,7 @@ img.lp-logo-sequence {
 
 .lp-founder-line:first-of-type {
   margin-top: 0;
+  color: #c81d25;
 }
 
 .lp-founder-line:nth-of-type(3) {
@@ -5052,6 +5053,10 @@ img.lp-logo-sequence {
   width: auto;
   margin: 0 0.18em 0 0;
   vertical-align: -0.08em;
+}
+
+.lp-founder-logo.is-tight {
+  margin-right: 0.02em;
 }
 
 .lp-founder.is-staged .lp-founder-line {

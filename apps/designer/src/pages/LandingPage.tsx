@@ -538,14 +538,14 @@ function WhyChoose() {
   );
 }
 
-function SequenceWord() {
-  return <img className="lp-founder-logo" src="/sequence-logo.png" alt="Sequence" />;
+function SequenceWord({ tight = false }: { tight?: boolean }) {
+  return <img className={`lp-founder-logo${tight ? " is-tight" : ""}`} src="/sequence-logo.png" alt="Sequence" />;
 }
 
 const FOUNDER_LINES = [
   <>Many laboratory systems are too complex, forcing labs to rely on expensive consultants and disconnected tools.</>,
   <><SequenceWord /> was built as a result of that frustration.</>,
-  <><SequenceWord /> supports scientists, IT teams and operation by simplifying workflows, reducing integration complexity, and making changes faster.</>,
+  <>With <SequenceWord tight />, your scientists, IT teams and operation leaders can simplify workflows, reduce integration complexity, and make changes faster.</>,
 ];
 
 function FounderQuote() {
