@@ -578,15 +578,15 @@ function FounderQuote() {
       <div className="lp-founder-stage">
         <blockquote>
           <h2 id="founder-quote-heading" className="lp-sr">From the founder</h2>
+          <footer className="lp-founder-by">
+            <cite>Loris Azo</cite>
+            <span>Founder, CEO</span>
+          </footer>
           {FOUNDER_LINES.map((line, index) => (
             <p key={index} className={`lp-founder-line${reveal >= index ? " is-on" : ""}`} aria-hidden={staged && reveal < index}>
               {line}
             </p>
           ))}
-          <footer className="lp-founder-by">
-            <cite>Loris Azo</cite>
-            <span>Founder, CEO</span>
-          </footer>
         </blockquote>
       </div>
     </section>
