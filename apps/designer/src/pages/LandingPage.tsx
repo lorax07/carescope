@@ -52,8 +52,9 @@ export function LandingPage() {
       <FounderQuote />
       <WhatWeSolve />
       <PlatformBand />
-      <IndustrySpotlights />
       <ComplianceSection />
+      <ItFriendly />
+      <IndustrySpotlights />
 
       <p className="lp-brand-lockup">
         <img
@@ -763,6 +764,98 @@ function IndustryMark({ title }: { title: string }) {
     <svg {...common}>
       <path d="m12 3 1.4 4.2L18 8.5l-3.4 2.6L15.8 16 12 13.6 8.2 16l1.2-4.9L6 8.5l4.6-1.3L12 3Z" />
     </svg>
+  );
+}
+
+const IT_LINKS = [
+  { d: "M 166 68 L 267 168", begin: "0.6s" },
+  { d: "M 434 68 L 333 168", begin: "1.1s" },
+  { d: "M 166 332 L 267 232", begin: "1.5s" },
+  { d: "M 434 332 L 333 232", begin: "1.9s" },
+] as const;
+
+function ItInfrastructure({ motion }: { motion: boolean }) {
+  return (
+    <figure className="lp-it-stage">
+      <svg className="lp-it-diagram" viewBox="0 0 600 400" role="img" aria-label="Sequence connecting directory, storage, instruments, and network">
+        {IT_LINKS.map((link) => (
+          <path key={link.d} className="lp-it-link" d={link.d} pathLength={1} />
+        ))}
+        {motion
+          ? IT_LINKS.map((link) => (
+              <circle key={link.begin} className="lp-it-packet" r="3.4">
+                <animateMotion dur="2.8s" repeatCount="indefinite" begin={link.begin} path={link.d} />
+              </circle>
+            ))
+          : null}
+        {motion ? (
+          <circle className="lp-it-pulse" cx="300" cy="200" r="52" fill="none" stroke="#1b6ef3" strokeWidth="1.5">
+            <animate attributeName="r" values="52;78" dur="3.4s" repeatCount="indefinite" />
+            <animate attributeName="stroke-opacity" values="0.45;0" dur="3.4s" repeatCount="indefinite" />
+          </circle>
+        ) : (
+          <circle cx="300" cy="200" r="58" fill="none" stroke="#1b6ef3" strokeOpacity="0.28" strokeWidth="1.5" />
+        )}
+        <g className="lp-it-hub">
+          <circle cx="300" cy="200" r="46" />
+          <text x="300" y="204">Sequence</text>
+        </g>
+        <g className="lp-it-node">
+          <rect x="16" y="36" width="150" height="64" rx="16" />
+          <path d="M48 52a6 6 0 1 0 0.1 0M40 78c1.4-6 4.2-8 8-8s6.6 2 8 8" />
+          <text x="70" y="73">Directory</text>
+        </g>
+        <g className="lp-it-node">
+          <rect x="434" y="36" width="150" height="64" rx="16" />
+          <ellipse cx="462" cy="56" rx="8" ry="3.2" />
+          <path d="M454 56v12c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2V56M454 62c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2" />
+          <text x="482" y="73">Storage</text>
+        </g>
+        <g className="lp-it-node">
+          <rect x="16" y="300" width="150" height="64" rx="16" />
+          <path d="M40 332h4l2-6 3 12 2-6h5" />
+          <text x="70" y="337">Instruments</text>
+        </g>
+        <g className="lp-it-node">
+          <rect x="434" y="300" width="150" height="64" rx="16" />
+          <circle cx="454" cy="332" r="2.2" />
+          <circle cx="474" cy="322" r="2.2" />
+          <circle cx="474" cy="342" r="2.2" />
+          <path d="M456 330.5 472 323.5M456 333.5 472 340.5M474 324.4v15" />
+          <text x="488" y="337">Network</text>
+        </g>
+      </svg>
+    </figure>
+  );
+}
+
+function ItFriendly() {
+  const [motion, setMotion] = useState(true);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setMotion(!media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return (
+    <section className="lp-section lp-it" id="it-friendly" aria-labelledby="it-friendly-heading">
+      <div className="lp-section-inner lp-it-layout">
+        <div>
+          <h2 id="it-friendly-heading">IT friendly by design</h2>
+          <p className="lp-it-problem">Many laboratory systems add unnecessary complexity to traditional IT infrastructure.</p>
+          <p className="lp-it-lead">CareScope Sequence is designed to</p>
+          <ol className="lp-it-parts">
+            <li>integrate seamlessly with existing systems</li>
+            <li>simplify maintenance</li>
+            <li>and give IT teams greater flexibility and control</li>
+          </ol>
+        </div>
+        <ItInfrastructure motion={motion} />
+      </div>
+    </section>
   );
 }
 
