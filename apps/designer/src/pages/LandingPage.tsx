@@ -41,8 +41,9 @@ export function LandingPage() {
         <div className="lp">
       <CoreHero />
       <WhyChoose />
-      <PlatformBand />
+      <FounderQuote />
       <WhatWeSolve />
+      <PlatformBand />
       <IndustrySpotlights />
       <ComplianceSection />
 
@@ -522,6 +523,71 @@ function WhyChoose() {
             <p>{item.body}</p>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function SequenceWord() {
+  return <img className="lp-founder-logo" src="/sequence-logo.png" alt="Sequence" />;
+}
+
+const FOUNDER_LINES = [
+  <>Many laboratory systems are too complex, forcing labs to rely on expensive consultants and disconnected tools.</>,
+  <><SequenceWord /> was built as a result of that frustration.</>,
+  <><SequenceWord /> supports scientists, IT teams and operation by simplifying workflows, reducing integration complexity, and making changes faster.</>,
+];
+
+function FounderQuote() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [staged, setStaged] = useState(() => (typeof window === "undefined" ? false : !prefersStackedSolve()));
+  const [reveal, setReveal] = useState(0);
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const update = () => {
+      if (prefersStackedSolve()) {
+        setStaged(false);
+        setReveal(FOUNDER_LINES.length - 1);
+        return;
+      }
+      const scrollable = section.offsetHeight - window.innerHeight;
+      const progress = scrollable <= 0 ? 0 : Math.min(1, Math.max(0, -section.getBoundingClientRect().top / scrollable));
+      const step = Math.min(FOUNDER_LINES.length - 1, Math.floor(Math.min(FOUNDER_LINES.length - 1e-4, progress * FOUNDER_LINES.length)));
+      setStaged(true);
+      setReveal((prev) => (prev === step ? prev : step));
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return (
+    <section
+      className={`lp-founder${staged ? " is-staged" : ""}`}
+      ref={sectionRef}
+      aria-labelledby="founder-quote-heading"
+    >
+      <div className="lp-founder-stage">
+        <blockquote>
+          <h2 id="founder-quote-heading" className="lp-sr">From the founder</h2>
+          <footer className="lp-founder-by">
+            <cite>Loris Azo</cite>
+            <span>Founder, CEO</span>
+          </footer>
+          {FOUNDER_LINES.map((line, index) => (
+            <p key={index} className={`lp-founder-line${reveal >= index ? " is-on" : ""}`} aria-hidden={staged && reveal < index}>
+              {line}
+            </p>
+          ))}
+        </blockquote>
       </div>
     </section>
   );
