@@ -1053,9 +1053,14 @@ function ComplianceSection() {
         />
         <div className="lp-compliance-layout">
           <div className="lp-compliance-copy">
-            <h2 id="compliance-heading">
+            <h2 id="compliance-heading" className="lp-sr">
               Sequence helps quality leadership feel at ease. The Core product and all modules continuously meet regulatory scrutiny across multiple industries.
             </h2>
+            <ol className="lp-compliance-parts">
+              <li>Sequence helps quality leadership feel at ease.</li>
+              <li>The Core product and all modules continuously meet regulatory scrutiny</li>
+              <li>across multiple industries.</li>
+            </ol>
             <label className="lp-reg-search">
               <span className="lp-sr">Find your regulatory framework</span>
               <input
