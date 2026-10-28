@@ -328,8 +328,26 @@ function WhatWeSolve() {
     const section = sectionRef.current;
     if (!section) return;
 
+    const fitIntegration = (stacked: boolean) => {
+      const visual = section.querySelector<HTMLElement>(".lp-friction.is-integration .lp-friction-visual");
+      const slides = section.querySelector<HTMLElement>(".lp-solve-slides");
+      const friction = section.querySelector<HTMLElement>(".lp-friction.is-integration");
+      if (!visual || !slides || !friction) return;
+      if (stacked) {
+        visual.style.zoom = "";
+        return;
+      }
+      visual.style.zoom = "1";
+      const style = getComputedStyle(friction);
+      const padY = Number.parseFloat(style.paddingTop) + Number.parseFloat(style.paddingBottom);
+      const available = slides.clientHeight - padY - 36;
+      const needed = visual.offsetHeight;
+      const scale = needed > 0 && needed > available ? Math.max(0.72, available / needed) : 1;
+      visual.style.zoom = scale < 0.995 ? String(scale) : "";
+    };
+
     const update = () => {
-      const stacked = window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches;
+      const stacked = prefersStackedSolve();
       if (stacked) {
         setStaged(false);
         setBeat((prev) => (prev.topic === 0 && prev.reveal === 0 ? prev : { topic: 0, reveal: 0 }));
@@ -344,12 +362,18 @@ function WhatWeSolve() {
       setBeat((prev) => (prev.topic === topic && prev.reveal === reveal ? prev : { topic, reveal }));
     };
 
+    const onResize = () => {
+      fitIntegration(prefersStackedSolve());
+      update();
+    };
+
+    fitIntegration(prefersStackedSolve());
     update();
     window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
