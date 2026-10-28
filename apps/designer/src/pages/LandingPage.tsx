@@ -257,12 +257,9 @@ function TopicInfographic({ id }: { id: Topic["id"] }) {
   return <CompareLists pairs={INTEGRATION_PAIRS} colored />;
 }
 
-function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
+function TopicBlock({ topic, flipped, active }: { topic: Topic; flipped: boolean; active: boolean }) {
   return (
-    <section className={`lp-friction is-${topic.id}${flipped ? " is-flip" : ""}`} aria-labelledby={`friction-${topic.id}`}>
-      <div className="lp-section-head lp-solve-banner lp-solve-reserve" aria-hidden="true">
-        <h2 className="lp-display-head">What we solve</h2>
-      </div>
+    <section className={`lp-friction is-${topic.id}${flipped ? " is-flip" : ""}${active ? " is-active" : ""}`} aria-labelledby={`friction-${topic.id}`}>
       <div className="lp-friction-inner">
         <figure className="lp-friction-visual">
           <div className="lp-friction-screen">
@@ -298,14 +295,45 @@ function TopicBlock({ topic, flipped }: { topic: Topic; flipped: boolean }) {
 }
 
 function WhatWeSolve() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const update = () => {
+      const stacked = window.matchMedia("(max-width: 900px), (prefers-reduced-motion: reduce)").matches;
+      if (stacked) {
+        setActive(0);
+        return;
+      }
+      const scrollable = section.offsetHeight - window.innerHeight;
+      const progress = scrollable <= 0 ? 0 : Math.min(1, Math.max(0, -section.getBoundingClientRect().top / scrollable));
+      setActive(Math.min(TOPICS.length - 1, Math.floor(progress * TOPICS.length)));
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
   return (
-    <section id="less-friction" aria-labelledby="what-we-solve-heading">
-      <div className="lp-section-head lp-solve-banner lp-solve-pin">
-        <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
+    <section id="less-friction" ref={sectionRef} className="lp-solve-scroll" aria-labelledby="what-we-solve-heading">
+      <div className="lp-solve-stage">
+        <div className="lp-section-head lp-solve-banner lp-solve-pin">
+          <h2 id="what-we-solve-heading" className="lp-display-head">What we solve</h2>
+        </div>
+        <div className="lp-solve-slides">
+          {TOPICS.map((topic, index) => (
+            <TopicBlock key={topic.id} topic={topic} flipped={index % 2 === 0} active={index === active} />
+          ))}
+        </div>
       </div>
-      {TOPICS.map((topic, index) => (
-        <TopicBlock key={topic.id} topic={topic} flipped={index % 2 === 0} />
-      ))}
     </section>
   );
 }
