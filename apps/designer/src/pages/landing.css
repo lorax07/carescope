@@ -4519,8 +4519,8 @@ img.lp-logo-sequence {
   margin: 0;
   padding: 0.95rem 1.05rem;
   border-radius: 14px;
-  background: #fff;
-  color: #10243f;
+  background: #3b2463;
+  color: #fff;
   font-family: Inter, "Sora", sans-serif;
   font-size: clamp(1.35rem, 2vw, 1.72rem);
   font-weight: 650;
