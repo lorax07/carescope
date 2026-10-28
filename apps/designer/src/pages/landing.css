@@ -5535,7 +5535,7 @@ img.lp-logo-sequence {
 }
 
 #less-friction.lp-solve-scroll {
-  height: 300dvh;
+  height: 480dvh;
   padding-bottom: 0;
   background: #f6f5f4;
 }
@@ -5829,6 +5829,45 @@ img.lp-logo-sequence {
   border-color: #bdbdbd;
   background: #fafafa;
   color: #1c1e22;
+}
+
+.lp-solve-scroll.is-staged .lp-reveal {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    max-height 0.4s ease,
+    opacity 0.32s ease,
+    visibility 0s linear 0.32s;
+}
+
+.lp-solve-scroll.is-staged .lp-reveal.is-open {
+  max-height: 16rem;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    max-height 0.4s ease,
+    opacity 0.36s ease,
+    visibility 0s linear 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-solve-scroll.is-staged .lp-reveal,
+  .lp-solve-scroll.is-staged .lp-reveal.is-open {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .lp-solve-scroll.is-staged .lp-reveal,
+  .lp-solve-scroll.is-staged .lp-reveal.is-open {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .lp-page .lp-industries .lp-section-head:has(.lp-display-head) {
