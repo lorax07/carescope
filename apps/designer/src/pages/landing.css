@@ -6069,6 +6069,7 @@ img.lp-logo-sequence {
 
 .lp-page .lp-industries .lp-section-head:has(.lp-display-head) {
   max-width: none;
+  margin-bottom: 2.7rem;
   margin-left: 0;
   margin-right: 0;
   text-align: right;
