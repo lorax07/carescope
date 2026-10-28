@@ -5005,7 +5005,7 @@ img.lp-logo-sequence {
 
 .lp-founder blockquote::after {
   content: "”";
-  margin-top: calc(0.15rem + 5px);
+  margin-top: calc(0.15rem + 15px);
 }
 
 .lp-founder.is-staged blockquote:not(.is-closed)::after {
