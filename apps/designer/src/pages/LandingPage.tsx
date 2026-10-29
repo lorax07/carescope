@@ -517,7 +517,9 @@ const WHY_CHOOSE = [
 function WhyChoose() {
   return (
     <section className="lp-why" aria-labelledby="why-sequence-heading">
-      <h2 id="why-sequence-heading">Why choose Sequence</h2>
+      <h2 id="why-sequence-heading">
+        Why choose <img className="lp-why-logo" src="/sequence-logo-light.png" alt="Sequence" />
+      </h2>
       <div className="lp-why-stats">
         {WHY_CHOOSE.map((item) => (
           <article key={item.n}>
