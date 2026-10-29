@@ -304,7 +304,7 @@ export function userOnboardingTemplate(tenantId: string, createdBy: string): Wor
   const access = node("task", "Provision Lab Access", 880, 160, { autoComplete: true });
   const email = node("email", "Welcome Email", 1080, 160, {
     to: "user.email",
-    subject: "Welcome to CareScope LIMS",
+    subject: "Welcome to Carescope LIMS",
     body: "Your account is ready. Complete assigned training to begin.",
   });
   const end = node("end", "End", 1280, 160);

@@ -1,7 +1,7 @@
 {
   "name": "@carescope/workflow-api",
   "version": "0.1.0",
-  "description": "REST and GraphQL API for the CareScope workflow engine",
+  "description": "REST and GraphQL API for the Carescope workflow engine",
   "type": "module",
   "main": "./dist/index.js",
   "files": [

@@ -158,7 +158,7 @@ export type CreateLabInput = {
 };
 
 export type IntrasiteMeta = {
-  product: "CareScope Intrasite";
+  product: "Carescope Intrasite";
   store: "memory" | "postgres";
   tenantHeader: string;
   labHeader: string;

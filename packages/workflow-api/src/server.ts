@@ -8,7 +8,7 @@ const app = createApp();
 initIntrasite()
   .then(() => {
     app.listen(port, () => {
-      console.log(`CareScope Workflow API listening on http://localhost:${port}`);
+      console.log(`Carescope Workflow API listening on http://localhost:${port}`);
       console.log(`  REST      → http://localhost:${port}/api/v1`);
       console.log(`  Intrasite → http://localhost:${port}/api/v1/intrasite`);
       console.log(`  GraphQL   → http://localhost:${port}/graphql`);

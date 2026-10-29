@@ -1,6 +1,6 @@
 /**
  * @carescope/workflow-core
- * Foundational workflow engine for the CareScope LIMS platform.
+ * Foundational workflow engine for the Carescope LIMS platform.
  */
 
 export * from "./types.js";

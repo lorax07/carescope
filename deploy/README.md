@@ -1,6 +1,6 @@
-# CareScope Intrasite deployment
+# Carescope Intrasite deployment
 
-Intrasite is the authenticated business control plane for CareScope. The landing-page **Intrasite** link (bottom right) opens `/intrasite`.
+Intrasite is the authenticated business control plane for Carescope. The landing-page **Intrasite** link (bottom right) opens `/intrasite`.
 
 ## Tech stack
 

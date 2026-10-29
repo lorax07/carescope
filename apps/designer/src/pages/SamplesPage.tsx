@@ -820,7 +820,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       ) : null}
 
       <p className="lims-footnote">
-        Sample events can trigger CareScope workflows —{" "}
+        Sample events can trigger Carescope workflows —{" "}
         <Link to="/app/workflows">configure automations</Link> for receive, assign, review, and
         CoA release.
       </p>

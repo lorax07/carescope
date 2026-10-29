@@ -33,7 +33,7 @@ export function LandingPage() {
             Designed to scale
           </h1>
           <p>
-            CareScope Sequence brings your lab workflows, data and systems together — so you can make changes
+            Carescope Sequence brings your lab workflows, data and systems together — so you can make changes
             faster, reduce integrations, and run a more efficient laboratory.
           </p>
           <div className="lp-showcase-actions">
@@ -60,7 +60,7 @@ export function LandingPage() {
         <img
           className="lp-footer-logo"
           src="/carescope-parent-logo.png"
-          alt="CareScope. Building Better Healthcare for Everyone."
+          alt="Carescope. Building Better Healthcare for Everyone."
         />
       </p>
 
@@ -846,7 +846,7 @@ function ItFriendly() {
         <div>
           <h2 id="it-friendly-heading">IT friendly by design</h2>
           <p className="lp-it-problem">Many laboratory systems add unnecessary complexity to traditional IT infrastructure.</p>
-          <p className="lp-it-lead">CareScope Sequence is designed to</p>
+          <p className="lp-it-lead">Carescope Sequence is designed to</p>
           <ol className="lp-it-parts">
             <li>integrate seamlessly with existing systems</li>
             <li>simplify maintenance</li>
