@@ -44,7 +44,7 @@ export function SiteHeader() {
             alt="Carescope. Building Better Healthcare for Everyone."
           />
           <span className="lp-logo-rule" aria-hidden="true" />
-          <img className="lp-logo-sequence" src="/sequence-logo.png" width={1698} height={198} alt="Sequence" />
+          <img className="lp-logo-sequence" src="/sequence-logo.png" width={1790} height={291} alt="Sequence" />
         </Link>
 
         <div className="lp-nav-end">
