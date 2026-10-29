@@ -27,7 +27,7 @@ export function createApp(): Application {
 
   app.get("/", (_req, res) => {
     res.json({
-      name: "CareScope Workflow API",
+      name: "Carescope Workflow API",
       version: "0.1.0",
       rest: "/api/v1",
       graphql: "/graphql",

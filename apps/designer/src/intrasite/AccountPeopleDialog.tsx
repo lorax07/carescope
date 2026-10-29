@@ -88,7 +88,7 @@ export function AccountPeopleDialog({
             <h2 id={titleId}>{title}</h2>
             <p>
               {kind === "internal_resource"
-                ? `Assign or remove CareScope staff on ${client.name}.`
+                ? `Assign or remove Carescope staff on ${client.name}.`
                 : `Assign or remove business contacts on ${client.name}.`}
             </p>
           </div>

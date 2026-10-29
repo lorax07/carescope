@@ -1,5 +1,5 @@
 /**
- * CareScope Workflow Engine — Core Type System
+ * Carescope Workflow Engine — Core Type System
  *
  * Every entity in the LIMS can attach configurable workflows.
  * Node types are plugin-extensible without modifying the engine core.

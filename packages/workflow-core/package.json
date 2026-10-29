@@ -1,7 +1,7 @@
 {
   "name": "@carescope/workflow-core",
   "version": "0.1.0",
-  "description": "CareScope LIMS foundational workflow engine — state machine execution, plugins, rules, and events",
+  "description": "Carescope LIMS foundational workflow engine — state machine execution, plugins, rules, and events",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

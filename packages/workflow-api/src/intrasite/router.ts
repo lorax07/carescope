@@ -86,7 +86,7 @@ export function createIntrasiteRouter(): Router {
   router.get("/meta", (_req, res) => {
     const store = getIntrasiteStore();
     res.json({
-      product: "CareScope Intrasite",
+      product: "Carescope Intrasite",
       store: store.kind,
       tenantHeader: tenantHeader(),
       labHeader: labHeader(),

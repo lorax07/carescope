@@ -35,16 +35,16 @@ export function SiteHeader() {
   return (
     <header className={`lp-nav${solid ? " is-solid" : ""}`}>
       <div className="lp-nav-bar">
-        <Link to="/" className="lp-logo" aria-label="CareScope Sequence home">
+        <Link to="/" className="lp-logo" aria-label="Carescope Sequence home">
           <img
             className="lp-header-logo"
             src="/carescope-header-logo.png"
             width={156}
             height={39}
-            alt="CareScope. Building Better Healthcare for Everyone."
+            alt="Carescope. Building Better Healthcare for Everyone."
           />
           <span className="lp-logo-rule" aria-hidden="true" />
-          <img className="lp-logo-sequence" src="/sequence-logo.png" width={1745} height={257} alt="Sequence" />
+          <img className="lp-logo-sequence" src="/sequence-logo.png" width={1698} height={198} alt="Sequence" />
         </Link>
 
         <div className="lp-nav-end">
