@@ -22,7 +22,10 @@ export function RcmDenialsPage() {
   return (
     <RcmShell studio title="Denials" lede="Why money was refused, who owns recovery, and which patterns keep coming back.">
       <header className="client-board-head">
-        <h1>Denials</h1>
+        <div className="module-screen-name">
+          <p className="lims-eyebrow">Sequence Revenue</p>
+          <h1>Denials</h1>
+        </div>
         <Link to="/app/billing/payments">Cash</Link>
         <Link to="/app/billing/ar">Receivables</Link>
       </header>

@@ -60,7 +60,10 @@ function Shell({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="lims-page rcm-page client-studio">
       <div className="client-home">
-        <h1 className="client-overview-title">{title}</h1>
+        <div className="client-overview-head">
+          <p className="lims-eyebrow">Sequence Compliance</p>
+          <h1 className="client-overview-title">{title}</h1>
+        </div>
         {children}
       </div>
     </div>

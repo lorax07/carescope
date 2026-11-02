@@ -29,7 +29,10 @@ export function RcmOverviewPage() {
   return (
     <RcmShell studio title="Revenue overview" lede="What needs attention, what money is at risk, and the next action on the laboratory ledger.">
       <div className="client-home">
-        <h1 className="client-overview-title">Revenue Overview</h1>
+        <div className="client-overview-head">
+          <p className="lims-eyebrow">Sequence Revenue</p>
+          <h1 className="client-overview-title">Revenue Overview</h1>
+        </div>
         <div className="client-home-main">
           <div className="client-kpis">
             <StudioLink to="/app/billing/ar">

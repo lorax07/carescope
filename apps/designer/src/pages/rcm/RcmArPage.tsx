@@ -60,7 +60,10 @@ export function RcmArPage() {
   return (
     <RcmShell studio title="Receivables" lede="Outstanding balances by aging, client, payer, and route.">
       <header className="client-board-head">
-        <h1>Receivables</h1>
+        <div className="module-screen-name">
+          <p className="lims-eyebrow">Sequence Revenue</p>
+          <h1>Receivables</h1>
+        </div>
         <Link to="/app/billing/payments">Cash</Link>
         <Link to="/app/billing/denials">Denials</Link>
       </header>

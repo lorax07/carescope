@@ -173,12 +173,23 @@ export function InstrumentRecordPage() {
   if (!instrument) {
     return (
       <div className="lims-page">
-        <h1>Instrument not found</h1>
+        <div className="lims-page-header">
+          <div>
+            <p className="lims-eyebrow">Sequence Instruments</p>
+            <h1>Instrument not found</h1>
+          </div>
+        </div>
       </div>
     );
   }
   return (
     <div className="lims-page">
+      <div className="lims-page-header">
+        <div>
+          <p className="lims-eyebrow">Sequence Instruments</p>
+          <h1>{instrument.name}</h1>
+        </div>
+      </div>
       <section className="lims-panel">
         <InstrumentRecordView instrument={instrument} />
       </section>

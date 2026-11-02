@@ -118,7 +118,12 @@ export function SampleDetailBody({
       ) : null}
       <div className="lims-page-header">
         <div>
-          {showTitle ? <h1>Sample Details</h1> : null}
+          {showTitle ? (
+            <>
+              <p className="lims-eyebrow">Sequence Operations</p>
+              <h1>Sample Details</h1>
+            </>
+          ) : null}
           <p className="lims-page-lede">{sample.client} · {sample.tests}</p>
         </div>
       </div>
@@ -251,7 +256,7 @@ export function SampleDetailPage() {
   if (!sample) {
     return (
       <div className="lims-page">
-        <p className="lims-eyebrow">Sample</p>
+        <p className="lims-eyebrow">Sequence Operations</p>
         <h1>Sample not found</h1>
         <p>
           <Link to="/app/ops/home">Back to Home</Link>
