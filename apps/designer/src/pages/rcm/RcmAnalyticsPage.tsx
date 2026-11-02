@@ -96,7 +96,10 @@ export function RcmAnalyticsPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Performance</h1>
+            <div className="module-screen-name">
+              <p className="lims-eyebrow">Sequence Revenue</p>
+              <h1>Performance</h1>
+            </div>
           </header>
           <div className="client-kpis">
             <Link className="client-kpi" to="/app/billing/claims">

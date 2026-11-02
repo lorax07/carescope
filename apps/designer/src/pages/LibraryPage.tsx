@@ -255,7 +255,7 @@ export function LibraryPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <p className="lims-eyebrow">Automation</p>
+          <p className="lims-eyebrow">Workflow design</p>
           <h1>Laboratory workflows</h1>
           <p>
             Configure no-code automations for sample receive, testing, review, CAPA,

@@ -56,8 +56,8 @@ export function InsightsChatPage() {
     <div className="lims-page insights-page">
       <div className="lims-page-header">
         <div>
-          <p className="lims-eyebrow">Overall business data, with a chat that answers from the text provided</p>
-          <h1>Sequence Insights</h1>
+          <p className="lims-eyebrow">Sequence Insights</p>
+          <h1>Insights</h1>
           <p className="lims-page-lede">
             Accounts, laboratory work, revenue, and pipeline in one view. The chat answers only from the briefing.
           </p>

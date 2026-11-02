@@ -45,8 +45,8 @@ export function LimsModulePage({ id }: { id: LabModuleId }) {
   const capabilities = module.capabilities.split(", ");
   return (
     <ModulePage
-      eyebrow={module.positioning}
-      title={module.label}
+      eyebrow={module.label}
+      title="Overview"
       lede={module.capabilities}
       rows={capabilities.map((capability) => ({
         label: capability,
@@ -59,7 +59,7 @@ export function LimsModulePage({ id }: { id: LabModuleId }) {
 export function TestsPage() {
   return (
     <ModulePage
-      eyebrow="Test scheduling"
+      eyebrow="Sequence Operations"
       title="Test schedule"
       lede="Methods queued against samples, instruments, and analyst availability."
       rows={[
@@ -93,7 +93,7 @@ export function TestsPage() {
 export function ResultsPage() {
   return (
     <ModulePage
-      eyebrow="Results entry"
+      eyebrow="Sequence Operations"
       title="Results & review"
       lede="Analytical results pending entry, verification, and electronic signature."
       rows={[
@@ -128,7 +128,7 @@ export function ResultsPage() {
 export function InstrumentsPage() {
   return (
     <ModulePage
-      eyebrow="Equipment"
+      eyebrow="Sequence Instruments"
       title="Instruments"
       lede="Operational status, calibration currency, and active sample assignments."
       rows={[
@@ -163,7 +163,7 @@ export function InstrumentsPage() {
 export function InventoryPage() {
   return (
     <ModulePage
-      eyebrow="Materials"
+      eyebrow="Sequence Operations"
       title="Inventory & reagents"
       lede="Lots, thresholds, and controlled materials supporting active methods."
       rows={[
@@ -197,7 +197,7 @@ export function InventoryPage() {
 export function QualityPage() {
   return (
     <ModulePage
-      eyebrow="Quality system"
+      eyebrow="Sequence Compliance"
       title="Quality events"
       lede="Deviations, non-conformances, and CAPA linked to laboratory work."
       rows={[

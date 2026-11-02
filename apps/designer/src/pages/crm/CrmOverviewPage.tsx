@@ -30,7 +30,10 @@ export function CrmOverviewPage() {
   return (
     <CrmShell studio title="Client overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
       <div className="client-home">
-        <h1 className="client-overview-title">Client Overview</h1>
+        <div className="client-overview-head">
+          <p className="lims-eyebrow">Sequence Client</p>
+          <h1 className="client-overview-title">Client Overview</h1>
+        </div>
         <div className="client-home-main">
           <div className="client-kpis">
             <StudioLink to="/app/connectivity/clients">

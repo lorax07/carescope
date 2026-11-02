@@ -60,7 +60,10 @@ export function CrmClientsPage() {
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
-            <h1>Manage Clients</h1>
+            <div className="module-screen-name">
+              <p className="lims-eyebrow">Sequence Client</p>
+              <h1>Manage Clients</h1>
+            </div>
             <label>
               <span className="sr-only">Search clients</span>
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search clients" />

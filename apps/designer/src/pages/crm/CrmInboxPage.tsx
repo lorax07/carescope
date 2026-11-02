@@ -123,6 +123,10 @@ export function CrmInboxPage() {
 
   return (
     <CrmShell studio title="Inbox" lede="Messages with the people on Sequence Client accounts.">
+      <div className="module-screen-name inbox-screen-name">
+        <p className="lims-eyebrow">Sequence Client</p>
+        <h1>Inbox</h1>
+      </div>
       <div className="inbox">
         <section className="inbox-thread" aria-label={selected ? `Conversation with ${selected.name}` : "Conversation"}>
           {selected ? (
@@ -223,7 +227,7 @@ export function CrmInboxPage() {
 
         <section className="inbox-list" aria-label="All messages">
           <header>
-            <h1>All messages</h1>
+            <h2>All messages</h2>
             <label>
               <span className="sr-only">Search messages</span>
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search messages" />

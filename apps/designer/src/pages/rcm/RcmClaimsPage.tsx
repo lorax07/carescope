@@ -25,7 +25,10 @@ export function RcmClaimsPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Claims</h1>
+            <div className="module-screen-name">
+              <p className="lims-eyebrow">Sequence Revenue</p>
+              <h1>Claims</h1>
+            </div>
           </header>
           <div className="client-board-links">
             <Link to="/app/billing/capture">Charge capture</Link>

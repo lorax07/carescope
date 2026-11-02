@@ -816,7 +816,7 @@ export function DesignerPage() {
       )}
       <div className="canvas-area">
         <div className="canvas-toolbar">
-          <div className="workflow-toolbar-brand"><Link to="/app/workflows" aria-label="Back to workflows">←</Link><div><span>Workflow Designer</span><b>{workflow.name}</b></div></div>
+          <div className="workflow-toolbar-brand"><Link to="/app/workflows" aria-label="Back to workflows">←</Link><div><span>Workflow design</span><b>{workflow.name}</b></div></div>
           <div className="workflow-designer-mode" role="group" aria-label="Designer mode">
             <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
             <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>

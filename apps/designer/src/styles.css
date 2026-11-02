@@ -4192,7 +4192,7 @@ a {
   letter-spacing: -0.03em;
 }
 
-.page-header p {
+.page-header p:not(.lims-eyebrow) {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.95rem;
@@ -5336,7 +5336,7 @@ button.palette-category-title {
 }
 
 .workflow-toolbar-brand span {
-  color: var(--text-muted);
+  color: var(--accent);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.07em;
@@ -6888,11 +6888,27 @@ button.palette-category-title {
   text-decoration: none;
 }
 
-.client-overview-title {
+.module-screen-name,
+.client-overview-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.client-overview-head {
   grid-column: 1 / -1;
+}
+
+.inbox-screen-name {
+  margin-bottom: 0.9rem;
+}
+
+.module-screen-name h1,
+.client-overview-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.75rem;
   letter-spacing: -0.03em;
 }
 
@@ -7286,7 +7302,7 @@ button.palette-category-title {
 .client-board-head h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.75rem;
   letter-spacing: -0.03em;
 }
 
@@ -7585,7 +7601,8 @@ button.client-kpi.is-on {
 }
 
 .inbox-thread-head b,
-.inbox-list h1 {
+.inbox-list h1,
+.inbox-list h2 {
   display: block;
   margin: 0;
   color: #1d2433;
