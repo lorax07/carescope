@@ -466,11 +466,8 @@ function FilmCard({
     }
     const begin = () => {
       video.currentTime = chapter.start;
-      video.muted = false;
-      video.play().catch(() => {
-        video.muted = true;
-        void video.play();
-      });
+      video.muted = true;
+      void video.play();
     };
     if (video.readyState >= 1) begin();
     else video.addEventListener("loadedmetadata", begin, { once: true });
