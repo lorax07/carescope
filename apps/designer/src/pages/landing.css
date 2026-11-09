@@ -12,8 +12,8 @@
   --lp-navy: #0b1f44;
   --lp-green: #16a34a;
   --lp-green-deep: #15803d;
-  --lp-font: "Inconsolata", ui-monospace, monospace;
-  --lp-display: "Inconsolata", ui-monospace, monospace;
+  --lp-font: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --lp-display: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --lp-gutter: 2.25rem;
   --lp-measure: 1250px;
   max-width: var(--lp-measure);
@@ -6844,5 +6844,286 @@ img.lp-logo-sequence {
 
   .lp-industry-tile.is-navy {
     grid-row: auto;
+  }
+}
+
+/* Glide-style marketing chrome. Plus Jakarta Sans is the page face:
+   Glide's Booton is a commercial Displaay typeface and is not shipped. */
+.lp-page {
+  --lp-font: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --lp-display: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #fff;
+  color: #000;
+  font-family: var(--lp-font);
+  font-weight: 450;
+}
+
+.lp-home {
+  background: #fff;
+  background-image: none;
+}
+
+.lp-page .lp-nav,
+.lp-home > .lp-nav,
+.lp-home > .lp-nav.is-solid {
+  background: #fff;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.lp-page .lp-nav-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+  height: 72px;
+  padding: 0 28px;
+}
+
+.lp-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.lp-page .lp-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.lp-page .lp-logo-rule {
+  display: none;
+}
+
+.lp-page .lp-header-logo {
+  height: 32px;
+}
+
+.lp-page img.lp-logo-sequence {
+  height: 20px;
+}
+
+.lp-brand-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #111;
+  cursor: pointer;
+}
+
+.lp-brand-chevron:hover {
+  background: #f3f3f3;
+}
+
+.lp-modules.is-open .lp-brand-chevron svg {
+  transform: rotate(180deg);
+}
+
+.lp-brand-chevron svg {
+  display: block;
+  transition: transform 0.15s ease;
+}
+
+.lp-page .lp-nav-links,
+.lp-home .lp-nav-links,
+.lp-home .lp-nav-links > a,
+.lp-page .lp-nav-links > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.85rem;
+  margin: 0;
+  color: #000;
+  font-family: var(--lp-font);
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: -0.011em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lp-page .lp-nav-links > a,
+.lp-home .lp-nav-links > a {
+  display: inline-flex;
+  color: #000;
+  text-decoration: none;
+}
+
+.lp-page .lp-nav-links > a:hover,
+.lp-home .lp-nav-links > a:hover {
+  color: #000;
+}
+
+.lp-page .lp-nav-links a[aria-current="page"] {
+  font-weight: 600;
+}
+
+.lp-page .lp-nav-actions {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.lp-nav-login {
+  margin-right: 0.35rem;
+  color: #000;
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: -0.011em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lp-nav-login:hover {
+  color: #000;
+}
+
+.lp-nav-outline,
+.lp-nav-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.lp-nav-outline {
+  background: #fff;
+  color: #000;
+  border: 1px solid #e6e6e6;
+}
+
+.lp-nav-outline:hover {
+  background: #fafafa;
+  border-color: #d8d8d8;
+  color: #000;
+}
+
+.lp-nav-solid {
+  background: #000;
+  color: #fff;
+  border: 1px solid #000;
+}
+
+.lp-nav-solid:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.lp-home .lp-showcase {
+  background: #fff;
+  padding: 5.5rem 1.5rem 4.5rem;
+}
+
+.lp-home .lp-showcase h1 {
+  max-width: 16em;
+  color: #000;
+  font-weight: 600;
+  font-size: clamp(2.7rem, 4.4vw, 3.75rem);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+}
+
+.lp-page h1.lp-display-head,
+.lp-page .lp-section-head h2.lp-display-head,
+.lp-page .lp-solve-intro h2.lp-display-head,
+.lp-page #compliance .lp-section-head h2.lp-display-head,
+.lp-page .lp-price h1,
+.lp-page .lp-it h2,
+.lp-page #what-we-solve-heading.lp-display-head,
+.lp-page #industry-spotlights-heading.lp-display-head {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.lp-home .lp-showcase-actions {
+  margin-top: 1.85rem;
+  gap: 0.65rem;
+}
+
+.lp-home .lp-showcase .lp-pill {
+  height: 42px;
+  padding: 0 18px;
+  font-weight: 500;
+  transform: none;
+}
+
+.lp-home .lp-showcase .lp-pill:hover {
+  transform: none;
+}
+
+.lp-home .lp-showcase .lp-pill-light {
+  background: #fff;
+  border-color: #e6e6e6;
+  color: #000;
+}
+
+.lp-page .lp-modules-menu {
+  top: calc(100% + 0.55rem);
+  left: 0;
+  border-radius: 16px;
+  border-color: #ececec;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+}
+
+.lp-page .lp-modules-menu a {
+  font-weight: 500;
+  color: #111;
+}
+
+@media (max-width: 1180px) {
+  .lp-page .lp-nav-bar {
+    display: flex;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 0.75rem 1rem 0.85rem;
+    row-gap: 0.7rem;
+  }
+
+  .lp-page .lp-nav-links,
+  .lp-home .lp-nav-links {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    gap: 1.15rem;
+  }
+
+  .lp-page .lp-nav-actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-page .lp-nav-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .lp-nav-login {
+    margin-right: 0.15rem;
   }
 }
