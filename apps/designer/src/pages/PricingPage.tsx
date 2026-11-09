@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { BuildPlanDialog } from "./BuildPlanDialog";
 import { MARKETING_MODULES } from "./marketingModules";
 import { CORE_PLANS, IMPLEMENTATION, SUPPORT, modulePriceLabel } from "./pricingQuote";
@@ -7,11 +7,21 @@ import { SiteHeader } from "./SiteHeader";
 import "./landing.css";
 
 export function PricingPage() {
-  const [planOpen, setPlanOpen] = useState(false);
+  const location = useLocation();
+  const [planOpen, setPlanOpen] = useState(Boolean((location.state as { buildPlan?: boolean } | null)?.buildPlan));
   const openPlanRef = useRef<HTMLButtonElement>(null);
   const closePlan = useCallback(() => {
     setPlanOpen(false);
     requestAnimationFrame(() => openPlanRef.current?.focus());
+  }, []);
+
+  useEffect(() => {
+    function onPlan(event: Event) {
+      event.preventDefault();
+      setPlanOpen(true);
+    }
+    window.addEventListener("carescope-build-plan", onPlan);
+    return () => window.removeEventListener("carescope-build-plan", onPlan);
   }, []);
 
   return (

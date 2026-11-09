@@ -21,6 +21,15 @@ export function LandingPage() {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  useEffect(() => {
+    function onPlan(event: Event) {
+      event.preventDefault();
+      setPlanOpen(true);
+    }
+    window.addEventListener("carescope-build-plan", onPlan);
+    return () => window.removeEventListener("carescope-build-plan", onPlan);
+  }, []);
+
   return (
     <div className="lp-page lp-home">
         <SiteHeader />

@@ -1,20 +1,13 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MARKETING_MODULES } from "./marketingModules";
 
 export function SiteHeader() {
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [solid, setSolid] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setSolid(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -32,59 +25,81 @@ export function SiteHeader() {
     };
   }, [open]);
 
-  return (
-    <header className={`lp-nav${solid ? " is-solid" : ""}`}>
-      <div className="lp-nav-bar">
-        <Link to="/" className="lp-logo" aria-label="Carescope Sequence home">
-          <img
-            className="lp-header-logo"
-            src="/carescope-header-logo.png"
-            width={156}
-            height={39}
-            alt="Carescope. Building Better Healthcare for Everyone."
-          />
-          <span className="lp-logo-rule" aria-hidden="true" />
-          <img className="lp-logo-sequence" src="/sequence-logo.png" width={1790} height={291} alt="Sequence" />
-        </Link>
+  function openPlan() {
+    const event = new CustomEvent("carescope-build-plan", { cancelable: true });
+    if (!window.dispatchEvent(event)) return;
+    navigate("/pricing", { state: { buildPlan: true } });
+  }
 
-        <div className="lp-nav-end">
-          <nav className="lp-nav-links" aria-label="Primary">
-            <a href="/">Home</a>
-            <a href="/#less-friction">What we solve</a>
-            <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
-              <button
-                type="button"
-                className="lp-modules-btn"
-                aria-expanded={open}
-                aria-haspopup="menu"
-                aria-controls={menuId}
-                onClick={() => setOpen((current) => !current)}
-              >
-                Modules
-                <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                  <path d="M2.2 4.2 6 8l3.8-3.8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-              {open ? (
-                <ul className="lp-modules-menu" id={menuId} role="menu">
-                  {MARKETING_MODULES.map((item) => (
-                    <li key={item.slug} role="none">
-                      <Link role="menuitem" to={`/modules/${item.slug}`} onClick={() => setOpen(false)}>
-                        {item.title}
-                        <small>{item.detail}</small>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-            <Link to="/pricing" aria-current={pathname === "/pricing" ? "page" : undefined}>
-              Pricing
-            </Link>
-            <a href="/#compliance">About</a>
-            <Link to="/intrasite">Sign in</Link>
-          </nav>
-          <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
+  return (
+    <header className="lp-nav">
+      <div className="lp-nav-bar">
+        <div className="lp-brand">
+          <Link to="/" className="lp-logo" aria-label="Carescope Sequence home">
+            <img
+              className="lp-header-logo"
+              src="/carescope-header-logo.png"
+              width={156}
+              height={39}
+              alt=""
+            />
+            <img className="lp-logo-sequence" src="/sequence-logo.png" width={1790} height={291} alt="Sequence" />
+          </Link>
+          <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
+            <button
+              type="button"
+              className="lp-brand-chevron"
+              aria-expanded={open}
+              aria-haspopup="menu"
+              aria-controls={menuId}
+              aria-label="Modules"
+              onClick={() => setOpen((current) => !current)}
+            >
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path
+                  d="M2.2 4.3 6 8.1l3.8-3.8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {open ? (
+              <ul className="lp-modules-menu" id={menuId} role="menu">
+                {MARKETING_MODULES.map((item) => (
+                  <li key={item.slug} role="none">
+                    <Link role="menuitem" to={`/modules/${item.slug}`} onClick={() => setOpen(false)}>
+                      {item.title}
+                      <small>{item.detail}</small>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </div>
+
+        <nav className="lp-nav-links" aria-label="Primary">
+          <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>
+            Home
+          </Link>
+          <a href="/#less-friction">What we solve</a>
+          <Link to="/pricing" aria-current={pathname === "/pricing" ? "page" : undefined}>
+            Pricing
+          </Link>
+          <a href="/#compliance">About</a>
+        </nav>
+
+        <div className="lp-nav-actions">
+          <Link to="/intrasite" className="lp-nav-login">
+            Log in
+          </Link>
+          <button type="button" className="lp-nav-outline" onClick={openPlan}>
+            Build your plan
+          </button>
+          <Link to="/app?signup=1" className="lp-nav-solid">
             Try free for 30 days
           </Link>
         </div>
