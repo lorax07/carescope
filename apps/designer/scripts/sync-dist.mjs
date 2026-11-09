@@ -16,4 +16,4 @@ if (!existsSync(designerDist)) {
 rmSync(rootDist, { recursive: true, force: true });
 mkdirSync(rootDist, { recursive: true });
 cpSync(designerDist, rootDist, { recursive: true });
-console.log("Synced designer dist →", rootDist);
+console.log("Synced designer dist to", rootDist);
