@@ -12,8 +12,8 @@
   --lp-navy: #0b1f44;
   --lp-green: #16a34a;
   --lp-green-deep: #15803d;
-  --lp-font: "Source Sans 3", "IBM Plex Sans", sans-serif;
-  --lp-display: "Sora", "Source Sans 3", sans-serif;
+  --lp-font: "Inconsolata", ui-monospace, monospace;
+  --lp-display: "Inconsolata", ui-monospace, monospace;
   --lp-gutter: 2.25rem;
   --lp-measure: 1250px;
   max-width: var(--lp-measure);
@@ -2925,7 +2925,7 @@
 }
 
 .lp-capability-index {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: var(--lp-font);
   font-size: 0.64rem;
   font-weight: 600;
   color: var(--lp-blue);
@@ -3651,7 +3651,7 @@ img.lp-logo-sequence {
 .lp-core-chrome span {
   margin-left: auto;
   color: #8b919a;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.14em;
@@ -3665,7 +3665,7 @@ img.lp-logo-sequence {
 .lp-core-kicker {
   margin: 0;
   color: #8b919a;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.72rem;
   font-weight: 650;
   letter-spacing: 0.16em;
@@ -3675,7 +3675,7 @@ img.lp-logo-sequence {
 .lp-core-body h2 {
   margin: 0.32rem 0 0;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(2.05rem, 3.5vw, 3rem);
   font-weight: 650;
   letter-spacing: -0.048em;
@@ -3688,7 +3688,7 @@ img.lp-logo-sequence {
   gap: 0.3rem 0.15rem;
   margin: 0.6rem 0 0;
   color: #615d59;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.98rem;
   letter-spacing: -0.015em;
 }
@@ -3709,7 +3709,7 @@ img.lp-logo-sequence {
 
 .lp-core-stages li {
   color: #a39e98;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -3855,7 +3855,7 @@ img.lp-logo-sequence {
 .lp-core-float span {
   display: block;
   color: #8b919a;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.66rem;
   font-weight: 650;
   letter-spacing: 0.13em;
@@ -3866,7 +3866,7 @@ img.lp-logo-sequence {
   display: block;
   margin-top: 0.22rem;
   color: #16181d;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.98rem;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -3899,7 +3899,7 @@ img.lp-logo-sequence {
 .lp-core-caption {
   margin: 0.15rem 0 0;
   color: #615d59;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 1rem;
   letter-spacing: -0.018em;
   text-align: center;
@@ -4088,7 +4088,7 @@ img.lp-logo-sequence {
 .lp-logo-sequence,
 .lp-cycle-face h3,
 .lp-cycle-cost {
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -4534,7 +4534,7 @@ img.lp-logo-sequence {
   border-radius: 14px;
   background: #3b2463;
   color: #fff;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.2rem, 1.7vw, 1.48rem);
   font-weight: 400;
   letter-spacing: -0.03em;
@@ -4782,7 +4782,7 @@ img.lp-logo-sequence {
 .lp-home .lp-nav-links > a,
 .lp-home .lp-modules-btn {
   color: #1c1e22;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.98rem;
   font-weight: 500;
   letter-spacing: -0.015em;
@@ -4814,21 +4814,11 @@ img.lp-logo-sequence {
   max-width: 18em;
   margin: 0;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(2.25rem, 4.15vw, 3.6rem);
   font-weight: 800;
   letter-spacing: -0.052em;
   line-height: 0.98;
-}
-
-.lp-showcase p {
-  max-width: 34rem;
-  margin: 1.45rem 0 0;
-  color: #8b919a;
-  font-family: Inter, "Source Sans 3", sans-serif;
-  font-size: 1.05rem;
-  font-weight: 400;
-  line-height: 1.55;
 }
 
 .lp-showcase-actions {
@@ -4850,7 +4840,7 @@ img.lp-logo-sequence {
   border-radius: 999px;
   cursor: pointer;
   appearance: none;
-  font-family: Inter, "Source Sans 3", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -5020,7 +5010,7 @@ img.lp-logo-sequence {
 .lp-founder blockquote::after {
   display: block;
   color: #5b7ec9;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--lp-font);
   font-size: 4.4rem;
   line-height: 0.7;
 }
@@ -5063,7 +5053,7 @@ img.lp-logo-sequence {
   background: #fff;
   box-shadow: 0 14px 32px rgba(11, 31, 68, 0.07);
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.35rem, 2.35vw, 2.05rem);
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -5148,7 +5138,7 @@ img.lp-logo-sequence {
   gap: 0.75rem;
   margin: 0 0 0.85rem;
   color: #1c2422;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: 1.05rem;
   font-weight: 650;
   letter-spacing: -0.03em;
@@ -5296,7 +5286,7 @@ img.lp-logo-sequence {
 .lp-module-card strong {
   width: 100%;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -5351,7 +5341,7 @@ img.lp-logo-sequence {
   background: none;
   box-shadow: none;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.45rem, 2.8vw, 2.48rem);
   font-weight: 800;
   letter-spacing: -0.052em;
@@ -5619,7 +5609,7 @@ img.lp-logo-sequence {
 .lp-price-fees strong,
 .lp-price-support strong {
   color: #0b1f44;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -5670,7 +5660,7 @@ img.lp-logo-sequence {
   background: #fff;
   box-shadow: 0 24px 60px rgba(11, 31, 68, 0.24);
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   outline: none;
 }
 
@@ -6115,7 +6105,7 @@ img.lp-logo-sequence {
   margin: 0;
   padding-bottom: 0.7rem;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.7rem, 3vw, 2.45rem);
   font-weight: 400;
   letter-spacing: -0.04em;
@@ -6397,7 +6387,7 @@ img.lp-logo-sequence {
 .lp-friction-copy h2 {
   margin: 0;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.65rem, 2.5vw, 2.15rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -6509,7 +6499,7 @@ img.lp-logo-sequence {
 .lp-page .lp-it h2 {
   margin: 0 0 0.9rem;
   color: #16181d;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
   font-size: clamp(1.7rem, 3vw, 2.45rem);
   font-weight: 400;
   letter-spacing: -0.04em;
@@ -6585,7 +6575,7 @@ img.lp-logo-sequence {
   display: block;
   width: 100%;
   height: auto;
-  font-family: Inter, "Sora", sans-serif;
+  font-family: var(--lp-font);
 }
 
 .lp-it-link {

@@ -18,9 +18,9 @@
   --info: #0284c7;
   --success: #059669;
   --canvas-dot: #d5deea;
-  --font-sans: "Source Sans 3", "IBM Plex Sans", sans-serif;
-  --font-display: "Sora", "Source Sans 3", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Inconsolata", ui-monospace, monospace;
+  --font-display: "Inconsolata", ui-monospace, monospace;
+  --font-mono: "Inconsolata", ui-monospace, monospace;
   --radius: 16px;
   --shadow: 0 12px 32px rgba(31, 41, 79, 0.06);
 }

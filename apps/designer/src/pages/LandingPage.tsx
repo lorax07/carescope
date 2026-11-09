@@ -32,10 +32,6 @@ export function LandingPage() {
             <br />
             Designed to scale
           </h1>
-          <p>
-            Carescope Sequence brings your lab workflows, data and systems together — so you can make changes
-            faster, reduce integrations, and run a more efficient laboratory.
-          </p>
           <div className="lp-showcase-actions">
             <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
               Try free for 30 days
