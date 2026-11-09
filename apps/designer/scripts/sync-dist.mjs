@@ -11,7 +11,8 @@ if (!existsSync(designerDist)) {
   process.exit(1);
 }
 
-// Mirror to monorepo root dist/ for Vercel projects whose Root Directory is the repo root
+// Mirror to monorepo root dist/ for a project whose Root Directory is the repo root.
+// The published app is apps/designer/dist. Vercel’s root directory is apps/designer.
 rmSync(rootDist, { recursive: true, force: true });
 mkdirSync(rootDist, { recursive: true });
 cpSync(designerDist, rootDist, { recursive: true });
