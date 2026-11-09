@@ -4821,16 +4821,6 @@ img.lp-logo-sequence {
   line-height: 0.98;
 }
 
-.lp-showcase p {
-  max-width: 34rem;
-  margin: 1.45rem 0 0;
-  color: #8b919a;
-  font-family: var(--lp-font);
-  font-size: 1.05rem;
-  font-weight: 400;
-  line-height: 1.55;
-}
-
 .lp-showcase-actions {
   display: flex;
   flex-wrap: wrap;
