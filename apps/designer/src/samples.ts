@@ -14,6 +14,12 @@ export type SampleRecord = {
   orderId: string;
   received: string;
   client: string;
+  /** Sequence Client account chosen at login. The laboratory tenant stays on accountId. */
+  clientAccountId?: string;
+  patientId?: string;
+  patientName?: string;
+  physicianId?: string;
+  physicianName?: string;
   matrix: string;
   tests: string;
   status: SampleStatus;
@@ -386,6 +392,11 @@ export type SampleLog = {
   accountName: string;
   orderId: string;
   client: string;
+  clientAccountId?: string;
+  patientId?: string;
+  patientName?: string;
+  physicianId?: string;
+  physicianName?: string;
   matrix: string;
   tests: string;
   priority: SampleRecord["priority"];

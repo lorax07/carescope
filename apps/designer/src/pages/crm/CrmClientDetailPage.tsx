@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { addNote, crmCanWrite, useCrm } from "../../crm";
+import { personName } from "../../crm/clientWorkflow";
 import { CONTACT_TYPE_LABEL } from "../../crm/types";
 import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
@@ -10,6 +11,8 @@ import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
 export function CrmClientDetailPage() {
   const { accountId = "" } = useParams();
   const crm = useCrm();
+  const accountPatients = crm.patients.filter((patient) => patient.accountId === accountId);
+  const accountPhysicians = crm.physicians.filter((physician) => physician.accountId === accountId);
   const stages = useWorkflowStages();
   const card = crm.cards.find((item) => item.account.id === accountId);
   const [note, setNote] = useState("");
@@ -123,6 +126,46 @@ export function CrmClientDetailPage() {
               </tbody>
             </table>
           </div>
+          <h3>Patients</h3>
+          {accountPatients.length ? (
+            <ul className="client-flow-matches">
+              {accountPatients.map((patient) => (
+                <li key={patient.id}>
+                  <b>{personName(patient)}</b>
+                  <small>
+                    {patient.mrn} · {patient.dob}
+                  </small>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="billing-note">
+              No patients on this account.{" "}
+              <Link className="lims-linkish" to="/app/connectivity/workflows?flow=patient">
+                Register a patient
+              </Link>
+            </p>
+          )}
+          <h3>Ordering physicians</h3>
+          {accountPhysicians.length ? (
+            <ul className="client-flow-matches">
+              {accountPhysicians.map((physician) => (
+                <li key={physician.id}>
+                  <b>{personName(physician)}</b>
+                  <small>
+                    NPI {physician.npi} · {physician.specialty}
+                  </small>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="billing-note">
+              No ordering physician on this account.{" "}
+              <Link className="lims-linkish" to="/app/connectivity/workflows?flow=physician">
+                Add a physician
+              </Link>
+            </p>
+          )}
         </section>
         <section className="lims-panel billing-panel">
           <div className="lims-panel-head">

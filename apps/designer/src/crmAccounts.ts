@@ -37,6 +37,8 @@ export type CrmAccount = {
   relationship: string;
   industry: string;
   owner: string;
+  /** Practice or billing phone collected when the account is created. */
+  phone?: string;
   contact: string;
   status: AccountStatus;
   health: AccountHealth;

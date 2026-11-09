@@ -138,6 +138,38 @@ export type OpportunityRecord = {
   nextAction: string;
 };
 
+export type PatientSex = "Female" | "Male" | "Unknown";
+
+export type PatientRecord = {
+  id: string;
+  tenantId: string;
+  accountId: string;
+  accountName: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  sex: PatientSex;
+  mrn: string;
+  phone: string;
+  address: string;
+  createdAt: string;
+};
+
+export type PhysicianRecord = {
+  id: string;
+  tenantId: string;
+  accountId: string;
+  accountName: string;
+  firstName: string;
+  lastName: string;
+  npi: string;
+  specialty: string;
+  phone: string;
+  fax: string;
+  email: string;
+  createdAt: string;
+};
+
 export type CrmNote = {
   id: string;
   tenantId: string;
@@ -178,6 +210,10 @@ export type CrmOverlay = {
   nextNote: number;
   nextAudit: number;
   extraAccounts?: CrmAccount[];
+  patients: PatientRecord[];
+  physicians: PhysicianRecord[];
+  nextPatient: number;
+  nextPhysician: number;
 };
 
 export const CONTACT_TYPE_LABEL: Record<ContactType, string> = {

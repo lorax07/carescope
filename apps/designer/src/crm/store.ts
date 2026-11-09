@@ -7,6 +7,14 @@ import { findSample, useSamples, type SampleRecord } from "../samples";
 import { rollup, type Charge, type Cycle, useRevenue } from "../revenueCycle";
 import { allContacts, contactsFor } from "./contacts";
 import { derivedHealth, signalsFor } from "./health";
+import {
+  mrnTaken,
+  npiError,
+  patientDuplicate,
+  personName,
+  physicianByNpi,
+  sameAccountName,
+} from "./clientWorkflow";
 import type {
   CommunicationKind,
   CrmActivity,
@@ -20,6 +28,9 @@ import type {
   IssueStatus,
   OpportunityRecord,
   OpportunityStage,
+  PatientRecord,
+  PatientSex,
+  PhysicianRecord,
   TaskStatus,
 } from "./types";
 import { PIPELINE_STAGES } from "./types";
@@ -184,13 +195,84 @@ function seedOverlay(tenantId: string): CrmOverlay {
     nextActivity: 1,
     nextNote: 1,
     nextAudit: 2,
+    patients: [
+      {
+        id: "PAT-1001",
+        tenantId,
+        accountId: "acc-helix",
+        accountName: "Helix Biologics",
+        firstName: "Maya",
+        lastName: "Brooks",
+        dob: "1984-03-12",
+        sex: "Female",
+        mrn: "HB-1044",
+        phone: "858-555-0144",
+        address: "410 Torrey Pines, La Jolla",
+        createdAt: "2026-07-18 09:00",
+      },
+      {
+        id: "PAT-1002",
+        tenantId,
+        accountId: "acc-summit",
+        accountName: "Summit Generics",
+        firstName: "Owen",
+        lastName: "Alvarez",
+        dob: "1971-11-02",
+        sex: "Male",
+        mrn: "SG-2208",
+        phone: "919-555-0177",
+        address: "88 Capitol Blvd, Raleigh",
+        createdAt: "2026-07-19 11:20",
+      },
+    ],
+    physicians: [
+      {
+        id: "PHY-1001",
+        tenantId,
+        accountId: "acc-helix",
+        accountName: "Helix Biologics",
+        firstName: "Elena",
+        lastName: "Cho",
+        npi: "1245319599",
+        specialty: "Oncology",
+        phone: "858-555-0108",
+        fax: "858-555-0109",
+        email: "e.cho@helix.example",
+        createdAt: "2026-07-18 09:05",
+      },
+      {
+        id: "PHY-1002",
+        tenantId,
+        accountId: "acc-aether",
+        accountName: "Aether Pharma",
+        firstName: "Amir",
+        lastName: "Shah",
+        npi: "1093746281",
+        specialty: "Clinical pharmacology",
+        phone: "617-555-0160",
+        fax: "",
+        email: "a.shah@aether.example",
+        createdAt: "2026-07-19 08:40",
+      },
+    ],
+    nextPatient: 1003,
+    nextPhysician: 1003,
   };
+}
+
+function hydrate(overlay: CrmOverlay): CrmOverlay {
+  overlay.patients = overlay.patients ?? [];
+  overlay.physicians = overlay.physicians ?? [];
+  overlay.nextPatient = overlay.nextPatient || 1001;
+  overlay.nextPhysician = overlay.nextPhysician || 1001;
+  overlay.extraAccounts = overlay.extraAccounts ?? [];
+  return overlay;
 }
 
 function readOverlay(tenantId: string): CrmOverlay {
   const parsed = readJson<CrmOverlay>(storageKey(tenantId), [`carescope.crm.v1:${tenantId}`]);
   if (!parsed || parsed.version !== 1 || parsed.tenantId !== tenantId) return seedOverlay(tenantId);
-  return parsed;
+  return hydrate(parsed);
 }
 
 const overlays = new Map<string, CrmOverlay>();
@@ -199,7 +281,7 @@ const listeners = new Set<() => void>();
 function overlayFor(tenantId: string): CrmOverlay {
   const cached = overlays.get(tenantId);
   if (cached) return cached;
-  const loaded = readOverlay(tenantId);
+  const loaded = hydrate(readOverlay(tenantId));
   overlays.set(tenantId, loaded);
   return loaded;
 }
@@ -212,7 +294,7 @@ function commit(overlay: CrmOverlay) {
     /* Keep the overlay in memory if storage is full. */
   }
   listeners.forEach((listener) => listener());
-  window.dispatchEvent(new Event(EVENT));
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(EVENT));
 }
 
 function currentOverlay(): CrmOverlay {
@@ -357,11 +439,26 @@ function listedAccounts(overlay: CrmOverlay): CrmAccount[] {
   return extras.length ? [...CRM_ACCOUNTS, ...extras] : CRM_ACCOUNTS;
 }
 
-export function addClientAccount(input: { name: string; contact: string; role: string; industry: string }) {
+export type NewClientAccount = {
+  name: string;
+  industry: string;
+  phone: string;
+  contact: string;
+  role: string;
+  email: string;
+  contactPhone: string;
+  billTo: "Client" | "Insurance" | "Self-pay";
+  payer: string;
+};
+
+export function addClientAccount(input: NewClientAccount): CrmAccount | null {
+  if (!crmCanWrite()) return null;
   const name = input.name.trim();
   const contact = input.contact.trim();
-  if (!name || !contact) return;
-  const overlay = currentOverlay();
+  if (!name || !contact) return null;
+  const overlay = structuredClone(currentOverlay());
+  if (sameAccountName(listedAccounts(overlay), name)) return null;
+  const when = stamp();
   const account: CrmAccount = {
     id: `acc-${crypto.randomUUID().slice(0, 8)}`,
     number: `ACC-${1000 + (overlay.extraAccounts?.length ?? 0) + CRM_ACCOUNTS.length}`,
@@ -369,21 +466,141 @@ export function addClientAccount(input: { name: string; contact: string; role: s
     relationship: "Client",
     industry: input.industry.trim() || "Laboratory",
     owner: crmActor(),
+    phone: input.phone.trim(),
     contact,
     status: "Active",
     health: "Healthy",
     revenue: "$0 open",
-    billTo: "Client",
-    payer: `${name} AP`,
+    billTo: input.billTo,
+    payer: input.payer.trim() || (input.billTo === "Self-pay" ? "Patient" : `${name} AP`),
     pricing: "List",
-    contacts: [{ name: contact, role: input.role.trim() || "Primary contact", email: "", phone: "" }],
-    activities: [],
+    contacts: [
+      {
+        name: contact,
+        role: input.role.trim() || "Primary contact",
+        email: input.email.trim(),
+        phone: input.contactPhone.trim() || input.phone.trim(),
+      },
+    ],
+    activities: [{ when, kind: "Account", summary: "Client account opened" }],
     agreements: [],
     opportunities: [],
   };
   overlay.extraAccounts = [...(overlay.extraAccounts ?? []), account];
   audit(overlay, "account", account.id, "create", "", name);
   commit(overlay);
+  return account;
+}
+
+export type NewPatient = {
+  accountId: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  sex: PatientSex;
+  mrn: string;
+  phone: string;
+  address: string;
+};
+
+export function addPatient(input: NewPatient): PatientRecord | null {
+  if (!crmCanWrite()) return null;
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  if (!firstName || !lastName || !input.dob) return null;
+  const overlay = structuredClone(currentOverlay());
+  const account = listedAccounts(overlay).find((item) => item.id === input.accountId);
+  if (!account) return null;
+  if (patientDuplicate(overlay.patients, account.id, firstName, lastName, input.dob)) return null;
+  const mrn = input.mrn.trim() || `MRN-${overlay.nextPatient}`;
+  if (mrnTaken(overlay.patients, account.id, mrn)) return null;
+  const patient: PatientRecord = {
+    id: `PAT-${overlay.nextPatient}`,
+    tenantId: overlay.tenantId,
+    accountId: account.id,
+    accountName: account.name,
+    firstName,
+    lastName,
+    dob: input.dob,
+    sex: input.sex,
+    mrn,
+    phone: input.phone.trim(),
+    address: input.address.trim(),
+    createdAt: stamp(),
+  };
+  overlay.nextPatient += 1;
+  overlay.patients = [patient, ...overlay.patients];
+  overlay.activities.unshift({
+    id: `ACT-${overlay.nextActivity}`,
+    tenantId: overlay.tenantId,
+    accountId: account.id,
+    contactId: "",
+    at: patient.createdAt,
+    kind: "Patient",
+    summary: `${personName(patient)} registered · ${patient.mrn}`,
+    source: "crm",
+  });
+  overlay.nextActivity += 1;
+  audit(overlay, "patient", patient.id, "create", "", personName(patient));
+  commit(overlay);
+  return patient;
+}
+
+export type NewPhysician = {
+  accountId: string;
+  firstName: string;
+  lastName: string;
+  npi: string;
+  specialty: string;
+  phone: string;
+  fax: string;
+  email: string;
+};
+
+export function addPhysician(input: NewPhysician): PhysicianRecord | null {
+  if (!crmCanWrite()) return null;
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  if (!firstName || !lastName || npiError(input.npi) || !input.specialty.trim()) return null;
+  const overlay = structuredClone(currentOverlay());
+  const account = listedAccounts(overlay).find((item) => item.id === input.accountId);
+  if (!account) return null;
+  if (physicianByNpi(overlay.physicians, input.npi.trim())) return null;
+  const physician: PhysicianRecord = {
+    id: `PHY-${overlay.nextPhysician}`,
+    tenantId: overlay.tenantId,
+    accountId: account.id,
+    accountName: account.name,
+    firstName,
+    lastName,
+    npi: input.npi.trim(),
+    specialty: input.specialty.trim(),
+    phone: input.phone.trim(),
+    fax: input.fax.trim(),
+    email: input.email.trim(),
+    createdAt: stamp(),
+  };
+  overlay.nextPhysician += 1;
+  overlay.physicians = [physician, ...overlay.physicians];
+  overlay.activities.unshift({
+    id: `ACT-${overlay.nextActivity}`,
+    tenantId: overlay.tenantId,
+    accountId: account.id,
+    contactId: "",
+    at: physician.createdAt,
+    kind: "Physician",
+    summary: `${personName(physician)} added · NPI ${physician.npi}`,
+    source: "crm",
+  });
+  overlay.nextActivity += 1;
+  audit(overlay, "physician", physician.id, "create", "", personName(physician));
+  commit(overlay);
+  return physician;
+}
+
+/** Drops the in-memory overlay so a test can start from the seed. */
+export function testingClearCrm() {
+  overlays.clear();
 }
 
 function opportunities(tenantId: string, overlay: CrmOverlay): OpportunityRecord[] {
@@ -504,6 +721,8 @@ export type CrmSnapshot = {
   overlay: CrmOverlay;
   accounts: CrmAccount[];
   contacts: ReturnType<typeof allContacts>;
+  patients: PatientRecord[];
+  physicians: PhysicianRecord[];
   opportunities: OpportunityRecord[];
   cards: ClientCard[];
 };
@@ -514,6 +733,8 @@ export function snapshot(cycle: Cycle, samples: SampleRecord[]): CrmSnapshot {
   const books = rollup(cycle.charges);
   const accounts = listedAccounts(overlay);
   const contacts = allContacts(accounts, tenantId);
+  const patients = overlay.patients;
+  const physicians = overlay.physicians;
   const opportunityRows = opportunities(tenantId, overlay);
   const cards = accounts.map((account) => {
     const accountIssues = overlay.issues.filter((item) => item.accountId === account.id);
@@ -532,7 +753,7 @@ export function snapshot(cycle: Cycle, samples: SampleRecord[]): CrmSnapshot {
       collectedCents: finance?.collected ?? 0,
     };
   });
-  return { tenantId, actor: crmActor(), canWrite: crmCanWrite(), overlay, accounts, contacts, opportunities: opportunityRows, cards };
+  return { tenantId, actor: crmActor(), canWrite: crmCanWrite(), overlay, accounts, contacts, patients, physicians, opportunities: opportunityRows, cards };
 }
 
 export function useCrm() {

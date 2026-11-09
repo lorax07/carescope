@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { CRM_ACCOUNTS } from "../crmAccounts";
 import { seedCycle } from "../revenueCycle";
 import { contactTypeFor } from "./contacts";
 import { derivedHealth, signalsFor } from "./health";
-import { pageRows, snapshot } from "./store";
+import { addClientAccount, addPatient, addPhysician, pageRows, snapshot, testingClearCrm } from "./store";
+
+afterEach(() => {
+  testingClearCrm();
+});
 
 describe("Sequence Client CRM", () => {
   it("does not duplicate Sequence Client accounts", () => {
@@ -55,6 +59,67 @@ describe("Sequence Client CRM", () => {
     expect(state.overlay.tenantId).toBe(state.tenantId);
     expect(state.overlay.tasks.every((item) => item.tenantId === state.tenantId)).toBe(true);
     expect(state.overlay.issues.every((item) => item.tenantId === state.tenantId)).toBe(true);
+  });
+
+  it("saves a new account, patient, and physician for sample login", () => {
+    const account = addClientAccount({
+      name: "Harbor Clinical",
+      industry: "Clinical",
+      phone: "312-555-0100",
+      contact: "R. Hale",
+      role: "Lab director",
+      email: "r.hale@harbor.example",
+      contactPhone: "312-555-0101",
+      billTo: "Client",
+      payer: "Harbor AP",
+    });
+    expect(account?.name).toBe("Harbor Clinical");
+    expect(account?.number.startsWith("ACC-")).toBe(true);
+    const patient = addPatient({
+      accountId: account?.id ?? "",
+      firstName: "Nora",
+      lastName: "Hale",
+      dob: "1990-04-04",
+      sex: "Female",
+      mrn: "HC-1",
+      phone: "",
+      address: "",
+    });
+    const physician = addPhysician({
+      accountId: account?.id ?? "",
+      firstName: "Leah",
+      lastName: "Ortiz",
+      npi: "1987654328",
+      specialty: "Internal medicine",
+      phone: "",
+      fax: "",
+      email: "",
+    });
+    const state = snapshot(seedCycle(), []);
+    expect(state.accounts.some((item) => item.id === account?.id)).toBe(true);
+    expect(state.patients.some((item) => item.id === patient?.id && item.accountName === "Harbor Clinical")).toBe(true);
+    expect(state.physicians.some((item) => item.npi === physician?.npi)).toBe(true);
+    expect(addClientAccount({
+      name: "harbor clinical",
+      industry: "",
+      phone: "",
+      contact: "R. Hale",
+      role: "",
+      email: "",
+      contactPhone: "",
+      billTo: "Client",
+      payer: "",
+    })).toBeNull();
+    expect(addPhysician({
+      accountId: account?.id ?? "",
+      firstName: "Other",
+      lastName: "Person",
+      npi: "1987654328",
+      specialty: "Pathology",
+      phone: "",
+      fax: "",
+      email: "",
+    })).toBeNull();
   });
 
   it("pages client lists instead of sending the whole portfolio to the table", () => {

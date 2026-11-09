@@ -36,6 +36,7 @@ import { RcmQueuesPage } from "./pages/rcm/RcmQueuesPage";
 import { CrmActivitiesPage } from "./pages/crm/CrmActivitiesPage";
 import { CrmAnalyticsPage } from "./pages/crm/CrmAnalyticsPage";
 import { CrmClientDetailPage } from "./pages/crm/CrmClientDetailPage";
+import { ClientWorkflowsPage } from "./pages/crm/ClientWorkflowsPage";
 import { CrmClientsPage } from "./pages/crm/CrmClientsPage";
 import { CrmInboxPage } from "./pages/crm/CrmInboxPage";
 import { CrmContactsPage } from "./pages/crm/CrmContactsPage";
@@ -123,6 +124,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="instruments/review" element={<InstrumentReviewPage />} />
           <Route path="instruments/:instrumentId" element={<InstrumentRecordPage />} />
           <Route path="instruments" element={<InstrumentInterfacePage />} />
+          <Route path="connectivity/workflows" element={<ClientWorkflowsPage />} />
           <Route path="connectivity/clients/:accountId" element={<CrmClientDetailPage />} />
           <Route path="connectivity/clients" element={<CrmClientsPage />} />
           <Route path="connectivity/contacts" element={<CrmContactsPage />} />
