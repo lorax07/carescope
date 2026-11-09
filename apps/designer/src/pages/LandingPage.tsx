@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { BuildPlanDialog } from "./BuildPlanDialog";
 import { MARKETING_MODULES } from "./marketingModules";
@@ -895,227 +895,67 @@ function IndustrySpotlights() {
 }
 
 const REGULATIONS = [
-  { code: "21 CFR 11", name: "Electronic records and signatures", meets: "Sequence binds each signature to the section it approves and keeps the audit trail on that same electronic record." },
-  { code: "21 CFR 58", name: "Good Laboratory Practice", meets: "Sequence Operations keeps the study sample, the instrument that tested it, and the people who handled it on one record." },
-  { code: "21 CFR 210", name: "Drug manufacturing practice", meets: "Sequence holds the batch steps, the holds, and the laboratory controls on the accession the laboratory is already running." },
-  { code: "21 CFR 211", name: "Finished pharmaceuticals", meets: "Sequence records laboratory control, review, and release on the finished-product accession instead of a separate batch file." },
-  { code: "21 CFR 820", name: "Quality system regulation", meets: "Sequence Compliance keeps the device change, the deviation, and the controlled document together, with the approval on the section it covers." },
-  { code: "ISO 17025", name: "Testing laboratory competence", meets: "Sequence keeps the method, the instrument, and the result on the testing record, and the audit trail shows who changed each one." },
-  { code: "ISO 15189", name: "Medical laboratories", meets: "Sequence Operations carries a clinical sample from receipt through review, with the site and any hold visible on that accession." },
-  { code: "CLIA", name: "Clinical laboratory quality", meets: "Sequence keeps the patient test, its review, and the released result on one accession." },
-  { code: "CAP", name: "Laboratory accreditation", meets: "Sequence Compliance keeps deviations, CAPA, and the audit trail in the same module the laboratory uses for the work." },
-  { code: "EU Annex 11", name: "Computerized systems", meets: "Sequence records who changed a workflow and keeps the audit trail on that change in the designer." },
-  { code: "ICH Q7", name: "API good manufacturing", meets: "Sequence keeps the ingredient batch, its tests, and the release decision on one record, and Sequence Compliance records a deviation beside that batch." },
-  { code: "HIPAA", name: "Protected health information", meets: "Sequence Client keeps the account and its accessions together, so the laboratory work stays on that account rather than a separate list." },
+  { code: "21 CFR 11", name: "Electronic records and signatures", image: "/regulations/reg-cfr-11.jpg", meets: "Sequence binds each signature to the section it approves and keeps the audit trail on that same electronic record." },
+  { code: "21 CFR 58", name: "Good Laboratory Practice", image: "/regulations/reg-cfr-58.jpg", meets: "Sequence Operations keeps the study sample, the instrument that tested it, and the people who handled it on one record." },
+  { code: "21 CFR 210", name: "Drug manufacturing practice", image: "/regulations/reg-cfr-210.jpg", meets: "Sequence holds the batch steps, the holds, and the laboratory controls on the accession the laboratory is already running." },
+  { code: "21 CFR 211", name: "Finished pharmaceuticals", image: "/regulations/reg-cfr-211.jpg", meets: "Sequence records laboratory control, review, and release on the finished-product accession instead of a separate batch file." },
+  { code: "21 CFR 820", name: "Quality system regulation", image: "/regulations/reg-cfr-820.jpg", meets: "Sequence Compliance keeps the device change, the deviation, and the controlled document together, with the approval on the section it covers." },
+  { code: "ISO 17025", name: "Testing laboratory competence", image: "/regulations/reg-iso-17025.jpg", meets: "Sequence keeps the method, the instrument, and the result on the testing record, and the audit trail shows who changed each one." },
+  { code: "ISO 15189", name: "Medical laboratories", image: "/regulations/reg-iso-15189.jpg", meets: "Sequence Operations carries a clinical sample from receipt through review, with the site and any hold visible on that accession." },
+  { code: "CLIA", name: "Clinical laboratory quality", image: "/regulations/reg-clia.jpg", meets: "Sequence keeps the patient test, its review, and the released result on one accession." },
+  { code: "CAP", name: "Laboratory accreditation", image: "/regulations/reg-cap.jpg", meets: "Sequence Compliance keeps deviations, CAPA, and the audit trail in the same module the laboratory uses for the work." },
+  { code: "EU Annex 11", name: "Computerized systems", image: "/regulations/reg-annex-11.jpg", meets: "Sequence records who changed a workflow and keeps the audit trail on that change in the designer." },
+  { code: "ICH Q7", name: "API good manufacturing", image: "/regulations/reg-ich-q7.jpg", meets: "Sequence keeps the ingredient batch, its tests, and the release decision on one record, and Sequence Compliance records a deviation beside that batch." },
+  { code: "HIPAA", name: "Protected health information", image: "/regulations/reg-hipaa.jpg", meets: "Sequence Client keeps the account and its accessions together, so the laboratory work stays on that account rather than a separate list." },
 ] as const;
-
-function RegIcon({ code }: { code: string }) {
-  const common = {
-    viewBox: "0 0 24 24",
-    width: 28,
-    height: 28,
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.6,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
-  const paths: Record<string, ReactNode> = {
-    "21 CFR 11": (
-      <>
-        <path d="M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
-        <path d="M14 4v4h4M8 14h5M8 17h3" />
-      </>
-    ),
-    "21 CFR 58": (
-      <>
-        <rect x="6" y="3" width="12" height="18" rx="2" />
-        <path d="M9 8h6M9 12h6M9 16h4" />
-      </>
-    ),
-    "21 CFR 210": (
-      <>
-        <path d="M4 20V9l5 3V9l5 3V7l6 3v10" />
-        <path d="M4 20h16" />
-      </>
-    ),
-    "21 CFR 211": (
-      <>
-        <rect x="7" y="3" width="10" height="18" rx="5" />
-        <path d="M7 10h10" />
-      </>
-    ),
-    "21 CFR 820": (
-      <>
-        <path d="M12 3.5 19 6.5v5.2c0 4.2-2.8 7.2-7 8.8-4.2-1.6-7-4.6-7-8.8V6.5L12 3.5Z" />
-        <path d="m9 12 2 2 4-4" />
-      </>
-    ),
-    "ISO 17025": (
-      <>
-        <circle cx="12" cy="12" r="8" />
-        <path d="m8.8 12.2 2.1 2.1 4.3-4.6" />
-      </>
-    ),
-    "ISO 15189": (
-      <>
-        <path d="M12 21s-7-4.4-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 3.8C19 16.6 12 21 12 21Z" />
-      </>
-    ),
-    CLIA: (
-      <>
-        <path d="M9 3h6" />
-        <path d="M10 3v5.5L6.5 18A3.2 3.2 0 0 0 9.4 22h5.2a3.2 3.2 0 0 0 2.9-4L14 8.5V3" />
-      </>
-    ),
-    CAP: (
-      <>
-        <circle cx="12" cy="9" r="4" />
-        <path d="M8 14.5 6.5 21l5.5-2.4L17.5 21 16 14.5" />
-      </>
-    ),
-    "EU Annex 11": (
-      <>
-        <rect x="4" y="4" width="16" height="6" rx="1.5" />
-        <rect x="4" y="14" width="16" height="6" rx="1.5" />
-        <path d="M8 7h.01M8 17h.01" />
-      </>
-    ),
-    "ICH Q7": (
-      <>
-        <path d="M8 3h8M9 3v6l-3.2 6.2A3 3 0 0 0 8.4 21h7.2a3 3 0 0 0 2.6-5.8L15 9V3" />
-      </>
-    ),
-    HIPAA: (
-      <>
-        <rect x="6" y="10" width="12" height="10" rx="2" />
-        <path d="M8 10V8a4 4 0 0 1 8 0v2" />
-      </>
-    ),
-  };
-  return <svg {...common}>{paths[code]}</svg>;
-}
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-  return reduced;
-}
 
 function ComplianceSection() {
   const [query, setQuery] = useState("");
-  const [cursor, setCursor] = useState(0);
-  const [hovering, setHovering] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const previousIndex = useRef(0);
-  const reducedMotion = usePrefersReducedMotion();
   const normalized = query.trim().toLowerCase();
-  const matchIndex = normalized
-    ? REGULATIONS.findIndex((item) =>
+  const visible = normalized
+    ? REGULATIONS.filter((item) =>
         `${item.code} ${item.name} ${item.meets}`.toLowerCase().includes(normalized),
       )
-    : -1;
-  const searching = normalized.length > 0;
-
-  useEffect(() => {
-    if (searching || hovering || reducedMotion) return;
-    const timer = window.setInterval(() => {
-      setCursor((current) => (current + 1) % REGULATIONS.length);
-    }, 3000);
-    return () => window.clearInterval(timer);
-  }, [searching, hovering, reducedMotion]);
-
-  useEffect(() => {
-    const scroller = scrollRef.current;
-    if (!scroller) return;
-    const index = searching ? matchIndex : cursor;
-    if (index < 0) return;
-    const card = scroller.querySelectorAll<HTMLElement>(".lp-reg-card")[index];
-    if (!card) return;
-    const top = searching
-      ? card.offsetTop - (scroller.clientHeight - card.offsetHeight) / 2
-      : card.offsetTop;
-    const behavior: ScrollBehavior =
-      reducedMotion || (!searching && index < previousIndex.current) ? "auto" : "smooth";
-    previousIndex.current = index;
-    scroller.scrollTo({ top: Math.max(0, top), behavior });
-  }, [cursor, matchIndex, searching, reducedMotion]);
+    : REGULATIONS;
 
   return (
     <section className="lp-rigor" id="compliance" aria-labelledby="rigor-heading">
-      <h2 id="rigor-heading" className="lp-rigor-heading">Build with regulatory rigor in mind</h2>
-      <div className="lp-section lp-compliance">
-      <div className="lp-compliance-stage">
-        <img
-          className="lp-compliance-photo"
-          src="/regulations/regulated-lab-background.jpg"
-          alt=""
-        />
-        <div className="lp-compliance-layout">
-          <div className="lp-compliance-copy">
-            <h2 id="compliance-heading" className="lp-sr">
-              Sequence helps quality leadership feel at ease. The Core product and all modules continuously meet regulatory scrutiny across multiple industries.
-            </h2>
-            <ol className="lp-compliance-parts">
-              <li>Sequence helps quality leadership feel at ease.</li>
-              <li>The Core product and all modules continuously meet regulatory scrutiny</li>
-              <li>across multiple industries.</li>
-            </ol>
-            <label className="lp-reg-search">
-              <span className="lp-sr">Find your regulatory framework</span>
-              <input
-                type="search"
-                value={query}
-                placeholder="find your regulatory framework"
-                onChange={(event) => setQuery(event.target.value)}
-                aria-controls="regulation-carousel"
-              />
-            </label>
-            {searching && matchIndex < 0 ? (
-              <p className="lp-reg-empty" role="status">No framework matches that search.</p>
-            ) : null}
-            <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
-              Try free for 30 days
-            </Link>
-          </div>
-          <div
-            className={`lp-reg-scroll${searching ? " is-searching" : ""}`}
-            id="regulation-carousel"
-            ref={scrollRef}
-            tabIndex={0}
-            aria-label="Regulations"
-            onMouseEnter={() => setHovering(true)}
-            onMouseLeave={() => setHovering(false)}
-            onFocus={() => setHovering(true)}
-            onBlur={() => setHovering(false)}
-          >
-            {REGULATIONS.map((item, index) => (
-              <article
-                className={`lp-reg-card${searching && index === matchIndex ? " is-focus" : ""}`}
-                key={item.code}
-                data-code={item.code}
-              >
-                <span className="lp-reg-icon" aria-hidden="true">
-                  <RegIcon code={item.code} />
-                </span>
-                <div className="lp-reg-copy">
-                  <b>{item.code}</b>
-                  <small>{item.name}</small>
-                  <p className="lp-reg-more">{item.meets}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+      <div className="lp-rigor-copy">
+        <p className="lp-rigor-kicker">Regulatory</p>
+        <h2 id="rigor-heading" className="lp-rigor-heading">
+          <span>Build with regulatory rigor in mind.</span>
+          <span className="lp-rigor-quiet">Sequence helps quality leadership feel at ease.</span>
+        </h2>
+        <p className="lp-rigor-lede">
+          The Core product and all modules continuously meet regulatory scrutiny across multiple industries.
+        </p>
+        <label className="lp-reg-search">
+          <span className="lp-sr">Find your regulatory framework</span>
+          <input
+            type="search"
+            value={query}
+            placeholder="Find your regulatory framework"
+            onChange={(event) => setQuery(event.target.value)}
+            aria-controls="regulation-row"
+          />
+        </label>
+      </div>
+      {visible.length === 0 ? (
+        <p className="lp-reg-empty" role="status">No framework matches that search.</p>
+      ) : (
+        <div className="lp-reg-scroll" id="regulation-row" tabIndex={0} aria-label="Regulatory frameworks">
+          {visible.map((item) => (
+            <article className="lp-reg-card" key={item.code}>
+              <img src={item.image} alt="" />
+              <div className="lp-reg-caption">
+                <b>{item.code}</b>
+                <small>{item.name}</small>
+                <p>{item.meets}</p>
+              </div>
+            </article>
+          ))}
         </div>
-      </div>
-      </div>
+      )}
     </section>
   );
 }
