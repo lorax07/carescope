@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CRM_ACCOUNTS, accountByName, type AccountHealth, type CrmAccount } from "../crmAccounts";
+import { useCrm } from "../crm";
+import { accountByName, type AccountHealth, type CrmAccount } from "../crmAccounts";
 import { accountRevenueLabel, useRevenue } from "../revenueCycle";
 import { useSamples } from "../samples";
 
@@ -9,7 +10,8 @@ export function accountPath(accountId: string): string {
 }
 
 export function AccountLink({ name }: { name: string }) {
-  const account = accountByName(name);
+  const { accounts } = useCrm();
+  const account = accounts.find((item) => item.name === name) ?? accountByName(name);
   if (!account) return <>{name}</>;
   return (
     <Link className="lims-linkish" to={accountPath(account.id)}>
@@ -33,6 +35,7 @@ export function AccountTable({
 }) {
   const samples = useSamples();
   const ledger = useRevenue();
+  const { accounts } = useCrm();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All" | "Active" | "On hold">("All");
   const openByName = useMemo(() => {
@@ -44,7 +47,7 @@ export function AccountTable({
     return counts;
   }, [samples]);
 
-  const rows = CRM_ACCOUNTS.filter((account) => {
+  const rows = accounts.filter((account) => {
     if (status !== "All" && account.status !== status) return false;
     const haystack = `${account.name} ${account.number} ${account.owner} ${account.industry}`.toLowerCase();
     return haystack.includes(query.trim().toLowerCase());

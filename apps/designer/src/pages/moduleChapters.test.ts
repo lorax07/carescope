@@ -3,14 +3,15 @@ import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath 
 
 describe("client and revenue chapters", () => {
   it("keeps revenue to four work areas and adds Inbox beside the client areas", () => {
-    expect(CLIENT_CHAPTERS).toHaveLength(5);
+    expect(CLIENT_CHAPTERS).toHaveLength(6);
     expect(REVENUE_CHAPTERS).toHaveLength(4);
-    expect(new Set(CLIENT_CHAPTERS.map((chapter) => chapter.id)).size).toBe(5);
+    expect(new Set(CLIENT_CHAPTERS.map((chapter) => chapter.id)).size).toBe(6);
     expect(new Set(REVENUE_CHAPTERS.map((chapter) => chapter.id)).size).toBe(4);
   });
 
   it("places client pages in the area an account manager would open", () => {
-    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Tasks", "Projects", "Growth Hub", "Inbox"]);
+    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Workflows", "Tasks", "Projects", "Growth Hub", "Inbox"]);
+    expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/workflows")?.id).toBe("workflows");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/clients/acc-helix")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/contacts")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/documents")?.id).toBe("client");

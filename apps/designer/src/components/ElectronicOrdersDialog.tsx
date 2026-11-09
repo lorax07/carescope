@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCrm } from "../crm";
 import { logSample, SAMPLE_ACCOUNT, useSamples, type SampleRecord } from "../samples";
 
 type ElectronicOrder = {
@@ -28,6 +29,7 @@ export function ElectronicOrdersDialog({
   onReceived: (samples: SampleRecord[]) => void;
 }) {
   const samples = useSamples();
+  const { accounts } = useCrm();
   const available = ELECTRONIC_ORDERS.filter((order) => !samples.some((sample) => sample.orderId === order.orderId));
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
@@ -47,6 +49,7 @@ export function ElectronicOrdersDialog({
       accountName: SAMPLE_ACCOUNT.name,
       orderId: order.orderId,
       client: order.client,
+      clientAccountId: accounts.find((account) => account.name === order.client)?.id,
       matrix: order.matrix,
       tests: order.tests,
       priority: order.priority,

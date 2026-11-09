@@ -160,6 +160,18 @@ export function SampleDetailBody({
                 <AccountLink name={sample.client} />
               </dd>
             </div>
+            {sample.patientName ? (
+              <div>
+                <dt>Patient</dt>
+                <dd>{sample.patientName}</dd>
+              </div>
+            ) : null}
+            {sample.physicianName ? (
+              <div>
+                <dt>Ordering physician</dt>
+                <dd>{sample.physicianName}</dd>
+              </div>
+            ) : null}
             <div>
               <dt>Matrix</dt>
               <dd>{sample.matrix}</dd>

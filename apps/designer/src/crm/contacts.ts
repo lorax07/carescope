@@ -16,7 +16,8 @@ export function contactTypeFor(role: string): ContactType {
 }
 
 export function contactId(accountId: string, contact: AccountContact): string {
-  return `${accountId}:${contact.email}`;
+  const key = contact.email.trim() || contact.name.trim() || contact.phone.trim();
+  return `${accountId}:${key}`;
 }
 
 export function contactsFor(account: CrmAccount, tenantId: string): ContactRecord[] {

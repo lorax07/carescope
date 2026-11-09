@@ -37,6 +37,14 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
     ],
   },
   {
+    id: "workflows",
+    to: "/app/connectivity/workflows",
+    label: "Workflows",
+    question: "Create an account, a patient, or a physician.",
+    hideTools: true,
+    tools: [{ to: "/app/connectivity/workflows", label: "Workflows", match: "/app/connectivity/workflows" }],
+  },
+  {
     id: "tasks",
     to: "/app/connectivity/tasks",
     label: "Tasks",

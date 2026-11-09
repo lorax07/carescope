@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { addClientAccount, useCrm, type ClientCard } from "../../crm";
+import { useCrm, type ClientCard } from "../../crm";
 import { ClientAssist, ClientAvatar, SourceBars, clientBudget } from "./clientStudio";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 
@@ -22,8 +22,6 @@ export function CrmClientsPage() {
   const { cards, actor, canWrite, accounts } = useCrm();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") || "");
-  const [adding, setAdding] = useState(false);
-  const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
   const [saved, setSaved] = useState<string[]>([]);
   const filter = params.get("view") || (params.get("status") === "On hold" ? "hold" : params.get("health") === "At risk" || params.get("health") === "Critical" ? "watch" : "all");
   const filtered = useMemo(() => {
@@ -66,12 +64,13 @@ export function CrmClientsPage() {
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search clients" />
             </label>
             {canWrite ? (
-              <button type="button" className="client-add" onClick={() => setAdding(true)}>
+              <Link className="client-add" to="/app/connectivity/workflows?flow=account">
                 Add new Client
-              </button>
+              </Link>
             ) : null}
           </header>
           <div className="client-board-links">
+            <Link to="/app/connectivity/workflows">Workflows</Link>
             <Link to="/app/connectivity/contacts">People</Link>
             <Link to="/app/connectivity/documents">Agreements</Link>
             <Link to="/app/connectivity/health">Health</Link>
@@ -153,33 +152,6 @@ export function CrmClientsPage() {
           <ClientAssist actor={actor} hint="A saved star stays on this screen until you leave it." />
         </aside>
       </div>
-      {adding ? (
-        <div className="lims-modal-backdrop" role="presentation" onClick={() => setAdding(false)}>
-          <form
-            className="lims-modal client-add-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-client-title"
-            onClick={(event) => event.stopPropagation()}
-            onSubmit={(event) => {
-              event.preventDefault();
-              addClientAccount(draft);
-              setAdding(false);
-              setDraft({ name: "", contact: "", role: "", industry: "" });
-            }}
-          >
-            <div className="lims-dialog-bar">
-              <h2 id="add-client-title">Add new Client</h2>
-              <button type="button" className="btn" onClick={() => setAdding(false)}>Close</button>
-            </div>
-            <label>Account name<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
-            <label>Primary contact<input value={draft.contact} onChange={(event) => setDraft({ ...draft, contact: event.target.value })} required /></label>
-            <label>Role<input value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Lab director" /></label>
-            <label>Sector<input value={draft.industry} onChange={(event) => setDraft({ ...draft, industry: event.target.value })} placeholder="Pharmaceutical" /></label>
-            <button type="submit" className="btn btn-primary">Save client</button>
-          </form>
-        </div>
-      ) : null}
     </CrmShell>
   );
 }

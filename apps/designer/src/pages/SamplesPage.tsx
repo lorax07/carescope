@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
@@ -285,7 +285,12 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
   const [openSample, setOpenSample] = useState<SampleRecord | null>(null);
   const [receiptSample, setReceiptSample] = useState<SampleRecord | null>(null);
   const [receiveOpen, setReceiveOpen] = useState(false);
-  const [logOpen, setLogOpen] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const presetAccount = params.get("account") ?? "";
+  const [logOpen, setLogOpen] = useState(Boolean(presetAccount));
+  useEffect(() => {
+    if (view === "home" && presetAccount) setLogOpen(true);
+  }, [presetAccount, view]);
   const [filter, setFilter] = useState<QuickFilter>("all");
   const [conditionFilters, setConditionFilters] = useState<SampleCondition[]>([]);
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>("all");
@@ -749,7 +754,15 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
 
       {logOpen ? (
         <LogSampleDialog
-          onClose={() => setLogOpen(false)}
+          initialAccountId={presetAccount}
+          onClose={() => {
+            setLogOpen(false);
+            if (params.has("account")) {
+              const next = new URLSearchParams(params);
+              next.delete("account");
+              setParams(next, { replace: true });
+            }
+          }}
           onLogged={(sample) => {
             setLogOpen(false);
             setOpenSample(sample);
