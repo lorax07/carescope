@@ -12,7 +12,7 @@ const decoder = new TextDecoder();
 
 describe("pricing quote", () => {
   it("keeps Starter free in year one and prices support from the $15,000 plan", () => {
-    const quote = quotePlan({ coreId: "starter", modules: [], implementation: [], supportId: "priority" });
+    const quote = quotePlan({ coreId: "starter", modules: [], implementation: [], supportId: "standard" });
     expect(quote.lines.core.value).toBe("Year 1 free, then $15,000 / year");
     expect(quote.supportAnnual).toBe(2_250);
     expect(quote.yearOne).toBe(2_250);
@@ -21,19 +21,19 @@ describe("pricing quote", () => {
     expect(quote.lines.totals.map((line) => line.label)).toEqual(["First year", "After the first year", "One time"]);
   });
 
-  it("matches the published $100,000 example for Priority and Premium", () => {
-    const priority = quotePlan({
+  it("matches the published $100,000 example for Standard and Premium", () => {
+    const standard = quotePlan({
       coreId: "professional",
       modules: ["instruments", "revenue"],
       implementation: ["database", "validation"],
-      supportId: "priority",
+      supportId: "standard",
     });
-    expect(priority.supportAnnual).toBe(15_000);
-    expect(priority.modulesAnnual).toBe(48_000);
-    expect(priority.oneTime).toBe(16_000);
-    expect(priority.yearOne).toBe(163_000);
-    expect(priority.ongoing).toBe(163_000);
-    expect(priority.lines.totals[0]).toEqual({ label: "Annual subscription", value: "$163,000 / year" });
+    expect(standard.supportAnnual).toBe(15_000);
+    expect(standard.modulesAnnual).toBe(48_000);
+    expect(standard.oneTime).toBe(16_000);
+    expect(standard.yearOne).toBe(163_000);
+    expect(standard.ongoing).toBe(163_000);
+    expect(standard.lines.totals[0]).toEqual({ label: "Annual subscription", value: "$163,000 / year" });
 
     const premium = quotePlan({ coreId: "professional", modules: ["operations"], implementation: [], supportId: "premium" });
     expect(premium.supportAnnual).toBe(22_000);
@@ -56,7 +56,7 @@ describe("pricing quote", () => {
       coreId: "professional",
       modules: ["instruments"],
       implementation: ["database"],
-      supportId: "priority",
+      supportId: "standard",
     });
     const pdf = decoder.decode(buildPricingPdf(quote, "lab@example.com", "October 28, 2026"));
     expect(pdf.startsWith("%PDF-1.4")).toBe(true);
@@ -72,6 +72,17 @@ describe("pricing quote", () => {
     expect(pdf).toContain("15% of the annual plan");
     const positions = [...pdf.matchAll(/1 0 0 1 [\d.]+ ([\d.]+) Tm/g)].map((match) => Number(match[1]));
     expect(Math.min(...positions)).toBeGreaterThan(36);
+    const addressed = decoder.decode(
+      buildPricingPdf(quote, "ada@northlab.example", "October 28, 2026", {
+        name: "Ada Lovelace",
+        role: "Lab director",
+        phone: "312-555-0100",
+      }),
+    );
+    expect(addressed).toContain("Prepared for Ada Lovelace, Lab director");
+    expect(addressed).toContain("ada@northlab.example");
+    expect(addressed).toContain("312-555-0100");
+    expect(addressed.match(/\/Type \/Page\b/g)).toHaveLength(1);
     expect(formatMoney(100_000)).toBe("$100,000");
     expect(isPricingEmail("lab@example.com")).toBe(true);
     expect(isPricingEmail("not an email")).toBe(false);
