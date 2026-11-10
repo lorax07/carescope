@@ -836,6 +836,8 @@ function ItInfrastructure({ motion }: { motion: boolean }) {
   );
 }
 
+const IT_BADGES = ["Directory", "Storage", "Instruments", "Network"] as const;
+
 function ItFriendly() {
   const [motion, setMotion] = useState(true);
 
@@ -849,17 +851,34 @@ function ItFriendly() {
 
   return (
     <section className="lp-section lp-it" id="it-friendly" aria-labelledby="it-friendly-heading">
-      <div className="lp-section-inner lp-it-layout">
-        <div>
-          <h2 id="it-friendly-heading">IT friendly by design</h2>
-          <p className="lp-it-problem">Many laboratory systems add unnecessary complexity to traditional IT infrastructure.</p>
-          <p className="lp-it-lead">Carescope Sequence is designed to</p>
-          <ol className="lp-it-parts">
-            <li>integrate seamlessly with existing systems</li>
-            <li>simplify maintenance</li>
-            <li>and give IT teams greater flexibility and control</li>
-          </ol>
+      <div className="lp-it-band">
+        <p className="lp-it-kicker">IT</p>
+        <div className="lp-it-top">
+          <h2 id="it-friendly-heading">
+            <span>IT friendly by design.</span>
+            <span className="lp-it-quiet">Carescope Sequence is designed to</span>
+          </h2>
+          <ul className="lp-it-badges" aria-label="Systems Sequence connects">
+            {IT_BADGES.map((label) => (
+              <li key={label}>
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                  <circle cx="60" cy="60" r="46" />
+                  <circle cx="60" cy="60" r="38" />
+                  <text x="60" y="64">{label}</text>
+                </svg>
+              </li>
+            ))}
+          </ul>
         </div>
+        <p className="lp-it-problem">Many laboratory systems add unnecessary complexity to traditional IT infrastructure.</p>
+        <Link to="/app?signup=1" className="lp-it-cta">Try free for 30 days</Link>
+        <ol className="lp-it-parts">
+          <li>integrate seamlessly with existing systems</li>
+          <li>simplify maintenance</li>
+          <li>and give IT teams greater flexibility and control</li>
+        </ol>
+      </div>
+      <div className="lp-it-visual">
         <ItInfrastructure motion={motion} />
       </div>
     </section>
