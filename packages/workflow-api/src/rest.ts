@@ -10,6 +10,14 @@ import {
   evaluateRules,
 } from "@carescope/workflow-core";
 import { getDefaultTenant, getPlatform } from "./platform.js";
+import {
+  BOOKMARK_LIMIT,
+  BookmarkInputError,
+  BookmarkLimitError,
+  addBookmark,
+  listBookmarks,
+  removeBookmark,
+} from "./bookmarks.js";
 
 function tenantId(req: Request): string {
   return String(req.header("x-tenant-id") ?? getDefaultTenant());
@@ -46,6 +54,34 @@ export function createRestRouter(): Router {
   router.get("/health", (_req, res) => {
     res.json({ status: "ok", service: "carescope-workflow-api", time: new Date().toISOString() });
   });
+
+  router.get("/bookmarks", (req, res) => {
+    res.json({ bookmarks: listBookmarks(userId(req)), limit: BOOKMARK_LIMIT });
+  });
+
+  router.post("/bookmarks", (req, res) => {
+    try {
+      const { bookmark, created } = addBookmark(userId(req), req.body ?? {});
+      res.status(created ? 201 : 200).json(bookmark);
+    } catch (error) {
+      if (error instanceof BookmarkLimitError || error instanceof BookmarkInputError) {
+        res.status(error.status).json({ error: error.message, limit: BOOKMARK_LIMIT });
+        return;
+      }
+      throw error;
+    }
+  });
+
+  router.delete(
+    "/bookmarks/:id",
+    (req, res) => {
+      if (!removeBookmark(userId(req), param(req, "id"))) {
+        res.status(404).json({ error: "Bookmark not found" });
+        return;
+      }
+      res.status(204).end();
+    }
+  );
 
   router.get("/catalog/nodes", (_req, res) => {
     const { registry } = getPlatform();
