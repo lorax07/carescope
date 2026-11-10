@@ -6860,17 +6860,21 @@ img.lp-logo-sequence {
 .lp-page .lp-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.85rem;
   min-width: 0;
   text-decoration: none;
 }
 
 .lp-page .lp-logo-rule {
-  display: none;
+  display: block;
+  width: 1px;
+  height: 1.7rem;
+  margin: 0;
+  background: #d0d0d0;
 }
 
 .lp-page .lp-header-logo {
-  height: 32px;
+  height: 30px;
 }
 
 .lp-page img.lp-logo-sequence {

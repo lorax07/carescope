@@ -38,11 +38,12 @@ export function SiteHeader() {
           <Link to="/" className="lp-logo" aria-label="Carescope Sequence home">
             <img
               className="lp-header-logo"
-              src="/carescope-header-logo.png"
-              width={156}
-              height={39}
+              src="/carescope-mark.png"
+              width={86}
+              height={97}
               alt=""
             />
+            <span className="lp-logo-rule" aria-hidden="true" />
             <img className="lp-logo-sequence" src="/sequence-logo.png" width={1790} height={291} alt="Sequence" />
           </Link>
         </div>
