@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { BookmarkMenu } from "./components/BookmarkMenu";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { InstrumentRecordView } from "./components/InstrumentRecordView";
@@ -1107,6 +1108,7 @@ function AppFrame() {
           />
         </div>
         <div className="lims-topbar-meta">
+          <BookmarkMenu userId={lims?.userId || lims?.username || "M. Chen"} />
           <time className="lims-chip" dateTime={now.toISOString()}>
             {signedInName} · {now.toLocaleString()}
           </time>
