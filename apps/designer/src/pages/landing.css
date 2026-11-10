@@ -6877,32 +6877,25 @@ img.lp-logo-sequence {
   height: 20px;
 }
 
-.lp-brand-chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin: 0;
+.lp-page .lp-modules-btn,
+.lp-home .lp-modules-btn {
+  gap: 0.28rem;
   padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #111;
+  color: #000;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: -0.011em;
+  line-height: 1;
   cursor: pointer;
 }
 
-.lp-brand-chevron:hover {
-  background: #f3f3f3;
+.lp-page .lp-modules-btn[aria-current="page"] {
+  font-weight: 600;
 }
 
-.lp-modules.is-open .lp-brand-chevron svg {
-  transform: rotate(180deg);
-}
-
-.lp-brand-chevron svg {
+.lp-page .lp-modules-btn svg {
   display: block;
-  transition: transform 0.15s ease;
 }
 
 .lp-page .lp-nav-links,
