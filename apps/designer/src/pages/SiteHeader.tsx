@@ -45,16 +45,24 @@ export function SiteHeader() {
             />
             <img className="lp-logo-sequence" src="/sequence-logo.png" width={1790} height={291} alt="Sequence" />
           </Link>
+        </div>
+
+        <nav className="lp-nav-links" aria-label="Primary">
+          <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>
+            Home
+          </Link>
+          <a href="/#less-friction">What we solve</a>
           <div className={`lp-modules${open ? " is-open" : ""}`} ref={rootRef}>
             <button
               type="button"
-              className="lp-brand-chevron"
+              className="lp-modules-btn"
               aria-expanded={open}
               aria-haspopup="menu"
               aria-controls={menuId}
-              aria-label="Modules"
+              aria-current={pathname.startsWith("/modules") ? "page" : undefined}
               onClick={() => setOpen((current) => !current)}
             >
+              Modules
               <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
                 <path
                   d="M2.2 4.3 6 8.1l3.8-3.8"
@@ -79,13 +87,6 @@ export function SiteHeader() {
               </ul>
             ) : null}
           </div>
-        </div>
-
-        <nav className="lp-nav-links" aria-label="Primary">
-          <Link to="/" aria-current={pathname === "/" ? "page" : undefined}>
-            Home
-          </Link>
-          <a href="/#less-friction">What we solve</a>
           <Link to="/pricing" aria-current={pathname === "/pricing" ? "page" : undefined}>
             Pricing
           </Link>
