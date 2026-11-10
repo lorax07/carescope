@@ -61,25 +61,25 @@ export const IMPLEMENTATION: readonly ImplementationOffer[] = [
 
 export const SUPPORT: readonly SupportOffer[] = [
   {
-    id: "standard",
-    name: "Standard",
+    id: "response-72",
+    name: "72 hour response",
     priceLabel: "Included",
     percent: 0,
-    detail: "Monday to Friday, business hours, by email. A reply within one business day for the modules you subscribe to.",
+    detail: "Monday to Friday, business hours, by email. A reply within 72 hours for the modules you subscribe to.",
   },
   {
-    id: "priority",
-    name: "Priority",
+    id: "standard",
+    name: "Standard",
     priceLabel: "15% of the annual plan",
     percent: 15,
-    detail: "Phone and email during business hours. Critical issues are answered within 4 hours.",
+    detail: "Phone and email during business hours. A reply within 24 hours.",
   },
   {
     id: "premium",
     name: "Premium",
     priceLabel: "22% of the annual plan",
     percent: 22,
-    detail: "Critical issues are covered 24×7, with a reply within 1 hour, a named contact, and a quarterly review.",
+    detail: "A reply within 4 hours, a named contact, and a quarterly review.",
   },
 ];
 
@@ -221,7 +221,19 @@ function textWidth(text: string, size: number, bold: boolean): number {
   return (units / 1000) * size * (bold ? 1.04 : 1);
 }
 
-export function buildPricingPdf(quote: PlanQuote, email: string, dateLabel: string): Uint8Array {
+export type QuoteContact = {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+};
+
+export function buildPricingPdf(
+  quote: PlanQuote,
+  email: string,
+  dateLabel: string,
+  contact?: Pick<QuoteContact, "name" | "role" | "phone">,
+): Uint8Array {
   const left = 48;
   const right = 564;
   const commands: string[] = [];
@@ -242,11 +254,26 @@ export function buildPricingPdf(quote: PlanQuote, email: string, dateLabel: stri
 
   let y = 718;
   ink("0.086 0.094 0.114");
-  textAt(`Prepared for ${email.trim()}`, left, y, 11, true);
-  y -= 16;
-  ink("0.361 0.396 0.439");
-  textAt(dateLabel, left, y, 9);
-  y -= 24;
+  if (contact?.name?.trim()) {
+    const role = contact.role?.trim() ? `, ${contact.role.trim()}` : "";
+    textAt(`Prepared for ${contact.name.trim()}${role}`, left, y, 11, true);
+    y -= 14;
+    ink("0.361 0.396 0.439");
+    textAt(email.trim(), left, y, 9);
+    y -= 12;
+    if (contact.phone?.trim()) {
+      textAt(contact.phone.trim(), left, y, 9);
+      y -= 12;
+    }
+    textAt(dateLabel, left, y, 9);
+    y -= 18;
+  } else {
+    textAt(`Prepared for ${email.trim()}`, left, y, 11, true);
+    y -= 16;
+    ink("0.361 0.396 0.439");
+    textAt(dateLabel, left, y, 9);
+    y -= 24;
+  }
 
   ink("0.086 0.094 0.114");
   textAt("Your plan", left, y, 12, true);
@@ -323,7 +350,7 @@ export function buildPricingPdf(quote: PlanQuote, email: string, dateLabel: stri
   }
   y -= 8;
   ink("0.361 0.396 0.439");
-  textAt("On a $100,000 plan, Priority is $15,000 a year and Premium is $22,000 a year.", left, y, 8);
+  textAt("On a $100,000 plan, Standard is $15,000 a year and Premium is $22,000 a year.", left, y, 8);
   y -= 12;
   textAt("Enterprise pricing and support are quoted. Carescope.", left, y, 8);
 
