@@ -18,9 +18,9 @@
   --info: #0284c7;
   --success: #059669;
   --canvas-dot: #d5deea;
-  --font-sans: "Inconsolata", ui-monospace, monospace;
-  --font-display: "Inconsolata", ui-monospace, monospace;
-  --font-mono: "Inconsolata", ui-monospace, monospace;
+  --font-sans: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "Plus Jakarta Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --radius: 16px;
   --shadow: 0 12px 32px rgba(31, 41, 79, 0.06);
 }
@@ -40,6 +40,7 @@ body,
 
 body {
   font-family: var(--font-sans);
+  font-weight: 450;
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
