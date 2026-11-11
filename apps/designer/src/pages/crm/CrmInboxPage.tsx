@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
-import { CrmShell } from "./CrmShell";
+import { CrmModuleTitle, CrmShell } from "./CrmShell";
 import {
   attachmentNote,
   buildInboxThreads,
@@ -123,6 +123,7 @@ export function CrmInboxPage() {
 
   return (
     <CrmShell studio title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
+      <CrmModuleTitle title="Inbox" />
       <div className="inbox">
         <section className="inbox-thread" aria-label={selected ? `Conversation with ${selected.name}` : "Conversation"}>
           {selected ? (

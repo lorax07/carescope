@@ -7087,15 +7087,115 @@ button.palette-category-title {
   grid-column: 1 / -1;
 }
 
-.client-overview-head .lims-eyebrow {
-  margin-bottom: 0.2rem;
+.crm-studio-title {
+  min-width: 0;
 }
 
+.crm-studio-title h1,
 .client-overview-title {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.45rem;
   letter-spacing: -0.03em;
+}
+
+.wildcard01 {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+}
+
+.wildcard01.is-on {
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(31, 41, 79, 0.08);
+}
+
+.wildcard01 input,
+.wildcard01-trigger,
+.wildcard01-menu-btn {
+  border: 0;
+  background: transparent;
+  color: #667085;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.wildcard01.is-on .wildcard01-trigger,
+.wildcard01.is-on .wildcard01-menu-btn {
+  color: #1d2433;
+}
+
+.wildcard01-trigger {
+  padding: 0.35rem 0.15rem 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.wildcard01 input {
+  width: 9.5rem;
+  padding: 0.35rem 0.7rem;
+  color: #1d2433;
+  outline: none;
+}
+
+.wildcard01-menu-btn {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.wildcard01-menu-btn svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.wildcard01-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 30;
+  width: max-content;
+  min-width: 11rem;
+  max-width: 16rem;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(31, 41, 79, 0.12);
+}
+
+.wildcard01-menu button {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #1d2433;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wildcard01-menu button:hover {
+  background: #f4f1ff;
+}
+
+.wildcard01-empty {
+  padding: 0.4rem 0.5rem;
+  color: #8b93a7;
+  font-size: 0.75rem;
 }
 
 .client-chart-hint {
@@ -7207,6 +7307,43 @@ button.palette-category-title {
   background: #fff;
   box-shadow: 0 6px 16px rgba(31, 41, 79, 0.08);
   color: #1d2433;
+}
+
+.client-pills .wildcard01-trigger,
+.client-pills .wildcard01-menu-btn,
+.client-pills .wildcard01-menu button {
+  background: transparent;
+  box-shadow: none;
+}
+
+.client-pills .wildcard01-trigger {
+  max-width: 12rem;
+  overflow: hidden;
+  padding: 0.35rem 0.15rem 0.35rem 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.client-pills .wildcard01-menu-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+}
+
+.client-pills .wildcard01-menu button {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.client-pills .wildcard01.is-on .wildcard01-trigger,
+.client-pills .wildcard01.is-on .wildcard01-menu-btn {
+  color: #1d2433;
+}
+
+.client-studio > .crm-studio-title {
+  margin-bottom: 0.85rem;
 }
 
 .client-pills em {

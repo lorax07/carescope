@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, type TaskStatus } from "../../crm";
 import { ClientAssist, ClientAvatar, shortDate } from "./clientStudio";
-import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
 
 const SCOPES = [
   { id: "open", label: "Open" },
@@ -57,7 +57,7 @@ export function CrmTasksPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Cases</h1>
+            <CrmModuleTitle title="Cases" />
           </header>
           <div className="client-board-links">
             <Link to="/app/connectivity/inbox">Inbox</Link>

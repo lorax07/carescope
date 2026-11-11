@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import type { Charge } from "../../revenueCycle";
 import { ClientAssist, ProjectTable, RevenueChart, StudioLink, paymentBars, type ProjectFilter } from "./clientStudio";
-import { CrmShell } from "./CrmShell";
+import { CrmModuleTitle, CrmShell } from "./CrmShell";
 
 function postedPayments(charges: Charge[]): { at: string; cents: number }[] {
   return charges.flatMap((charge) =>
@@ -28,8 +28,7 @@ export function CrmOverviewPage() {
     <CrmShell studio title="CRM Overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
       <div className="client-home">
         <div className="client-overview-head">
-          <p className="lims-eyebrow">Sequence CRM</p>
-          <h1 className="client-overview-title">CRM Overview</h1>
+          <CrmModuleTitle title="CRM Overview" />
         </div>
         <div className="client-home-main">
           <div className="client-kpis">

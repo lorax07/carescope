@@ -4,6 +4,15 @@ import { CLIENT_CHAPTERS } from "../moduleChapters";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
+export function CrmModuleTitle({ title }: { title: string }) {
+  return (
+    <div className="crm-studio-title">
+      <p className="lims-eyebrow">Sequence CRM</p>
+      <h1>{title}</h1>
+    </div>
+  );
+}
+
 export function CrmShell({
   title,
   lede,
