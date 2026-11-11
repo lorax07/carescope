@@ -7083,8 +7083,15 @@ button.palette-category-title {
   text-decoration: none;
 }
 
-.client-overview-title {
+.client-overview-head {
   grid-column: 1 / -1;
+}
+
+.client-overview-head .lims-eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.client-overview-title {
   margin: 0;
   font-family: var(--font-display);
   font-size: 1.45rem;

@@ -56,11 +56,11 @@ export function CrmClientsPage() {
   }
 
   return (
-    <CrmShell studio title="Client" lede="The people on Sequence Client accounts.">
+    <CrmShell studio title="Client" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
-            <h1>Manage Clients</h1>
+            <h1>Manage Accounts</h1>
             <label>
               <span className="sr-only">Search clients</span>
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search clients" />

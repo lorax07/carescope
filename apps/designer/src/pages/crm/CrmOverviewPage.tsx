@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
-import { money, type Charge } from "../../revenueCycle";
+import type { Charge } from "../../revenueCycle";
 import { ClientAssist, ProjectTable, RevenueChart, StudioLink, paymentBars, type ProjectFilter } from "./clientStudio";
 import { CrmShell } from "./CrmShell";
 
@@ -18,40 +18,40 @@ export function CrmOverviewPage() {
   const [filter, setFilter] = useState<ProjectFilter>("active");
   const [query, setQuery] = useState("");
   const active = cards.filter((card) => card.account.status === "Active");
-  const collected = cards.reduce((sum, card) => sum + card.collectedCents, 0);
-  const openAr = cards.reduce((sum, card) => sum + card.arCents, 0);
   const openProjects = opportunities.filter((item) => item.stage !== "Won" && item.stage !== "Lost");
   const moving = openProjects.filter((item) => item.stage === "Proposal" || item.stage === "Negotiation" || item.stage === "Qualified");
   const openTasks = overlay.tasks.filter((item) => item.status !== "done");
   const series = useMemo(() => paymentBars(postedPayments(charges), 2026, 7), [charges]);
-  const paidShare = collected + openAr > 0 ? Math.round((collected / (collected + openAr)) * 100) : 0;
   const watch = cards.filter((card) => card.health === "At risk" || card.health === "Critical").length;
 
   return (
-    <CrmShell studio title="Client overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
+    <CrmShell studio title="CRM Overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
       <div className="client-home">
-        <h1 className="client-overview-title">Client Overview</h1>
+        <div className="client-overview-head">
+          <p className="lims-eyebrow">Sequence CRM</p>
+          <h1 className="client-overview-title">CRM Overview</h1>
+        </div>
         <div className="client-home-main">
           <div className="client-kpis">
             <StudioLink to="/app/connectivity/clients">
               <header>
-                <span>Clients</span>
+                <span>Accounts</span>
                 <em className="is-up">+{active.length}</em>
               </header>
               <strong>{cards.length}</strong>
               <small>{active.length} active</small>
             </StudioLink>
-            <StudioLink to="/app/connectivity/analytics">
+            <StudioLink to="/app/connectivity/tasks">
               <header>
-                <span>Revenue</span>
-                <em className={paidShare >= 50 ? "is-up" : "is-down"}>{paidShare}%</em>
+                <span>Cases</span>
+                <em className="is-up">+{openTasks.length}</em>
               </header>
-              <strong>{money(collected)}</strong>
-              <small>{money(openAr)} still open</small>
+              <strong>{openTasks.length}</strong>
+              <small>Open cases</small>
             </StudioLink>
             <StudioLink to="/app/connectivity/opportunities">
               <header>
-                <span>Projects</span>
+                <span>Marketing</span>
                 <em className="is-up">+{moving.length}</em>
               </header>
               <strong>{openProjects.length}</strong>
@@ -84,13 +84,13 @@ export function CrmOverviewPage() {
             </div>
           </section>
 
-          <ProjectTable scroll rows={opportunities} accounts={accounts} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
+          <ProjectTable scroll title="Manage Cases" rows={opportunities} accounts={accounts} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
         </div>
 
         <aside className="client-home-side">
           <section className="client-card client-tasks">
             <header>
-              <h2>Priority tasks</h2>
+              <h2>Priority cases</h2>
               <Link to="/app/connectivity/tasks">See all</Link>
             </header>
             {openTasks.length ? (
@@ -110,7 +110,7 @@ export function CrmOverviewPage() {
                 ))}
               </ul>
             ) : (
-              <p className="client-empty">No open tasks.</p>
+              <p className="client-empty">No open cases.</p>
             )}
           </section>
           <ClientAssist actor={actor} hint="Search uses the same client accounts as the laboratory and Sequence Revenue." />

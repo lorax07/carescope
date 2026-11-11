@@ -75,7 +75,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
   },
   {
     slug: "client",
-    title: "Sequence Client",
+    title: "Sequence CRM",
     detail: "A state-of-the-art CRM, tailor-made for the healthcare industry",
     tone: "violet",
     appPath: "/app/connectivity",
@@ -84,7 +84,7 @@ export const MARKETING_MODULES: MarketingModule[] = [
       "The account, the agreement, and the laboratory work live apart. A client call starts with three searches, and the person on the phone cannot see the accessions already in the lab.",
     solutionTitle: "One client record for the account and the work",
     solution:
-      "Sequence Client holds contacts, agreements, pipeline, issues, and the laboratory work under that name. It is the same account table Sequence Revenue and the sample pages use.",
+      "Sequence CRM holds contacts, agreements, pipeline, issues, and the laboratory work under that name. It is the same account table Sequence Revenue and the sample pages use.",
     points: [
       "Work queues show which clients need a person today",
       "Health is explained from holds, denials, issues, and overdue tasks",

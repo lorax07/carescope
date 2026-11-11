@@ -211,7 +211,7 @@ export const SYSTEM_WORKFLOWS: SystemWorkflowDefinition[] = [
     ["quality-capa", "Sequence Compliance", "Deviation & CAPA", "Report deviations, contain impact, investigate root cause, implement CAPA, and verify effectiveness.", ["Report", "Containment", "Investigation", "CAPA", "QA close"]],
     ["instrument-qualification", "Sequence Instruments", "Instrument Qualification & Calibration", "Add instruments, qualify interfaces, schedule calibration, and retain maintenance evidence.", ["Identity", "Interface", "Qualification", "Calibration", "In service"]],
     ["revenue-cycle", "Sequence Revenue", "Laboratory Revenue Cycle", "Create charges from completed testing, resolve exceptions, and route approved billing.", ["Charge capture", "Coding", "Exception review", "Approval", "Invoice"]],
-    ["client-environment", "Sequence Client", "Client & Lab Environment Setup", "Create a client, configure laboratories and environments, assign modules, and promote an installation.", ["Create client", "Add laboratory", "Configure environment", "Assign modules", "Promote"]],
+    ["client-environment", "Sequence CRM", "Client & Lab Environment Setup", "Create a client, configure laboratories and environments, assign modules, and promote an installation.", ["Create client", "Add laboratory", "Configure environment", "Assign modules", "Promote"]],
     ["insight-escalation", "Sequence Insights", "Operational Insight Escalation", "Detect an operational signal, assemble supporting records, assign an owner, and track resolution.", ["Signal detected", "Evidence assembled", "Owner assigned", "Action tracked", "Resolved"]],
   ].map(([id, module, name, description, labels]) => ({
     id: id as string,

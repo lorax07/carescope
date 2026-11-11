@@ -53,11 +53,11 @@ export function CrmTasksPage() {
   }
 
   return (
-    <CrmShell studio title="Tasks" lede="What someone owes a client today.">
+    <CrmShell studio title="Cases" lede="What someone owes a client today.">
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Tasks</h1>
+            <h1>Cases</h1>
           </header>
           <div className="client-board-links">
             <Link to="/app/connectivity/inbox">Inbox</Link>

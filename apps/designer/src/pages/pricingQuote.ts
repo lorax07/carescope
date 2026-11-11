@@ -48,7 +48,7 @@ export const MODULE_OFFERS: readonly ModuleOffer[] = [
   { slug: "operations", title: "Sequence Operations", priceLabel: "Included", monthly: 0, included: true },
   { slug: "instruments", title: "Sequence Instruments", priceLabel: "+$1,500/mo", monthly: 1_500, included: false },
   { slug: "compliance", title: "Sequence Compliance", priceLabel: "+$1,500/mo", monthly: 1_500, included: false },
-  { slug: "client", title: "Sequence Client", priceLabel: "+$1,000/mo", monthly: 1_000, included: false },
+  { slug: "client", title: "Sequence CRM", priceLabel: "+$1,000/mo", monthly: 1_000, included: false },
   { slug: "revenue", title: "Sequence Revenue", priceLabel: "+$2,500/mo", monthly: 2_500, included: false },
   { slug: "insights", title: "Sequence Insights", priceLabel: "+$1,000/mo", monthly: 1_000, included: false },
 ];

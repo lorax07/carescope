@@ -20,7 +20,7 @@ import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 const NAV = [
   { to: "/app/design", label: "Workflow design" },
   { to: "/app/instruments", label: "Sequence Instruments" },
-  { to: "/app/connectivity", label: "Sequence Client" },
+  { to: "/app/connectivity", label: "Sequence CRM" },
   { to: "/app/quality", label: "Sequence Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
   { to: "/app/insights", label: "Sequence Insights" },
@@ -556,7 +556,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
     menu.find((item) => item.view === section)?.label ??
     {
       design: "Workflow design",
-      connectivity: "Sequence Client",
+      connectivity: "Sequence CRM",
       quality: "Sequence Compliance",
       billing: "Sequence Revenue",
       insights: "Sequence Insights",

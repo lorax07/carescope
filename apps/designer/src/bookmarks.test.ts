@@ -11,6 +11,6 @@ describe("bookmark targets", () => {
       path: "/app/samples/SCP-20460",
     });
     expect(bookmarkTarget("/app/ops/home")).toMatchObject({ kind: "screen", title: "Home", path: "/app/ops/home" });
-    expect(bookmarkTarget("/app/connectivity/clients")).toMatchObject({ kind: "screen", title: "Client" });
+    expect(bookmarkTarget("/app/connectivity/clients")).toMatchObject({ kind: "screen", title: "Accounts", detail: "CRM" });
   });
 });

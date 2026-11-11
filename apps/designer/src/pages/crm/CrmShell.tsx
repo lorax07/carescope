@@ -22,7 +22,7 @@ export function CrmShell({
       {studio ? null : (
         <div className="lims-page-header">
           <div>
-            <p className="lims-eyebrow">Sequence Client</p>
+            <p className="lims-eyebrow">Sequence CRM</p>
             <h1>{title}</h1>
             <p className="lims-page-lede">{lede}</p>
           </div>

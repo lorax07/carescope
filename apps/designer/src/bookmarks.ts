@@ -46,7 +46,7 @@ function screenTarget(pathname: string): BookmarkTarget {
     return { kind: "screen", objectId: path, title: ops.label, detail: "Operations", path };
   }
   const chapters = [
-    ...CLIENT_CHAPTERS.map((chapter) => ({ chapters: CLIENT_CHAPTERS, chapter, module: "Client" })),
+    ...CLIENT_CHAPTERS.map((chapter) => ({ chapters: CLIENT_CHAPTERS, chapter, module: "CRM" })),
     ...INSTRUMENT_CHAPTERS.map((chapter) => ({ chapters: INSTRUMENT_CHAPTERS, chapter, module: "Instruments" })),
     ...COMPLIANCE_CHAPTERS.map((chapter) => ({ chapters: COMPLIANCE_CHAPTERS, chapter, module: "Compliance" })),
     ...REVENUE_CHAPTERS.map((chapter) => ({ chapters: REVENUE_CHAPTERS, chapter, module: "Revenue" })),
@@ -58,7 +58,7 @@ function screenTarget(pathname: string): BookmarkTarget {
     }
   }
   const pages: Record<string, string> = {
-    "/app/connectivity": "Client",
+    "/app/connectivity": "CRM",
     "/app/instruments": "Instruments",
     "/app/quality": "Compliance",
     "/app/billing": "Revenue",

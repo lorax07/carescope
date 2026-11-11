@@ -10,7 +10,7 @@ describe("client and revenue chapters", () => {
   });
 
   it("places client pages in the area an account manager would open", () => {
-    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Client", "Tasks", "Projects", "Growth Hub", "Inbox"]);
+    expect(CLIENT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Accounts", "Cases", "Marketing", "Growth Hub", "Inbox"]);
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/clients/acc-helix")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/contacts")?.id).toBe("client");
     expect(chapterForPath(CLIENT_CHAPTERS, "/app/connectivity/documents")?.id).toBe("client");
