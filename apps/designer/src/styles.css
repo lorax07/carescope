@@ -7402,7 +7402,8 @@ button.palette-category-title {
 .client-projects > header input,
 .client-board-head input,
 .client-assist-ask input,
-.client-add-dialog input {
+.client-add-dialog input,
+.client-add-dialog select {
   width: 100%;
   padding: 0.48rem 0.7rem;
   border: 1px solid #e6eaf2;
@@ -7669,6 +7670,234 @@ button.palette-category-title {
   font-size: 0.8rem;
 }
 
+.crm-view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.15rem;
+}
+
+.crm-view-tabs button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b0b7c6;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.crm-view-tabs button.is-on {
+  color: #1d2433;
+}
+
+.crm-view-tabs button:hover {
+  color: #667085;
+}
+
+.crm-view-tabs button.is-on:hover {
+  color: #1d2433;
+}
+
+.client-add-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.client-add-dialog.is-import {
+  width: min(720px, calc(100vw - 2rem));
+}
+
+.client-add-dialog select {
+  width: 100%;
+}
+
+.crm-import {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.crm-import p {
+  margin: 0;
+  color: #667085;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.crm-import-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.crm-import-drop {
+  display: grid;
+  place-items: center;
+  min-height: 7.5rem;
+  padding: 1rem;
+  border: 1.5px dashed #d5dbe8;
+  border-radius: 16px;
+  background: #f7f8fc;
+  color: #667085;
+  text-align: center;
+  cursor: pointer;
+}
+
+.crm-import-drop input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.crm-import-drop span {
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.crm-import-preview {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+}
+
+.crm-import-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.crm-import-preview th,
+.crm-import-preview td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid #f1f3f8;
+  text-align: left;
+}
+
+.crm-import-preview th {
+  color: #98a2b3;
+  font-weight: 700;
+}
+
+.account-page {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.account-page-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.account-page-title > a {
+  color: #667085;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.account-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 1.1rem;
+  align-items: center;
+  padding: 1.15rem 1.2rem 1rem;
+}
+
+.account-hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.account-hero small,
+.account-hero em {
+  display: block;
+  color: #8b93a7;
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.account-hero dl {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.5rem;
+  grid-column: 1 / -1;
+  margin: 0.55rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f3f8;
+}
+
+.account-hero dl div {
+  display: flex;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+}
+
+.account-hero dt {
+  color: #98a0b3;
+}
+
+.account-hero dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.account-block h2,
+.account-panel h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+}
+
+.account-panel {
+  padding: 1rem 1.05rem 1.05rem;
+}
+
+.account-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.account-work {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-work li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  padding-top: 0.45rem;
+  border-top: 1px solid #f1f3f8;
+  font-size: 0.78rem;
+}
+
+.account-work span {
+  overflow: hidden;
+  color: #667085;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .account-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .client-board-head h1 {
   margin: 0;
   font-family: var(--font-display);
@@ -7723,7 +7952,8 @@ button.palette-category-title {
   color: #f0b429;
 }
 
-.client-person a {
+.client-person a,
+.client-person-id {
   display: grid;
   justify-items: center;
   color: inherit;

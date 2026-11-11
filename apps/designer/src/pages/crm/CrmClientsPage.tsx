@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { buttonFormat1 } from "../../buttonFormat1";
 import { Wildcard01 } from "../../components/Wildcard01";
-import { addClientAccount, useCrm, type ClientCard } from "../../crm";
+import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../../crm";
 import { wildcard01Match } from "../../wildcard01";
-import { ClientAssist, ClientAvatar, SourceBars, clientBudget } from "./clientStudio";
-import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
+import { AccountPersonCard, ClientAssist, SourceBars, clientBudget } from "./clientStudio";
+import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmImportPanel } from "./CrmImportPanel";
 
 const FILTERS = [
   { id: "watch", label: "Watch" },
@@ -14,8 +15,16 @@ const FILTERS = [
 
 function accountText(card: ClientCard): string {
   const account = card.account;
-  const people = account.contacts.map((person) => `${person.name} ${person.role} ${person.email}`).join(" ");
+  const people = account.contacts.map((person) => `${person.name} ${person.role} ${person.email} ${person.phone}`).join(" ");
   return [account.name, account.number, account.contact, account.industry, account.owner, account.billTo, account.relationship, people].join(" ");
+}
+
+function personFacts(card: ClientCard): { label: string; value: string }[] {
+  return [
+    { label: "From", value: card.account.billTo },
+    { label: "Sector", value: card.account.industry },
+    { label: "Budget", value: clientBudget(card) },
+  ];
 }
 
 function matchesFilter(card: ClientCard, filter: string): boolean {
@@ -26,11 +35,15 @@ function matchesFilter(card: ClientCard, filter: string): boolean {
 
 export function CrmClientsPage() {
   const { cards, actor, canWrite, accounts } = useCrm();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [wildcard, setWildcard] = useState("");
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
+  const [contactDraft, setContactDraft] = useState({ accountId: "", name: "", role: "", email: "", phone: "" });
   const [saved, setSaved] = useState<string[]>([]);
+  const panel = params.get("panel") === "contacts" ? "contacts" : "accounts";
   const filter = params.get("view") || (params.get("status") === "On hold" ? "hold" : params.get("health") === "At risk" || params.get("health") === "Critical" ? "watch" : "all");
   const filtered = useMemo(() => {
     return cards.filter((card) => {
@@ -71,15 +84,43 @@ export function CrmClientsPage() {
     setParams(copy, { replace: true });
   }
 
+  function setPanel(next: "accounts" | "contacts") {
+    const copy = new URLSearchParams(params);
+    if (next === "accounts") copy.delete("panel");
+    else copy.set("panel", "contacts");
+    copy.delete("view");
+    copy.delete("status");
+    copy.delete("health");
+    copy.delete("q");
+    setWildcard("");
+    setParams(copy, { replace: true });
+  }
+
+  function openAccount(accountId: string) {
+    setAdding(false);
+    setImporting(false);
+    navigate(`/app/connectivity/clients/${accountId}`);
+  }
+
   return (
     <CrmShell studio title="Client" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
-            <CrmModuleTitle title="Manage Accounts" />
+            <div className="crm-studio-title">
+              <p className="lims-eyebrow">Sequence CRM</p>
+              <div className="crm-view-tabs" role="tablist" aria-label="Manage">
+                <button type="button" role="tab" aria-selected={panel === "accounts"} className={panel === "accounts" ? "is-on" : undefined} onClick={() => setPanel("accounts")}>
+                  Manage Accounts
+                </button>
+                <button type="button" role="tab" aria-selected={panel === "contacts"} className={panel === "contacts" ? "is-on" : undefined} onClick={() => setPanel("contacts")}>
+                  Manage Contact
+                </button>
+              </div>
+            </div>
             {canWrite ? (
-              <button type="button" className="client-add" onClick={() => setAdding(true)}>
-                Add new Client
+              <button type="button" className="client-add" onClick={() => { setImporting(false); setAdding(true); }}>
+                {panel === "accounts" ? "Add new Account" : "Add new Contact"}
               </button>
             ) : null}
           </header>
@@ -90,10 +131,11 @@ export function CrmClientsPage() {
           </div>
           <div className="client-pills" role="tablist" aria-label="Account filter">
             <button type="button" role="tab" aria-selected={filter === "all"} className={buttonFormat1(filter === "all")} onClick={() => setFilter("all")}>
-              All Accounts
+              {panel === "accounts" ? "All Accounts" : "All Contacts"}
             </button>
             <Wildcard01
-              scope="manage-accounts"
+              key={panel}
+              scope={panel === "accounts" ? "manage-accounts" : "manage-contacts"}
               active={filter === "custom"}
               query={filter === "custom" ? wildcard : ""}
               onSearch={(query) => {
@@ -111,49 +153,30 @@ export function CrmClientsPage() {
             <div className="client-grid">
               {filtered.flatMap((card) => {
                 const people = card.account.contacts.length ? card.account.contacts : [{ name: card.account.contact, role: "Primary contact", email: "", phone: "" }];
-                return people.map((person) => (
-                  <article key={`${card.account.id}-${person.name}`} className="client-person">
-                    <button
-                      type="button"
-                      className={saved.includes(`${card.account.id}:${person.name}`) ? "is-saved" : undefined}
-                      aria-label={`Save ${person.name}`}
-                      aria-pressed={saved.includes(`${card.account.id}:${person.name}`)}
-                      onClick={() =>
-                        setSaved((current) =>
-                          current.includes(`${card.account.id}:${person.name}`)
-                            ? current.filter((item) => item !== `${card.account.id}:${person.name}`)
-                            : [...current, `${card.account.id}:${person.name}`],
-                        )
+                return people.map((person) => {
+                  const key = `${card.account.id}:${person.name}`;
+                  return (
+                    <AccountPersonCard
+                      key={key}
+                      name={person.name}
+                      role={person.role}
+                      accountName={card.account.name}
+                      href={`/app/connectivity/clients/${card.account.id}`}
+                      facts={personFacts(card)}
+                      saved={saved.includes(key)}
+                      onSave={() =>
+                        setSaved((current) => (current.includes(key) ? current.filter((item) => item !== key) : [...current, key]))
                       }
-                    >
-                      ★
-                    </button>
-                    <Link to={`/app/connectivity/clients/${card.account.id}`}>
-                      <ClientAvatar name={person.name} />
-                      <b>{person.name}</b>
-                      <small>{person.role}</small>
-                      <em>{card.account.name}</em>
-                    </Link>
-                    <dl>
-                      <div>
-                        <dt>From</dt>
-                        <dd>{card.account.billTo}</dd>
-                      </div>
-                      <div>
-                        <dt>Sector</dt>
-                        <dd>{card.account.industry}</dd>
-                      </div>
-                      <div>
-                        <dt>Budget</dt>
-                        <dd>{clientBudget(card)}</dd>
-                      </div>
-                    </dl>
-                  </article>
-                ));
+                    />
+                  );
+                });
               })}
             </div>
           ) : (
-            <CrmEmpty title="No accounts match." detail="Choose All Accounts to see the full list." />
+            <CrmEmpty
+              title={panel === "accounts" ? "No accounts match." : "No contacts match."}
+              detail={panel === "accounts" ? "Choose All Accounts to see the full list." : "Choose All Contacts to see the full list."}
+            />
           )}
         </div>
         <aside className="client-board-side">
@@ -180,27 +203,63 @@ export function CrmClientsPage() {
       {adding ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setAdding(false)}>
           <form
-            className="lims-modal client-add-dialog"
+            className={`lims-modal client-add-dialog${importing ? " is-import" : ""}`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-client-title"
             onClick={(event) => event.stopPropagation()}
             onSubmit={(event) => {
               event.preventDefault();
-              addClientAccount(draft);
-              setAdding(false);
-              setDraft({ name: "", contact: "", role: "", industry: "" });
+              if (importing) return;
+              if (panel === "accounts") {
+                const accountId = addClientAccount(draft);
+                setDraft({ name: "", contact: "", role: "", industry: "" });
+                if (accountId) openAccount(accountId);
+                return;
+              }
+              const accountId = addClientContact(contactDraft);
+              setContactDraft({ accountId: "", name: "", role: "", email: "", phone: "" });
+              if (accountId) openAccount(accountId);
             }}
           >
             <div className="lims-dialog-bar">
-              <h2 id="add-client-title">Add new Client</h2>
+              <h2 id="add-client-title">{importing ? (panel === "accounts" ? "Import accounts" : "Import contacts") : panel === "accounts" ? "Add new Account" : "Add new Contact"}</h2>
               <button type="button" className="btn" onClick={() => setAdding(false)}>Close</button>
             </div>
-            <label>Account name<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
-            <label>Primary contact<input value={draft.contact} onChange={(event) => setDraft({ ...draft, contact: event.target.value })} required /></label>
-            <label>Role<input value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Lab director" /></label>
-            <label>Sector<input value={draft.industry} onChange={(event) => setDraft({ ...draft, industry: event.target.value })} placeholder="Pharmaceutical" /></label>
-            <button type="submit" className="btn btn-primary">Save client</button>
+            {importing ? (
+              <CrmImportPanel kind={panel === "accounts" ? "account" : "contact"} accounts={accounts} onDone={openAccount} />
+            ) : panel === "accounts" ? (
+              <>
+                <label>Account name<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
+                <label>Primary contact<input value={draft.contact} onChange={(event) => setDraft({ ...draft, contact: event.target.value })} required /></label>
+                <label>Role<input value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Lab director" /></label>
+                <label>Sector<input value={draft.industry} onChange={(event) => setDraft({ ...draft, industry: event.target.value })} placeholder="Pharmaceutical" /></label>
+              </>
+            ) : (
+              <>
+                <label>
+                  Account
+                  <select value={contactDraft.accountId} onChange={(event) => setContactDraft({ ...contactDraft, accountId: event.target.value })} required>
+                    <option value="">Choose an account</option>
+                    {accounts.map((account) => (
+                      <option key={account.id} value={account.id}>{account.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>Name<input value={contactDraft.name} onChange={(event) => setContactDraft({ ...contactDraft, name: event.target.value })} required /></label>
+                <label>Role<input value={contactDraft.role} onChange={(event) => setContactDraft({ ...contactDraft, role: event.target.value })} placeholder="Lab director" /></label>
+                <label>Email<input type="email" value={contactDraft.email} onChange={(event) => setContactDraft({ ...contactDraft, email: event.target.value })} placeholder="name@lab.example" /></label>
+                <label>Phone<input value={contactDraft.phone} onChange={(event) => setContactDraft({ ...contactDraft, phone: event.target.value })} placeholder="503-555-0100" /></label>
+              </>
+            )}
+            {importing ? (
+              <button type="button" className="btn" onClick={() => setImporting(false)}>Back to form</button>
+            ) : (
+              <div className="client-add-actions">
+                <button type="button" className="btn" onClick={() => setImporting(true)}>Import</button>
+                <button type="submit" className="btn btn-primary">{panel === "accounts" ? "Save account" : "Save contact"}</button>
+              </div>
+            )}
           </form>
         </div>
       ) : null}

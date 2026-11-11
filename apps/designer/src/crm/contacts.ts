@@ -15,13 +15,14 @@ export function contactTypeFor(role: string): ContactType {
   return "other";
 }
 
-export function contactId(accountId: string, contact: AccountContact): string {
-  return `${accountId}:${contact.email}`;
+export function contactId(accountId: string, contact: AccountContact, index = 0): string {
+  if (contact.email) return `${accountId}:${contact.email}`;
+  return `${accountId}:${contact.name}:${index}`;
 }
 
 export function contactsFor(account: CrmAccount, tenantId: string): ContactRecord[] {
   return account.contacts.map((contact, index) => ({
-    id: contactId(account.id, contact),
+    id: contactId(account.id, contact, index),
     tenantId,
     accountId: account.id,
     accountName: account.name,
