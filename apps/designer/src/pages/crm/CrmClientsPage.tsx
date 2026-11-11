@@ -1,18 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Wildcard01 } from "../../components/Wildcard01";
 import { addClientAccount, useCrm, type ClientCard } from "../../crm";
+import { wildcard01Match } from "../../wildcard01";
 import { ClientAssist, ClientAvatar, SourceBars, clientBudget } from "./clientStudio";
-import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
 
 const FILTERS = [
-  { id: "all", label: "All Clients" },
-  { id: "active", label: "Active" },
   { id: "watch", label: "Watch" },
   { id: "hold", label: "On hold" },
 ] as const;
 
+function accountText(card: ClientCard): string {
+  const account = card.account;
+  const people = account.contacts.map((person) => `${person.name} ${person.role} ${person.email}`).join(" ");
+  return [account.name, account.number, account.contact, account.industry, account.owner, account.billTo, account.relationship, people].join(" ");
+}
+
 function matchesFilter(card: ClientCard, filter: string): boolean {
-  if (filter === "active") return card.account.status === "Active" && card.health !== "At risk" && card.health !== "Critical";
   if (filter === "watch") return card.health === "Watch" || card.health === "At risk" || card.health === "Critical";
   if (filter === "hold") return card.account.status === "On hold";
   return true;
@@ -21,20 +26,27 @@ function matchesFilter(card: ClientCard, filter: string): boolean {
 export function CrmClientsPage() {
   const { cards, actor, canWrite, accounts } = useCrm();
   const [params, setParams] = useSearchParams();
-  const [query, setQuery] = useState(params.get("q") || "");
+  const [wildcard, setWildcard] = useState("");
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
   const [saved, setSaved] = useState<string[]>([]);
   const filter = params.get("view") || (params.get("status") === "On hold" ? "hold" : params.get("health") === "At risk" || params.get("health") === "Critical" ? "watch" : "all");
   const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
     return cards.filter((card) => {
-      if (!matchesFilter(card, filter)) return false;
-      if (!needle) return true;
-      const people = card.account.contacts.map((item) => `${item.name} ${item.role}`).join(" ");
-      return `${card.account.name} ${card.account.contact} ${card.account.industry} ${card.account.owner} ${people}`.toLowerCase().includes(needle);
+      if (filter === "custom") return wildcard01Match(accountText(card), wildcard);
+      return matchesFilter(card, filter);
     });
-  }, [cards, filter, query]);
+  }, [cards, filter, wildcard]);
+
+  useEffect(() => {
+    const incoming = params.get("q");
+    if (!incoming) return;
+    setWildcard(incoming);
+    const copy = new URLSearchParams(params);
+    copy.delete("q");
+    copy.set("view", "custom");
+    setParams(copy, { replace: true });
+  }, [params, setParams]);
 
   const signed = accounts.reduce((sum, account) => sum + account.agreements.filter((item) => item.status === "Active").length, 0);
   const negotiating = accounts.reduce((sum, account) => sum + account.opportunities.filter((item) => item.stage === "Negotiation" || item.stage === "Proposal").length, 0);
@@ -47,11 +59,14 @@ export function CrmClientsPage() {
 
   function setFilter(next: string) {
     const copy = new URLSearchParams(params);
-    if (next === "all") copy.delete("view");
-    else copy.set("view", next);
+    if (next === "all") {
+      copy.delete("view");
+      setWildcard("");
+    } else copy.set("view", next);
     copy.delete("status");
     copy.delete("health");
     copy.delete("page");
+    copy.delete("q");
     setParams(copy, { replace: true });
   }
 
@@ -60,11 +75,7 @@ export function CrmClientsPage() {
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
-            <h1>Manage Accounts</h1>
-            <label>
-              <span className="sr-only">Search clients</span>
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search clients" />
-            </label>
+            <CrmModuleTitle title="Manage Accounts" />
             {canWrite ? (
               <button type="button" className="client-add" onClick={() => setAdding(true)}>
                 Add new Client
@@ -76,7 +87,19 @@ export function CrmClientsPage() {
             <Link to="/app/connectivity/documents">Agreements</Link>
             <Link to="/app/connectivity/health">Health</Link>
           </div>
-          <div className="client-pills" role="tablist" aria-label="Client filter">
+          <div className="client-pills" role="tablist" aria-label="Account filter">
+            <button type="button" role="tab" aria-selected={filter === "all"} className={filter === "all" ? "is-on" : undefined} onClick={() => setFilter("all")}>
+              All Accounts
+            </button>
+            <Wildcard01
+              scope="manage-accounts"
+              active={filter === "custom"}
+              query={filter === "custom" ? wildcard : ""}
+              onSearch={(query) => {
+                setWildcard(query);
+                setFilter("custom");
+              }}
+            />
             {FILTERS.map((item) => (
               <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "is-on" : undefined} onClick={() => setFilter(item.id)}>
                 {item.label}
@@ -129,7 +152,7 @@ export function CrmClientsPage() {
               })}
             </div>
           ) : (
-            <CrmEmpty title="No clients match." detail="Clear the search or choose All Clients." />
+            <CrmEmpty title="No accounts match." detail="Choose All Accounts to see the full list." />
           )}
         </div>
         <aside className="client-board-side">
