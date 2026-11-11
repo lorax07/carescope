@@ -25,6 +25,51 @@ export function initials(name: string): string {
   return letters.join("").toUpperCase();
 }
 
+export function AccountPersonCard({
+  name,
+  role,
+  accountName,
+  href,
+  facts,
+  saved = false,
+  onSave,
+}: {
+  name: string;
+  role: string;
+  accountName: string;
+  href?: string;
+  facts: { label: string; value: string }[];
+  saved?: boolean;
+  onSave?: () => void;
+}) {
+  const identity = (
+    <>
+      <ClientAvatar name={name} />
+      <b>{name}</b>
+      <small>{role}</small>
+      <em>{accountName}</em>
+    </>
+  );
+  return (
+    <article className="client-person">
+      {onSave ? (
+        <button type="button" className={saved ? "is-saved" : undefined} aria-label={`Save ${name}`} aria-pressed={saved} onClick={onSave}>
+          ★
+        </button>
+      ) : null}
+      {href ? <Link to={href}>{identity}</Link> : <div className="client-person-id">{identity}</div>}
+      <dl>
+        {facts.map((fact) => (
+          <div key={fact.label}>
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
 export function ClientAvatar({ name, size = 46 }: { name: string; size?: number }) {
   const color = avatarColor(name);
   return (

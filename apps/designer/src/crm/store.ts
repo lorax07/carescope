@@ -354,13 +354,19 @@ function isStage(value: string): value is OpportunityStage {
 
 function listedAccounts(overlay: CrmOverlay): CrmAccount[] {
   const extras = overlay.extraAccounts ?? [];
-  return extras.length ? [...CRM_ACCOUNTS, ...extras] : CRM_ACCOUNTS;
+  const base = extras.length ? [...CRM_ACCOUNTS, ...extras] : CRM_ACCOUNTS;
+  const added = overlay.extraContacts ?? {};
+  if (!Object.values(added).some((rows) => rows.length)) return base;
+  return base.map((account) => {
+    const more = added[account.id];
+    return more?.length ? { ...account, contacts: [...account.contacts, ...more] } : account;
+  });
 }
 
-export function addClientAccount(input: { name: string; contact: string; role: string; industry: string }) {
+export function addClientAccount(input: { name: string; contact: string; role: string; industry: string }): string | undefined {
   const name = input.name.trim();
   const contact = input.contact.trim();
-  if (!name || !contact) return;
+  if (!name || !contact || !crmCanWrite()) return;
   const overlay = currentOverlay();
   const account: CrmAccount = {
     id: `acc-${crypto.randomUUID().slice(0, 8)}`,
@@ -384,6 +390,30 @@ export function addClientAccount(input: { name: string; contact: string; role: s
   overlay.extraAccounts = [...(overlay.extraAccounts ?? []), account];
   audit(overlay, "account", account.id, "create", "", name);
   commit(overlay);
+  return account.id;
+}
+
+export function addClientContact(input: { accountId: string; name: string; role: string; email: string; phone: string }): string | undefined {
+  const name = input.name.trim();
+  if (!name || !input.accountId || !crmCanWrite()) return;
+  const overlay = currentOverlay();
+  const account = listedAccounts(overlay).find((item) => item.id === input.accountId);
+  if (!account) return;
+  const contact = {
+    name,
+    role: input.role.trim() || "Contact",
+    email: input.email.trim(),
+    phone: input.phone.trim(),
+  };
+  const extra = overlay.extraAccounts?.find((item) => item.id === input.accountId);
+  if (extra) extra.contacts = [...extra.contacts, contact];
+  else {
+    const current = overlay.extraContacts?.[input.accountId] ?? [];
+    overlay.extraContacts = { ...(overlay.extraContacts ?? {}), [input.accountId]: [...current, contact] };
+  }
+  audit(overlay, "contact", input.accountId, "create", "", name);
+  commit(overlay);
+  return input.accountId;
 }
 
 function opportunities(tenantId: string, overlay: CrmOverlay): OpportunityRecord[] {

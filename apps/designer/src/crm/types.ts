@@ -1,4 +1,4 @@
-import type { CrmAccount } from "../crmAccounts";
+import type { AccountContact, CrmAccount } from "../crmAccounts";
 
 export type ContactType =
   | "ordering_provider"
@@ -178,6 +178,7 @@ export type CrmOverlay = {
   nextNote: number;
   nextAudit: number;
   extraAccounts?: CrmAccount[];
+  extraContacts?: Record<string, AccountContact[]>;
 };
 
 export const CONTACT_TYPE_LABEL: Record<ContactType, string> = {
