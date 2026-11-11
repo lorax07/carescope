@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { buttonFormat1 } from "../../buttonFormat1";
 import { Wildcard01 } from "../../components/Wildcard01";
 import { addClientAccount, useCrm, type ClientCard } from "../../crm";
 import { wildcard01Match } from "../../wildcard01";
@@ -88,7 +89,7 @@ export function CrmClientsPage() {
             <Link to="/app/connectivity/health">Health</Link>
           </div>
           <div className="client-pills" role="tablist" aria-label="Account filter">
-            <button type="button" role="tab" aria-selected={filter === "all"} className={filter === "all" ? "is-on" : undefined} onClick={() => setFilter("all")}>
+            <button type="button" role="tab" aria-selected={filter === "all"} className={buttonFormat1(filter === "all")} onClick={() => setFilter("all")}>
               All Accounts
             </button>
             <Wildcard01
@@ -101,7 +102,7 @@ export function CrmClientsPage() {
               }}
             />
             {FILTERS.map((item) => (
-              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "is-on" : undefined} onClick={() => setFilter(item.id)}>
+              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => setFilter(item.id)}>
                 {item.label}
               </button>
             ))}

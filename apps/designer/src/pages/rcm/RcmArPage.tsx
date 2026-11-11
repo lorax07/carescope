@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { buttonFormat1 } from "../../buttonFormat1";
 import { CRM_ACCOUNTS } from "../../crmAccounts";
 import { FINANCIAL_LABEL, bucketFor, formatMoney, pageRows, rcmCanWrite, useRcm, type AgingBucket } from "../../rcm";
 import { routeLabel, writeOffCharge } from "../../revenueCycle";
@@ -76,7 +77,7 @@ export function RcmArPage() {
               type="button"
               role="tab"
               aria-selected={bucket === item.id}
-              className={bucket === item.id ? "is-on" : undefined}
+              className={buttonFormat1(bucket === item.id)}
               onClick={() => setFilter("bucket", bucket === item.id ? "all" : item.id)}
             >
               {item.label} <em>{formatMoney(item.cents)}</em>

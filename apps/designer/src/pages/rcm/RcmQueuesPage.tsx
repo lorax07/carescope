@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { buttonFormat1 } from "../../buttonFormat1";
 import { captureAccession } from "../../revenueCycle";
 import { QUEUE_META, formatMoney, postRemittance, rcmCanWrite, useRcm, type QueueId } from "../../rcm";
 import { RcmEmpty, RcmShell } from "./RcmShell";
@@ -82,7 +83,7 @@ export function RcmQueuesPage() {
                   type="button"
                   role="tab"
                   aria-selected={item.id === active}
-                  className={item.id === active ? "is-on" : undefined}
+                  className={buttonFormat1(item.id === active)}
                   onClick={() => setParams({ queue: item.id }, { replace: true })}
                 >
                   {SHORT[item.id]} <em>{item.count}</em>

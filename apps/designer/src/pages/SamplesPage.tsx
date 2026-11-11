@@ -9,6 +9,7 @@ import { LogSampleDialog } from "../components/ReceiveSampleDialog";
 import { ResultWindow } from "../components/ResultWindow";
 import { StartTestingWorkflow } from "../components/StartTestingWorkflow";
 import { CURRENT_RUNS } from "../testingRuns";
+import { BUTTON_FORMAT_1 } from "../buttonFormat1";
 import { buttonStyle, priorityRank, useLabOperations, type LabMenuView, type SampleColumnId } from "../labOperations";
 import { useProfileColumns } from "../profileColumns";
 import { StageConditionCell } from "../components/StageConditionCell";
@@ -104,7 +105,7 @@ function SearchableFilter({
       ) : (
         <button
           type="button"
-          className={`lims-filter filter-trigger${active || selected.length || query ? " active" : ""}`}
+          className={`lims-filter filter-trigger ${BUTTON_FORMAT_1}${active || selected.length || query ? " active" : ""}`}
           aria-expanded={options.length ? open : undefined}
           title={`Double-click to wildcard search ${label.toLowerCase()}`}
           onClick={() => options.length ? onOpenChange?.(!open) : onActivate?.()}
@@ -560,7 +561,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               <button
                 key={item}
                 type="button"
-                className={`lims-filter${reviewFilter === item ? " active" : ""}`}
+                className={`lims-filter ${BUTTON_FORMAT_1}${reviewFilter === item ? " active" : ""}`}
                 aria-pressed={reviewFilter === item}
                 onClick={() => setReviewFilter(item)}
               >
@@ -571,7 +572,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
               <button
                 key={item.id}
                 type="button"
-                className={`lims-filter${filter === item.id ? " active" : ""}`}
+                className={`lims-filter ${BUTTON_FORMAT_1}${filter === item.id ? " active" : ""}`}
                 aria-pressed={filter === item.id}
                 onClick={() => {
                   setOpenFilter(null);

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { buttonFormat1 } from "../buttonFormat1";
 import {
   ReactFlow,
   Background,
@@ -818,8 +819,8 @@ export function DesignerPage() {
         <div className="canvas-toolbar">
           <div className="workflow-toolbar-brand"><Link to="/app/workflows" aria-label="Back to workflows">←</Link><div><span>Workflow Designer</span><b>{workflow.name}</b></div></div>
           <div className="workflow-designer-mode" role="group" aria-label="Designer mode">
-            <button type="button" className={designerMode === "workflow" ? "is-on" : undefined} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
-            <button type="button" className={designerMode === "screens" ? "is-on" : undefined} onClick={() => setDesignerMode("screens")}>Screen design</button>
+            <button type="button" className={buttonFormat1(designerMode === "workflow")} onClick={() => setDesignerMode("workflow")}>Workflow logic</button>
+            <button type="button" className={buttonFormat1(designerMode === "screens")} onClick={() => setDesignerMode("screens")}>Screen design</button>
           </div>
           <div className="workflow-history-controls" role="group" aria-label="Workflow edit history">
             <div className="designer-split-control">

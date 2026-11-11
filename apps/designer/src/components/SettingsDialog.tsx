@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { buttonFormat1 } from "../buttonFormat1";
 import { passwordMatches, saveLimsPassword } from "../limsPassword";
 import { readLimsSession } from "../limsSession";
 import {
@@ -102,7 +103,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
                   type="button"
                   role="tab"
                   aria-selected={section === item.id}
-                  className={`btn${section === item.id ? " is-on" : ""}`}
+                  className={`btn ${buttonFormat1(section === item.id)}`}
                   onClick={() => setSection(item.id)}
                 >
                   {item.label}

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, type TaskStatus } from "../../crm";
 import { ClientAssist, ClientAvatar, shortDate } from "./clientStudio";
+import { buttonFormat1 } from "../../buttonFormat1";
 import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
 
 const SCOPES = [
@@ -93,7 +94,7 @@ export function CrmTasksPage() {
           <section className="client-card client-task-board">
             <div className="client-pills" role="tablist" aria-label="Task status">
               {SCOPES.map((item) => (
-                <button key={item.id} type="button" role="tab" aria-selected={mine === item.id} className={mine === item.id ? "is-on" : undefined} onClick={() => setScope(item.id)}>
+                <button key={item.id} type="button" role="tab" aria-selected={mine === item.id} className={buttonFormat1(mine === item.id)} onClick={() => setScope(item.id)}>
                   {item.label}
                 </button>
               ))}

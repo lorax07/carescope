@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { buttonFormat1 } from "./buttonFormat1";
 
 export type PinnedTab = {
   id: string;
@@ -137,7 +138,7 @@ function WorkspaceViewToggle() {
           key={mode}
           type="button"
           aria-pressed={tabs.presentation === mode}
-          className={tabs.presentation === mode ? "is-on" : undefined}
+          className={buttonFormat1(tabs.presentation === mode)}
           onClick={() => tabs.setPresentation(mode)}
         >
           {mode === "tab" ? "Tab view" : "Screen view"}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { buttonFormat1 } from "../../buttonFormat1";
 import type { ClientCard, OpportunityRecord } from "../../crm";
 import type { CrmAccount } from "../../crmAccounts";
 import { money } from "../../revenueCycle";
@@ -234,7 +235,7 @@ export function ProjectTable({
       </header>
       <div className="client-pills" role="tablist" aria-label="Project status">
         {counts.map((item) => (
-          <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "is-on" : undefined} onClick={() => onFilter(item.id)}>
+          <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => onFilter(item.id)}>
             {item.label} <em>{item.count}</em>
           </button>
         ))}
