@@ -1,0 +1,6 @@
+---
+description: App building skills. Use when the user asks for app building skills, or names Button format 1 or Wildcard01.
+alwaysApply: false
+---
+
+When the user asks for app building skills, read `apps/designer/APP_BUILDING_SKILLS.md` and reply with each skill’s name and description. Do not invent skills that are not in that file. When the user names a skill, apply that skill as the file describes.

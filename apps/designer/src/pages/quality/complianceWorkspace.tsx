@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { buttonFormat1 } from "../../buttonFormat1";
 import { findInstrument } from "../../instruments";
 import { pinState, verifyReviewerPin } from "../../reviewerPin";
 import { RevenueChart, StudioLink, greetingName, paymentBars } from "../crm/clientStudio";
@@ -364,7 +365,7 @@ function QualityList({ section }: { section: string }) {
           </header>
           <div className="client-pills" role="tablist" aria-label="Saved view">
             {FILTERS.map((item) => (
-              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={filter === item.id ? "is-on" : undefined} onClick={() => setFilter(item.id)}>
+              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => setFilter(item.id)}>
                 {item.label}
               </button>
             ))}

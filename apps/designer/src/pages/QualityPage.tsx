@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { buttonFormat1 } from "../buttonFormat1";
 import { pinState, useReviewerPin, verifyReviewerPin } from "../reviewerPin";
 import { STATUS_LABEL, useSamples } from "../samples";
 import {
@@ -613,7 +614,7 @@ export function QualityPage() {
       </div>
       <div className="quality-types" role="tablist" aria-label="Compliance workflows">
         {TYPES.map((item) => (
-          <button key={item.id} type="button" role="tab" aria-selected={item.id === type} className={`btn${item.id === type ? " is-on" : ""}`} onClick={() => openType(item.id)}>
+          <button key={item.id} type="button" role="tab" aria-selected={item.id === type} className={`btn ${buttonFormat1(item.id === type)}`} onClick={() => openType(item.id)}>
             {item.label}
           </button>
         ))}
@@ -716,7 +717,7 @@ function Workflow<T extends { id: string; title: string; status: string }>({
             type="button"
             role="tab"
             aria-selected={item.id === stage}
-            className={`btn${item.id === stage ? " is-on" : ""}`}
+            className={`btn ${buttonFormat1(item.id === stage)}`}
             onClick={() => {
               const first = records.find((record) => record.status === item.id);
               onSelect(first?.id ?? "", item.id);

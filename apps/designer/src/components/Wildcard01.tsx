@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { BUTTON_FORMAT_1 } from "../buttonFormat1";
 import { rememberWildcard01 } from "../wildcard01";
 
 function readSaved(scope: string): string[] {
@@ -66,7 +67,7 @@ export function Wildcard01({
   }
 
   return (
-    <div className={`wildcard01${active ? " is-on" : ""}`} ref={rootRef}>
+    <div className={`wildcard01 ${BUTTON_FORMAT_1}${active ? " is-on" : ""}`} ref={rootRef}>
       {editing ? (
         <input
           ref={inputRef}
