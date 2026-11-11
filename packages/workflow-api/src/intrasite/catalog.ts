@@ -32,7 +32,7 @@ export const LAB_MODULE_CATALOG = [
   },
   {
     id: "connectivity",
-    label: "Sequence Client",
+    label: "Sequence CRM",
     positioning: "This is an RCM for accounts, pipeline, and lab work",
     capabilities:
       "Shared account table, contacts, pipeline, activities, service agreements, laboratory work, revenue handoff",

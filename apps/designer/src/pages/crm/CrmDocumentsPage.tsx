@@ -8,7 +8,7 @@ export function CrmDocumentsPage() {
   const rows = CRM_ACCOUNTS.flatMap((account) => crm.documentsFor(account.id).map((item) => ({ ...item, accountName: account.name })));
 
   return (
-    <CrmShell title="Documents" lede="Agreements already on the Sequence Client account. This is not a document-management product; files stay referenced, not copied.">
+    <CrmShell title="Documents" lede="Agreements already on the Sequence CRM account. This is not a document-management product; files stay referenced, not copied.">
       <section className="lims-panel billing-panel">
         <div className="lims-panel-head">
           <h2>Agreements and files</h2>

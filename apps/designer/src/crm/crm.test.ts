@@ -5,8 +5,8 @@ import { contactTypeFor } from "./contacts";
 import { derivedHealth, signalsFor } from "./health";
 import { pageRows, snapshot } from "./store";
 
-describe("Sequence Client CRM", () => {
-  it("does not duplicate Sequence Client accounts", () => {
+describe("Sequence CRM CRM", () => {
+  it("does not duplicate Sequence CRM accounts", () => {
     const state = snapshot(seedCycle(), []);
     expect(state.accounts).toBe(CRM_ACCOUNTS);
     expect(state.cards).toHaveLength(CRM_ACCOUNTS.length);

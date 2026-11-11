@@ -19,7 +19,7 @@ export function CrmContactsPage() {
   const paged = pageRows(filtered, page);
 
   return (
-    <CrmShell title="Contacts" lede="People on Sequence Client accounts. Roles come from the account record; they are not a second person database.">
+    <CrmShell title="Contacts" lede="People on Sequence CRM accounts. Roles come from the account record; they are not a second person database.">
       <section className="lims-panel billing-panel">
         <div className="lims-panel-head rcm-toolbar">
           <h2>{filtered.length} contacts</h2>

@@ -50,7 +50,7 @@ export type CrmAccount = {
   opportunities: AccountOpportunity[];
 };
 
-/** One account list for Sequence Client, Sequence Revenue, and the rest of the app. */
+/** One account list for Sequence CRM, Sequence Revenue, and the rest of the app. */
 export const CRM_ACCOUNTS: CrmAccount[] = [
   {
     id: "acc-vertex",

@@ -202,6 +202,7 @@ export function ProjectTable({
   query,
   onQuery,
   scroll = false,
+  title = "Manage Projects",
 }: {
   rows: OpportunityRecord[];
   accounts: CrmAccount[];
@@ -210,6 +211,7 @@ export function ProjectTable({
   query: string;
   onQuery: (query: string) => void;
   scroll?: boolean;
+  title?: string;
 }) {
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -224,7 +226,7 @@ export function ProjectTable({
   return (
     <section className={`client-card client-projects${scroll ? " is-scroll" : ""}`}>
       <header>
-        <h2>Manage Projects</h2>
+        <h2>{title}</h2>
         <label>
           <span className="sr-only">Search projects</span>
           <input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search" aria-label="Search projects" />

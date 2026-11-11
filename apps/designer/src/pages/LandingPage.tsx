@@ -159,7 +159,7 @@ const INTEGRATION_PAIRS = [
   },
   {
     issue: "The client account and the laboratory work are different systems.",
-    solution: "Sequence Client keeps contacts, agreements, and accessions on one account.",
+    solution: "Sequence CRM keeps contacts, agreements, and accessions on one account.",
   },
   {
     issue: "Charges and denials start after the result is already released.",
@@ -925,7 +925,7 @@ const REGULATIONS = [
   { code: "CAP", name: "Laboratory accreditation", image: "/regulations/reg-cap.jpg", meets: "Sequence Compliance keeps deviations, CAPA, and the audit trail in the same module the laboratory uses for the work." },
   { code: "EU Annex 11", name: "Computerized systems", image: "/regulations/reg-annex-11.jpg", meets: "Sequence records who changed a workflow and keeps the audit trail on that change in the designer." },
   { code: "ICH Q7", name: "API good manufacturing", image: "/regulations/reg-ich-q7.jpg", meets: "Sequence keeps the ingredient batch, its tests, and the release decision on one record, and Sequence Compliance records a deviation beside that batch." },
-  { code: "HIPAA", name: "Protected health information", image: "/regulations/reg-hipaa.jpg", meets: "Sequence Client keeps the account and its accessions together, so the laboratory work stays on that account rather than a separate list." },
+  { code: "HIPAA", name: "Protected health information", image: "/regulations/reg-hipaa.jpg", meets: "Sequence CRM keeps the account and its accessions together, so the laboratory work stays on that account rather than a separate list." },
 ] as const;
 
 function ComplianceSection() {

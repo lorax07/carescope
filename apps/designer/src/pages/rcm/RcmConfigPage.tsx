@@ -25,7 +25,7 @@ export function RcmConfigPage() {
           <Link to="/app/billing/capture">Charge capture workbench</Link>
         </div>
         <p className="billing-note">
-          Payer, plan, and route come from the Sequence Client account. Insurance uses 837P, client billing uses an invoice, and self-pay uses a statement. Medicare, Medicaid, and commercial plans attach here without a second patient or payer database.
+          Payer, plan, and route come from the Sequence CRM account. Insurance uses 837P, client billing uses an invoice, and self-pay uses a statement. Medicare, Medicaid, and commercial plans attach here without a second patient or payer database.
         </p>
         <div className="lims-table-wrap">
           <table className="lims-table">

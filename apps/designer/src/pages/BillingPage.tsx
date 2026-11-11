@@ -318,7 +318,7 @@ export function BillingPage() {
         <div className="lims-panel-head">
           <h2>Payers</h2>
         </div>
-        <p className="billing-note">Each account bills through the payer on its Sequence Client record.</p>
+        <p className="billing-note">Each account bills through the payer on its Sequence CRM record.</p>
         <div className="lims-table-wrap">
           <table className="lims-table">
             <thead>
@@ -413,7 +413,7 @@ export function BillingPage() {
         <div className="lims-panel-head">
           <h2>Accounts</h2>
         </div>
-        <p className="billing-note">The Sequence Client account list. Revenue is the open balance on this ledger.</p>
+        <p className="billing-note">The Sequence CRM account list. Revenue is the open balance on this ledger.</p>
         <AccountTable />
       </section>
     </RcmShell>

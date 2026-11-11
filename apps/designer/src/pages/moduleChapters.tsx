@@ -19,18 +19,18 @@ export type ModuleChapter = {
 };
 
 /**
- * Sequence Client, as an account manager would use it.
+ * Sequence CRM, as an account manager would use it.
  * The briefing stays on the module home. These are the places you work.
  */
 export const CLIENT_CHAPTERS: ModuleChapter[] = [
   {
     id: "client",
     to: "/app/connectivity/clients",
-    label: "Client",
+    label: "Accounts",
     question: "The people and accounts you work with.",
     hideTools: true,
     tools: [
-      { to: "/app/connectivity/clients", label: "Client", match: "/app/connectivity/clients" },
+      { to: "/app/connectivity/clients", label: "Accounts", match: "/app/connectivity/clients" },
       { to: "/app/connectivity/contacts", label: "People", match: "/app/connectivity/contacts" },
       { to: "/app/connectivity/documents", label: "Agreements", match: "/app/connectivity/documents" },
       { to: "/app/connectivity/health", label: "Health", match: "/app/connectivity/health" },
@@ -39,11 +39,11 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
   {
     id: "tasks",
     to: "/app/connectivity/tasks",
-    label: "Tasks",
+    label: "Cases",
     question: "What is due for a client.",
     hideTools: true,
     tools: [
-      { to: "/app/connectivity/tasks", label: "Tasks", match: "/app/connectivity/tasks" },
+      { to: "/app/connectivity/tasks", label: "Cases", match: "/app/connectivity/tasks" },
       { to: "/app/connectivity/activities", label: "Activity", match: "/app/connectivity/activities" },
       { to: "/app/connectivity/issues", label: "Issues", match: "/app/connectivity/issues" },
     ],
@@ -51,10 +51,10 @@ export const CLIENT_CHAPTERS: ModuleChapter[] = [
   {
     id: "projects",
     to: "/app/connectivity/opportunities",
-    label: "Projects",
+    label: "Marketing",
     question: "Work moving through the laboratory.",
     hideTools: true,
-    tools: [{ to: "/app/connectivity/opportunities", label: "Projects", match: "/app/connectivity/opportunities" }],
+    tools: [{ to: "/app/connectivity/opportunities", label: "Marketing", match: "/app/connectivity/opportunities" }],
   },
   {
     id: "growth",

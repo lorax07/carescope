@@ -122,7 +122,7 @@ export function CrmInboxPage() {
   const ordered = [...visible].sort((a, b) => Number(pinned.includes(b.contactId)) - Number(pinned.includes(a.contactId)));
 
   return (
-    <CrmShell studio title="Inbox" lede="Messages with the people on Sequence Client accounts.">
+    <CrmShell studio title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
       <div className="inbox">
         <section className="inbox-thread" aria-label={selected ? `Conversation with ${selected.name}` : "Conversation"}>
           {selected ? (
@@ -213,7 +213,7 @@ export function CrmInboxPage() {
               <p className="inbox-footnote">
                 <Link to={`/app/connectivity/clients/${selected.accountId}`}>{selected.accountName}</Link>
                 {" · "}
-                {selected.role}. Replies are saved on the Sequence Client account.
+                {selected.role}. Replies are saved on the Sequence CRM account.
               </p>
             </>
           ) : (

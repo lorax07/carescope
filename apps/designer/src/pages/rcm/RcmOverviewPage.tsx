@@ -111,7 +111,7 @@ export function RcmOverviewPage() {
               <p className="client-empty">Queues are clear.</p>
             )}
           </section>
-          <RevenueAssist actor={actor} hint="Search uses the same claims as the laboratory ledger and Sequence Client." />
+          <RevenueAssist actor={actor} hint="Search uses the same claims as the laboratory ledger and Sequence CRM." />
         </aside>
       </div>
     </RcmShell>
