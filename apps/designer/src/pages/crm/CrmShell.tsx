@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
 import { CLIENT_CHAPTERS } from "../moduleChapters";
+import { TopPriorities } from "./TopPriorities";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
@@ -18,27 +19,45 @@ export function CrmShell({
   lede,
   actions,
   studio,
+  priorities = true,
   children,
 }: {
   title: string;
   lede: string;
   actions?: ReactNode;
   studio?: boolean;
+  /** Pages that already place Top Priorities in their own right column pass false. */
+  priorities?: boolean;
   children: ReactNode;
 }) {
+  const header = studio ? null : (
+    <div className="lims-page-header">
+      <div>
+        <p className="lims-eyebrow">Sequence CRM</p>
+        <h1>{title}</h1>
+        <p className="lims-page-lede">{lede}</p>
+      </div>
+      {actions ? <div className="rcm-header-actions">{actions}</div> : null}
+    </div>
+  );
   return (
-    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
-      {studio ? null : (
-        <div className="lims-page-header">
-          <div>
-            <p className="lims-eyebrow">Sequence CRM</p>
-            <h1>{title}</h1>
-            <p className="lims-page-lede">{lede}</p>
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${priorities ? " has-priorities" : ""}`}>
+      {priorities ? (
+        <>
+          <div className="crm-priority-main">
+            {header}
+            {children}
           </div>
-          {actions ? <div className="rcm-header-actions">{actions}</div> : null}
-        </div>
+          <aside className="crm-priority-side">
+            <TopPriorities />
+          </aside>
+        </>
+      ) : (
+        <>
+          {header}
+          {children}
+        </>
       )}
-      {children}
     </div>
   );
 }

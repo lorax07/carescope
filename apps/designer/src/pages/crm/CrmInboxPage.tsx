@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
+import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import {
   attachmentNote,
@@ -123,7 +124,7 @@ export function CrmInboxPage() {
   const ordered = [...visible].sort((a, b) => Number(pinned.includes(b.contactId)) - Number(pinned.includes(a.contactId)));
 
   return (
-    <CrmShell studio title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
+    <CrmShell studio priorities={false} title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
       <CrmModuleTitle title="Inbox" />
       <div className="inbox">
         <section className="inbox-thread" aria-label={selected ? `Conversation with ${selected.name}` : "Conversation"}>
@@ -223,6 +224,8 @@ export function CrmInboxPage() {
           )}
         </section>
 
+        <div className="inbox-side">
+          <TopPriorities />
         <section className="inbox-list" aria-label="All messages">
           <header>
             <h1>All messages</h1>
@@ -263,6 +266,7 @@ export function CrmInboxPage() {
             })}
           </ul>
         </section>
+        </div>
       </div>
     </CrmShell>
   );
