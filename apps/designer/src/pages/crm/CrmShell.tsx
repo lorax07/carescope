@@ -30,22 +30,24 @@ export function CrmShell({
   priorities?: boolean;
   children: ReactNode;
 }) {
-  const header = studio ? null : (
+  const heading = (
     <div className="lims-page-header">
       <div>
         <p className="lims-eyebrow">Sequence CRM</p>
         <h1>{title}</h1>
-        <p className="lims-page-lede">{lede}</p>
+        {priorities ? null : <p className="lims-page-lede">{lede}</p>}
       </div>
       {actions ? <div className="rcm-header-actions">{actions}</div> : null}
     </div>
   );
+  const header = studio ? null : heading;
   return (
     <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${priorities ? " has-priorities" : ""}`}>
       {priorities ? (
         <>
+          {header}
           <div className="crm-priority-main">
-            {header}
+            {studio ? null : <p className="lims-page-lede">{lede}</p>}
             {children}
           </div>
           <aside className="crm-priority-side">

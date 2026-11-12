@@ -157,7 +157,7 @@ export function CrmClientsPage() {
   return (
     <CrmShell studio priorities={false} title="Account" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
-        <div className="client-board-main">
+        <div className="client-overview-head">
           <CrmDirectoryHeader
             panel={panel}
             onPanel={setPanel}
@@ -167,6 +167,8 @@ export function CrmClientsPage() {
               </button>
             ) : null}
           />
+        </div>
+        <div className="client-board-main">
           <div className="tab-sheet">
           <CrmRecordStrip />
           <div className="tab-sheet">
