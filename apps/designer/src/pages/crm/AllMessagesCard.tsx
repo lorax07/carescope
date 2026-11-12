@@ -19,7 +19,7 @@ function snippet(thread: InboxThread): string {
   return body.length > 72 ? `${body.slice(0, 69)}...` : body;
 }
 
-export function AllMessagesCard() {
+export function AllMessagesCard({ heading = "All messages", limit }: { heading?: string; limit?: number }) {
   const { overlay, contacts, accounts } = useCrm();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -51,11 +51,12 @@ export function AllMessagesCard() {
       ).filter((thread) => threadMatches(thread, query, platforms)),
     [accounts, contacts, overlay.communications, platforms, query],
   );
+  const shown = typeof limit === "number" ? threads.slice(0, limit) : threads;
 
   return (
-    <section className="inbox-list" aria-label="All messages">
+    <section className="inbox-list" aria-label={heading}>
       <header>
-        <h1>All messages</h1>
+        <h1>{heading}</h1>
         <label>
           <span className="sr-only">Search messages</span>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search messages" />
@@ -71,7 +72,7 @@ export function AllMessagesCard() {
         />
       </header>
       <ul>
-        {threads.map((thread) => {
+        {shown.map((thread) => {
           const unread = read.includes(thread.contactId) ? 0 : unreadCount(thread);
           const on = current === thread.contactId;
           return (

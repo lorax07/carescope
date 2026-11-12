@@ -15,11 +15,13 @@ const TILES: { id: keyof PriorityCounts; label: string; tone: string; to: string
 ];
 
 export function TopPriorities({
-  defaultOpen = false,
+  defaultOpen = true,
+  messages = true,
   hint = "Search uses the same accounts as the laboratory and Sequence Revenue.",
   ask = "Ask about an account, case, or project",
 }: {
   defaultOpen?: boolean;
+  messages?: boolean;
   hint?: string;
   ask?: string;
 }) {
@@ -99,7 +101,7 @@ export function TopPriorities({
             <button type="submit" aria-label="Search accounts">↑</button>
           </form>
           <p className="client-assist-hint">{hint}</p>
-          <AllMessagesCard />
+          {messages ? <AllMessagesCard heading="Recent Messages" limit={4} /> : null}
         </div>
       ) : (
         <div className="top-priorities-counts">

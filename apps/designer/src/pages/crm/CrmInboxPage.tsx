@@ -232,7 +232,7 @@ export function CrmInboxPage() {
         </section>
 
         <div className="inbox-side">
-          <TopPriorities />
+          <TopPriorities defaultOpen={false} messages={false} />
         <section className="inbox-list" aria-label="All messages">
           <header>
             <h1>All messages</h1>
