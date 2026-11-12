@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Filter01 } from "../../components/Filter01";
 import { useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
 import { InboxChannelMark } from "./InboxChannelMark";
@@ -23,7 +24,7 @@ export function AllMessagesCard() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [query, setQuery] = useState("");
-  const [platform, setPlatform] = useState<(typeof PLATFORMS)[number]["id"]>("all");
+  const [platforms, setPlatforms] = useState<CommunicationKind[]>([]);
   const [starred] = useState<string[]>(["acc-helix:m.brooks@helix.example", "acc-northwind:c.ibarra@northwind.example"]);
   const [read, setRead] = useState<string[]>([]);
   const now = useMemo(() => new Date(), []);
@@ -47,8 +48,8 @@ export function AllMessagesCard() {
           activities: account.activities,
         })),
         overlay.communications,
-      ).filter((thread) => threadMatches(thread, query, platform)),
-    [accounts, contacts, overlay.communications, platform, query],
+      ).filter((thread) => threadMatches(thread, query, platforms)),
+    [accounts, contacts, overlay.communications, platforms, query],
   );
 
   return (
@@ -59,16 +60,15 @@ export function AllMessagesCard() {
           <span className="sr-only">Search messages</span>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label="Search messages" />
         </label>
-        <label>
-          <span className="sr-only">Platform</span>
-          <select value={platform} aria-label="All Platforms" onChange={(event) => setPlatform(event.target.value as (typeof PLATFORMS)[number]["id"])}>
-            {PLATFORMS.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Filter01
+          className="is-inline"
+          label="Messages"
+          options={PLATFORMS.filter((item) => item.id !== "all").map((item) => ({ id: item.id, label: item.label, category: "Channel" }))}
+          selected={platforms}
+          onChange={(ids) => setPlatforms(ids.filter((id): id is CommunicationKind => id === "email" || id === "call" || id === "meeting" || id === "note"))}
+          query={query}
+          onQuery={setQuery}
+        />
       </header>
       <ul>
         {threads.map((thread) => {

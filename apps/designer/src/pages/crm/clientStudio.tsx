@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
+import { filter01Match } from "../../filter01";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import type { ClientCard, OpportunityRecord } from "../../crm";
 import type { CrmAccount } from "../../crmAccounts";
@@ -247,7 +248,7 @@ export function RevenueChart({ series, format = "money" }: { series: number[]; f
 export function ProjectTable({
   rows,
   accounts,
-  filter,
+  filters,
   onFilter,
   query,
   onQuery,
@@ -256,22 +257,23 @@ export function ProjectTable({
 }: {
   rows: OpportunityRecord[];
   accounts: CrmAccount[];
-  filter: ProjectFilter;
-  onFilter: (filter: ProjectFilter) => void;
+  filters: string[];
+  onFilter: (filters: string[]) => void;
   query: string;
   onQuery: (query: string) => void;
   scroll?: boolean;
   title?: string;
 }) {
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const stages = filters.filter((id): id is ProjectFilter => PROJECT_FILTERS.some((item) => item.id === id));
+    const queries = filters.filter((id) => id.startsWith("search:")).map((id) => id.slice(7));
+    const needles = queries.length ? queries : query.trim() ? [query] : [];
     return rows.filter((row) => {
-      if (!projectMatches(row.stage, filter)) return false;
-      if (!needle) return true;
-      return `${row.accountName} ${row.name} ${row.nextAction} ${row.owner}`.toLowerCase().includes(needle);
+      if (stages.length && !stages.some((filter) => projectMatches(row.stage, filter))) return false;
+      if (!needles.length) return true;
+      return needles.some((needle) => filter01Match(`${row.accountName} ${row.name} ${row.nextAction} ${row.owner}`, needle));
     });
-  }, [filter, query, rows]);
-  const counts = PROJECT_FILTERS.map((item) => ({ ...item, count: rows.filter((row) => projectMatches(row.stage, item.id)).length }));
+  }, [filters, query, rows]);
 
   return (
     <section className={`client-card client-projects${scroll ? " is-scroll" : ""}`}>
@@ -282,13 +284,15 @@ export function ProjectTable({
           <input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search" aria-label="Search projects" />
         </label>
       </header>
-      <div className="client-pills" role="tablist" aria-label="Project status">
-        {counts.map((item) => (
-          <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => onFilter(item.id)}>
-            {item.label} <em>{item.count}</em>
-          </button>
-        ))}
-      </div>
+      <Filter01
+        label="Projects"
+        scope="projects"
+        options={PROJECT_FILTERS.map((item) => ({ id: item.id, label: item.label, category: "Status" }))}
+        selected={filters}
+        onChange={onFilter}
+        query={query}
+        onQuery={onQuery}
+      />
       {visible.length ? (
         <div className="client-table-wrap">
           <table className="client-table">

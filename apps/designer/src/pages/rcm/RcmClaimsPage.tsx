@@ -16,7 +16,7 @@ export function RcmClaimsPage() {
   const { claims, actor } = useRcm();
   const [params] = useSearchParams();
   const workflow = params.get("workflow") || "";
-  const [filter, setFilter] = useState<ClaimFilter>(filterForWorkflow(workflow));
+  const [filters, setFilters] = useState<string[]>([filterForWorkflow(workflow)]);
   const [query, setQuery] = useState(params.get("q") || "");
   const rows = workflow && workflow in WORKFLOW_LABEL ? claims.filter((claim) => claim.workflow === (workflow as ClaimWorkflow)) : claims;
 
@@ -32,7 +32,7 @@ export function RcmClaimsPage() {
             <Link to="/app/billing/queues">Exceptions</Link>
             <Link to="/app/billing/denials">Denials</Link>
           </div>
-          <RevenueClaimTable scroll rows={rows} filter={workflow && workflow in WORKFLOW_LABEL ? "all" : filter} onFilter={setFilter} query={query} onQuery={setQuery} />
+          <RevenueClaimTable scroll rows={rows} filters={workflow && workflow in WORKFLOW_LABEL ? [] : filters} onFilter={setFilters} query={query} onQuery={setQuery} />
           {workflow && workflow in WORKFLOW_LABEL ? <p className="client-empty">Showing {WORKFLOW_LABEL[workflow as ClaimWorkflow]} claims. {rows.filter((row) => claimMatches(row, "all")).length} in this workflow.</p> : null}
         </div>
         <aside className="client-home-side">

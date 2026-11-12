@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
+import { filter01Match } from "../../filter01";
 import { findInstrument } from "../../instruments";
 import { pinState, verifyReviewerPin } from "../../reviewerPin";
 import { RevenueChart, StudioLink, greetingName, paymentBars } from "../crm/clientStudio";
@@ -344,13 +345,18 @@ function QualityList({ section }: { section: string }) {
   const [query, setQuery] = useState("");
   const rows = rowsFor(section, system, actor);
   const day = currentDay();
+  const selected = filter === "all" ? [] : filter.split(",").filter((item) => item && item !== "all");
+  const owners = selected.filter((item) => item.startsWith("owner:")).map((item) => item.slice(6));
+  const statuses = selected.filter((item) => !item.startsWith("owner:"));
   const visible = rows.filter((row) => {
-    const needle = query.trim().toLowerCase();
-    if (needle && !`${row.id} ${row.title} ${row.owner} ${row.next}`.toLowerCase().includes(needle)) return false;
-    if (filter === "all") return true;
-    if (filter === "mine") return row.mine;
-    if (filter === "overdue") return row.open && Boolean(row.due) && row.due < day;
-    return row.open;
+    if (query.trim() && !filter01Match(`${row.id} ${row.title} ${row.owner} ${row.next}`, query)) return false;
+    if (owners.length && !owners.includes(row.owner)) return false;
+    if (!statuses.length) return true;
+    return statuses.some((item) => {
+      if (item === "mine") return row.mine;
+      if (item === "overdue") return row.open && Boolean(row.due) && row.due < day;
+      return row.open;
+    });
   });
   return (
     <Shell title={TITLES[section] ?? "Compliance"}>
@@ -363,13 +369,21 @@ function QualityList({ section }: { section: string }) {
               <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search" aria-label={`Search ${TITLES[section] ?? "records"}`} />
             </label>
           </header>
-          <div className="client-pills" role="tablist" aria-label="Saved view">
-            {FILTERS.map((item) => (
-              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => setFilter(item.id)}>
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <Filter01
+            label={TITLES[section] ?? "Records"}
+            query={query}
+            onQuery={setQuery}
+            options={[
+              ...FILTERS.filter((item) => item.id !== "all").map((item) => ({ id: item.id, label: item.label, category: "Status" })),
+              ...[...new Set(rows.map((row) => row.owner).filter(Boolean))].sort().map((owner) => ({ id: `owner:${owner}`, label: owner, category: "Owner" })),
+            ]}
+            selected={selected}
+            onChange={(ids) => {
+              const status = ids.filter((id) => !id.startsWith("owner:"));
+              const owners = ids.filter((id) => id.startsWith("owner:"));
+              setFilter([...status, ...owners].join(",") || "all");
+            }}
+          />
           <CreateForm section={section} actor={actor} />
           {visible.length ? (
             <div className="client-table-wrap">

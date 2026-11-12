@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import type { Charge } from "../../revenueCycle";
-import { ProjectTable, RevenueChart, StudioLink, paymentBars, type ProjectFilter } from "./clientStudio";
+import { ProjectTable, RevenueChart, StudioLink, paymentBars } from "./clientStudio";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
 import { TopPriorities } from "./TopPriorities";
 
@@ -16,7 +16,7 @@ function postedPayments(charges: Charge[]): { at: string; cents: number }[] {
 
 export function CrmOverviewPage() {
   const { cards, overlay, opportunities, accounts, charges } = useCrm();
-  const [filter, setFilter] = useState<ProjectFilter>("active");
+  const [filters, setFilters] = useState<string[]>(["active"]);
   const [query, setQuery] = useState("");
   const active = cards.filter((card) => card.account.status === "Active");
   const openProjects = opportunities.filter((item) => item.stage !== "Won" && item.stage !== "Lost");
@@ -84,7 +84,7 @@ export function CrmOverviewPage() {
             </div>
           </section>
 
-          <ProjectTable scroll title="Manage Cases" rows={opportunities} accounts={accounts} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
+          <ProjectTable scroll title="Manage Cases" rows={opportunities} accounts={accounts} filters={filters} onFilter={setFilters} query={query} onQuery={setQuery} />
         </div>
 
         <aside className="client-home-side">

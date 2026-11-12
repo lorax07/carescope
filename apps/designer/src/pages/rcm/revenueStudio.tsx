@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
+import { filter01Match } from "../../filter01";
 import { accountById } from "../../crmAccounts";
 import type { Claim, ClaimWorkflow } from "../../rcm";
 import { WORKFLOW_LABEL, formatMoney } from "../../rcm";
@@ -38,28 +39,29 @@ export function claimTone(workflow: ClaimWorkflow): { label: string; tone: "draf
 
 export function RevenueClaimTable({
   rows,
-  filter,
+  filters,
   onFilter,
   query,
   onQuery,
   scroll = false,
 }: {
   rows: Claim[];
-  filter: ClaimFilter;
-  onFilter: (filter: ClaimFilter) => void;
+  filters: string[];
+  onFilter: (filters: string[]) => void;
   query: string;
   onQuery: (query: string) => void;
   scroll?: boolean;
 }) {
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const stages = filters.filter((id): id is ClaimFilter => CLAIM_FILTERS.some((item) => item.id === id && item.id !== "all"));
+    const queries = filters.filter((id) => id.startsWith("search:")).map((id) => id.slice(7));
+    const needles = queries.length ? queries : query.trim() ? [query] : [];
     return rows.filter((row) => {
-      if (!claimMatches(row, filter)) return false;
-      if (!needle) return true;
-      return `${row.id} ${row.accountName} ${row.accessionId} ${row.payerName} ${row.nextAction}`.toLowerCase().includes(needle);
+      if (stages.length && !stages.some((filter) => claimMatches(row, filter))) return false;
+      if (!needles.length) return true;
+      return needles.some((needle) => filter01Match(`${row.id} ${row.accountName} ${row.accessionId} ${row.payerName} ${row.nextAction}`, needle));
     });
-  }, [filter, query, rows]);
-  const counts = CLAIM_FILTERS.map((item) => ({ ...item, count: rows.filter((row) => claimMatches(row, item.id)).length }));
+  }, [filters, query, rows]);
 
   return (
     <section className={`client-card client-projects${scroll ? " is-scroll" : ""}`}>
@@ -70,13 +72,15 @@ export function RevenueClaimTable({
           <input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search" aria-label="Search claims" />
         </label>
       </header>
-      <div className="client-pills" role="tablist" aria-label="Claim status">
-        {counts.map((item) => (
-          <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => onFilter(item.id)}>
-            {item.label} <em>{item.count}</em>
-          </button>
-        ))}
-      </div>
+      <Filter01
+        label="Claims"
+        scope="claims"
+        options={CLAIM_FILTERS.filter((item) => item.id !== "all").map((item) => ({ id: item.id, label: item.label, category: "Status" }))}
+        selected={filters}
+        onChange={onFilter}
+        query={query}
+        onQuery={onQuery}
+      />
       {visible.length ? (
         <div className="client-table-wrap">
           <table className="client-table">

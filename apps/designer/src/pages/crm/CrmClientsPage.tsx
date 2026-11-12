@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
-import { Wildcard01 } from "../../components/Wildcard01";
+import { Filter01, type Filter01Option } from "../../components/Filter01";
 import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../../crm";
 import { contactsOnAccount } from "../../crm/directory";
 import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
-import { wildcard01Match } from "../../wildcard01";
+import { filter01Match } from "../../filter01";
 import { AccountCompanyCard, AccountPersonCard, SourceBars, clientBudget } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { TopPriorities } from "./TopPriorities";
@@ -13,10 +12,21 @@ import { CrmEmpty, CrmShell } from "./CrmShell";
 import { CrmImportPanel } from "./CrmImportPanel";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 
-const FILTERS = [
-  { id: "watch", label: "Watch" },
-  { id: "hold", label: "On hold" },
-] as const;
+function readFilters(value: string | null): string[] {
+  if (!value) return [];
+  return value.split(",").flatMap((item) => {
+    try {
+      const decoded = decodeURIComponent(item);
+      return decoded ? [decoded] : [];
+    } catch {
+      return item ? [item] : [];
+    }
+  });
+}
+
+function writeFilters(ids: string[]): string {
+  return ids.map((item) => encodeURIComponent(item)).join(",");
+}
 
 function accountText(card: ClientCard): string {
   const account = card.account;
@@ -24,9 +34,23 @@ function accountText(card: ClientCard): string {
   return [account.name, account.number, account.contact, account.industry, account.owner, account.billTo, account.relationship, people].join(" ");
 }
 
-function matchesFilter(card: ClientCard, filter: string): boolean {
-  if (filter === "watch") return card.health === "Watch" || card.health === "At risk" || card.health === "Critical";
-  if (filter === "hold") return card.account.status === "On hold";
+function picked(ids: string[], prefix: string): string[] {
+  return ids.filter((id) => id.startsWith(prefix)).map((id) => id.slice(prefix.length));
+}
+
+function accountMatches(card: ClientCard, ids: string[], wildcard: string): boolean {
+  const status = picked(ids, "status:");
+  const health = picked(ids, "health:");
+  const sector = picked(ids, "sector:");
+  const source = picked(ids, "source:");
+  const queries = picked(ids, "search:");
+  if (status.length && !status.includes(card.account.status)) return false;
+  if (health.length && !health.includes(card.health)) return false;
+  if (sector.length && !sector.includes(card.account.industry)) return false;
+  const sourceLabel = card.account.billTo === "Client" ? "Account" : card.account.billTo;
+  if (source.length && !source.includes(sourceLabel)) return false;
+  const needles = queries.length ? queries : wildcard.trim() ? [wildcard] : [];
+  if (needles.length && !needles.some((query) => filter01Match(accountText(card), query))) return false;
   return true;
 }
 
@@ -34,38 +58,74 @@ export function CrmClientsPage() {
   const { cards, canWrite, accounts, overlay } = useCrm();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [wildcard, setWildcard] = useState("");
+  const [wildcard, setWildcard] = useState(params.get("q") || "");
+  const [selected, setSelected] = useState<string[]>(() => {
+    const stored = readFilters(params.get("filters"));
+    if (stored.length) return stored;
+    const legacy: string[] = [];
+    if (params.get("view") === "hold" || params.get("status") === "On hold") legacy.push("status:On hold");
+    if (params.get("view") === "watch" || params.get("health") === "At risk" || params.get("health") === "Critical") {
+      legacy.push("health:Watch", "health:At risk", "health:Critical");
+    }
+    return legacy;
+  });
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
   const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
   const [contactDraft, setContactDraft] = useState({ accountId: "", name: "", role: "", email: "", phone: "" });
   const [saved, setSaved] = useState<string[]>([]);
   const panel = params.get("panel") === "contacts" ? "contacts" : "accounts";
-  const filter = params.get("view") || (params.get("status") === "On hold" ? "hold" : params.get("health") === "At risk" || params.get("health") === "Critical" ? "watch" : "all");
-  const filtered = useMemo(() => {
-    return cards.filter((card) => {
-      if (filter === "custom") return wildcard01Match(accountText(card), wildcard);
-      return matchesFilter(card, filter);
-    });
-  }, [cards, filter, wildcard]);
+  const filtered = useMemo(() => cards.filter((card) => accountMatches(card, selected, wildcard)), [cards, selected, wildcard]);
   const contactRows = useMemo(() => {
+    const roles = picked(selected, "role:");
+    const names = picked(selected, "account:");
+    const sectors = picked(selected, "sector:");
+    const queries = picked(selected, "search:");
+    const needles = queries.length ? queries : wildcard.trim() ? [wildcard] : [];
     return cards.flatMap((card) => {
-      if (filter !== "custom" && !matchesFilter(card, filter)) return [];
+      if (names.length && !names.includes(card.account.name)) return [];
+      if (sectors.length && !sectors.includes(card.account.industry)) return [];
       return contactsOnAccount(card.account.id, overlay)
-        .filter((person) => filter !== "custom" || wildcard01Match(`${person.name} ${person.role} ${person.email} ${person.phone} ${card.account.name}`, wildcard))
+        .filter((person) => !roles.length || roles.includes(person.role))
+        .filter((person) => !needles.length || needles.some((query) => filter01Match(`${person.name} ${person.role} ${person.email} ${person.phone} ${card.account.name}`, query)))
         .map((person) => ({ card, person }));
     });
-  }, [cards, filter, overlay, wildcard]);
+  }, [cards, overlay, selected, wildcard]);
+  const filterOptions = useMemo<Filter01Option[]>(() => {
+    if (panel === "contacts") {
+      const people = accounts.flatMap((account) => account.contacts.map((person) => ({ role: person.role, account: account.name, sector: account.industry })));
+      return [
+        ...[...new Set(people.map((person) => person.role))].sort().map((role) => ({ id: `role:${role}`, label: role, category: "Role" })),
+        ...[...new Set(people.map((person) => person.account))].sort().map((name) => ({ id: `account:${name}`, label: name, category: "Account" })),
+        ...[...new Set(people.map((person) => person.sector))].sort().map((sector) => ({ id: `sector:${sector}`, label: sector, category: "Sector" })),
+      ];
+    }
+    return [
+      { id: "status:Active", label: "Active", category: "Status" },
+      { id: "status:On hold", label: "On hold", category: "Status" },
+      { id: "health:Healthy", label: "Healthy", category: "Health" },
+      { id: "health:Watch", label: "Watch", category: "Health" },
+      { id: "health:At risk", label: "At risk", category: "Health" },
+      { id: "health:Critical", label: "Critical", category: "Health" },
+      ...[...new Set(accounts.map((account) => account.industry))].sort().map((sector) => ({ id: `sector:${sector}`, label: sector, category: "Sector" })),
+      { id: "source:Account", label: "Account", category: "Source" },
+      { id: "source:Insurance", label: "Insurance", category: "Source" },
+      { id: "source:Self-pay", label: "Self-pay", category: "Source" },
+    ];
+  }, [accounts, panel]);
 
-  useEffect(() => {
-    const incoming = params.get("q");
-    if (!incoming) return;
-    setWildcard(incoming);
+  function chooseFilters(next: string[]) {
+    setSelected(next);
     const copy = new URLSearchParams(params);
+    if (next.length) copy.set("filters", writeFilters(next));
+    else copy.delete("filters");
+    copy.delete("view");
+    copy.delete("status");
+    copy.delete("health");
     copy.delete("q");
-    copy.set("view", "custom");
+    copy.delete("page");
     setParams(copy, { replace: true });
-  }, [params, setParams]);
+  }
 
   const signed = accounts.reduce((sum, account) => sum + account.agreements.filter((item) => item.status === "Active").length, 0);
   const negotiating = accounts.reduce((sum, account) => sum + account.opportunities.filter((item) => item.stage === "Negotiation" || item.stage === "Proposal").length, 0);
@@ -76,19 +136,6 @@ export function CrmClientsPage() {
   }));
   const quiet = [...sources].sort((a, b) => a.count - b.count)[0];
 
-  function setFilter(next: string) {
-    const copy = new URLSearchParams(params);
-    if (next === "all") {
-      copy.delete("view");
-      setWildcard("");
-    } else copy.set("view", next);
-    copy.delete("status");
-    copy.delete("health");
-    copy.delete("page");
-    copy.delete("q");
-    setParams(copy, { replace: true });
-  }
-
   function setPanel(next: "accounts" | "contacts") {
     const copy = new URLSearchParams(params);
     if (next === "accounts") copy.delete("panel");
@@ -96,7 +143,9 @@ export function CrmClientsPage() {
     copy.delete("view");
     copy.delete("status");
     copy.delete("health");
+    copy.delete("filters");
     copy.delete("q");
+    setSelected([]);
     setWildcard("");
     setParams(copy, { replace: true });
   }
@@ -128,26 +177,16 @@ export function CrmClientsPage() {
             ) : null}
           />
           <CrmRecordStrip />
-          <div className="client-pills" role="tablist" aria-label="Account filter">
-            <button type="button" role="tab" aria-selected={filter === "all"} className={buttonFormat1(filter === "all")} onClick={() => setFilter("all")}>
-              {panel === "accounts" ? "All Accounts" : "All Contacts"}
-            </button>
-            <Wildcard01
-              key={panel}
-              scope={panel === "accounts" ? "manage-accounts" : "manage-contacts"}
-              active={filter === "custom"}
-              query={filter === "custom" ? wildcard : ""}
-              onSearch={(query) => {
-                setWildcard(query);
-                setFilter("custom");
-              }}
-            />
-            {FILTERS.map((item) => (
-              <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} className={buttonFormat1(filter === item.id)} onClick={() => setFilter(item.id)}>
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <Filter01
+            key={panel}
+            label={panel === "accounts" ? "Accounts" : "Contacts"}
+            scope={panel === "accounts" ? "manage-accounts" : "manage-contacts"}
+            options={filterOptions}
+            selected={selected}
+            onChange={chooseFilters}
+            query={wildcard}
+            onQuery={setWildcard}
+          />
           {panel === "accounts" && filtered.length ? (
             <div className="client-grid">
               {filtered.map((card) => (

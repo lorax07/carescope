@@ -230,8 +230,9 @@ export function buildInboxThreads(contacts: InboxContact[], accounts: InboxAccou
     .sort((a, b) => (b.messages.at(-1)?.at ?? "").localeCompare(a.messages.at(-1)?.at ?? ""));
 }
 
-export function threadMatches(thread: InboxThread, query: string, platform: "all" | CommunicationKind): boolean {
-  if (platform !== "all" && !thread.messages.some((message) => message.kind === platform)) return false;
+export function threadMatches(thread: InboxThread, query: string, platform: "all" | CommunicationKind | readonly CommunicationKind[]): boolean {
+  const channels = platform === "all" ? [] : typeof platform === "string" ? [platform] : platform;
+  if (channels.length && !thread.messages.some((message) => channels.includes(message.kind))) return false;
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
   const hay = `${thread.name} ${thread.accountName} ${thread.role} ${thread.messages.map((message) => message.body).join(" ")}`.toLowerCase();
