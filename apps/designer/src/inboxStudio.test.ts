@@ -3,6 +3,7 @@ import type { CrmCommunication } from "./crm";
 import {
   attachmentNote,
   buildInboxThreads,
+  threadReach,
   followUpDraft,
   formalTone,
   inboxMessages,
@@ -39,6 +40,26 @@ describe("client inbox", () => {
     expect(helix?.messages.at(-1)?.id).toBe("COM-9");
     expect(inboxMessages(logged).filter((message) => message.id === "COM-1")).toHaveLength(1);
     expect(helix?.industry).toBe("Biologics");
+    expect(helix?.channel).toBe("email");
+  });
+
+  it("shows the address for email, phone, Slack, and Teams", () => {
+    expect(threadReach("acc-vertex:r.okonkwo@vertex.example", "r.okonkwo@vertex.example", "312-555-0142")).toEqual({
+      channel: "email",
+      reach: "r.okonkwo@vertex.example",
+    });
+    expect(threadReach("acc-cascade:d.nguyen@cascade.example", "d.nguyen@cascade.example", "503-555-0166")).toEqual({
+      channel: "phone",
+      reach: "503-555-0166",
+    });
+    expect(threadReach("acc-aether:l.shah@aether.example", "l.shah@aether.example", "617-555-0114")).toEqual({
+      channel: "slack",
+      reach: "@lshah",
+    });
+    expect(threadReach("acc-aether:payers@aether.example", "payers@aether.example", "617-555-0190")).toEqual({
+      channel: "teams",
+      reach: "payers@aether.example",
+    });
   });
 
   it("filters by channel and search, and counts unread incoming notes", () => {

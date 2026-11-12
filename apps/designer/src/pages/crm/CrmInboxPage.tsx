@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
+import { InboxChannelMark } from "./InboxChannelMark";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
 import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
@@ -65,6 +66,8 @@ export function CrmInboxPage() {
           name: contact.name,
           accountName: contact.accountName,
           role: contact.role,
+          email: contact.email,
+          phone: contact.phone,
         })),
         accounts.map((account) => ({
           id: account.id,
@@ -133,7 +136,10 @@ export function CrmInboxPage() {
               <header className="inbox-thread-head">
                 <ClientAvatar name={selected.name} size={44} />
                 <div>
-                  <b>{selected.name}</b>
+                  <b>
+                    {selected.name}
+                    <InboxChannelMark channel={selected.channel} reach={selected.reach} />
+                  </b>
                   <small>
                     {selected.industry} | Local time: {now.toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })}
                   </small>
@@ -253,7 +259,10 @@ export function CrmInboxPage() {
                   <button type="button" className={on ? "is-on" : undefined} aria-current={on ? "true" : undefined} onClick={() => openThread(thread.contactId)}>
                     <ClientAvatar name={thread.name} size={40} />
                     <span>
-                      <b>{thread.name}</b>
+                      <b>
+                        {thread.name}
+                        <InboxChannelMark channel={thread.channel} reach={thread.reach} />
+                      </b>
                       <small>{snippet(thread)}</small>
                     </span>
                     <span className="inbox-row-meta">

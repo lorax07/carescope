@@ -8612,7 +8612,9 @@ button.client-kpi.is-on {
 
 .inbox-thread-head b,
 .inbox-list h1 {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   margin: 0;
   color: #1d2433;
   font-size: 1rem;
@@ -8808,7 +8810,45 @@ button.client-kpi.is-on {
 }
 
 .inbox-list b {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.86rem;
+}
+
+.inbox-channel {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  color: #6d5efc;
+}
+
+.inbox-channel svg {
+  width: 14px;
+  height: 14px;
+}
+
+.inbox-channel-tip {
+  position: absolute;
+  z-index: 6;
+  left: calc(100% + 6px);
+  top: 50%;
+  padding: 0.22rem 0.45rem;
+  border-radius: 8px;
+  background: #1d2433;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.inbox-channel:hover .inbox-channel-tip,
+.inbox-channel:focus-visible .inbox-channel-tip {
+  opacity: 1;
 }
 
 .inbox-list small {
