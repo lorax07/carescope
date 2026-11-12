@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
+import { InboxChannelMark } from "./InboxChannelMark";
 import { buildInboxThreads, relativeAge, threadMatches, unreadCount, type InboxThread } from "./inboxStudio";
 
 const PLATFORMS: { id: "all" | CommunicationKind; label: string }[] = [
@@ -36,6 +37,8 @@ export function AllMessagesCard() {
           name: contact.name,
           accountName: contact.accountName,
           role: contact.role,
+          email: contact.email,
+          phone: contact.phone,
         })),
         accounts.map((account) => ({
           id: account.id,
@@ -84,7 +87,10 @@ export function AllMessagesCard() {
               >
                 <ClientAvatar name={thread.name} size={40} />
                 <span>
-                  <b>{thread.name}</b>
+                  <b>
+                  {thread.name}
+                  <InboxChannelMark channel={thread.channel} reach={thread.reach} />
+                </b>
                   <small>{snippet(thread)}</small>
                 </span>
                 <span className="inbox-row-meta">

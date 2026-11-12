@@ -11,12 +11,16 @@ export type InboxLine = {
   body: string;
 };
 
+export type InboxChannel = "email" | "phone" | "slack" | "teams";
+
 export type InboxContact = {
   id: string;
   accountId: string;
   name: string;
   accountName: string;
   role: string;
+  email?: string;
+  phone?: string;
 };
 
 export type InboxAccount = {
@@ -33,8 +37,36 @@ export type InboxThread = {
   accountName: string;
   role: string;
   industry: string;
+  channel: InboxChannel;
+  reach: string;
   messages: InboxLine[];
 };
+
+/** How this conversation is reached. Slack and Teams are set where the thread is not email or phone. */
+const THREAD_CHANNEL: Record<string, InboxChannel> = {
+  "acc-aether:l.shah@aether.example": "slack",
+  "acc-northwind:c.ibarra@northwind.example": "slack",
+  "acc-aether:payers@aether.example": "teams",
+  "acc-cascade:d.nguyen@cascade.example": "phone",
+  "acc-summit:billing@summit.example": "phone",
+};
+
+const SLACK_REACH: Record<string, string> = {
+  "acc-aether:l.shah@aether.example": "@lshah",
+  "acc-northwind:c.ibarra@northwind.example": "@cibarra",
+};
+
+const TEAMS_REACH: Record<string, string> = {
+  "acc-aether:payers@aether.example": "payers@aether.example",
+};
+
+export function threadReach(contactId: string, email = "", phone = ""): { channel: InboxChannel; reach: string } {
+  const channel = THREAD_CHANNEL[contactId] ?? (phone && !email ? "phone" : "email");
+  if (channel === "phone") return { channel, reach: phone || "No phone on file" };
+  if (channel === "slack") return { channel, reach: SLACK_REACH[contactId] || email || "Slack" };
+  if (channel === "teams") return { channel, reach: TEAMS_REACH[contactId] || email || "Teams" };
+  return { channel, reach: email || "No email on file" };
+}
 
 /** Conversations already on the laboratory accounts. Logged messages merge in by id. */
 export const INBOX_LINES: InboxLine[] = [
@@ -182,6 +214,7 @@ export function buildInboxThreads(contacts: InboxContact[], accounts: InboxAccou
       const person = people.get(contactId);
       const accountId = person?.accountId || contactId.split(":")[0] || "";
       const account = books.get(accountId);
+      const reached = threadReach(contactId, person?.email, person?.phone);
       return {
         contactId,
         accountId,
@@ -189,6 +222,8 @@ export function buildInboxThreads(contacts: InboxContact[], accounts: InboxAccou
         accountName: person?.accountName || accountId,
         role: person?.role || "Contact",
         industry: account?.industry || "Laboratory",
+        channel: reached.channel,
+        reach: reached.reach,
         messages: lines,
       };
     })
