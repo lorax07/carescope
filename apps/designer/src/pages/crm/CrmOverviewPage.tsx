@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import type { Charge } from "../../revenueCycle";
-import { ClientAssist, ProjectTable, RevenueChart, StudioLink, paymentBars, type ProjectFilter } from "./clientStudio";
+import { ProjectTable, RevenueChart, StudioLink, paymentBars, type ProjectFilter } from "./clientStudio";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
+import { TopPriorities } from "./TopPriorities";
 
 function postedPayments(charges: Charge[]): { at: string; cents: number }[] {
   return charges.flatMap((charge) =>
@@ -14,7 +15,7 @@ function postedPayments(charges: Charge[]): { at: string; cents: number }[] {
 }
 
 export function CrmOverviewPage() {
-  const { cards, overlay, opportunities, actor, accounts, charges } = useCrm();
+  const { cards, overlay, opportunities, accounts, charges } = useCrm();
   const [filter, setFilter] = useState<ProjectFilter>("active");
   const [query, setQuery] = useState("");
   const active = cards.filter((card) => card.account.status === "Active");
@@ -25,7 +26,7 @@ export function CrmOverviewPage() {
   const watch = cards.filter((card) => card.health === "At risk" || card.health === "Critical").length;
 
   return (
-    <CrmShell studio title="CRM Overview" lede="How the laboratory’s clients are doing, what they need, and who should act next.">
+    <CrmShell studio priorities={false} title="CRM Overview" lede="How the laboratory’s accounts are doing, what they need, and who should act next.">
       <div className="client-home">
         <div className="client-overview-head">
           <CrmModuleTitle title="CRM Overview" />
@@ -87,32 +88,7 @@ export function CrmOverviewPage() {
         </div>
 
         <aside className="client-home-side">
-          <section className="client-card client-tasks">
-            <header>
-              <h2>Priority cases</h2>
-              <Link to="/app/connectivity/tasks">See all</Link>
-            </header>
-            {openTasks.length ? (
-              <ul>
-                {openTasks.slice(0, 4).map((task) => (
-                  <li key={task.id}>
-                    <Link to={`/app/connectivity/tasks?task=${task.id}`}>
-                      <span className={`client-task-mark is-${task.priority}`} />
-                      <span>
-                        <b>{task.title}</b>
-                        <small>{task.due.slice(5)} · {task.priority}</small>
-                        <em>{task.description}</em>
-                      </span>
-                      <span aria-hidden="true">›</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="client-empty">No open cases.</p>
-            )}
-          </section>
-          <ClientAssist actor={actor} hint="Search uses the same accounts as the laboratory and Sequence Revenue." />
+          <TopPriorities defaultOpen hint="Search uses the same accounts as the laboratory and Sequence Revenue." />
         </aside>
       </div>
     </CrmShell>

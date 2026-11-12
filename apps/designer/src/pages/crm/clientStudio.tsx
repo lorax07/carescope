@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { buttonFormat1 } from "../../buttonFormat1";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import type { ClientCard, OpportunityRecord } from "../../crm";
@@ -199,53 +199,6 @@ export function RevenueChart({ series, format = "money" }: { series: number[]; f
         </div>
       </div>
     </div>
-  );
-}
-
-export function ClientAssist({ actor, hint, ask = "Ask about an account, case, or project" }: { actor: string; hint: string; ask?: string }) {
-  const [draft, setDraft] = useState("");
-  const navigate = useNavigate();
-  const first = greetingName(actor);
-  return (
-    <section className="client-assist">
-      <p>Hi, {first}</p>
-      <h2>How can I help you?</h2>
-      <div className="client-assist-grid">
-        <Link to="/app/connectivity/tasks">
-          <i className="is-mint" />
-          <span>Follow-ups</span>
-          <small>Open the tasks that are still due.</small>
-        </Link>
-        <Link to="/app/connectivity/documents">
-          <i className="is-rose" />
-          <span>Agreements</span>
-          <small>Review contracts on the accounts.</small>
-        </Link>
-        <Link to="/app/connectivity/opportunities">
-          <i className="is-amber" />
-          <span>Projects</span>
-          <small>See work that is still moving.</small>
-        </Link>
-        <Link to="/app/connectivity/health">
-          <i className="is-pink" />
-          <span>Accounts to watch</span>
-          <small>Health signals with a next step.</small>
-        </Link>
-      </div>
-      <form
-        className="client-assist-ask"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const query = draft.trim();
-          if (!query) return;
-          navigate(`/app/connectivity/clients?q=${encodeURIComponent(query)}`);
-        }}
-      >
-        <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={ask} aria-label={ask} />
-        <button type="submit" aria-label="Search accounts">↑</button>
-      </form>
-      <p className="client-assist-hint">{hint}</p>
-    </section>
   );
 }
 

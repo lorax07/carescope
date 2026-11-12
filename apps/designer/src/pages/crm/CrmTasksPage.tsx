@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, type TaskStatus } from "../../crm";
-import { ClientAssist, ClientAvatar, shortDate } from "./clientStudio";
+import { ClientAvatar, shortDate } from "./clientStudio";
+import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import { buttonFormat1 } from "../../buttonFormat1";
 import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
@@ -26,7 +27,7 @@ function priorityTone(priority: TaskPriority): string {
 }
 
 export function CrmTasksPage() {
-  const { overlay, accounts, actor } = useCrm();
+  const { overlay, accounts } = useCrm();
   const [params, setParams] = useSearchParams();
   const canWrite = crmCanWrite();
   const mine = params.get("scope") || "open";
@@ -55,7 +56,7 @@ export function CrmTasksPage() {
   }
 
   return (
-    <CrmShell studio title="Cases" lede="What someone owes an account today.">
+    <CrmShell studio priorities={false} title="Cases" lede="What someone owes an account today.">
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
@@ -73,7 +74,7 @@ export function CrmTasksPage() {
                 <em className="is-up">{counts.open}</em>
               </header>
               <strong>{counts.open}</strong>
-              <small>Still owed to a client</small>
+              <small>Still owed to an account</small>
             </button>
             <button type="button" className={`client-kpi${mine === "in_progress" ? " is-on" : ""}`} onClick={() => setScope("in_progress")}>
               <header>
@@ -143,7 +144,7 @@ export function CrmTasksPage() {
           </section>
         </div>
         <aside className="client-home-side">
-          <ClientAssist actor={actor} hint="Start and complete stay on the task. Client status does not change with them." />
+          <TopPriorities hint="Start and complete stay on the case. Account status does not change with them." />
         </aside>
       </div>
     </CrmShell>

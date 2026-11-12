@@ -6,7 +6,8 @@ import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../
 import { contactsOnAccount } from "../../crm/directory";
 import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
 import { wildcard01Match } from "../../wildcard01";
-import { AccountPersonCard, ClientAssist, SourceBars, clientBudget } from "./clientStudio";
+import { AccountPersonCard, SourceBars, clientBudget } from "./clientStudio";
+import { TopPriorities } from "./TopPriorities";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 import { CrmImportPanel } from "./CrmImportPanel";
 import { CrmRecordStrip } from "./CrmRecordStrip";
@@ -37,7 +38,7 @@ function matchesFilter(card: ClientCard, filter: string): boolean {
 }
 
 export function CrmClientsPage() {
-  const { cards, actor, canWrite, accounts, overlay } = useCrm();
+  const { cards, canWrite, accounts, overlay } = useCrm();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [wildcard, setWildcard] = useState("");
@@ -124,7 +125,7 @@ export function CrmClientsPage() {
   }
 
   return (
-    <CrmShell studio title="Account" lede="The people on Sequence CRM accounts.">
+    <CrmShell studio priorities={false} title="Account" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
@@ -197,6 +198,7 @@ export function CrmClientsPage() {
           )}
         </div>
         <aside className="client-board-side">
+          <TopPriorities hint="A saved star stays on this screen until you leave it." />
           <section className="client-card client-contracts">
             <div className="client-contract-bar" aria-hidden="true">
               <span style={{ width: `${signed + negotiating === 0 ? 50 : Math.round((signed / (signed + negotiating)) * 100)}%` }} />
@@ -215,7 +217,6 @@ export function CrmClientsPage() {
             title="Account source"
             note={quiet ? `${quiet.label} is the smallest source, with ${quiet.count} account${quiet.count === 1 ? "" : "s"}.` : "Sources appear as accounts are billed."}
           />
-          <ClientAssist actor={actor} hint="A saved star stays on this screen until you leave it." />
         </aside>
       </div>
       {adding ? (
