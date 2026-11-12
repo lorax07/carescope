@@ -11,6 +11,7 @@ import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { AccountEditDialog } from "./AccountEditDialog";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
+import { TopPriorities } from "./TopPriorities";
 
 function FeedIcon({ kind }: { kind: "activity" | "documents" | "notes" }) {
   const path = kind === "activity"
@@ -72,10 +73,19 @@ export function CrmClientDetailPage() {
 
   if (!card) {
     return (
-      <CrmShell studio title="Account" lede="This account is not in the current tenant.">
-        <CrmDirectoryHeader panel={home} onPanel={chooseHome} />
-        <CrmRecordStrip />
-        <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
+      <CrmShell studio priorities={false} title="Account" lede="This account is not in the current tenant.">
+        <div className="client-board">
+          <div className="client-overview-head">
+            <CrmDirectoryHeader panel={home} onPanel={chooseHome} />
+          </div>
+          <div className="client-board-main">
+            <CrmRecordStrip />
+            <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
+          </div>
+          <aside className="client-board-side">
+            <TopPriorities />
+          </aside>
+        </div>
       </CrmShell>
     );
   }
@@ -124,13 +134,16 @@ export function CrmClientDetailPage() {
   }
 
   return (
-    <CrmShell studio title={focus ? focus.name : account.name} lede={focus ? focus.role : `${account.number} · ${account.owner}`}>
-      <div className="account-page">
-        <CrmDirectoryHeader
-          panel={home}
-          onPanel={chooseHome}
-          action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
-        />
+    <CrmShell studio priorities={false} title={focus ? focus.name : account.name} lede={focus ? focus.role : `${account.number} · ${account.owner}`}>
+      <div className="client-board">
+        <div className="client-overview-head">
+          <CrmDirectoryHeader
+            panel={home}
+            onPanel={chooseHome}
+            action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
+          />
+        </div>
+        <div className="account-page">
         <div className="tab-sheet">
         <CrmRecordStrip activeKey={activeKey} />
         <div className="tab-sheet">
@@ -265,6 +278,10 @@ export function CrmClientDetailPage() {
         </section>}
         </div>
         </div>
+        </div>
+        <aside className="client-board-side">
+          <TopPriorities />
+        </aside>
       </div>
       {editing ? (
         <AccountEditDialog

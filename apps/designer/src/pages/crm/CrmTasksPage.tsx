@@ -61,10 +61,12 @@ export function CrmTasksPage() {
   return (
     <CrmShell studio priorities={false} title="Cases" lede="What someone owes an account today.">
       <div className="client-home">
-        <div className="client-home-main">
+        <div className="client-overview-head">
           <header className="client-board-head">
             <CrmModuleTitle title="Cases" />
           </header>
+        </div>
+        <div className="client-home-main">
           <div className="client-board-links">
             <Link to="/app/connectivity/inbox">Inbox</Link>
             <Link to="/app/connectivity/activities">Activity</Link>
