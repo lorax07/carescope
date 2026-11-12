@@ -5,8 +5,9 @@ import { directoryContacts } from "../../crm/directory";
 import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
 import { useWorkflowStages } from "../../workflowStages";
-import { openCrmRecordTab } from "../../crmRecordTabs";
-import { AccountPersonCard, ClientAvatar, clientBudget } from "./clientStudio";
+import { crmHomePanel, openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
+import { AccountPersonCard, ClientAvatar, clientBudget, initials } from "./clientStudio";
+import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { AccountEditDialog } from "./AccountEditDialog";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
@@ -67,13 +68,16 @@ export function CrmClientDetailPage() {
     return () => document.removeEventListener("mousedown", close);
   }, [reach]);
 
+  const home = crmHomePanel();
+  function chooseHome(next: "accounts" | "contacts") {
+    rememberCrmHome(next);
+    navigate(next === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients");
+  }
+
   if (!card) {
     return (
       <CrmShell studio title="Account" lede="This account is not in the current tenant.">
-        <div className="crm-studio-title">
-          <p className="lims-eyebrow">Sequence CRM</p>
-          <h1>Account</h1>
-        </div>
+        <CrmDirectoryHeader panel={home} onPanel={chooseHome} />
         <CrmRecordStrip />
         <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
       </CrmShell>
@@ -113,30 +117,53 @@ export function CrmClientDetailPage() {
   }, new Map());
   const activeKey = focus ? `contact:${focus.id}` : `account:${account.id}`;
 
+  function openAccountRecord() {
+    const tab = { key: `account:${account.id}`, kind: "account" as const, accountId: account.id, title: account.name };
+    openCrmRecordTab(tab);
+    navigate(recordPath(tab));
+  }
+
   function openContact(contactId: string, title: string) {
     openCrmRecordTab({ key: `contact:${contactId}`, kind: "contact", accountId: account.id, contactId, title });
     navigate(`/app/connectivity/clients/${account.id}?contact=${encodeURIComponent(contactId)}`);
   }
 
   return (
-    <CrmShell studio title={account.name} lede={`${account.number} · ${account.owner}`}>
+    <CrmShell studio title={focus ? focus.name : account.name} lede={focus ? focus.role : `${account.number} · ${account.owner}`}>
       <div className="account-page">
-        <div className="account-page-title">
-          <p className="lims-eyebrow">Sequence CRM</p>
-          {canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
-        </div>
+        <CrmDirectoryHeader
+          panel={home}
+          onPanel={chooseHome}
+          action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
+        />
         <CrmRecordStrip activeKey={activeKey} />
 
+        {focus ? (
+          <section className="client-card account-hero contact-record">
+            <ClientAvatar name={focus.name} size={72} />
+            <div>
+              <h1>{focus.name}</h1>
+              <small>{focus.role}</small>
+              <em>{account.name}</em>
+            </div>
+            <dl>
+              <div><dt>Email</dt><dd>{focus.email ? <a href={`mailto:${focus.email}`}>{focus.email}</a> : "—"}</dd></div>
+              <div><dt>Phone</dt><dd>{focus.phone ? <a href={`tel:${focus.phone}`}>{focus.phone}</a> : "—"}</dd></div>
+              <div><dt>Account</dt><dd><button type="button" className="crm-record-link" onClick={() => openAccountRecord()}>{account.name}</button></dd></div>
+              <div><dt>Sector</dt><dd>{account.industry}</dd></div>
+            </dl>
+          </section>
+        ) : (
         <section className="client-card account-hero">
-          <ClientAvatar name={focus?.name || account.name} size={72} />
+          <span className="account-mark is-hero" aria-hidden="true">{initials(account.name)}</span>
           <div>
-            <h1>{focus?.name || account.name}</h1>
+            <h1>{account.name}</h1>
             <small>{account.number} · {sourceLabel(account.relationship)} · {account.owner}</small>
-            <em>{focus ? `${focus.role} · ${account.name}` : account.industry}</em>
+            <em>{account.industry}</em>
           </div>
           <div className="account-contact-row">
             {people.map((person) => (
-              <div key={person.id} className={`account-contact-chip${focus?.id === person.id ? " is-on" : ""}`}>
+              <div key={person.id} className="account-contact-chip">
                 <button type="button" aria-label={`Contact ${person.name}`} aria-expanded={reach === person.id} onClick={() => setReach((current) => current === person.id ? null : person.id)}>
                   <ClientAvatar name={person.name} size={36} />
                 </button>
@@ -159,8 +186,9 @@ export function CrmClientDetailPage() {
             ))}
           </dl>
         </section>
+        )}
 
-        <section className="account-block">
+        {focus ? null : <section className="account-block">
           <h2>Contacts</h2>
           <div className="client-grid">
             {people.map((person) => (
@@ -178,9 +206,9 @@ export function CrmClientDetailPage() {
               />
             ))}
           </div>
-        </section>
+        </section>}
 
-        <div className="account-page-grid">
+        {focus ? null : <div className="account-page-grid">
           <section className="client-card account-panel">
             <h2>What needs to happen next</h2>
             <SignalList items={card.signals} />
@@ -203,9 +231,9 @@ export function CrmClientDetailPage() {
             )}
             {charges.length ? <p className="billing-note">{charges.length} charge line{charges.length === 1 ? "" : "s"} stay in Sequence Revenue.</p> : null}
           </section>
-        </div>
+        </div>}
 
-        <section className="client-card account-feed">
+        {focus ? null : <section className="client-card account-feed">
           <div className="account-feed-tabs" role="tablist" aria-label="Account record">
             {(["activity", "documents", "notes"] as const).map((item) => (
               <button key={item} type="button" role="tab" aria-selected={feed === item} className={feed === item ? "is-on" : undefined} onClick={() => setFeed(item)}>
@@ -252,7 +280,7 @@ export function CrmClientDetailPage() {
               {notes.map((item) => <p key={item.id} className="account-feed-doc"><b>{item.actor}</b><span>{item.text}</span><time>{item.at}</time></p>)}
             </div>
           ) : null}
-        </section>
+        </section>}
       </div>
       {editing ? (
         <AccountEditDialog

@@ -79,6 +79,48 @@ export function AccountPersonCard({
   );
 }
 
+export function AccountCompanyCard({
+  name,
+  industry,
+  number,
+  onOpen,
+  facts,
+  saved = false,
+  onSave,
+}: {
+  name: string;
+  industry: string;
+  number: string;
+  onOpen: () => void;
+  facts: { label: string; value: string }[];
+  saved?: boolean;
+  onSave?: () => void;
+}) {
+  return (
+    <article className="client-person account-company">
+      {onSave ? (
+        <button type="button" className={saved ? "is-saved" : undefined} aria-label={`Save ${name}`} aria-pressed={saved} onClick={onSave}>
+          ★
+        </button>
+      ) : null}
+      <button type="button" className="client-person-id" onClick={onOpen}>
+        <span className="account-mark" aria-hidden="true">{initials(name)}</span>
+        <b>{name}</b>
+        <small>{industry}</small>
+        <em>{number}</em>
+      </button>
+      <dl>
+        {facts.map((fact) => (
+          <div key={fact.label}>
+            <dt>{fact.label}</dt>
+            <dd>{fact.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </article>
+  );
+}
+
 export function ClientAvatar({ name, size = 46 }: { name: string; size?: number }) {
   const color = avatarColor(name);
   return (

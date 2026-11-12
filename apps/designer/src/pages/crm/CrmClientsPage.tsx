@@ -6,7 +6,8 @@ import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../
 import { contactsOnAccount } from "../../crm/directory";
 import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
 import { wildcard01Match } from "../../wildcard01";
-import { AccountPersonCard, SourceBars, clientBudget } from "./clientStudio";
+import { AccountCompanyCard, AccountPersonCard, SourceBars, clientBudget } from "./clientStudio";
+import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { TopPriorities } from "./TopPriorities";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 import { CrmImportPanel } from "./CrmImportPanel";
@@ -21,14 +22,6 @@ function accountText(card: ClientCard): string {
   const account = card.account;
   const people = account.contacts.map((person) => `${person.name} ${person.role} ${person.email} ${person.phone}`).join(" ");
   return [account.name, account.number, account.contact, account.industry, account.owner, account.billTo, account.relationship, people].join(" ");
-}
-
-function personFacts(card: ClientCard): { label: string; value: string }[] {
-  return [
-    { label: "From", value: card.account.billTo === "Client" ? "Account" : card.account.billTo },
-    { label: "Sector", value: card.account.industry },
-    { label: "Budget", value: clientBudget(card) },
-  ];
 }
 
 function matchesFilter(card: ClientCard, filter: string): boolean {
@@ -55,6 +48,14 @@ export function CrmClientsPage() {
       return matchesFilter(card, filter);
     });
   }, [cards, filter, wildcard]);
+  const contactRows = useMemo(() => {
+    return cards.flatMap((card) => {
+      if (filter !== "custom" && !matchesFilter(card, filter)) return [];
+      return contactsOnAccount(card.account.id, overlay)
+        .filter((person) => filter !== "custom" || wildcard01Match(`${person.name} ${person.role} ${person.email} ${person.phone} ${card.account.name}`, wildcard))
+        .map((person) => ({ card, person }));
+    });
+  }, [cards, filter, overlay, wildcard]);
 
   useEffect(() => {
     const incoming = params.get("q");
@@ -113,39 +114,19 @@ export function CrmClientsPage() {
     navigate(recordPath(tab));
   }
 
-  function openCard(card: ClientCard, person: { name: string; role: string; email: string; phone: string }, index: number) {
-    if (panel === "contacts") {
-      const id = contactsOnAccount(card.account.id, overlay)[index]?.id || `${card.account.id}:${person.email || person.name}:${index}`;
-      const tab = { key: `contact:${id}`, kind: "contact" as const, accountId: card.account.id, contactId: id, title: person.name };
-      openCrmRecordTab(tab);
-      navigate(recordPath(tab));
-      return;
-    }
-    openAccount(card.account.id, card.account.name);
-  }
-
   return (
     <CrmShell studio priorities={false} title="Account" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
         <div className="client-board-main">
-          <header className="client-board-head">
-            <div className="crm-studio-title">
-              <p className="lims-eyebrow">Sequence CRM</p>
-              <div className="crm-view-tabs" role="tablist" aria-label="Manage">
-                <button type="button" role="tab" aria-selected={panel === "accounts"} className={panel === "accounts" ? "is-on" : undefined} onClick={() => setPanel("accounts")}>
-                  Manage Accounts
-                </button>
-                <button type="button" role="tab" aria-selected={panel === "contacts"} className={panel === "contacts" ? "is-on" : undefined} onClick={() => setPanel("contacts")}>
-                  Manage Contact
-                </button>
-              </div>
-            </div>
-            {canWrite ? (
+          <CrmDirectoryHeader
+            panel={panel}
+            onPanel={setPanel}
+            action={canWrite ? (
               <button type="button" className="client-add" onClick={() => { setImporting(false); setAdding(true); }}>
                 {panel === "accounts" ? "Add new Account" : "Add new Contact"}
               </button>
             ) : null}
-          </header>
+          />
           <CrmRecordStrip />
           <div className="client-pills" role="tablist" aria-label="Account filter">
             <button type="button" role="tab" aria-selected={filter === "all"} className={buttonFormat1(filter === "all")} onClick={() => setFilter("all")}>
@@ -167,30 +148,52 @@ export function CrmClientsPage() {
               </button>
             ))}
           </div>
-          {filtered.length ? (
+          {panel === "accounts" && filtered.length ? (
             <div className="client-grid">
-              {filtered.flatMap((card) => {
-                const people = card.account.contacts.length ? card.account.contacts : [{ name: card.account.contact, role: "Primary contact", email: "", phone: "" }];
-                return people.map((person, index) => {
-                  const key = `${card.account.id}:${person.name}:${index}`;
-                  return (
-                    <AccountPersonCard
-                      key={key}
-                      name={person.name}
-                      role={person.role}
-                      accountName={card.account.name}
-                      onOpen={() => openCard(card, person, index)}
-                      facts={personFacts(card)}
-                      saved={saved.includes(key)}
-                      onSave={() =>
-                        setSaved((current) => (current.includes(key) ? current.filter((item) => item !== key) : [...current, key]))
-                      }
-                    />
-                  );
-                });
-              })}
+              {filtered.map((card) => (
+                <AccountCompanyCard
+                  key={card.account.id}
+                  name={card.account.name}
+                  industry={card.account.industry}
+                  number={card.account.number}
+                  onOpen={() => openAccount(card.account.id, card.account.name)}
+                  facts={[
+                    { label: "Status", value: card.account.status },
+                    { label: "Sector", value: card.account.industry },
+                    { label: "Health", value: card.health },
+                    { label: "Budget", value: clientBudget(card) },
+                  ]}
+                  saved={saved.includes(card.account.id)}
+                  onSave={() => setSaved((current) => (current.includes(card.account.id) ? current.filter((item) => item !== card.account.id) : [...current, card.account.id]))}
+                />
+              ))}
             </div>
-          ) : (
+          ) : null}
+          {panel === "contacts" && contactRows.length ? (
+            <div className="client-grid">
+              {contactRows.map(({ card, person }) => (
+                <AccountPersonCard
+                  key={person.id}
+                  name={person.name}
+                  role={person.role}
+                  accountName={card.account.name}
+                  onOpen={() => {
+                    const tab = { key: `contact:${person.id}`, kind: "contact" as const, accountId: card.account.id, contactId: person.id, title: person.name };
+                    openCrmRecordTab(tab);
+                    navigate(recordPath(tab));
+                  }}
+                  facts={[
+                    { label: "Email", value: person.email || "—" },
+                    { label: "Phone", value: person.phone || "—" },
+                    { label: "Account", value: card.account.name },
+                  ]}
+                  saved={saved.includes(person.id)}
+                  onSave={() => setSaved((current) => (current.includes(person.id) ? current.filter((item) => item !== person.id) : [...current, person.id]))}
+                />
+              ))}
+            </div>
+          ) : null}
+          {(panel === "accounts" ? filtered.length : contactRows.length) ? null : (
             <CrmEmpty
               title={panel === "accounts" ? "No accounts match." : "No contacts match."}
               detail={panel === "accounts" ? "Choose All Accounts to see the full list." : "Choose All Contacts to see the full list."}

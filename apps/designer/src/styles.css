@@ -7824,19 +7824,24 @@ button.palette-category-title {
 
 .crm-view-tabs button {
   margin: 0;
-  padding: 0;
+  padding: 0.15rem 0.55rem 0.4rem;
   border: 0;
+  border-radius: 10px 10px 0 0;
   background: transparent;
   color: #b0b7c6;
   font-family: var(--font-display);
   font-size: 1.45rem;
-  font-weight: 650;
+  font-weight: 550;
   letter-spacing: -0.03em;
   line-height: 1.15;
+  box-shadow: inset 0 -3px 0 transparent;
 }
 
 .crm-view-tabs button.is-on {
   color: #1d2433;
+  font-weight: 750;
+  background: #efeaff;
+  box-shadow: inset 0 -3px 0 #6d5efc;
 }
 
 .crm-view-tabs button:hover {
@@ -8083,16 +8088,28 @@ button.palette-category-title {
 .crm-record-strip a {
   color: #b0b7c6;
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 550;
   text-decoration: none;
-  padding: 0.4rem 0 0.45rem;
+  padding: 0.4rem 0.55rem 0.5rem;
   white-space: nowrap;
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 -3px 0 transparent;
 }
 
 .crm-record-strip > a.is-on,
+.crm-record-strip span.is-on {
+  color: #1d2433;
+  font-weight: 750;
+  background: #efeaff;
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 -3px 0 #6d5efc;
+}
+
 .crm-record-strip span.is-on a {
   color: #1d2433;
-  box-shadow: inset 0 -2px 0 #1d2433;
+  font-weight: 750;
+  background: transparent;
+  box-shadow: none;
 }
 
 .crm-record-strip span {
@@ -8187,18 +8204,22 @@ button.palette-category-title {
   align-items: center;
   gap: 0.35rem;
   border: 0;
+  border-radius: 8px 8px 0 0;
   background: transparent;
-  color: #8b93a7;
+  color: #b0b7c6;
   font: inherit;
   font-size: 0.84rem;
-  font-weight: 650;
-  padding: 0.15rem 0 0.65rem;
+  font-weight: 550;
+  padding: 0.35rem 0.55rem 0.55rem;
+  box-shadow: inset 0 -3px 0 transparent;
   cursor: pointer;
 }
 
 .account-feed-tabs button.is-on {
   color: #1d2433;
-  box-shadow: inset 0 -2px 0 #1d2433;
+  font-weight: 750;
+  background: #efeaff;
+  box-shadow: inset 0 -3px 0 #6d5efc;
 }
 
 .account-feed-tabs svg,
@@ -8364,6 +8385,31 @@ button.client-person-id {
   background: #fff;
   font-size: 0.78rem;
   font-weight: 750;
+}
+
+.account-mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #efeaff;
+  color: #6d5efc;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.account-mark.is-hero {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  font-size: 1.05rem;
+}
+
+.contact-record a,
+.contact-record button.crm-record-link {
+  color: #6d5efc;
+  font-weight: 700;
 }
 
 .client-contracts {
