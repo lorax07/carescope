@@ -5,7 +5,7 @@ import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../
 import { contactsOnAccount } from "../../crm/directory";
 import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
 import { filter01Match } from "../../filter01";
-import { AccountCompanyCard, AccountPersonCard, SourceBars, clientBudget } from "./clientStudio";
+import { AccountCompanyCard, AccountPersonCard, clientBudget } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { TopPriorities } from "./TopPriorities";
 import { CrmEmpty, CrmShell } from "./CrmShell";
@@ -127,15 +127,6 @@ export function CrmClientsPage() {
     setParams(copy, { replace: true });
   }
 
-  const signed = accounts.reduce((sum, account) => sum + account.agreements.filter((item) => item.status === "Active").length, 0);
-  const negotiating = accounts.reduce((sum, account) => sum + account.opportunities.filter((item) => item.stage === "Negotiation" || item.stage === "Proposal").length, 0);
-  const sources = ["Client", "Insurance", "Self-pay"].map((label, index) => ({
-    label: label === "Client" ? "Account" : label,
-    count: accounts.filter((account) => account.billTo === label).length,
-    tone: ["is-rose", "is-mint", "is-lilac"][index] ?? "is-mint",
-  }));
-  const quiet = [...sources].sort((a, b) => a.count - b.count)[0];
-
   function setPanel(next: "accounts" | "contacts") {
     const copy = new URLSearchParams(params);
     if (next === "accounts") copy.delete("panel");
@@ -176,7 +167,9 @@ export function CrmClientsPage() {
               </button>
             ) : null}
           />
+          <div className="tab-sheet">
           <CrmRecordStrip />
+          <div className="tab-sheet">
           <Filter01
             key={panel}
             label={panel === "accounts" ? "Accounts" : "Contacts"}
@@ -238,27 +231,11 @@ export function CrmClientsPage() {
               detail={panel === "accounts" ? "Choose All Accounts to see the full list." : "Choose All Contacts to see the full list."}
             />
           )}
+          </div>
+          </div>
         </div>
         <aside className="client-board-side">
-          <TopPriorities hint="A saved star stays on this screen until you leave it." />
-          <section className="client-card client-contracts">
-            <div className="client-contract-bar" aria-hidden="true">
-              <span style={{ width: `${signed + negotiating === 0 ? 50 : Math.round((signed / (signed + negotiating)) * 100)}%` }} />
-            </div>
-            <div>
-              <strong>{signed}</strong>
-              <small>Signed contracts</small>
-            </div>
-            <div>
-              <strong>{negotiating}</strong>
-              <small>Ongoing negotiations</small>
-            </div>
-          </section>
-          <SourceBars
-            groups={sources}
-            title="Account source"
-            note={quiet ? `${quiet.label} is the smallest source, with ${quiet.count} account${quiet.count === 1 ? "" : "s"}.` : "Sources appear as accounts are billed."}
-          />
+          <TopPriorities defaultOpen hint="A saved star stays on this screen until you leave it." />
         </aside>
       </div>
       {adding ? (

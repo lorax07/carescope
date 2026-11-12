@@ -6,15 +6,11 @@ import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
 import { useWorkflowStages } from "../../workflowStages";
 import { crmHomePanel, openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
-import { AccountPersonCard, ClientAvatar, clientBudget, initials } from "./clientStudio";
+import { ClientAvatar, clientBudget, initials } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { AccountEditDialog } from "./AccountEditDialog";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
-
-function sourceLabel(value: string): string {
-  return value === "Client" ? "Account" : value;
-}
 
 function FeedIcon({ kind }: { kind: "activity" | "documents" | "notes" }) {
   const path = kind === "activity"
@@ -96,7 +92,6 @@ export function CrmClientDetailPage() {
   const timeline = crm.activitiesFor(account.id);
   const tests = [...new Set(work.flatMap((sample) => sample.tests.split(",").map((item) => item.trim()).filter(Boolean)))];
   const facts = [
-    { label: "From", value: sourceLabel(account.billTo) },
     { label: "Sector", value: account.industry },
     { label: "Budget", value: clientBudget(card) },
     { label: "Status", value: account.status },
@@ -136,7 +131,9 @@ export function CrmClientDetailPage() {
           onPanel={chooseHome}
           action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
         />
+        <div className="tab-sheet">
         <CrmRecordStrip activeKey={activeKey} />
+        <div className="tab-sheet">
 
         {focus ? (
           <section className="client-card account-hero contact-record">
@@ -158,9 +155,11 @@ export function CrmClientDetailPage() {
           <span className="account-mark is-hero" aria-hidden="true">{initials(account.name)}</span>
           <div>
             <h1>{account.name}</h1>
-            <small>{account.number} · {sourceLabel(account.relationship)} · {account.owner}</small>
+            <small>{account.number} · {account.owner}</small>
             <em>{account.industry}</em>
           </div>
+          <div className="account-card-contacts">
+            <h2>Contacts</h2>
           <div className="account-contact-row">
             {people.map((person) => (
               <div key={person.id} className="account-contact-chip">
@@ -177,6 +176,7 @@ export function CrmClientDetailPage() {
               </div>
             ))}
           </div>
+          </div>
           <dl>
             {facts.map((fact) => (
               <div key={fact.label}>
@@ -187,26 +187,6 @@ export function CrmClientDetailPage() {
           </dl>
         </section>
         )}
-
-        {focus ? null : <section className="account-block">
-          <h2>Contacts</h2>
-          <div className="client-grid">
-            {people.map((person) => (
-              <AccountPersonCard
-                key={person.id}
-                name={person.name}
-                role={person.role}
-                accountName={account.name}
-                onOpen={() => openContact(person.id, person.name)}
-                facts={[
-                  { label: "Email", value: person.email || "—" },
-                  { label: "Phone", value: person.phone || "—" },
-                  { label: "Sector", value: account.industry },
-                ]}
-              />
-            ))}
-          </div>
-        </section>}
 
         {focus ? null : <div className="account-page-grid">
           <section className="client-card account-panel">
@@ -242,6 +222,7 @@ export function CrmClientDetailPage() {
               </button>
             ))}
           </div>
+          <div className="tab-sheet">
           {feed === "activity" ? (
             <div className="account-feed-body">
               {[...months.entries()].map(([month, items]) => (
@@ -280,7 +261,10 @@ export function CrmClientDetailPage() {
               {notes.map((item) => <p key={item.id} className="account-feed-doc"><b>{item.actor}</b><span>{item.text}</span><time>{item.at}</time></p>)}
             </div>
           ) : null}
+          </div>
         </section>}
+        </div>
+        </div>
       </div>
       {editing ? (
         <AccountEditDialog

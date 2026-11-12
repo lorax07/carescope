@@ -7908,15 +7908,42 @@ button.palette-category-title {
 .crm-view-tabs {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 1.15rem;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tab-sheet {
+  margin-top: 0;
+  padding-top: 0.85rem;
+  background: linear-gradient(#f3efff, transparent 22px);
+}
+
+.client-board-head:has(.crm-view-tabs) {
+  position: relative;
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+
+.client-board-head:has(.crm-view-tabs)::after,
+.crm-record-strip::after,
+.account-feed-tabs::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 3px;
+  background: #6d5efc;
+  pointer-events: none;
 }
 
 .crm-view-tabs button {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  padding: 0.15rem 0.55rem 0.4rem;
+  padding: 0.22rem 0.9rem;
   border: 0;
-  border-radius: 10px 10px 0 0;
+  border-radius: 999px;
   background: transparent;
   color: #b0b7c6;
   font-family: var(--font-display);
@@ -7924,14 +7951,14 @@ button.palette-category-title {
   font-weight: 550;
   letter-spacing: -0.03em;
   line-height: 1.15;
-  box-shadow: inset 0 -3px 0 transparent;
 }
 
 .crm-view-tabs button.is-on {
+  margin-bottom: -8px;
   color: #1d2433;
   font-weight: 750;
   background: #efeaff;
-  box-shadow: inset 0 -3px 0 #6d5efc;
+  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
 .crm-view-tabs button:hover {
@@ -8167,12 +8194,20 @@ button.palette-category-title {
 }
 
 .crm-record-strip {
+  position: relative;
   display: flex;
-  gap: 0.85rem;
+  gap: 0.4rem;
   align-items: flex-end;
   overflow-x: auto;
-  margin-top: 0.35rem;
-  border-bottom: 1px solid #e7ebf3;
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 0;
+}
+
+.crm-record-strip > a,
+.crm-record-strip > span {
+  border-radius: 999px;
+  padding: 0.32rem 0.8rem;
 }
 
 .crm-record-strip a {
@@ -8180,19 +8215,22 @@ button.palette-category-title {
   font-size: 0.84rem;
   font-weight: 550;
   text-decoration: none;
-  padding: 0.4rem 0.55rem 0.5rem;
   white-space: nowrap;
-  border-radius: 8px 8px 0 0;
-  box-shadow: inset 0 -3px 0 transparent;
+}
+
+.crm-record-strip span a {
+  padding: 0;
 }
 
 .crm-record-strip > a.is-on,
 .crm-record-strip span.is-on {
+  position: relative;
+  z-index: 1;
+  margin-bottom: -8px;
   color: #1d2433;
   font-weight: 750;
   background: #efeaff;
-  border-radius: 8px 8px 0 0;
-  box-shadow: inset 0 -3px 0 #6d5efc;
+  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
 .crm-record-strip span.is-on a {
@@ -8218,8 +8256,17 @@ button.palette-category-title {
   cursor: pointer;
 }
 
-.account-contact-row {
+.account-card-contacts {
   grid-column: 1 / -1;
+}
+
+.account-card-contacts h2 {
+  margin: 0 0 10px;
+  color: #1d2433;
+  font-size: 0.95rem;
+}
+
+.account-contact-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
@@ -8284,9 +8331,12 @@ button.palette-category-title {
 }
 
 .account-feed-tabs {
+  position: relative;
   display: flex;
-  gap: 1.1rem;
-  border-bottom: 1px solid #eef1f6;
+  gap: 0.4rem;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  border-bottom: 0;
 }
 
 .account-feed-tabs button {
@@ -8294,22 +8344,24 @@ button.palette-category-title {
   align-items: center;
   gap: 0.35rem;
   border: 0;
-  border-radius: 8px 8px 0 0;
+  border-radius: 999px;
   background: transparent;
   color: #b0b7c6;
   font: inherit;
   font-size: 0.84rem;
   font-weight: 550;
-  padding: 0.35rem 0.55rem 0.55rem;
-  box-shadow: inset 0 -3px 0 transparent;
+  padding: 0.35rem 0.75rem;
   cursor: pointer;
 }
 
 .account-feed-tabs button.is-on {
+  position: relative;
+  z-index: 1;
+  margin-bottom: -8px;
   color: #1d2433;
   font-weight: 750;
   background: #efeaff;
-  box-shadow: inset 0 -3px 0 #6d5efc;
+  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
 .account-feed-tabs svg,
