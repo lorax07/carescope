@@ -32,8 +32,12 @@ export function rememberCrmHome(panel: "accounts" | "contacts") {
   sessionStorage.setItem(HOME_KEY, panel);
 }
 
+export function crmHomePanel(): "accounts" | "contacts" {
+  return sessionStorage.getItem(HOME_KEY) === "contacts" ? "contacts" : "accounts";
+}
+
 export function crmHomePath(): string {
-  return sessionStorage.getItem(HOME_KEY) === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients";
+  return crmHomePanel() === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients";
 }
 
 export function listCrmRecordTabs(): CrmRecordTab[] {
