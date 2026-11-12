@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import { CRM_ACCOUNTS } from "../../crmAccounts";
 import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmAccountLink } from "./CrmRecordStrip";
 
 export function CrmDocumentsPage() {
   const crm = useCrm();
@@ -19,7 +19,7 @@ export function CrmDocumentsPage() {
               <thead>
                 <tr>
                   <th>Document</th>
-                  <th>Client</th>
+                  <th>Account</th>
                   <th>Kind</th>
                   <th>Status</th>
                 </tr>
@@ -29,9 +29,9 @@ export function CrmDocumentsPage() {
                   <tr key={`${item.accountId}-${item.id}`}>
                     <td>{item.name}</td>
                     <td>
-                      <Link className="lims-linkish" to={`/app/connectivity/clients/${item.accountId}`}>
+                      <CrmAccountLink className="lims-linkish" accountId={item.accountId} title={item.accountName}>
                         {item.accountName}
-                      </Link>
+                      </CrmAccountLink>
                     </td>
                     <td>{item.kind}</td>
                     <td>{item.status}</td>

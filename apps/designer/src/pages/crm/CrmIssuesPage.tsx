@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { crmCanWrite, ISSUE_CATEGORY_LABEL, resolveIssue, setIssueStatus, useCrm } from "../../crm";
 import { accountById, accountByName } from "../../crmAccounts";
 import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmAccountLink } from "./CrmRecordStrip";
 
 export function CrmIssuesPage() {
   const { overlay, deviations, samples } = useCrm();
@@ -16,7 +17,7 @@ export function CrmIssuesPage() {
     .filter((item) => item.client);
 
   return (
-    <CrmShell title="Service issues" lede="Client problems that need a person. Quality deviations stay in Sequence Compliance; they appear here by accession so the client record is complete.">
+    <CrmShell title="Service issues" lede="Account problems that need a person. Quality deviations stay in Sequence Compliance; they appear here by accession so the account record is complete.">
       <section className="lims-panel billing-panel">
         <div className="lims-panel-head">
           <h2>CRM issues</h2>
@@ -27,7 +28,7 @@ export function CrmIssuesPage() {
               <thead>
                 <tr>
                   <th>Issue</th>
-                  <th>Client</th>
+                  <th>Account</th>
                   <th>Category</th>
                   <th>Owner</th>
                   <th>Status</th>
@@ -49,9 +50,9 @@ export function CrmIssuesPage() {
                       </td>
                       <td>
                         {account ? (
-                          <Link className="lims-linkish" to={`/app/connectivity/clients/${account.id}`}>
+                          <CrmAccountLink className="lims-linkish" accountId={account.id} title={account.name}>
                             {account.name}
-                          </Link>
+                          </CrmAccountLink>
                         ) : (
                           item.accountId
                         )}
@@ -97,9 +98,9 @@ export function CrmIssuesPage() {
                   <b>{item.id}</b>
                   <span>
                     {account ? (
-                      <Link className="lims-linkish" to={`/app/connectivity/clients/${account.id}`}>
-                        {item.client}
-                      </Link>
+                      <CrmAccountLink className="lims-linkish" accountId={account.id} title={account.name}>
+                        {account.name}
+                      </CrmAccountLink>
                     ) : (
                       item.client
                     )}
@@ -112,7 +113,7 @@ export function CrmIssuesPage() {
             })}
           </ul>
         ) : (
-          <CrmEmpty title="No quality records on a client accession." />
+          <CrmEmpty title="No quality records on an account accession." />
         )}
       </section>
     </CrmShell>

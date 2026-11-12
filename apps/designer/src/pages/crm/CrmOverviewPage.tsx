@@ -112,7 +112,7 @@ export function CrmOverviewPage() {
               <p className="client-empty">No open cases.</p>
             )}
           </section>
-          <ClientAssist actor={actor} hint="Search uses the same client accounts as the laboratory and Sequence Revenue." />
+          <ClientAssist actor={actor} hint="Search uses the same accounts as the laboratory and Sequence Revenue." />
         </aside>
       </div>
     </CrmShell>
