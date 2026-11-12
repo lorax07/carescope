@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { pageRows, useCrm } from "../../crm";
 import { CRM_ACCOUNTS } from "../../crmAccounts";
 import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmAccountLink } from "./CrmRecordStrip";
 
 export function CrmActivitiesPage() {
   const crm = useCrm();
@@ -23,7 +23,7 @@ export function CrmActivitiesPage() {
           <h2>{paged.rows.length} recent events</h2>
           <label>
             Search
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Client, kind, summary" aria-label="Search activities" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Account, kind, summary" aria-label="Search activities" />
           </label>
         </div>
         {paged.rows.length ? (
@@ -32,9 +32,9 @@ export function CrmActivitiesPage() {
               <li key={item.id}>
                 <b>{item.kind}</b>
                 <span>
-                  <Link className="lims-linkish" to={`/app/connectivity/clients/${item.accountId}`}>
+                  <CrmAccountLink className="lims-linkish" accountId={item.accountId} title={item.accountName}>
                     {item.accountName}
-                  </Link>
+                  </CrmAccountLink>
                   {" · "}
                   {item.summary}
                 </span>

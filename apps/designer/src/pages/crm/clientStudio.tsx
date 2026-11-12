@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { buttonFormat1 } from "../../buttonFormat1";
+import { CrmAccountLink } from "./CrmRecordStrip";
 import type { ClientCard, OpportunityRecord } from "../../crm";
 import type { CrmAccount } from "../../crmAccounts";
 import { money } from "../../revenueCycle";
@@ -30,6 +31,7 @@ export function AccountPersonCard({
   role,
   accountName,
   href,
+  onOpen,
   facts,
   saved = false,
   onSave,
@@ -38,6 +40,7 @@ export function AccountPersonCard({
   role: string;
   accountName: string;
   href?: string;
+  onOpen?: () => void;
   facts: { label: string; value: string }[];
   saved?: boolean;
   onSave?: () => void;
@@ -57,7 +60,13 @@ export function AccountPersonCard({
           ★
         </button>
       ) : null}
-      {href ? <Link to={href}>{identity}</Link> : <div className="client-person-id">{identity}</div>}
+      {onOpen ? (
+        <button type="button" className="client-person-id" onClick={onOpen}>{identity}</button>
+      ) : href ? (
+        <Link to={href}>{identity}</Link>
+      ) : (
+        <div className="client-person-id">{identity}</div>
+      )}
       <dl>
         {facts.map((fact) => (
           <div key={fact.label}>
@@ -193,7 +202,7 @@ export function RevenueChart({ series, format = "money" }: { series: number[]; f
   );
 }
 
-export function ClientAssist({ actor, hint }: { actor: string; hint: string }) {
+export function ClientAssist({ actor, hint, ask = "Ask about an account, case, or project" }: { actor: string; hint: string; ask?: string }) {
   const [draft, setDraft] = useState("");
   const navigate = useNavigate();
   const first = greetingName(actor);
@@ -232,8 +241,8 @@ export function ClientAssist({ actor, hint }: { actor: string; hint: string }) {
           navigate(`/app/connectivity/clients?q=${encodeURIComponent(query)}`);
         }}
       >
-        <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask about a client, task, or project" aria-label="Ask about a client" />
-        <button type="submit" aria-label="Search clients">↑</button>
+        <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={ask} aria-label={ask} />
+        <button type="submit" aria-label="Search accounts">↑</button>
       </form>
       <p className="client-assist-hint">{hint}</p>
     </section>
@@ -290,7 +299,7 @@ export function ProjectTable({
           <table className="client-table">
             <thead>
               <tr>
-                <th>Client</th>
+                <th>Account</th>
                 <th>Project</th>
                 <th>Note</th>
                 <th>Due on</th>
@@ -306,13 +315,13 @@ export function ProjectTable({
                 return (
                   <tr key={row.id}>
                     <td>
-                      <Link to={`/app/connectivity/clients/${row.accountId}`}>
+                      <CrmAccountLink accountId={row.accountId} title={account?.name || row.accountName}>
                         <ClientAvatar name={person} size={36} />
                         <span>
                           <b>{person}</b>
                           <small>{row.accountName}</small>
                         </span>
-                      </Link>
+                      </CrmAccountLink>
                     </td>
                     <td>
                       <b>{row.name}</b>
@@ -346,7 +355,7 @@ export function SourceBars({
   groups,
   note,
   href = "/app/connectivity/analytics",
-  title = "Clients source",
+  title = "Account source",
 }: {
   groups: { label: string; count: number; tone: string }[];
   note: string;

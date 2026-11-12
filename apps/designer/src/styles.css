@@ -3524,6 +3524,18 @@ a {
   font-weight: 600;
 }
 
+button.lims-linkish,
+button.crm-record-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: inherit;
+}
+
 .lims-badge {
   display: inline-flex;
   align-items: center;
@@ -7454,6 +7466,7 @@ button.palette-category-title {
 }
 
 .client-table a,
+.client-table button.crm-record-link,
 .client-person-inline {
   display: flex;
   align-items: center;
@@ -7926,6 +7939,223 @@ button.palette-category-title {
   color: #1d2433;
 }
 
+.crm-record-strip {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-end;
+  overflow-x: auto;
+  margin-top: 0.35rem;
+  border-bottom: 1px solid #e7ebf3;
+}
+
+.crm-record-strip a {
+  color: #b0b7c6;
+  font-size: 0.84rem;
+  font-weight: 650;
+  text-decoration: none;
+  padding: 0.4rem 0 0.45rem;
+  white-space: nowrap;
+}
+
+.crm-record-strip > a.is-on,
+.crm-record-strip span.is-on a {
+  color: #1d2433;
+  box-shadow: inset 0 -2px 0 #1d2433;
+}
+
+.crm-record-strip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.crm-record-strip span button {
+  border: 0;
+  background: transparent;
+  color: #b0b7c6;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+
+.account-contact-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.account-contact-chip {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+}
+
+.account-contact-chip > button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.account-contact-chip.is-on .client-avatar {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #6d5efc;
+}
+
+.account-contact-name {
+  max-width: 7rem;
+  overflow: hidden;
+  color: #1d2433;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-contact-chip:has(.account-contact-menu) {
+  z-index: 6;
+}
+
+.account-contact-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 6;
+  display: grid;
+  gap: 0.3rem;
+  min-width: 14rem;
+  padding: 0.45rem 0.6rem;
+  background: #fff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(20, 24, 40, 0.08);
+  text-align: left;
+}
+
+.account-contact-menu a,
+.account-contact-menu span {
+  color: #1d2433;
+  font-size: 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.account-feed-tabs {
+  display: flex;
+  gap: 1.1rem;
+  border-bottom: 1px solid #eef1f6;
+}
+
+.account-feed-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #8b93a7;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 650;
+  padding: 0.15rem 0 0.65rem;
+  cursor: pointer;
+}
+
+.account-feed-tabs button.is-on {
+  color: #1d2433;
+  box-shadow: inset 0 -2px 0 #1d2433;
+}
+
+.account-feed-tabs svg,
+.account-feed-body svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.account-feed {
+  padding: 0.85rem 1.05rem 1.05rem;
+}
+
+.account-feed-body h3 {
+  margin: 0.9rem 0 0.35rem;
+  color: #98a0b3;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.account-feed-body ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-feed-body li,
+.account-feed-doc {
+  display: grid;
+  grid-template-columns: 16px auto minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.4rem 0;
+  border-top: 1px solid #f4f6fa;
+  font-size: 0.8rem;
+}
+
+.account-feed-doc {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.account-feed-body span,
+.account-feed-body time {
+  color: #667085;
+}
+
+.account-edit-grid,
+.account-edit-contact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.account-edit-contact {
+  margin: 0 0 0.55rem;
+  padding: 0.6rem;
+  border: 1px solid #e7ebf3;
+  border-radius: 12px;
+}
+
+.account-edit-assign {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.account-save-warning {
+  margin: 0.2rem 0 0.6rem;
+  color: #b42318;
+  font-size: 0.8rem;
+}
+
+button.client-person-id {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 .client-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7938,7 +8168,7 @@ button.palette-category-title {
   text-align: center;
 }
 
-.client-person > button {
+.client-person > button:not(.client-person-id) {
   position: absolute;
   top: 0.55rem;
   right: 0.55rem;

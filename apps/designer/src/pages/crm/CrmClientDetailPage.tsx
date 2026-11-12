@@ -1,19 +1,71 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { addNote, crmCanWrite, useCrm } from "../../crm";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { addNote, crmCanWrite, saveAccountWorkspace, useCrm } from "../../crm";
+import { directoryContacts } from "../../crm/directory";
 import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
 import { useWorkflowStages } from "../../workflowStages";
+import { openCrmRecordTab } from "../../crmRecordTabs";
 import { AccountPersonCard, ClientAvatar, clientBudget } from "./clientStudio";
+import { AccountEditDialog } from "./AccountEditDialog";
+import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
+
+function sourceLabel(value: string): string {
+  return value === "Client" ? "Account" : value;
+}
+
+function FeedIcon({ kind }: { kind: "activity" | "documents" | "notes" }) {
+  const path = kind === "activity"
+    ? "M4 12h3l2-5 2 10 2-5h3"
+    : kind === "documents"
+      ? "M6 3.5h5l3 3V16.5H6zM11 3.5V7h3.5"
+      : "M5 5.5h10M5 9h10M5 12.5h6";
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true">
+      <path d={path} />
+    </svg>
+  );
+}
+
+function monthLabel(value: string): string {
+  const date = new Date(value.includes("T") ? value : value.replace(" ", "T"));
+  if (Number.isNaN(date.getTime())) return "Earlier";
+  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
 
 export function CrmClientDetailPage() {
   const { accountId = "" } = useParams();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
   const crm = useCrm();
   const stages = useWorkflowStages();
   const card = crm.cards.find((item) => item.account.id === accountId);
   const [note, setNote] = useState("");
+  const [feed, setFeed] = useState<"activity" | "documents" | "notes">("activity");
+  const [editing, setEditing] = useState(false);
+  const [reach, setReach] = useState<string | null>(null);
   const canWrite = crmCanWrite();
+  const contactKey = params.get("contact") || "";
+  const directory = useMemo(() => directoryContacts(crm.overlay), [crm.overlay]);
+  const people = directory.filter((contact) => contact.accountIds.includes(accountId));
+  const focus = people.find((contact) => contact.id === contactKey);
+
+  useEffect(() => {
+    if (!card) return;
+    if (focus) openCrmRecordTab({ key: `contact:${focus.id}`, kind: "contact", accountId, contactId: focus.id, title: focus.name });
+    else openCrmRecordTab({ key: `account:${accountId}`, kind: "account", accountId, title: card.account.name });
+  }, [accountId, card, focus]);
+
+  useEffect(() => {
+    if (!reach) return;
+    function close(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest(".account-contact-chip")) setReach(null);
+    }
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [reach]);
 
   if (!card) {
     return (
@@ -22,13 +74,13 @@ export function CrmClientDetailPage() {
           <p className="lims-eyebrow">Sequence CRM</p>
           <h1>Account</h1>
         </div>
+        <CrmRecordStrip />
         <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
       </CrmShell>
     );
   }
 
   const account = card.account;
-  const contacts = account.contacts.length ? account.contacts : [{ name: account.contact, role: "Primary contact", email: "", phone: "" }];
   const work = crm.samples.filter((sample) => sample.client === account.name);
   const charges = crm.charges.filter((charge) => charge.accountId === account.id && charge.status !== "rebilled");
   const issues = crm.overlay.issues.filter((item) => item.accountId === account.id);
@@ -40,28 +92,63 @@ export function CrmClientDetailPage() {
   const timeline = crm.activitiesFor(account.id);
   const tests = [...new Set(work.flatMap((sample) => sample.tests.split(",").map((item) => item.trim()).filter(Boolean)))];
   const facts = [
-    { label: "From", value: account.billTo },
+    { label: "From", value: sourceLabel(account.billTo) },
     { label: "Sector", value: account.industry },
     { label: "Budget", value: clientBudget(card) },
     { label: "Status", value: account.status },
     { label: "Health", value: card.health },
     { label: "A/R", value: money(card.arCents) },
   ];
+  const activity = [
+    ...timeline.map((item) => ({ id: item.id, at: item.at, title: item.kind, detail: item.summary })),
+    ...audit.map((item) => ({ id: item.id, at: item.at, title: item.actor, detail: `${item.action} · ${item.before} → ${item.after}` })),
+    ...issues.map((item) => ({ id: item.id, at: "", title: "Issue", detail: `${item.title} · ${item.status}` })),
+    ...tasks.map((item) => ({ id: item.id, at: item.due, title: "Case", detail: `${item.title} · ${item.owner} · ${item.status}` })),
+    ...opportunities.map((item) => ({ id: item.id, at: item.close, title: "Opportunity", detail: `${item.name} · ${item.stage} · ${item.amount}` })),
+  ];
+  const months = activity.reduce<Map<string, typeof activity>>((groups, item) => {
+    const label = monthLabel(item.at);
+    groups.set(label, [...(groups.get(label) ?? []), item]);
+    return groups;
+  }, new Map());
+  const activeKey = focus ? `contact:${focus.id}` : `account:${account.id}`;
+
+  function openContact(contactId: string, title: string) {
+    openCrmRecordTab({ key: `contact:${contactId}`, kind: "contact", accountId: account.id, contactId, title });
+    navigate(`/app/connectivity/clients/${account.id}?contact=${encodeURIComponent(contactId)}`);
+  }
 
   return (
     <CrmShell studio title={account.name} lede={`${account.number} · ${account.owner}`}>
       <div className="account-page">
         <div className="account-page-title">
           <p className="lims-eyebrow">Sequence CRM</p>
-          <Link to="/app/connectivity/clients">Manage Accounts</Link>
+          {canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
         </div>
+        <CrmRecordStrip activeKey={activeKey} />
 
         <section className="client-card account-hero">
-          <ClientAvatar name={account.name} size={72} />
+          <ClientAvatar name={focus?.name || account.name} size={72} />
           <div>
-            <h1>{account.name}</h1>
-            <small>{account.number} · {account.relationship} · {account.owner}</small>
-            <em>{account.industry}</em>
+            <h1>{focus?.name || account.name}</h1>
+            <small>{account.number} · {sourceLabel(account.relationship)} · {account.owner}</small>
+            <em>{focus ? `${focus.role} · ${account.name}` : account.industry}</em>
+          </div>
+          <div className="account-contact-row">
+            {people.map((person) => (
+              <div key={person.id} className={`account-contact-chip${focus?.id === person.id ? " is-on" : ""}`}>
+                <button type="button" aria-label={`Contact ${person.name}`} aria-expanded={reach === person.id} onClick={() => setReach((current) => current === person.id ? null : person.id)}>
+                  <ClientAvatar name={person.name} size={36} />
+                </button>
+                <button type="button" className="account-contact-name" onClick={() => openContact(person.id, person.name)}>{person.name}</button>
+                {reach === person.id ? (
+                  <div className="account-contact-menu" role="menu">
+                    {person.email ? <a href={`mailto:${person.email}`}>Email {person.email}</a> : <span>No email on file</span>}
+                    {person.phone ? <a href={`tel:${person.phone}`}>Call {person.phone}</a> : <span>No phone on file</span>}
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
           <dl>
             {facts.map((fact) => (
@@ -76,16 +163,17 @@ export function CrmClientDetailPage() {
         <section className="account-block">
           <h2>Contacts</h2>
           <div className="client-grid">
-            {contacts.map((person) => (
+            {people.map((person) => (
               <AccountPersonCard
-                key={`${account.id}-${person.name}-${person.email}`}
+                key={person.id}
                 name={person.name}
                 role={person.role}
                 accountName={account.name}
+                onOpen={() => openContact(person.id, person.name)}
                 facts={[
-                  { label: "From", value: account.billTo },
+                  { label: "Email", value: person.email || "—" },
+                  { label: "Phone", value: person.phone || "—" },
                   { label: "Sector", value: account.industry },
-                  { label: "Budget", value: clientBudget(card) },
                 ]}
               />
             ))}
@@ -96,32 +184,6 @@ export function CrmClientDetailPage() {
           <section className="client-card account-panel">
             <h2>What needs to happen next</h2>
             <SignalList items={card.signals} />
-          </section>
-          <section className="client-card account-panel">
-            <h2>Add more details</h2>
-            {!canWrite ? <p className="billing-note">Read only. A client-success role is required to add notes.</p> : null}
-            <p className="billing-note">
-              Billing stays in <Link className="lims-linkish" to={`/app/billing?account=${account.id}`}>Sequence Revenue</Link>.
-              {charges.length ? ` ${charges.length} charge line${charges.length === 1 ? "" : "s"} are on the ledger.` : ""}
-            </p>
-            <label className="rcm-field">
-              Note
-              <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} placeholder="Pricing, sites, or the next conversation" />
-            </label>
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={!canWrite}
-              onClick={() => {
-                addNote(account.id, note);
-                setNote("");
-              }}
-            >
-              Save note
-            </button>
-            {notes.map((item) => (
-              <p key={item.id} className="billing-note">{item.at} · {item.actor}: {item.text}</p>
-            ))}
           </section>
           <section className="client-card account-panel">
             <h2>Laboratory work</h2>
@@ -139,60 +201,68 @@ export function CrmClientDetailPage() {
             ) : (
               <CrmEmpty title="No accessions." detail="New laboratory work for this name will appear here." />
             )}
-          </section>
-          <section className="client-card account-panel">
-            <h2>Work around this account</h2>
-            {issues.map((item) => (
-              <p key={item.id} className="billing-note">
-                {item.title} · {item.status}
-                {item.claimId ? <> · <Link className="lims-linkish" to={`/app/billing/claims/${item.claimId}`}>{item.claimId}</Link></> : null}
-              </p>
-            ))}
-            {tasks.map((item) => (
-              <p key={item.id} className="billing-note">{item.title} · {item.owner} · {item.status}</p>
-            ))}
-            {opportunities.map((item) => (
-              <p key={item.id} className="billing-note">{item.name} · {item.stage} · {item.amount}</p>
-            ))}
-            {documents.map((item) => (
-              <p key={item.id} className="billing-note">{item.name} · {item.status}</p>
-            ))}
-            {!issues.length && !tasks.length && !opportunities.length && !documents.length ? <CrmEmpty title="Nothing else is open." /> : null}
-          </section>
-          <section className="client-card account-panel">
-            <h2>What happened</h2>
-            {timeline.length ? (
-              <ul className="account-activity">
-                {timeline.slice(0, 8).map((item) => (
-                  <li key={item.id}>
-                    <b>{item.kind}</b>
-                    <span>{item.summary}</span>
-                    <small>{item.at}</small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <CrmEmpty title="No activity yet." />
-            )}
-          </section>
-          <section className="client-card account-panel">
-            <h2>Record of changes</h2>
-            {audit.length ? (
-              <ul className="account-activity">
-                {audit.slice(0, 8).map((item) => (
-                  <li key={item.id}>
-                    <b>{item.action}</b>
-                    <span>{item.actor} · {item.before} → {item.after}</span>
-                    <small>{item.at}</small>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="billing-note">Account changes are kept here. Charge history stays in Sequence Revenue.</p>
-            )}
+            {charges.length ? <p className="billing-note">{charges.length} charge line{charges.length === 1 ? "" : "s"} stay in Sequence Revenue.</p> : null}
           </section>
         </div>
+
+        <section className="client-card account-feed">
+          <div className="account-feed-tabs" role="tablist" aria-label="Account record">
+            {(["activity", "documents", "notes"] as const).map((item) => (
+              <button key={item} type="button" role="tab" aria-selected={feed === item} className={feed === item ? "is-on" : undefined} onClick={() => setFeed(item)}>
+                <FeedIcon kind={item} />
+                {item === "activity" ? "Activity" : item === "documents" ? "Documents" : "Notes"}
+              </button>
+            ))}
+          </div>
+          {feed === "activity" ? (
+            <div className="account-feed-body">
+              {[...months.entries()].map(([month, items]) => (
+                <section key={month}>
+                  <h3>{month}</h3>
+                  <ul>
+                    {items.map((item) => (
+                      <li key={item.id}>
+                        <FeedIcon kind="activity" />
+                        <b>{item.title}</b>
+                        <span>{item.detail}</span>
+                        <time>{item.at}</time>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+              {!activity.length ? <CrmEmpty title="No activity yet." /> : null}
+            </div>
+          ) : null}
+          {feed === "documents" ? (
+            <div className="account-feed-body">
+              {documents.length ? documents.map((item) => (
+                <p key={item.id} className="account-feed-doc"><b>{item.name}</b><span>{item.kind} · {item.status}</span></p>
+              )) : <CrmEmpty title="No documents on this account." />}
+            </div>
+          ) : null}
+          {feed === "notes" ? (
+            <div className="account-feed-body">
+              {!canWrite ? <p className="billing-note">Read only. An account role is required to add notes.</p> : null}
+              <label className="rcm-field">
+                Note
+                <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} placeholder="Pricing, sites, or the next conversation" />
+              </label>
+              <button type="button" className="btn btn-primary" disabled={!canWrite} onClick={() => { addNote(account.id, note); setNote(""); }}>Save note</button>
+              {notes.map((item) => <p key={item.id} className="account-feed-doc"><b>{item.actor}</b><span>{item.text}</span><time>{item.at}</time></p>)}
+            </div>
+          ) : null}
+        </section>
       </div>
+      {editing ? (
+        <AccountEditDialog
+          account={{ id: account.id, name: account.name, industry: account.industry, owner: account.owner, relationship: account.relationship, status: account.status, billTo: account.billTo, payer: account.payer, pricing: account.pricing }}
+          contacts={people}
+          directory={directory}
+          onClose={() => setEditing(false)}
+          onSave={(nextAccount, nextContacts) => saveAccountWorkspace(account.id, nextAccount, nextContacts)}
+        />
+      ) : null}
     </CrmShell>
   );
 }

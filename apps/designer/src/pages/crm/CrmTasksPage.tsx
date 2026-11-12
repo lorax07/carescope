@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, type TaskStatus } from "../../crm";
 import { ClientAssist, ClientAvatar, shortDate } from "./clientStudio";
+import { CrmAccountLink } from "./CrmRecordStrip";
 import { buttonFormat1 } from "../../buttonFormat1";
 import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
 
@@ -54,7 +55,7 @@ export function CrmTasksPage() {
   }
 
   return (
-    <CrmShell studio title="Cases" lede="What someone owes a client today.">
+    <CrmShell studio title="Cases" lede="What someone owes an account today.">
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
@@ -110,7 +111,7 @@ export function CrmTasksPage() {
                       <div>
                         <b>{item.title}</b>
                         <small>
-                          {account ? <Link to={`/app/connectivity/clients/${account.id}`}>{account.name}</Link> : item.accountId}
+                          {account ? <CrmAccountLink accountId={account.id} title={account.name}>{account.name}</CrmAccountLink> : item.accountId}
                           {" · "}
                           {item.owner}
                           {" · due "}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CRM_ACCOUNTS, accountByName, type AccountHealth, type CrmAccount } from "../crmAccounts";
+import { openCrmRecordTab, recordPath } from "../crmRecordTabs";
 import { accountRevenueLabel, useRevenue } from "../revenueCycle";
 import { useSamples } from "../samples";
 
@@ -9,12 +10,21 @@ export function accountPath(accountId: string): string {
 }
 
 export function AccountLink({ name }: { name: string }) {
+  const navigate = useNavigate();
   const account = accountByName(name);
   if (!account) return <>{name}</>;
   return (
-    <Link className="lims-linkish" to={accountPath(account.id)}>
+    <button
+      type="button"
+      className="lims-linkish"
+      onClick={() => {
+        const tab = { key: `account:${account.id}`, kind: "account" as const, accountId: account.id, title: account.name };
+        openCrmRecordTab(tab);
+        navigate(recordPath(tab));
+      }}
+    >
       {account.name}
-    </Link>
+    </button>
   );
 }
 

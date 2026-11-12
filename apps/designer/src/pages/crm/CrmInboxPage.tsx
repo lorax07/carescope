@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from "../../crm";
 import { ClientAvatar } from "./clientStudio";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
+import { CrmAccountLink } from "./CrmRecordStrip";
 import {
   attachmentNote,
   buildInboxThreads,
@@ -212,7 +213,7 @@ export function CrmInboxPage() {
                 </button>
               </form>
               <p className="inbox-footnote">
-                <Link to={`/app/connectivity/clients/${selected.accountId}`}>{selected.accountName}</Link>
+                <CrmAccountLink accountId={selected.accountId} title={selected.accountName}>{selected.accountName}</CrmAccountLink>
                 {" · "}
                 {selected.role}. Replies are saved on the Sequence CRM account.
               </p>

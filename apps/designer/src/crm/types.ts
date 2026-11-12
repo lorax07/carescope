@@ -179,6 +179,19 @@ export type CrmOverlay = {
   nextAudit: number;
   extraAccounts?: CrmAccount[];
   extraContacts?: Record<string, AccountContact[]>;
+  contacts?: { id: string; name: string; role: string; email: string; phone: string }[];
+  accountContactLinks?: { accountId: string; contactId: string }[];
+  removedLinks?: { accountId: string; contactId: string }[];
+  accountPatches?: Record<string, {
+    name?: string;
+    industry?: string;
+    owner?: string;
+    relationship?: string;
+    status?: CrmAccount["status"];
+    billTo?: string;
+    payer?: string;
+    pricing?: string;
+  }>;
 };
 
 export const CONTACT_TYPE_LABEL: Record<ContactType, string> = {

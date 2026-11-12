@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { CONTACT_TYPE_LABEL, pageRows, useCrm, type ContactType } from "../../crm";
 import { CrmEmpty, CrmShell } from "./CrmShell";
+import { CrmAccountLink } from "./CrmRecordStrip";
 
 export function CrmContactsPage() {
   const { contacts } = useCrm();
@@ -25,7 +25,7 @@ export function CrmContactsPage() {
           <h2>{filtered.length} contacts</h2>
           <label>
             Search
-            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, email, phone, client" aria-label="Search contacts" />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, email, phone, account" aria-label="Search contacts" />
           </label>
           <label>
             Type
@@ -52,7 +52,7 @@ export function CrmContactsPage() {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Client</th>
+                  <th>Account</th>
                   <th>Type</th>
                   <th>Email</th>
                   <th>Phone</th>
@@ -62,13 +62,15 @@ export function CrmContactsPage() {
                 {paged.rows.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      {item.name}
+                      <CrmAccountLink className="lims-linkish" accountId={item.accountId} contactId={item.id} title={item.name}>
+                        {item.name}
+                      </CrmAccountLink>
                       {item.primary ? <small className="rcm-muted"> Primary</small> : null}
                     </td>
                     <td>
-                      <Link className="lims-linkish" to={`/app/connectivity/clients/${item.accountId}`}>
+                      <CrmAccountLink className="lims-linkish" accountId={item.accountId} title={item.accountName}>
                         {item.accountName}
-                      </Link>
+                      </CrmAccountLink>
                     </td>
                     <td>{CONTACT_TYPE_LABEL[item.contactType]}</td>
                     <td>{item.email}</td>

@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { buttonFormat1 } from "../../buttonFormat1";
 import { Wildcard01 } from "../../components/Wildcard01";
 import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../../crm";
+import { contactsOnAccount } from "../../crm/directory";
+import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
 import { wildcard01Match } from "../../wildcard01";
 import { AccountPersonCard, ClientAssist, SourceBars, clientBudget } from "./clientStudio";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 import { CrmImportPanel } from "./CrmImportPanel";
+import { CrmRecordStrip } from "./CrmRecordStrip";
 
 const FILTERS = [
   { id: "watch", label: "Watch" },
@@ -21,7 +24,7 @@ function accountText(card: ClientCard): string {
 
 function personFacts(card: ClientCard): { label: string; value: string }[] {
   return [
-    { label: "From", value: card.account.billTo },
+    { label: "From", value: card.account.billTo === "Client" ? "Account" : card.account.billTo },
     { label: "Sector", value: card.account.industry },
     { label: "Budget", value: clientBudget(card) },
   ];
@@ -34,7 +37,7 @@ function matchesFilter(card: ClientCard, filter: string): boolean {
 }
 
 export function CrmClientsPage() {
-  const { cards, actor, canWrite, accounts } = useCrm();
+  const { cards, actor, canWrite, accounts, overlay } = useCrm();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [wildcard, setWildcard] = useState("");
@@ -65,7 +68,7 @@ export function CrmClientsPage() {
   const signed = accounts.reduce((sum, account) => sum + account.agreements.filter((item) => item.status === "Active").length, 0);
   const negotiating = accounts.reduce((sum, account) => sum + account.opportunities.filter((item) => item.stage === "Negotiation" || item.stage === "Proposal").length, 0);
   const sources = ["Client", "Insurance", "Self-pay"].map((label, index) => ({
-    label,
+    label: label === "Client" ? "Account" : label,
     count: accounts.filter((account) => account.billTo === label).length,
     tone: ["is-rose", "is-mint", "is-lilac"][index] ?? "is-mint",
   }));
@@ -96,14 +99,32 @@ export function CrmClientsPage() {
     setParams(copy, { replace: true });
   }
 
-  function openAccount(accountId: string) {
+  useEffect(() => {
+    rememberCrmHome(panel);
+  }, [panel]);
+
+  function openAccount(accountId: string, title?: string) {
     setAdding(false);
     setImporting(false);
-    navigate(`/app/connectivity/clients/${accountId}`);
+    const name = title || accounts.find((account) => account.id === accountId)?.name || "Account";
+    const tab = { key: `account:${accountId}`, kind: "account" as const, accountId, title: name };
+    openCrmRecordTab(tab);
+    navigate(recordPath(tab));
+  }
+
+  function openCard(card: ClientCard, person: { name: string; role: string; email: string; phone: string }, index: number) {
+    if (panel === "contacts") {
+      const id = contactsOnAccount(card.account.id, overlay)[index]?.id || `${card.account.id}:${person.email || person.name}:${index}`;
+      const tab = { key: `contact:${id}`, kind: "contact" as const, accountId: card.account.id, contactId: id, title: person.name };
+      openCrmRecordTab(tab);
+      navigate(recordPath(tab));
+      return;
+    }
+    openAccount(card.account.id, card.account.name);
   }
 
   return (
-    <CrmShell studio title="Client" lede="The people on Sequence CRM accounts.">
+    <CrmShell studio title="Account" lede="The people on Sequence CRM accounts.">
       <div className="client-board">
         <div className="client-board-main">
           <header className="client-board-head">
@@ -124,11 +145,7 @@ export function CrmClientsPage() {
               </button>
             ) : null}
           </header>
-          <div className="client-board-links">
-            <Link to="/app/connectivity/contacts">People</Link>
-            <Link to="/app/connectivity/documents">Agreements</Link>
-            <Link to="/app/connectivity/health">Health</Link>
-          </div>
+          <CrmRecordStrip />
           <div className="client-pills" role="tablist" aria-label="Account filter">
             <button type="button" role="tab" aria-selected={filter === "all"} className={buttonFormat1(filter === "all")} onClick={() => setFilter("all")}>
               {panel === "accounts" ? "All Accounts" : "All Contacts"}
@@ -153,15 +170,15 @@ export function CrmClientsPage() {
             <div className="client-grid">
               {filtered.flatMap((card) => {
                 const people = card.account.contacts.length ? card.account.contacts : [{ name: card.account.contact, role: "Primary contact", email: "", phone: "" }];
-                return people.map((person) => {
-                  const key = `${card.account.id}:${person.name}`;
+                return people.map((person, index) => {
+                  const key = `${card.account.id}:${person.name}:${index}`;
                   return (
                     <AccountPersonCard
                       key={key}
                       name={person.name}
                       role={person.role}
                       accountName={card.account.name}
-                      href={`/app/connectivity/clients/${card.account.id}`}
+                      onOpen={() => openCard(card, person, index)}
                       facts={personFacts(card)}
                       saved={saved.includes(key)}
                       onSave={() =>
@@ -195,6 +212,7 @@ export function CrmClientsPage() {
           </section>
           <SourceBars
             groups={sources}
+            title="Account source"
             note={quiet ? `${quiet.label} is the smallest source, with ${quiet.count} account${quiet.count === 1 ? "" : "s"}.` : "Sources appear as accounts are billed."}
           />
           <ClientAssist actor={actor} hint="A saved star stays on this screen until you leave it." />

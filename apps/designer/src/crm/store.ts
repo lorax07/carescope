@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { CRM_ACCOUNTS, type CrmAccount } from "../crmAccounts";
+import { CRM_ACCOUNTS, type AccountStatus, type CrmAccount } from "../crmAccounts";
 import { readLimsSession } from "../limsSession";
 import { currentInstanceId, moduleStorageKey, readJson, writeJson } from "../storageScope";
 import { useQuality, type Deviation } from "../qualitySystem";
 import { findSample, useSamples, type SampleRecord } from "../samples";
 import { rollup, type Charge, type Cycle, useRevenue } from "../revenueCycle";
-import { allContacts, contactsFor } from "./contacts";
+import { contactId, allContacts, contactsFor } from "./contacts";
+import { contactsOnAccount } from "./directory";
 import { derivedHealth, signalsFor } from "./health";
 import type {
   CommunicationKind,
@@ -356,11 +357,84 @@ function listedAccounts(overlay: CrmOverlay): CrmAccount[] {
   const extras = overlay.extraAccounts ?? [];
   const base = extras.length ? [...CRM_ACCOUNTS, ...extras] : CRM_ACCOUNTS;
   const added = overlay.extraContacts ?? {};
-  if (!Object.values(added).some((rows) => rows.length)) return base;
+  const hasAdded = Object.values(added).some((rows) => rows.length);
+  const hasDirectory = Boolean(overlay.contacts?.length || overlay.accountContactLinks?.length || overlay.removedLinks?.length || Object.keys(overlay.accountPatches ?? {}).length);
+  if (!hasAdded && !hasDirectory) return base;
   return base.map((account) => {
-    const more = added[account.id];
-    return more?.length ? { ...account, contacts: [...account.contacts, ...more] } : account;
+    const people = contactsOnAccount(account.id, overlay).map(({ name, role, email, phone }) => ({ name, role, email, phone }));
+    const patch = overlay.accountPatches?.[account.id];
+    return { ...account, ...patch, contact: people[0]?.name || account.contact, contacts: people };
   });
+}
+
+export type AccountWorkspaceDraft = {
+  name: string;
+  industry: string;
+  owner: string;
+  relationship: string;
+  status: AccountStatus;
+  billTo: string;
+  payer: string;
+  pricing: string;
+};
+
+export type ContactWorkspaceDraft = {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  assigned: boolean;
+};
+
+export function saveAccountWorkspace(accountId: string, account: AccountWorkspaceDraft, contacts: ContactWorkspaceDraft[]): boolean {
+  if (!crmCanWrite() || !account.name.trim()) return false;
+  if (contacts.some((item) => item.assigned && !item.name.trim())) return false;
+  const overlay = currentOverlay();
+  const current = baseAccount(overlay, accountId);
+  if (!current) return false;
+  overlay.accountPatches = {
+    ...(overlay.accountPatches ?? {}),
+    [accountId]: {
+      name: account.name.trim(),
+      industry: account.industry.trim(),
+      owner: account.owner.trim(),
+      relationship: account.relationship.trim(),
+      status: account.status,
+      billTo: account.billTo.trim(),
+      payer: account.payer.trim(),
+      pricing: account.pricing.trim(),
+    },
+  };
+  const seed = new Set(current.contacts.map((contact, index) => contactId(accountId, contact, index)));
+  const assigned = contacts.filter((item) => item.assigned).map((item) => ({ ...item, id: item.id || `con-${crypto.randomUUID().slice(0, 8)}` }));
+  const assignedIds = new Set(assigned.map((item) => item.id));
+  const present = new Set(contactsOnAccount(accountId, overlay).map((item) => item.id));
+  const stillRemoved = (overlay.removedLinks ?? []).filter((link) => link.accountId === accountId && !assignedIds.has(link.contactId)).map((link) => link.contactId);
+  const newlyRemoved = [...present].filter((id) => !assignedIds.has(id));
+  overlay.removedLinks = [
+    ...(overlay.removedLinks ?? []).filter((link) => link.accountId !== accountId),
+    ...[...new Set([...stillRemoved, ...newlyRemoved])].map((contactId) => ({ accountId, contactId })),
+  ];
+  overlay.accountContactLinks = [
+    ...(overlay.accountContactLinks ?? []).filter((link) => link.accountId !== accountId),
+    ...assigned.filter((item) => !seed.has(item.id)).map((item) => ({ accountId, contactId: item.id })),
+  ];
+  const stored = assigned.map((item) => ({ id: item.id, name: item.name.trim(), role: item.role.trim() || "Contact", email: item.email.trim(), phone: item.phone.trim() }));
+  const storedIds = new Set(stored.map((item) => item.id));
+  overlay.contacts = [...(overlay.contacts ?? []).filter((item) => !storedIds.has(item.id)), ...stored];
+  if (overlay.extraContacts?.[accountId]) {
+    const next = { ...overlay.extraContacts };
+    delete next[accountId];
+    overlay.extraContacts = next;
+  }
+  audit(overlay, "account", accountId, "update", "", account.name.trim());
+  commit(overlay);
+  return true;
+}
+
+function baseAccount(overlay: CrmOverlay, accountId: string): CrmAccount | undefined {
+  return overlay.extraAccounts?.find((item) => item.id === accountId) ?? CRM_ACCOUNTS.find((item) => item.id === accountId);
 }
 
 export function addClientAccount(input: { name: string; contact: string; role: string; industry: string }): string | undefined {
