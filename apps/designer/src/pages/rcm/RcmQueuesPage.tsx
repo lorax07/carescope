@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
 import { captureAccession } from "../../revenueCycle";
 import { QUEUE_META, formatMoney, postRemittance, rcmCanWrite, useRcm, type QueueId } from "../../rcm";
 import { RcmEmpty, RcmShell } from "./RcmShell";
@@ -28,9 +28,10 @@ export function RcmQueuesPage() {
   const { queues, actor } = useRcm();
   const [params, setParams] = useSearchParams();
   const requested = params.get("queue");
-  const active: QueueId = isQueue(requested) ? requested : (QUEUE_META.find((item) => queues[item.id].length)?.id ?? "review");
-  const rows = queues[active];
-  const meta = QUEUE_META.find((item) => item.id === active)!;
+  const fallback = QUEUE_META.find((item) => queues[item.id].length)?.id ?? "review";
+  const selected = (requested ? requested.split(",") : [fallback]).filter(isQueue);
+  const rows = selected.flatMap((id) => queues[id]);
+  const meta = QUEUE_META.find((item) => item.id === selected[0]) ?? QUEUE_META[0];
   const canWrite = rcmCanWrite();
   const counts = useMemo(() => QUEUE_META.map((item) => ({ ...item, count: queues[item.id].length })), [queues]);
   const open = counts.reduce((sum, item) => sum + item.count, 0);
@@ -58,7 +59,7 @@ export function RcmQueuesPage() {
               <strong>{open}</strong>
               <small>Across every queue</small>
             </button>
-            <button type="button" className={`client-kpi${active === "denials" ? " is-on" : ""}`} onClick={() => setParams({ queue: "denials" }, { replace: true })}>
+            <button type="button" className={`client-kpi${selected.length === 1 && selected[0] === "denials" ? " is-on" : ""}`} onClick={() => setParams({ queue: "denials" }, { replace: true })}>
               <header>
                 <span>Denied</span>
                 <em className={denied ? "is-down" : "is-up"}>{denied}</em>
@@ -66,7 +67,7 @@ export function RcmQueuesPage() {
               <strong>{denied}</strong>
               <small>Denials and appeals</small>
             </button>
-            <button type="button" className={`client-kpi${active === "unposted" ? " is-on" : ""}`} onClick={() => setParams({ queue: "unposted" }, { replace: true })}>
+            <button type="button" className={`client-kpi${selected.length === 1 && selected[0] === "unposted" ? " is-on" : ""}`} onClick={() => setParams({ queue: "unposted" }, { replace: true })}>
               <header>
                 <span>Unposted</span>
                 <em className={unposted ? "is-down" : "is-up"}>{unposted}</em>
@@ -76,20 +77,16 @@ export function RcmQueuesPage() {
             </button>
           </div>
           <section className="client-card client-task-board">
-            <div className="client-pills" role="tablist" aria-label="Exception queues">
-              {counts.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={item.id === active}
-                  className={buttonFormat1(item.id === active)}
-                  onClick={() => setParams({ queue: item.id }, { replace: true })}
-                >
-                  {SHORT[item.id]} <em>{item.count}</em>
-                </button>
-              ))}
-            </div>
+            <Filter01
+              label="Exceptions"
+              options={QUEUE_META.map((item) => ({
+                id: item.id,
+                label: SHORT[item.id],
+                category: item.id === "denials" || item.id === "appeals" ? "Denials" : item.id === "unposted" || item.id === "aging" ? "Cash" : "Claims",
+              }))}
+              selected={selected}
+              onChange={(ids) => setParams({ queue: ids.filter(isQueue).join(",") || fallback }, { replace: true })}
+            />
             <p className="client-empty">{meta.question}</p>
             {rows.length ? (
               <ul>

@@ -4,7 +4,7 @@ import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, ty
 import { ClientAvatar, shortDate } from "./clientStudio";
 import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
 import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
 
 const SCOPES = [
@@ -31,17 +31,20 @@ export function CrmTasksPage() {
   const [params, setParams] = useSearchParams();
   const canWrite = crmCanWrite();
   const mine = params.get("scope") || "open";
+  const scopes = mine === "all" ? [] : mine.split(",").filter((item) => item !== "all");
   const client = params.get("client") || "all";
+  const clients = client === "all" ? [] : client.split(",").filter(Boolean);
   const focus = params.get("task") || "";
   const rows = useMemo(() => {
     return overlay.tasks.filter((item) => {
-      if (client !== "all" && item.accountId !== client) return false;
-      if (mine === "open") return item.status !== "done";
-      if (mine === "in_progress") return item.status === "in_progress";
-      if (mine === "done") return item.status === "done";
-      return true;
+      if (clients.length && !clients.includes(item.accountId)) return false;
+      if (!scopes.length) return true;
+      if (scopes.includes("open") && item.status !== "done") return true;
+      if (scopes.includes("in_progress") && item.status === "in_progress") return true;
+      if (scopes.includes("done") && item.status === "done") return true;
+      return false;
     });
-  }, [overlay.tasks, mine, client]);
+  }, [overlay.tasks, scopes, clients]);
   const counts = {
     open: overlay.tasks.filter((item) => item.status !== "done").length,
     progress: overlay.tasks.filter((item) => item.status === "in_progress").length,
@@ -94,13 +97,25 @@ export function CrmTasksPage() {
             </button>
           </div>
           <section className="client-card client-task-board">
-            <div className="client-pills" role="tablist" aria-label="Task status">
-              {SCOPES.map((item) => (
-                <button key={item.id} type="button" role="tab" aria-selected={mine === item.id} className={buttonFormat1(mine === item.id)} onClick={() => setScope(item.id)}>
-                  {item.label}
-                </button>
-              ))}
-            </div>
+            <Filter01
+              label="Cases"
+              options={[
+                ...SCOPES.filter((item) => item.id !== "all").map((item) => ({ id: item.id, label: item.label, category: "Status" })),
+                ...accounts.map((account) => ({ id: `account:${account.id}`, label: account.name, category: "Account" })),
+              ]}
+              selected={[...scopes, ...clients.map((id) => `account:${id}`)]}
+              onChange={(ids) => {
+                const status = ids.filter((id) => !id.startsWith("account:"));
+                const nextClients = ids.filter((id) => id.startsWith("account:")).map((id) => id.slice(8));
+                const copy = new URLSearchParams(params);
+                if (!status.length) copy.set("scope", "all");
+                else if (status.length === 1 && status[0] === "open") copy.delete("scope");
+                else copy.set("scope", status.join(","));
+                if (nextClients.length) copy.set("client", nextClients.join(","));
+                else copy.delete("client");
+                setParams(copy, { replace: true });
+              }}
+            />
             {rows.length ? (
               <ul>
                 {rows.map((item) => {

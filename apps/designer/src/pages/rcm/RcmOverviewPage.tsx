@@ -4,11 +4,11 @@ import { formatMoney, useRcm } from "../../rcm";
 import { QUEUE_META } from "../../rcm/types";
 import { RevenueChart, StudioLink, paymentBars } from "../crm/clientStudio";
 import { RcmShell } from "./RcmShell";
-import { RevenueAssist, RevenueClaimTable, type ClaimFilter } from "./revenueStudio";
+import { RevenueAssist, RevenueClaimTable } from "./revenueStudio";
 
 export function RcmOverviewPage() {
   const { metrics, queues, claims, cycle, actor } = useRcm();
-  const [filter, setFilter] = useState<ClaimFilter>("open");
+  const [filters, setFilters] = useState<string[]>(["open"]);
   const [query, setQuery] = useState("");
   const openClaims = claims.filter((claim) => claim.recordStatus === "open" && claim.workflow !== "paid" && claim.workflow !== "resolved");
   const moving = claims.filter((claim) => claim.workflow === "submitted" || claim.workflow === "accepted" || claim.workflow === "ready");
@@ -83,7 +83,7 @@ export function RcmOverviewPage() {
             </div>
           </section>
 
-          <RevenueClaimTable scroll rows={claims} filter={filter} onFilter={setFilter} query={query} onQuery={setQuery} />
+          <RevenueClaimTable scroll rows={claims} filters={filters} onFilter={setFilters} query={query} onQuery={setQuery} />
         </div>
         <aside className="client-home-side">
           <section className="client-card client-tasks">

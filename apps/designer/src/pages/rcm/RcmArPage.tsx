@@ -1,10 +1,23 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { buttonFormat1 } from "../../buttonFormat1";
+import { Filter01 } from "../../components/Filter01";
+import { filter01Match } from "../../filter01";
 import { CRM_ACCOUNTS } from "../../crmAccounts";
 import { FINANCIAL_LABEL, bucketFor, formatMoney, pageRows, rcmCanWrite, useRcm, type AgingBucket } from "../../rcm";
 import { routeLabel, writeOffCharge } from "../../revenueCycle";
 import { RcmEmpty, RcmShell } from "./RcmShell";
+
+function unpack(value: string | null): string[] {
+  if (!value || value === "all") return [];
+  return value.split(",").flatMap((item) => {
+    try {
+      const decoded = decodeURIComponent(item);
+      return decoded ? [decoded] : [];
+    } catch {
+      return item ? [item] : [];
+    }
+  });
+}
 
 const BUCKETS: { id: AgingBucket | "all"; label: string }[] = [
   { id: "all", label: "All open" },
@@ -21,10 +34,10 @@ export function RcmArPage() {
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const canWrite = rcmCanWrite();
-  const bucket = (params.get("bucket") as AgingBucket | "all") || "all";
-  const route = params.get("route") || "all";
-  const payer = params.get("payer") || "all";
-  const client = params.get("client") || "all";
+  const buckets = unpack(params.get("bucket"));
+  const routes = unpack(params.get("route"));
+  const payersSelected = unpack(params.get("payer"));
+  const clients = unpack(params.get("client"));
   const page = Number(params.get("page") || "1");
   const open = useMemo(
     () => claims.filter((claim) => claim.balanceCents > 0 && claim.financial !== "unbilled"),
@@ -34,29 +47,43 @@ export function RcmArPage() {
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return open.filter((claim) => {
-      if (bucket !== "all" && bucketFor(claim.ageDays) !== bucket) return false;
-      if (route !== "all" && claim.route !== route) return false;
-      if (payer !== "all" && claim.payerName !== payer) return false;
-      if (client !== "all" && claim.accountId !== client) return false;
-      if (needle && !`${claim.id} ${claim.accountName} ${claim.accessionId} ${claim.payerName}`.toLowerCase().includes(needle)) {
+      if (buckets.length && !buckets.includes(bucketFor(claim.ageDays))) return false;
+      if (routes.length && !routes.includes(claim.route)) return false;
+      if (payersSelected.length && !payersSelected.includes(claim.payerName)) return false;
+      if (clients.length && !clients.includes(claim.accountId)) return false;
+      if (needle && !filter01Match(`${claim.id} ${claim.accountName} ${claim.accessionId} ${claim.payerName}`, needle)) {
         return false;
       }
       return true;
     });
-  }, [open, bucket, route, payer, client, query]);
+  }, [open, buckets, routes, payersSelected, clients, query]);
   const paged = pageRows(filtered, page);
   const totals = BUCKETS.filter((item) => item.id !== "all").map((item) => ({
     ...item,
     cents: aging[item.id as AgingBucket],
   }));
 
-  function setFilter(key: string, value: string) {
+  function chooseFilters(ids: string[]) {
     const copy = new URLSearchParams(params);
-    if (value === "all") copy.delete(key);
-    else copy.set(key, value);
-    if (key !== "page") copy.delete("page");
+    const write = (key: string, prefix: string) => {
+      const values = ids.filter((id) => id.startsWith(prefix)).map((id) => id.slice(prefix.length));
+      if (values.length) copy.set(key, values.map((item) => encodeURIComponent(item)).join(","));
+      else copy.delete(key);
+    };
+    write("bucket", "aging:");
+    write("client", "client:");
+    write("payer", "payer:");
+    write("route", "route:");
+    copy.delete("page");
     setParams(copy, { replace: true });
   }
+
+  const filterSelected = [
+    ...buckets.map((id) => `aging:${id}`),
+    ...clients.map((id) => `client:${id}`),
+    ...payersSelected.map((name) => `payer:${name}`),
+    ...routes.map((id) => `route:${id}`),
+  ];
 
   return (
     <RcmShell studio title="Receivables" lede="Outstanding balances by aging, client, payer, and route.">
@@ -70,20 +97,21 @@ export function RcmArPage() {
           <h2>Aging</h2>
           <strong>{formatMoney(metrics.ar)}</strong>
         </header>
-        <div className="client-pills" role="tablist" aria-label="Aging">
-          {totals.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={bucket === item.id}
-              className={buttonFormat1(bucket === item.id)}
-              onClick={() => setFilter("bucket", bucket === item.id ? "all" : item.id)}
-            >
-              {item.label} <em>{formatMoney(item.cents)}</em>
-            </button>
-          ))}
-        </div>
+        <Filter01
+          label="Receivables"
+          query={query}
+          onQuery={setQuery}
+          options={[
+            ...totals.map((item) => ({ id: `aging:${item.id}`, label: `${item.label} · ${formatMoney(item.cents)}`, category: "Aging" })),
+            ...CRM_ACCOUNTS.map((account) => ({ id: `client:${account.id}`, label: account.name, category: "Client" })),
+            ...payers.map((name) => ({ id: `payer:${name}`, label: name, category: "Payer" })),
+            { id: "route:837P", label: "Insurance", category: "Route" },
+            { id: "route:Invoice", label: "Client invoice", category: "Route" },
+            { id: "route:Statement", label: "Self-pay", category: "Route" },
+          ]}
+          selected={filterSelected}
+          onChange={chooseFilters}
+        />
         <p className="client-empty">
           {formatMoney(metrics.atRisk)} is at risk in 91+ and denied balances. Days in A/R: {metrics.daysInAr}.
         </p>
@@ -94,37 +122,6 @@ export function RcmArPage() {
           <label>
             Search
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Claim, client, payer" aria-label="Search A/R" />
-          </label>
-          <label>
-            Client
-            <select value={client} onChange={(event) => setFilter("client", event.target.value)} aria-label="Filter by client">
-              <option value="all">All clients</option>
-              {CRM_ACCOUNTS.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Payer
-            <select value={payer} onChange={(event) => setFilter("payer", event.target.value)} aria-label="Filter by payer">
-              <option value="all">All payers</option>
-              {payers.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Route
-            <select value={route} onChange={(event) => setFilter("route", event.target.value)} aria-label="Filter by billing route">
-              <option value="all">All routes</option>
-              <option value="837P">Insurance</option>
-              <option value="Invoice">Client invoice</option>
-              <option value="Statement">Self-pay</option>
-            </select>
           </label>
         </div>
         {paged.rows.length ? (
@@ -181,7 +178,11 @@ export function RcmArPage() {
           <p className="billing-note">
             Page {paged.page} of {paged.pages}{" "}
             {paged.page < paged.pages ? (
-              <button type="button" className="btn" onClick={() => setFilter("page", String(paged.page + 1))}>
+              <button type="button" className="btn" onClick={() => {
+                const copy = new URLSearchParams(params);
+                copy.set("page", String(paged.page + 1));
+                setParams(copy, { replace: true });
+              }}>
                 Next
               </button>
             ) : null}
