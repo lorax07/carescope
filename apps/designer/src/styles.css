@@ -7912,44 +7912,23 @@ button.palette-category-title {
 .crm-view-tabs {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.tab-sheet {
-  margin-top: 0;
-  padding-top: 0.85rem;
-  background: linear-gradient(#f3efff, transparent 22px);
+  align-items: flex-end;
+  gap: 0.2rem;
 }
 
 .client-board-head:has(.crm-view-tabs) {
-  position: relative;
   align-items: flex-end;
-  padding-bottom: 10px;
-}
-
-.client-board-head:has(.crm-view-tabs)::after,
-.crm-record-strip::after,
-.account-feed-tabs::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2px;
-  height: 3px;
-  background: #6d5efc;
-  pointer-events: none;
+  border-bottom: 1px solid #d5dbe6;
 }
 
 .crm-view-tabs button {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  padding: 0.22rem 0.9rem;
-  border: 0;
-  border-radius: 999px;
+  margin: 0 0 -1px;
+  padding: 0.28rem 0.9rem 0.42rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
   background: transparent;
-  color: #b0b7c6;
+  color: #98a2b3;
   font-family: var(--font-display);
   font-size: 1.45rem;
   font-weight: 550;
@@ -7958,11 +7937,11 @@ button.palette-category-title {
 }
 
 .crm-view-tabs button.is-on {
-  margin-bottom: -8px;
-  color: #1d2433;
+  border-color: #d5dbe6;
+  border-bottom: 1px solid #f4f6fb;
+  background: #f4f6fb;
+  color: #6d5efc;
   font-weight: 750;
-  background: #efeaff;
-  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
 .crm-view-tabs button:hover {
@@ -8198,24 +8177,25 @@ button.palette-category-title {
 }
 
 .crm-record-strip {
-  position: relative;
   display: flex;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.2rem;
   align-items: flex-end;
-  overflow-x: auto;
-  margin-top: 0;
-  padding-bottom: 10px;
-  border-bottom: 0;
+  margin-top: 0.85rem;
+  border-bottom: 1px solid #d5dbe6;
 }
 
 .crm-record-strip > a,
 .crm-record-strip > span {
-  border-radius: 999px;
-  padding: 0.32rem 0.8rem;
+  margin: 0 0 -1px;
+  padding: 0.38rem 0.75rem 0.42rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
 }
 
 .crm-record-strip a {
-  color: #b0b7c6;
+  color: #98a2b3;
   font-size: 0.84rem;
   font-weight: 550;
   text-decoration: none;
@@ -8228,20 +8208,18 @@ button.palette-category-title {
 
 .crm-record-strip > a.is-on,
 .crm-record-strip span.is-on {
-  position: relative;
-  z-index: 1;
-  margin-bottom: -8px;
-  color: #1d2433;
+  border-color: #d5dbe6;
+  border-bottom: 1px solid #f4f6fb;
+  background: #f4f6fb;
+  color: #6d5efc;
   font-weight: 750;
-  background: #efeaff;
-  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
-.crm-record-strip span.is-on a {
-  color: #1d2433;
+.crm-record-strip span.is-on a,
+.crm-record-strip span.is-on button {
+  color: #6d5efc;
   font-weight: 750;
   background: transparent;
-  box-shadow: none;
 }
 
 .crm-record-strip span {
@@ -8335,37 +8313,36 @@ button.palette-category-title {
 }
 
 .account-feed-tabs {
-  position: relative;
   display: flex;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.2rem;
   align-items: flex-end;
-  padding-bottom: 10px;
-  border-bottom: 0;
+  border-bottom: 1px solid #d5dbe6;
 }
 
 .account-feed-tabs button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 0;
-  border-radius: 999px;
+  margin: 0 0 -1px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
   background: transparent;
-  color: #b0b7c6;
+  color: #98a2b3;
   font: inherit;
   font-size: 0.84rem;
   font-weight: 550;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.75rem 0.45rem;
   cursor: pointer;
 }
 
 .account-feed-tabs button.is-on {
-  position: relative;
-  z-index: 1;
-  margin-bottom: -8px;
-  color: #1d2433;
+  border-color: #d5dbe6;
+  border-bottom: 1px solid #fff;
+  background: #fff;
+  color: #6d5efc;
   font-weight: 750;
-  background: #efeaff;
-  box-shadow: inset 0 0 0 1.5px #6d5efc;
 }
 
 .account-feed-tabs svg,

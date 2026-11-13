@@ -5,7 +5,7 @@ import { directoryContacts } from "../../crm/directory";
 import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
 import { useWorkflowStages } from "../../workflowStages";
-import { crmHomePanel, openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
+import { crmHomePanel, crmSubtabPath, openCrmRecordTab, recordPath, rememberCrmHome, rememberCrmSubtab } from "../../crmRecordTabs";
 import { ClientAvatar, clientBudget, initials } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
 import { AccountEditDialog } from "./AccountEditDialog";
@@ -51,8 +51,15 @@ export function CrmClientDetailPage() {
 
   useEffect(() => {
     if (!card) return;
-    if (focus) openCrmRecordTab({ key: `contact:${focus.id}`, kind: "contact", accountId, contactId: focus.id, title: focus.name });
-    else openCrmRecordTab({ key: `account:${accountId}`, kind: "account", accountId, title: card.account.name });
+    if (focus) {
+      openCrmRecordTab({ key: `contact:${focus.id}`, kind: "contact", accountId, contactId: focus.id, title: focus.name });
+      rememberCrmHome("contacts");
+      rememberCrmSubtab("contacts", `contact:${focus.id}`);
+    } else {
+      openCrmRecordTab({ key: `account:${accountId}`, kind: "account", accountId, title: card.account.name });
+      rememberCrmHome("accounts");
+      rememberCrmSubtab("accounts", `account:${accountId}`);
+    }
   }, [accountId, card, focus]);
 
   useEffect(() => {
@@ -67,8 +74,7 @@ export function CrmClientDetailPage() {
 
   const home = crmHomePanel();
   function chooseHome(next: "accounts" | "contacts") {
-    rememberCrmHome(next);
-    navigate(next === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients");
+    navigate(crmSubtabPath(next));
   }
 
   if (!card) {
@@ -79,7 +85,7 @@ export function CrmClientDetailPage() {
             <CrmDirectoryHeader panel={home} onPanel={chooseHome} />
           </div>
           <div className="client-board-main">
-            <CrmRecordStrip />
+            <CrmRecordStrip panel={home} />
             <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
           </div>
           <aside className="client-board-side">
@@ -138,15 +144,13 @@ export function CrmClientDetailPage() {
       <div className="client-board">
         <div className="client-overview-head">
           <CrmDirectoryHeader
-            panel={home}
+            panel={focus ? "contacts" : "accounts"}
             onPanel={chooseHome}
             action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
           />
         </div>
         <div className="account-page">
-        <div className="tab-sheet">
-        <CrmRecordStrip activeKey={activeKey} />
-        <div className="tab-sheet">
+        <CrmRecordStrip activeKey={activeKey} panel={focus ? "contacts" : "accounts"} />
 
         {focus ? (
           <section className="client-card account-hero contact-record">
@@ -235,7 +239,6 @@ export function CrmClientDetailPage() {
               </button>
             ))}
           </div>
-          <div className="tab-sheet">
           {feed === "activity" ? (
             <div className="account-feed-body">
               {[...months.entries()].map(([month, items]) => (
@@ -274,10 +277,7 @@ export function CrmClientDetailPage() {
               {notes.map((item) => <p key={item.id} className="account-feed-doc"><b>{item.actor}</b><span>{item.text}</span><time>{item.at}</time></p>)}
             </div>
           ) : null}
-          </div>
         </section>}
-        </div>
-        </div>
         </div>
         <aside className="client-board-side">
           <TopPriorities />
