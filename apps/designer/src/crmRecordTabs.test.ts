@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { CRM_RECORD_TAB_LIMIT, closeCrmRecordTab, listCrmRecordTabs, openCrmRecordTab, type CrmRecordTab } from "./crmRecordTabs";
+import { CRM_RECORD_TAB_LIMIT, closeCrmRecordTab, crmSubtabPath, listCrmRecordTabs, openCrmRecordTab, rememberCrmSubtab, type CrmRecordTab } from "./crmRecordTabs";
 
 function memoryStore() {
   const map = new Map<string, string>();
@@ -35,5 +35,21 @@ describe("CRM record tabs", () => {
     expect(tabs.at(-1)?.key).toBe("account:acc-11");
     closeCrmRecordTab("account:acc-11");
     expect(listCrmRecordTabs().some((item) => item.key === "account:acc-11")).toBe(false);
+  });
+
+  it("restores the last subtab under Accounts and under Contacts", () => {
+    sessionStorage.clear();
+    expect(crmSubtabPath("accounts")).toBe("/app/connectivity/clients");
+    expect(crmSubtabPath("contacts")).toBe("/app/connectivity/clients?panel=contacts");
+    openCrmRecordTab({ key: "account:acc-vertex", kind: "account", accountId: "acc-vertex", title: "Vertex" });
+    rememberCrmSubtab("accounts", "account:acc-vertex");
+    openCrmRecordTab({ key: "contact:p1", kind: "contact", accountId: "acc-vertex", contactId: "p1", title: "R. Okonkwo" });
+    rememberCrmSubtab("contacts", "contact:p1");
+    expect(crmSubtabPath("accounts")).toBe("/app/connectivity/clients/acc-vertex");
+    expect(crmSubtabPath("contacts")).toBe("/app/connectivity/clients/acc-vertex?contact=p1");
+    rememberCrmSubtab("accounts", "home");
+    expect(crmSubtabPath("accounts")).toBe("/app/connectivity/clients");
+    closeCrmRecordTab("contact:p1");
+    expect(crmSubtabPath("contacts")).toBe("/app/connectivity/clients?panel=contacts");
   });
 });

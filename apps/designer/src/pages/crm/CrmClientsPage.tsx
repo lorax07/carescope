@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Filter01, type Filter01Option } from "../../components/Filter01";
 import { addClientAccount, addClientContact, useCrm, type ClientCard } from "../../crm";
 import { contactsOnAccount } from "../../crm/directory";
-import { openCrmRecordTab, recordPath, rememberCrmHome } from "../../crmRecordTabs";
+import { crmSubtabPath, openCrmRecordTab, recordPath, rememberCrmHome, rememberCrmSubtab } from "../../crmRecordTabs";
 import { filter01Match } from "../../filter01";
 import { AccountCompanyCard, AccountPersonCard, clientBudget } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
@@ -128,6 +128,11 @@ export function CrmClientsPage() {
   }
 
   function setPanel(next: "accounts" | "contacts") {
+    const destination = crmSubtabPath(next);
+    if (/\/clients\/[^/?]+/.test(destination)) {
+      navigate(destination);
+      return;
+    }
     const copy = new URLSearchParams(params);
     if (next === "accounts") copy.delete("panel");
     else copy.set("panel", "contacts");
@@ -143,6 +148,7 @@ export function CrmClientsPage() {
 
   useEffect(() => {
     rememberCrmHome(panel);
+    rememberCrmSubtab(panel, "home");
   }, [panel]);
 
   function openAccount(accountId: string, title?: string) {
@@ -169,9 +175,7 @@ export function CrmClientsPage() {
           />
         </div>
         <div className="client-board-main">
-          <div className="tab-sheet">
-          <CrmRecordStrip />
-          <div className="tab-sheet">
+          <CrmRecordStrip panel={panel} />
           <Filter01
             key={panel}
             label={panel === "accounts" ? "Accounts" : "Contacts"}
@@ -233,8 +237,6 @@ export function CrmClientsPage() {
               detail={panel === "accounts" ? "Choose All Accounts to see the full list." : "Choose All Contacts to see the full list."}
             />
           )}
-          </div>
-          </div>
         </div>
         <aside className="client-board-side">
           <TopPriorities defaultOpen hint="A saved star stays on this screen until you leave it." />

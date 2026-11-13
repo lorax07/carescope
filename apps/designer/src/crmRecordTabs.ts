@@ -10,6 +10,7 @@ export type CrmRecordTab = {
 
 const TABS_KEY = "carescope.crm.record-tabs";
 const HOME_KEY = "carescope.crm.home-panel";
+const SUBTAB_KEY = "carescope.crm.active-subtab";
 const EVENT = "carescope-crm-tabs";
 
 function readTabs(): CrmRecordTab[] {
@@ -37,7 +38,37 @@ export function crmHomePanel(): "accounts" | "contacts" {
 }
 
 export function crmHomePath(): string {
-  return crmHomePanel() === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients";
+  return crmListPath(crmHomePanel());
+}
+
+export function crmListPath(panel: "accounts" | "contacts"): string {
+  return panel === "contacts" ? "/app/connectivity/clients?panel=contacts" : "/app/connectivity/clients";
+}
+
+function readSubtabs(): { accounts: string; contacts: string } {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(SUBTAB_KEY) || "{}") as { accounts?: unknown; contacts?: unknown };
+    return {
+      accounts: typeof parsed.accounts === "string" ? parsed.accounts : "home",
+      contacts: typeof parsed.contacts === "string" ? parsed.contacts : "home",
+    };
+  } catch {
+    return { accounts: "home", contacts: "home" };
+  }
+}
+
+export function rememberCrmSubtab(panel: "accounts" | "contacts", key: string) {
+  const current = readSubtabs();
+  current[panel] = key;
+  sessionStorage.setItem(SUBTAB_KEY, JSON.stringify(current));
+}
+
+/** The list, or the record that was last open under Accounts or Contacts. */
+export function crmSubtabPath(panel: "accounts" | "contacts"): string {
+  const key = readSubtabs()[panel];
+  const kind = panel === "contacts" ? "contact" : "account";
+  const tab = key && key !== "home" ? readTabs().find((item) => item.key === key && item.kind === kind) : undefined;
+  return tab ? recordPath(tab) : crmListPath(panel);
 }
 
 export function listCrmRecordTabs(): CrmRecordTab[] {
@@ -51,7 +82,11 @@ export function openCrmRecordTab(tab: CrmRecordTab): CrmRecordTab[] {
 }
 
 export function closeCrmRecordTab(key: string): CrmRecordTab[] {
-  return writeTabs(readTabs().filter((item) => item.key !== key));
+  const next = writeTabs(readTabs().filter((item) => item.key !== key));
+  const memory = readSubtabs();
+  if (memory.accounts === key) rememberCrmSubtab("accounts", "home");
+  if (memory.contacts === key) rememberCrmSubtab("contacts", "home");
+  return next;
 }
 
 export function recordPath(tab: Pick<CrmRecordTab, "accountId" | "contactId">): string {

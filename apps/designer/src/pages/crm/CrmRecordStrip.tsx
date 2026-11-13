@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { closeCrmRecordTab, crmHomePath, listCrmRecordTabs, openCrmRecordTab, recordPath, subscribeCrmRecordTabs, type CrmRecordTab } from "../../crmRecordTabs";
+import { closeCrmRecordTab, crmListPath, listCrmRecordTabs, openCrmRecordTab, recordPath, subscribeCrmRecordTabs, type CrmRecordTab } from "../../crmRecordTabs";
 
 export function CrmAccountLink({
   accountId,
@@ -32,12 +32,14 @@ export function useCrmRecordTabs(): CrmRecordTab[] {
   return tabs;
 }
 
-export function CrmRecordStrip({ activeKey }: { activeKey?: string }) {
-  const tabs = useCrmRecordTabs();
+export function CrmRecordStrip({ activeKey, panel }: { activeKey?: string; panel: "accounts" | "contacts" }) {
+  const kind = panel === "contacts" ? "contact" : "account";
+  const tabs = useCrmRecordTabs().filter((tab) => tab.kind === kind);
+  const home = crmListPath(panel);
   const navigate = useNavigate();
   return (
-    <div className="crm-record-strip" role="tablist" aria-label="Open records">
-      <Link to={crmHomePath()} role="tab" aria-selected={!activeKey} className={!activeKey ? "is-on" : undefined}>
+    <div className="crm-record-strip" role="tablist" aria-label={panel === "contacts" ? "Open contacts" : "Open accounts"}>
+      <Link to={home} role="tab" aria-selected={!activeKey} className={!activeKey ? "is-on" : undefined}>
         Home
       </Link>
       {tabs.map((tab) => {
@@ -52,7 +54,7 @@ export function CrmRecordStrip({ activeKey }: { activeKey?: string }) {
               aria-label={`Close ${tab.title}`}
               onClick={() => {
                 closeCrmRecordTab(tab.key);
-                if (on) navigate(crmHomePath());
+                if (on) navigate(home);
               }}
             >
               ×
