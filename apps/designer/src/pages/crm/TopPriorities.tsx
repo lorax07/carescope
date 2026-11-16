@@ -71,12 +71,18 @@ export function TopPriorities({
 
   return (
     <section className={`client-card top-priorities${open ? " is-open" : ""}${bouncing ? " is-bouncing" : ""}`} onAnimationEnd={() => setBouncing(false)}>
-      <button type="button" className="top-priorities-toggle" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-        <h2>Top Priorities</h2>
-        <svg viewBox="0 0 16 16" aria-hidden="true" className={open ? "is-open" : undefined}>
-          <path d="M4 6.2 8 10.2 12 6.2" />
-        </svg>
-      </button>
+      {open ? (
+        <div className="top-priorities-toggle">
+          <h2>Top Priorities</h2>
+        </div>
+      ) : (
+        <button type="button" className="top-priorities-toggle" aria-expanded={false} onClick={() => setOpen(true)}>
+          <h2>Top Priorities</h2>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 6.2 8 10.2 12 6.2" />
+          </svg>
+        </button>
+      )}
       {open ? (
         <div className="client-assist">
           <div className="client-assist-grid">
