@@ -7909,6 +7909,16 @@ button.palette-category-title {
   font-size: 0.8rem;
 }
 
+.crm-directory-title {
+  margin: 0.2rem 0 0.45rem;
+  color: #1d2433;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.tab01,
 .crm-view-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -7921,6 +7931,7 @@ button.palette-category-title {
   border-bottom: 1px solid #d5dbe6;
 }
 
+.tab01 button,
 .crm-view-tabs button {
   margin: 0 0 -1px;
   padding: 0.28rem 0.9rem 0.42rem;
@@ -7936,6 +7947,7 @@ button.palette-category-title {
   line-height: 1.15;
 }
 
+.tab01 button.is-on,
 .crm-view-tabs button.is-on {
   border-color: #d5dbe6;
   border-bottom: 1px solid #f4f6fb;
@@ -7944,10 +7956,12 @@ button.palette-category-title {
   font-weight: 750;
 }
 
+.tab01 button:hover,
 .crm-view-tabs button:hover {
   color: #667085;
 }
 
+.tab01 button.is-on:hover,
 .crm-view-tabs button.is-on:hover {
   color: #1d2433;
 }
@@ -8054,11 +8068,18 @@ button.palette-category-title {
 }
 
 .account-hero {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.35rem 1.1rem;
   align-items: center;
   padding: 1.15rem 1.2rem 1rem;
+}
+
+.account-card-edit {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
 }
 
 .account-hero h1 {
@@ -8176,6 +8197,11 @@ button.palette-category-title {
   color: #1d2433;
 }
 
+.subtab01,
+.crm-record-strip {
+  --subtab-fill: #f4f6fb;
+}
+
 .crm-record-strip {
   display: flex;
   flex-wrap: wrap;
@@ -8206,11 +8232,14 @@ button.palette-category-title {
   padding: 0;
 }
 
+.subtab01 > a.is-on,
+.subtab01 > span.is-on,
+.subtab01 > button.is-on,
 .crm-record-strip > a.is-on,
 .crm-record-strip span.is-on {
   border-color: #d5dbe6;
-  border-bottom: 1px solid #f4f6fb;
-  background: #f4f6fb;
+  border-bottom: 1px solid var(--subtab-fill, #f4f6fb);
+  background: var(--subtab-fill, #f4f6fb);
   color: #6d5efc;
   font-weight: 750;
 }
@@ -8240,6 +8269,7 @@ button.palette-category-title {
 
 .account-card-contacts {
   grid-column: 1 / -1;
+  margin-top: 10px;
 }
 
 .account-card-contacts h2 {
@@ -8284,6 +8314,13 @@ button.palette-category-title {
   white-space: nowrap;
 }
 
+.account-contact-channels {
+  display: flex;
+  gap: 0.28rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .account-contact-chip:has(.account-contact-menu) {
   z-index: 6;
 }
@@ -8310,6 +8347,10 @@ button.palette-category-title {
   font-size: 0.75rem;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.account-feed-tabs.subtab01 {
+  --subtab-fill: #fff;
 }
 
 .account-feed-tabs {
@@ -8339,8 +8380,8 @@ button.palette-category-title {
 
 .account-feed-tabs button.is-on {
   border-color: #d5dbe6;
-  border-bottom: 1px solid #fff;
-  background: #fff;
+  border-bottom: 1px solid var(--subtab-fill, #fff);
+  background: var(--subtab-fill, #fff);
   color: #6d5efc;
   font-weight: 750;
 }

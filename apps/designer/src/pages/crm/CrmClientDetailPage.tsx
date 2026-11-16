@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { addNote, crmCanWrite, saveAccountWorkspace, useCrm } from "../../crm";
+import { addClientAccount, addClientContact, addNote, crmCanWrite, saveAccountWorkspace, useCrm } from "../../crm";
 import { directoryContacts } from "../../crm/directory";
 import { money } from "../../revenueCycle";
 import { StageConditionCell } from "../../components/StageConditionCell";
@@ -8,6 +8,9 @@ import { useWorkflowStages } from "../../workflowStages";
 import { crmHomePanel, crmSubtabPath, openCrmRecordTab, recordPath, rememberCrmHome, rememberCrmSubtab } from "../../crmRecordTabs";
 import { ClientAvatar, clientBudget, initials } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
+import { CrmImportPanel } from "./CrmImportPanel";
+import { InboxChannelMark } from "./InboxChannelMark";
+import { contactChannels } from "./inboxStudio";
 import { AccountEditDialog } from "./AccountEditDialog";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
@@ -42,6 +45,10 @@ export function CrmClientDetailPage() {
   const [note, setNote] = useState("");
   const [feed, setFeed] = useState<"activity" | "documents" | "notes">("activity");
   const [editing, setEditing] = useState(false);
+  const [adding, setAdding] = useState<"account" | "contact" | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [draft, setDraft] = useState({ name: "", contact: "", role: "", industry: "" });
+  const [contactDraft, setContactDraft] = useState({ accountId: "", name: "", role: "", email: "", phone: "" });
   const [reach, setReach] = useState<string | null>(null);
   const canWrite = crmCanWrite();
   const contactKey = params.get("contact") || "";
@@ -146,7 +153,11 @@ export function CrmClientDetailPage() {
           <CrmDirectoryHeader
             panel={focus ? "contacts" : "accounts"}
             onPanel={chooseHome}
-            action={canWrite ? <button type="button" className="btn" onClick={() => setEditing(true)}>Edit</button> : null}
+            action={canWrite ? (
+              <button type="button" className="client-add" onClick={() => { setImporting(false); setAdding(focus ? "contact" : "account"); }}>
+                {focus ? "Add new Contact" : "Add new Account"}
+              </button>
+            ) : null}
           />
         </div>
         <div className="account-page">
@@ -154,6 +165,7 @@ export function CrmClientDetailPage() {
 
         {focus ? (
           <section className="client-card account-hero contact-record">
+            {canWrite ? <button type="button" className="btn account-card-edit" onClick={() => setEditing(true)}>Edit</button> : null}
             <ClientAvatar name={focus.name} size={72} />
             <div>
               <h1>{focus.name}</h1>
@@ -169,6 +181,7 @@ export function CrmClientDetailPage() {
           </section>
         ) : (
         <section className="client-card account-hero">
+          {canWrite ? <button type="button" className="btn account-card-edit" onClick={() => setEditing(true)}>Edit</button> : null}
           <span className="account-mark is-hero" aria-hidden="true">{initials(account.name)}</span>
           <div>
             <h1>{account.name}</h1>
@@ -184,6 +197,11 @@ export function CrmClientDetailPage() {
                   <ClientAvatar name={person.name} size={36} />
                 </button>
                 <button type="button" className="account-contact-name" onClick={() => openContact(person.id, person.name)}>{person.name}</button>
+                <span className="account-contact-channels">
+                  {contactChannels(person.id, person.email, person.phone).map((mark) => (
+                    <InboxChannelMark key={mark.channel} channel={mark.channel} reach={mark.reach} />
+                  ))}
+                </span>
                 {reach === person.id ? (
                   <div className="account-contact-menu" role="menu">
                     {person.email ? <a href={`mailto:${person.email}`}>Email {person.email}</a> : <span>No email on file</span>}
@@ -231,7 +249,7 @@ export function CrmClientDetailPage() {
         </div>}
 
         {focus ? null : <section className="client-card account-feed">
-          <div className="account-feed-tabs" role="tablist" aria-label="Account record">
+          <div className="account-feed-tabs subtab01" role="tablist" aria-label="Account record">
             {(["activity", "documents", "notes"] as const).map((item) => (
               <button key={item} type="button" role="tab" aria-selected={feed === item} className={feed === item ? "is-on" : undefined} onClick={() => setFeed(item)}>
                 <FeedIcon kind={item} />
@@ -291,6 +309,71 @@ export function CrmClientDetailPage() {
           onClose={() => setEditing(false)}
           onSave={(nextAccount, nextContacts) => saveAccountWorkspace(account.id, nextAccount, nextContacts)}
         />
+      ) : null}
+      {adding ? (
+        <div className="lims-modal-backdrop" role="presentation" onClick={() => setAdding(null)}>
+          <form
+            className={`lims-modal client-add-dialog${importing ? " is-import" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-client-title"
+            onClick={(event) => event.stopPropagation()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (importing) return;
+              if (adding === "account") {
+                const accountId = addClientAccount(draft);
+                setDraft({ name: "", contact: "", role: "", industry: "" });
+                setAdding(null);
+                if (accountId) navigate(`/app/connectivity/clients/${accountId}`);
+                return;
+              }
+              const accountId = addClientContact(contactDraft);
+              setContactDraft({ accountId: "", name: "", role: "", email: "", phone: "" });
+              setAdding(null);
+              if (accountId) navigate(`/app/connectivity/clients/${accountId}`);
+            }}
+          >
+            <div className="lims-dialog-bar">
+              <h2 id="add-client-title">{importing ? (adding === "account" ? "Import accounts" : "Import contacts") : adding === "account" ? "Add new Account" : "Add new Contact"}</h2>
+              <button type="button" className="btn" onClick={() => setAdding(null)}>Close</button>
+            </div>
+            {importing ? (
+              <CrmImportPanel kind={adding === "account" ? "account" : "contact"} accounts={crm.accounts} onDone={(accountId) => { setAdding(null); setImporting(false); navigate(`/app/connectivity/clients/${accountId}`); }} />
+            ) : adding === "account" ? (
+              <>
+                <label>Account name<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} required /></label>
+                <label>Primary contact<input value={draft.contact} onChange={(event) => setDraft({ ...draft, contact: event.target.value })} required /></label>
+                <label>Role<input value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Lab director" /></label>
+                <label>Sector<input value={draft.industry} onChange={(event) => setDraft({ ...draft, industry: event.target.value })} placeholder="Pharmaceutical" /></label>
+              </>
+            ) : (
+              <>
+                <label>
+                  Account
+                  <select value={contactDraft.accountId} onChange={(event) => setContactDraft({ ...contactDraft, accountId: event.target.value })} required>
+                    <option value="">Choose an account</option>
+                    {crm.accounts.map((item) => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>Name<input value={contactDraft.name} onChange={(event) => setContactDraft({ ...contactDraft, name: event.target.value })} required /></label>
+                <label>Role<input value={contactDraft.role} onChange={(event) => setContactDraft({ ...contactDraft, role: event.target.value })} placeholder="Lab director" /></label>
+                <label>Email<input type="email" value={contactDraft.email} onChange={(event) => setContactDraft({ ...contactDraft, email: event.target.value })} placeholder="name@lab.example" /></label>
+                <label>Phone<input value={contactDraft.phone} onChange={(event) => setContactDraft({ ...contactDraft, phone: event.target.value })} placeholder="503-555-0100" /></label>
+              </>
+            )}
+            {importing ? (
+              <button type="button" className="btn" onClick={() => setImporting(false)}>Back to form</button>
+            ) : (
+              <div className="client-add-actions">
+                <button type="button" className="btn" onClick={() => setImporting(true)}>Import</button>
+                <button type="submit" className="btn btn-primary">{adding === "account" ? "Save account" : "Save contact"}</button>
+              </div>
+            )}
+          </form>
+        </div>
       ) : null}
     </CrmShell>
   );
