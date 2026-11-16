@@ -9209,18 +9209,21 @@ button.client-kpi.is-on {
   }
 }
 
-.lims-shell.is-client {
+.lims-shell.is-app-rail {
   --client-rail: 6.15rem;
 }
 
-.lims-shell.is-client.is-nav-open {
+.lims-shell.is-app-rail.is-nav-open {
   --client-rail: 16rem;
 }
 
-.lims-shell.is-client .lims-nav-dock,
-.lims-shell.is-client .lims-nav-dock.is-docked,
-.lims-shell.is-client .lims-nav-dock.is-docked.is-open.is-left,
-.lims-shell.is-client .lims-nav-dock.is-open {
+.lims-shell.is-app-rail .lims-nav-dock,
+.lims-shell.is-app-rail .lims-nav-dock.is-docked,
+.lims-shell.is-app-rail .lims-nav-dock.is-docked:not(.is-open).is-left,
+.lims-shell.is-app-rail .lims-nav-dock.is-docked:not(.is-open).is-right,
+.lims-shell.is-app-rail .lims-nav-dock.is-docked.is-open.is-left,
+.lims-shell.is-app-rail .lims-nav-dock.is-docked.is-open.is-right,
+.lims-shell.is-app-rail .lims-nav-dock.is-open {
   top: 0 !important;
   left: 0 !important;
   width: var(--client-rail);
@@ -9231,8 +9234,8 @@ button.client-kpi.is-on {
   transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lims-shell.is-client .lims-icon-rail,
-.lims-shell.is-client .lims-sidebar {
+.lims-shell.is-app-rail .lims-icon-rail,
+.lims-shell.is-app-rail .lims-sidebar {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -9245,19 +9248,19 @@ button.client-kpi.is-on {
   transition: opacity 180ms ease;
 }
 
-.lims-shell.is-client.is-nav-open .lims-icon-rail,
-.lims-shell.is-client:not(.is-nav-open) .lims-sidebar {
+.lims-shell.is-app-rail.is-nav-open .lims-icon-rail,
+.lims-shell.is-app-rail:not(.is-nav-open) .lims-sidebar {
   opacity: 0;
   pointer-events: none;
 }
 
-.lims-shell.is-client .lims-icon-rail {
+.lims-shell.is-app-rail .lims-icon-rail {
   padding: 0.85rem 0.4rem 0.7rem;
   color: #d8d2f2;
   cursor: default;
 }
 
-.lims-shell.is-client .client-rail-logo {
+.lims-shell.is-app-rail .client-rail-logo {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -9269,34 +9272,34 @@ button.client-kpi.is-on {
   cursor: pointer;
 }
 
-.lims-shell.is-client .client-rail-logo img {
+.lims-shell.is-app-rail .client-rail-logo img {
   display: block;
   width: 100%;
   height: auto;
 }
 
-.lims-shell.is-client .lims-sidebar .client-rail-logo {
+.lims-shell.is-app-rail .lims-sidebar .client-rail-logo {
   width: 8.6rem;
   margin: 0.2rem 0.15rem 0.85rem;
   justify-content: start;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav {
   gap: 0.25rem;
   align-items: center;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-group,
-.lims-shell.is-client .lims-icon-rail .lims-nav-parent-row {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-group,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row {
   width: 4.7rem;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-caret,
-.lims-shell.is-client .lims-icon-rail .lims-nav-children {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-children {
   display: none;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-item {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item {
   flex-direction: column;
   justify-content: center;
   gap: 0.15rem;
@@ -9310,7 +9313,7 @@ button.client-kpi.is-on {
   text-align: center;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-icon {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-icon {
   width: auto;
   height: auto;
   border: 0;
@@ -9318,12 +9321,12 @@ button.client-kpi.is-on {
   color: inherit;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-icon svg {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-icon svg {
   width: 1.15rem;
   height: 1.15rem;
 }
 
-.lims-shell.is-client .client-rail-label {
+.lims-shell.is-app-rail .client-rail-label {
   display: block;
   max-width: 100%;
   margin: 0;
@@ -9337,9 +9340,9 @@ button.client-kpi.is-on {
   white-space: nowrap;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-item:hover .lims-nav-icon,
-.lims-shell.is-client .lims-icon-rail .lims-nav-item.active .lims-nav-icon,
-.lims-shell.is-client .lims-icon-rail .lims-nav-item.is-module-active .lims-nav-icon {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item:hover .lims-nav-icon,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.active .lims-nav-icon,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-module-active .lims-nav-icon {
   border: 0;
   background: transparent;
   color: inherit;
@@ -9347,13 +9350,13 @@ button.client-kpi.is-on {
   transform: none;
 }
 
-.lims-shell.is-client .lims-icon-rail .lims-nav-item.is-module-active,
-.lims-shell.is-client .lims-icon-rail .lims-nav-item.active {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-module-active,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.active {
   background: #6d5efc;
   color: #fff;
 }
 
-.lims-shell.is-client .lims-rail-user {
+.lims-shell.is-app-rail .lims-rail-user {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
@@ -9369,71 +9372,85 @@ button.client-kpi.is-on {
   box-shadow: none;
 }
 
-.lims-shell.is-client .lims-rail-user svg {
+.lims-shell.is-app-rail .lims-rail-user svg {
   width: 1.15rem;
   height: 1.15rem;
 }
 
-.lims-shell.is-client .lims-sidebar {
+.lims-shell.is-app-rail .lims-sidebar {
   padding: 0.85rem 0.7rem 0.7rem;
   color: #e8e4f8;
   cursor: default;
   animation: none;
 }
 
-.lims-shell.is-client .lims-sidebar .lims-nav-item {
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item {
   color: #e8e4f8;
   border-radius: 12px;
 }
 
-.lims-shell.is-client .lims-sidebar .lims-nav-icon,
-.lims-shell.is-client .lims-sidebar .lims-nav-item:hover .lims-nav-icon,
-.lims-shell.is-client .lims-sidebar .lims-nav-item.active .lims-nav-icon,
-.lims-shell.is-client .lims-sidebar .lims-nav-item.is-module-active .lims-nav-icon,
-.lims-shell.is-client .lims-sidebar .lims-nav-item.is-core-child.active .lims-nav-icon {
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-icon,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item:hover .lims-nav-icon,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.active .lims-nav-icon,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-module-active .lims-nav-icon,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-core-child.active .lims-nav-icon {
   background: transparent;
   border-color: transparent;
   color: inherit;
   box-shadow: none;
 }
 
-.lims-shell.is-client .lims-sidebar .lims-nav-item.is-module-active,
-.lims-shell.is-client .lims-sidebar .lims-nav-item.active,
-.lims-shell.is-client .lims-sidebar .lims-nav-item.is-core-child.active {
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-module-active,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.active,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-core-child.active {
   background: #6d5efc;
   color: #fff;
 }
 
-.lims-shell.is-client .lims-sidebar .lims-nav-caret,
-.lims-shell.is-client .lims-sidebar .lims-nav-caret:hover {
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-caret,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-caret:hover {
   color: #d8d2f2;
   background: transparent;
 }
 
-.lims-shell.is-client .lims-sidebar-foot {
+.lims-shell.is-app-rail .lims-sidebar-foot {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
 
-.lims-shell.is-client .lims-sidebar .lims-user b,
-.lims-shell.is-client .lims-sidebar .lims-user small {
+.lims-shell.is-app-rail .lims-sidebar .lims-user b,
+.lims-shell.is-app-rail .lims-sidebar .lims-user small {
   color: #e8e4f8;
 }
 
-.lims-shell.is-client .lims-main {
+.lims-shell.is-app-rail .lims-main {
   margin-left: var(--client-rail);
   margin-right: 0;
-  padding-top: 0;
   transition: margin-left 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lims-shell.is-client .lims-topbar {
+.lims-shell.is-client .lims-main {
+  padding-top: 0;
+}
+
+.lims-shell.is-app-rail .lims-topbar {
   left: var(--client-rail);
   width: auto;
+  transition: left 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lims-shell.is-client .lims-topbar {
   background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
   backdrop-filter: none;
-  transition: left 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lims-shell.is-app-rail .sequence-nav-toggle {
+  display: none;
+}
+
+.lims-shell.is-client .lims-page:has(.client-hero) {
+  padding-top: 0;
 }
 
 .lims-shell.is-client .lims-page:not(:has(.client-hero)) {
@@ -9443,25 +9460,6 @@ button.client-kpi.is-on {
 .client-topbar {
   justify-content: flex-start;
   gap: 0.9rem;
-}
-
-.client-brand {
-  display: grid;
-  line-height: 1.05;
-}
-
-.client-brand b {
-  color: #6d5efc;
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: -0.03em;
-}
-
-.client-brand span {
-  color: #1d2433;
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: -0.03em;
 }
 
 .client-search-pill {
@@ -9557,8 +9555,8 @@ button.client-kpi.is-on {
   height: 0.7rem;
 }
 
-.lims-shell.is-client .client-studio,
-.lims-shell.is-client .lims-page.client-studio {
+.lims-shell.is-app-rail .client-studio,
+.lims-shell.is-app-rail .lims-page.client-studio {
   background: #fff;
 }
 
@@ -9572,6 +9570,12 @@ button.client-kpi.is-on {
 
 .lims-shell.is-client .client-hero {
   margin-top: 0;
+  margin-right: -1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.lims-shell.is-client.is-left .client-hero {
+  margin-left: -0.68rem;
 }
 
 .lims-shell.is-client .client-hero-banner {
