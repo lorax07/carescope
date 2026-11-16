@@ -899,19 +899,6 @@ function AppFrame() {
     window.addEventListener("mouseup", up);
   }
 
-  function onMenuPointerDown(event: ReactPointerEvent<HTMLElement>) {
-    const target = event.target as HTMLElement;
-    if (target.closest("a, input, select, textarea")) return;
-    if (target.closest("button") && !target.closest(".sequence-wordmark")) return;
-    beginNavDrag(event, { toggle: true });
-  }
-
-  function onRailPointerDown(event: ReactPointerEvent<HTMLElement>) {
-    const target = event.target as HTMLElement;
-    if (target.closest(".lims-rail-user, .lims-nav-caret")) return;
-    beginNavDrag(event, { toggle: Boolean(target.closest(".lims-rail-logo")) });
-  }
-
   function toggleNavGroup(key: string) {
     setOpenGroups((current) => ({
       ...current,
@@ -1002,7 +989,7 @@ function AppFrame() {
 
   return (
     <div
-      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}${clientModule ? " is-client" : ""}`}
+      className={`lims-shell is-app-rail is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}${clientModule ? " is-client" : ""}`}
       style={
         {
           "--nav-left": `${insets.left}px`,
@@ -1032,27 +1019,23 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
-        {clientModule || !navOpen ? (
-          <div
+        <div
             className="lims-icon-rail"
-            inert={clientModule && navOpen ? true : undefined}
-            onClick={clientModule ? (event) => {
+            inert={navOpen ? true : undefined}
+            onClick={(event) => {
               const target = event.target as HTMLElement;
               if (target.closest("a, button, input, select, textarea")) return;
               setNavOpen(true);
-            } : undefined}
-            onPointerDown={clientModule ? undefined : onRailPointerDown}
+            }}
           >
-            {clientModule ? (
-              <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
-                <img src="/sequence-logo-light.png" alt="Sequence" />
-              </button>
-            ) : null}
+            <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+              <img src="/sequence-logo-light.png" alt="Sequence" />
+            </button>
             <nav className="lims-nav" aria-label="LIMS modules">
               <ShellNav
                 compact
-                stacked={clientModule}
-                includeNested={edge !== "top" && !clientModule}
+                stacked
+                includeNested={false}
                 operationLinks={operationLinks}
                 openGroups={openGroups}
                 currentGroup={currentGroup}
@@ -1061,38 +1044,25 @@ function AppFrame() {
               />
             </nav>
             <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
-              {clientModule ? (
-                <>
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.7" />
-                    <path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-                  </svg>
-                  <span>Settings</span>
-                </>
-              ) : railInitials}
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+              <span>Settings</span>
             </button>
           </div>
-        ) : null}
-      {clientModule || navOpen ? (
       <aside
         className="lims-sidebar"
-        inert={clientModule && !navOpen ? true : undefined}
-        onClick={clientModule ? (event) => {
+        inert={!navOpen ? true : undefined}
+        onClick={(event) => {
           const target = event.target as HTMLElement;
           if (target.closest("a, button, input, select, textarea")) return;
           setNavOpen((open) => !open);
-        } : undefined}
-        onPointerDown={clientModule ? undefined : onMenuPointerDown}
+        }}
       >
-        {clientModule ? (
-          <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
-            <img src="/sequence-logo-light.png" alt="Sequence" />
-          </button>
-        ) : edge === "top" ? null : (
-        <div className="lims-menu-brand">
-        {labEnvironment}
-        </div>
-        )}
+        <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+          <img src="/sequence-logo-light.png" alt="Sequence" />
+        </button>
 
         <nav className="lims-nav" aria-label="LIMS modules">
           <ShellNav
@@ -1129,16 +1099,11 @@ function AppFrame() {
           </div>
         </div>
       </aside>
-      ) : null}
       </div>
 
       <header className={clientModule ? "lims-topbar client-topbar" : "lims-topbar"} ref={headerRef}>
         {clientModule ? (
           <>
-            <div className="client-brand">
-              <b>CareScope</b>
-              <span>Sequence</span>
-            </div>
             <label className="client-search-pill">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
               <input type="search" aria-label="Search" placeholder="Building better healthcare for everyone" />
