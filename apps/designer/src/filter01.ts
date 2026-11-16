@@ -17,6 +17,22 @@ export function rememberFilter01(saved: readonly string[], query: string): strin
   return [cleaned, ...saved.filter((item) => item !== cleaned)].slice(0, FILTER01_LIMIT);
 }
 
+export type Filter01Pin = {
+  label: string;
+  selected: string[];
+  query: string;
+};
+
+export function filter01PinKey(pin: Pick<Filter01Pin, "selected" | "query">): string {
+  return `${[...pin.selected].sort().join("\n")}\u0000${pin.query.trim()}`;
+}
+
+/** Newest pin first. The same selection and search replaces the older copy. */
+export function rememberFilter01Pin(saved: readonly Filter01Pin[], pin: Filter01Pin): Filter01Pin[] {
+  const key = filter01PinKey(pin);
+  return [pin, ...saved.filter((item) => filter01PinKey(item) !== key)].slice(0, FILTER01_LIMIT);
+}
+
 export function filter01Color(id: string): string {
   let hash = 0;
   for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;

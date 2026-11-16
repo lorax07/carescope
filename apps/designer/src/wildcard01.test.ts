@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filter01Color, rememberFilter01, filter01Match } from "./filter01";
+import { filter01Color, filter01PinKey, rememberFilter01, rememberFilter01Pin, filter01Match } from "./filter01";
 
 describe("Filter01", () => {
   it("treats a star as any text", () => {
@@ -20,5 +20,15 @@ describe("Filter01", () => {
 
   it("gives the same item a stable color", () => {
     expect(filter01Color("status:Active")).toBe(filter01Color("status:Active"));
+  });
+
+  it("keeps a pinned filter and replaces the same one", () => {
+    const first = rememberFilter01Pin([], { label: "Active", selected: ["status:Active"], query: "" });
+    const second = rememberFilter01Pin(first, { label: "Watch", selected: ["health:Watch"], query: "lab" });
+    const repeat = rememberFilter01Pin(second, { label: "Active again", selected: ["status:Active"], query: "" });
+    expect(second.map((pin) => pin.label)).toEqual(["Watch", "Active"]);
+    expect(repeat).toHaveLength(2);
+    expect(repeat[0]?.label).toBe("Active again");
+    expect(filter01PinKey(repeat[0]!)).toBe(filter01PinKey({ selected: ["status:Active"], query: "" }));
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { filter01Color, filter01Match, rememberFilter01 } from "../filter01";
+import { filter01Color, filter01PinKey, filter01Match, rememberFilter01, rememberFilter01Pin, type Filter01Pin } from "../filter01";
 
 export type Filter01Option = {
   id: string;
@@ -16,9 +16,26 @@ function readSaved(scope: string): string[] {
   }
 }
 
+function readPins(scope: string): Filter01Pin[] {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(`carescope.filter01.pins.${scope}`) || "[]") as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const pin = item as Partial<Filter01Pin>;
+      if (typeof pin.label !== "string" || typeof pin.query !== "string" || !Array.isArray(pin.selected)) return [];
+      const selected = pin.selected.filter((id): id is string => typeof id === "string");
+      return [{ label: pin.label, query: pin.query, selected }];
+    }).slice(0, 10);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Filter01. Selected values sit in the field as chips.
- * All opens the categories for this page, and the list under it is those items.
+ * All opens the categories for this page, and Apply commits the checks.
+ * A pin saves the current filter as a pill beside the field.
  */
 export function Filter01({
   label = "Filter",
@@ -45,11 +62,17 @@ export function Filter01({
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [category, setCategory] = useState("All");
   const [draft, setDraft] = useState(query);
+  const [pending, setPending] = useState(selected);
   const [saved, setSaved] = useState<string[]>(() => (scope ? readSaved(scope) : []));
+  const [pins, setPins] = useState<Filter01Pin[]>(() => (scope ? readPins(scope) : []));
 
   useEffect(() => {
     setDraft(query);
   }, [query]);
+
+  useEffect(() => {
+    if (!open) setPending(selected);
+  }, [open, selected]);
 
   useEffect(() => {
     if (!open) return;
@@ -84,6 +107,7 @@ export function Filter01({
     if (category !== "All" && item.category !== category) return false;
     return filter01Match(`${item.label} ${item.category}`, draft);
   });
+  const appliedKey = filter01PinKey({ selected, query });
 
   function store(next: string[]) {
     setSaved(next);
@@ -95,54 +119,116 @@ export function Filter01({
     }
   }
 
-  function toggle(id: string) {
-    onChange(selected.includes(id) ? selected.filter((item) => item !== id) : [...selected, id]);
+  function storePins(next: Filter01Pin[]) {
+    setPins(next);
+    if (!scope) return;
+    try {
+      sessionStorage.setItem(`carescope.filter01.pins.${scope}`, JSON.stringify(next));
+    } catch {
+      /* The pins stay beside the field for this visit. */
+    }
   }
 
-  function commitSearch() {
-    const cleaned = draft.trim();
+  function toggle(id: string) {
+    setPending((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
+  }
+
+  function remove(id: string) {
+    const next = selected.filter((item) => item !== id);
+    onChange(next);
+    setPending(next);
+  }
+
+  function apply(nextSelected = pending, nextQuery = draft) {
+    const cleaned = nextQuery.trim();
+    let next = nextSelected;
     onQuery?.(cleaned);
-    if (!scope || !cleaned) return;
-    store(rememberFilter01(saved, cleaned));
-    const id = `search:${cleaned}`;
-    if (!selected.includes(id)) onChange([...selected, id]);
+    if (scope && cleaned) {
+      store(rememberFilter01(saved, cleaned));
+      const id = `search:${cleaned}`;
+      if (!next.includes(id)) next = [...next, id];
+    }
+    onChange(next);
+    setDraft(cleaned);
+    setPending(next);
+    setOpen(false);
+    setCategoriesOpen(false);
+  }
+
+  function pinFilter() {
+    const names = chosen.map((item) => item.label);
+    const labelText = names.length ? names.join(", ") : query.trim() || "All";
+    storePins(rememberFilter01Pin(pins, { label: labelText, selected: [...selected], query: query.trim() }));
+  }
+
+  function applyPin(pin: Filter01Pin) {
+    setDraft(pin.query);
+    setPending(pin.selected);
+    onQuery?.(pin.query);
+    onChange(pin.selected);
+    setOpen(false);
+    setCategoriesOpen(false);
   }
 
   return (
     <div className={className ? `filter01 ${className}` : "filter01"} ref={rootRef}>
-      <div className="filter01-field">
-        <div className="filter01-chips">
-          {chosen.length ? (
-            chosen.map((item) => (
-              <span key={item.id} className="filter01-chip">
-                <i style={{ background: filter01Color(item.id) }} aria-hidden="true" />
-                {item.label}
-                <button type="button" aria-label={`Remove ${item.label}`} onClick={() => toggle(item.id)}>
-                  ×
-                </button>
-              </span>
-            ))
-          ) : (
-            <button type="button" className="filter01-placeholder" onClick={() => setOpen(true)}>
-              All
-            </button>
-          )}
+      <div className="filter01-row">
+        <div className="filter01-field">
+          <div className="filter01-chips">
+            {chosen.length ? (
+              chosen.map((item) => (
+                <span key={item.id} className="filter01-chip">
+                  <i style={{ background: filter01Color(item.id) }} aria-hidden="true" />
+                  {item.label}
+                  <button type="button" aria-label={`Remove ${item.label}`} onClick={() => remove(item.id)}>
+                    ×
+                  </button>
+                </span>
+              ))
+            ) : (
+              <button type="button" className="filter01-placeholder" onClick={() => { setPending(selected); setOpen(true); }}>
+                All
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            className={pins.some((pin) => filter01PinKey(pin) === appliedKey) ? "filter01-pin is-on" : "filter01-pin"}
+            aria-label="Pin this filter"
+            onClick={pinFilter}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6.1 2.1h3.8l-.7 3.2 2.3 2.2H4.5l2.3-2.2-.7-3.2Z" />
+              <path d="M8 7.5v6.4" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="filter01-chevron"
+            aria-label={label}
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => {
+              setCategoriesOpen(false);
+              setPending(selected);
+              setOpen((current) => !current);
+            }}
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="m4 6 4 4 4-4" />
+            </svg>
+          </button>
         </div>
-        <button
-          type="button"
-          className="filter01-chevron"
-          aria-label={label}
-          aria-expanded={open}
-          aria-controls={menuId}
-          onClick={() => {
-            setCategoriesOpen(false);
-            setOpen((current) => !current);
-          }}
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d="m4 6 4 4 4-4" />
-          </svg>
-        </button>
+        {pins.map((pin) => (
+          <span key={filter01PinKey(pin)} className={filter01PinKey(pin) === appliedKey ? "filter01-pinned is-on" : "filter01-pinned"}>
+            <button type="button" onClick={() => applyPin(pin)}>
+              <span>{pin.label}</span>
+            </button>
+            <button type="button" aria-label={`Remove pinned filter ${pin.label}`} onClick={() => storePins(pins.filter((item) => filter01PinKey(item) !== filter01PinKey(pin)))}>
+              ×
+            </button>
+          </span>
+        ))}
       </div>
       {open ? (
         <div className="filter01-menu" id={menuId}>
@@ -155,36 +241,27 @@ export function Filter01({
               value={draft}
               placeholder="Search"
               aria-label={`${label} search`}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                onQuery?.(event.target.value);
-              }}
+              onChange={(event) => setDraft(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  commitSearch();
+                  apply();
                 }
               }}
             />
             {draft ? (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => {
-                  setDraft("");
-                  onQuery?.("");
-                }}
-              >
+              <button type="button" aria-label="Clear search" onClick={() => setDraft("")}>
                 ×
               </button>
             ) : null}
           </label>
           <div className="filter01-all">
-            <button type="button" onClick={() => { setCategory("All"); setCategoriesOpen(false); }}>
+            <button type="button" className="filter01-category" onClick={() => { setCategory("All"); setCategoriesOpen(false); }}>
               {category}
             </button>
             <button
               type="button"
+              className="filter01-category-chevron"
               aria-label="Filter categories"
               aria-expanded={categoriesOpen}
               onClick={() => setCategoriesOpen((current) => !current)}
@@ -192,6 +269,9 @@ export function Filter01({
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <path d="m4 6 4 4 4-4" />
               </svg>
+            </button>
+            <button type="button" className="filter01-apply" onClick={() => apply()}>
+              Apply
             </button>
             {categoriesOpen ? (
               <ul className="filter01-categories">
@@ -215,7 +295,7 @@ export function Filter01({
           <ul role="listbox" aria-label={label} aria-multiselectable="true">
             {visible.length ? (
               visible.map((item) => {
-                const on = selected.includes(item.id);
+                const on = pending.includes(item.id);
                 return (
                   <li key={item.id}>
                     <button type="button" role="option" aria-selected={on} onClick={() => toggle(item.id)}>

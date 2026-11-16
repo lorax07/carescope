@@ -8,7 +8,7 @@ Selectable buttons use the Sequence Operations filter pill. At rest the button i
 
 ## Filter01
 
-Filtering uses one field. Selected values sit in that field as chips with a colored dot, and each chip can be removed. Opening the field shows a search, then All. All has a dropdown of the categories for the items on that page, and the list under it is the items in the chosen category. A star in the search matches any text. Ten searches are stored, newest first, and the oldest drops off when an eleventh is saved. Use the `Filter01` component in `src/components/Filter01.tsx`.
+Filtering uses one field. Selected values sit in that field as chips with a colored dot, and each chip can be removed. Opening the field shows a search, then All. All has a dropdown of the categories for the items on that page, and the list under it is the items in the chosen category. An Apply pill sits on the right of All and commits the checks and the search. A pin on the right inside the filter field saves that filter as a pill beside the field. Clicking the saved pill applies it. A star in the search matches any text. Ten searches are stored, newest first, and the oldest drops off when an eleventh is saved. Use the `Filter01` component in `src/components/Filter01.tsx`.
 
 ## Tab01
 
