@@ -21,7 +21,6 @@ export function CrmDirectoryHeader({
           </svg>
         </span>
         <div>
-          <p>CRM</p>
           <h1>{title}</h1>
           <small>Manage your accounts and contacts</small>
         </div>
