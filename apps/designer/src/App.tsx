@@ -26,6 +26,18 @@ const NAV = [
   { to: "/app/insights", label: "Sequence Insights" },
 ] as const;
 
+function shortNavLabel(label: string): string {
+  if (label === "Operations Overview") return "Home";
+  if (label === "Sequence CRM") return "CRM";
+  if (label === "Sequence Instruments") return "Lab Ops";
+  if (label === "Sequence Insights") return "Insights";
+  if (label === "Sequence Compliance") return "Compliance";
+  if (label === "Sequence Revenue") return "Revenue";
+  if (label === "Workflow design") return "Design";
+  if (label === "Lab Resources") return "Resources";
+  return label.split(" ")[0] ?? label;
+}
+
 function nestedNavFor(to: string) {
   if (to === "/app/billing") return REVENUE_CHAPTERS;
   if (to === "/app/connectivity") return CLIENT_CHAPTERS;
@@ -384,6 +396,7 @@ function NavCaret({ open, label, onToggle }: { open: boolean; label: string; onT
 
 function ShellNav({
   compact,
+  stacked = false,
   includeNested,
   operationLinks,
   openGroups,
@@ -392,6 +405,7 @@ function ShellNav({
   showResources,
 }: {
   compact: boolean;
+  stacked?: boolean;
   includeNested: boolean;
   operationLinks: LabMenuItem[];
   openGroups: Record<string, boolean>;
@@ -426,7 +440,7 @@ function ShellNav({
               <span className="lims-nav-icon">
                 <ParentMark slug="operations" fallback="overview" />
               </span>
-              {compact ? null : overviewLink.label}
+              {stacked ? <span className="lims-nav-label">{shortNavLabel(overviewLink.label)}</span> : compact ? null : overviewLink.label}
             </NavLink>
             {includeNested && coreLinks.length > 0 ? (
               <NavCaret open={groupOpen("operations")} label={overviewLink.label} onToggle={() => onToggleGroup("operations")} />
@@ -446,7 +460,7 @@ function ShellNav({
                   <span className="lims-nav-icon">
                     <NavIcon name={item.view} />
                   </span>
-                  {compact ? null : item.label}
+                  {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
                 </NavLink>
               ))}
             </div>
@@ -467,7 +481,7 @@ function ShellNav({
               <span className="lims-nav-icon">
                 <NavIcon name="resources" />
               </span>
-              {compact ? null : "Lab Resources"}
+              {stacked ? <span className="lims-nav-label">Resources</span> : compact ? null : "Lab Resources"}
             </NavLink>
             {includeNested ? (
               <NavCaret open={groupOpen("resources")} label="Lab Resources" onToggle={() => onToggleGroup("resources")} />
@@ -487,7 +501,7 @@ function ShellNav({
                   <span className="lims-nav-icon">
                     <NavIcon name={item.id} />
                   </span>
-                  {compact ? null : item.label}
+                  {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
                 </NavLink>
               ))}
             </div>
@@ -515,7 +529,7 @@ function ShellNav({
                 <span className="lims-nav-icon">
                   <ParentMark slug={slug} fallback={section} />
                 </span>
-                {compact ? null : item.label}
+                {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
               </NavLink>
               {includeNested && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
             </div>
@@ -538,7 +552,7 @@ function ShellNav({
                     <span className="lims-nav-icon">
                       <NavIcon name={navGlyph(sub.to, section)} />
                     </span>
-                    {compact ? null : sub.label}
+                    {stacked ? <span className="lims-nav-label">{shortNavLabel(sub.label)}</span> : compact ? null : sub.label}
                   </NavLink>
                 ))}
               </div>
@@ -600,6 +614,7 @@ export function AppShell() {
 
 function AppFrame() {
   const location = useLocation();
+  const clientModule = location.pathname.startsWith("/app/connectivity");
   const [searchParams, setSearchParams] = useSearchParams();
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [dockWidth, setDockWidth] = useState(440);
@@ -987,7 +1002,7 @@ function AppFrame() {
 
   return (
     <div
-      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}`}
+      className={`lims-shell is-${edge}${navOpen ? " is-nav-open" : ""}${dragging ? " is-nav-dragging" : ""}${clientModule ? " is-client" : ""}`}
       style={
         {
           "--nav-left": `${insets.left}px`,
@@ -1017,12 +1032,16 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
-        {navOpen ? null : (
-          <div className="lims-icon-rail" onPointerDown={onRailPointerDown}>
+        {clientModule || !navOpen ? (
+          <div className="lims-icon-rail" onPointerDown={clientModule ? undefined : onRailPointerDown}>
+            {clientModule ? (
+              <img className="client-rail-logo" src="/sequence-q.png" alt="" />
+            ) : null}
             <nav className="lims-nav" aria-label="LIMS modules">
               <ShellNav
                 compact
-                includeNested={edge !== "top"}
+                stacked={clientModule}
+                includeNested={edge !== "top" && !clientModule}
                 operationLinks={operationLinks}
                 openGroups={openGroups}
                 currentGroup={currentGroup}
@@ -1031,11 +1050,19 @@ function AppFrame() {
               />
             </nav>
             <button type="button" className="lims-rail-user" aria-label={`Settings for ${signedInName}`} title={signedInName} onClick={() => setSettingsOpen(true)}>
-              {railInitials}
+              {clientModule ? (
+                <>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.7" />
+                    <path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M6 6l1.6 1.6M16.4 16.4 18 18M18 6l-1.6 1.6M7.6 16.4 6 18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  </svg>
+                  <span>Settings</span>
+                </>
+              ) : railInitials}
             </button>
           </div>
-        )}
-      {navOpen ? (
+        ) : null}
+      {navOpen && !clientModule ? (
       <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
         {edge === "top" ? null : (
         <div className="lims-menu-brand">
@@ -1081,7 +1108,32 @@ function AppFrame() {
       ) : null}
       </div>
 
-      <header className="lims-topbar" ref={headerRef}>
+      <header className={clientModule ? "lims-topbar client-topbar" : "lims-topbar"} ref={headerRef}>
+        {clientModule ? (
+          <>
+            <div className="client-brand">
+              <b>CareScope</b>
+              <span>Sequence</span>
+            </div>
+            <span className="client-brand-rule" aria-hidden="true" />
+            <p className="client-tagline">Building Better Healthcare for Everyone.</p>
+            <div className="client-top-actions">
+              <button type="button" aria-label="Search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+              </button>
+              <button type="button" aria-label="Notifications">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V10a6 6 0 1 1 12 0v6l1.4 2H4.6L6 16Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+                <i />
+              </button>
+              <button type="button" className="client-avatar" aria-label={`Account for ${signedInName}`} onClick={() => setSettingsOpen(true)}>
+                {railInitials}
+                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 4.4 6 8l3.8-3.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+          </>
+        ) : null}
+        {clientModule ? null : (
+        <>
         <div className="lims-topbar-brand" ref={brandRef}>
         <button
           ref={logoRef}
@@ -1114,6 +1166,8 @@ function AppFrame() {
           </time>
           <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
         </div>
+        </>
+        )}
       </header>
 
       <div className="lims-main">
