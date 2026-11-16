@@ -12,7 +12,7 @@ Filtering uses one field. Selected values sit in that field as chips with a colo
 
 ## Tab01
 
-The main tabs, such as Accounts and Contacts. The row rests on a thin gray baseline. The selected tab is a folder cap with a rounded top and a page-colored fill. Its bottom is open along the baseline, so the tab continues into the section it shows, and the label is purple. Unselected labels are gray with no fill. Add the class `tab01` to the tablist. Mark the selected control with `is-on`.
+The main tabs, such as Accounts and Contacts. A thin gray line runs under the row. Unselected labels are gray and sit on the line with no box. The selected label is purple, and a short red bar sits under it on the line. The labels are larger than subtab01. Add the class `tab01` to the tablist. Mark the selected control with `is-on`.
 
 ## subtab01
 
