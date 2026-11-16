@@ -7146,21 +7146,42 @@ button.palette-category-title {
   margin: 0.75rem 0;
 }
 
+.filter01:has(.filter01-pinned) {
+  width: auto;
+  max-width: 100%;
+}
+
 .filter01.is-inline {
   width: min(100%, 18rem);
   margin: 0;
+}
+
+.filter01.is-inline:has(.filter01-pinned) {
+  width: auto;
+}
+
+.filter01-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .filter01-field {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  width: min(100%, 28rem);
   min-height: 42px;
   padding: 0.28rem 0.35rem 0.28rem 0.45rem;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 1px 2px rgba(31, 41, 79, 0.04);
+}
+
+.filter01.is-inline .filter01-field {
+  width: min(100%, 18rem);
 }
 
 .filter01-chips {
@@ -7206,7 +7227,9 @@ button.palette-category-title {
 .filter01-chip button,
 .filter01-search button,
 .filter01-chevron,
-.filter01-all button {
+.filter01-pin,
+.filter01-all button,
+.filter01-pinned button {
   border: 0;
   background: transparent;
   color: #98a2b3;
@@ -7221,7 +7244,8 @@ button.palette-category-title {
 }
 
 .filter01-chevron,
-.filter01-all button:last-child {
+.filter01-pin,
+.filter01-category-chevron {
   display: grid;
   place-items: center;
   width: 1.7rem;
@@ -7229,7 +7253,50 @@ button.palette-category-title {
   flex: none;
 }
 
+.filter01-pin.is-on {
+  color: #6d5efc;
+}
+
+.filter01-pinned {
+  display: inline-flex;
+  align-items: center;
+  max-width: 14rem;
+  padding: 0.28rem 0.35rem 0.28rem 0.7rem;
+  border: 1px solid #e6eaf2;
+  border-radius: 999px;
+  background: #fff;
+  color: #344054;
+}
+
+.filter01-pinned.is-on {
+  border-color: #d9d6fe;
+  background: #efeaff;
+  color: #6d5efc;
+}
+
+.filter01-pinned button:first-child {
+  min-width: 0;
+  padding: 0.12rem 0;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.filter01-pinned button:first-child span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter01-pinned button:last-child {
+  padding: 0 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
 .filter01-chevron svg,
+.filter01-pin svg,
 .filter01-all svg,
 .filter01-search > svg,
 .filter01-menu li button > svg {
@@ -7290,7 +7357,7 @@ button.palette-category-title {
   background: #f7f8fc;
 }
 
-.filter01-all > button:first-child {
+.filter01-category {
   flex: 1;
   padding: 0.45rem 0.55rem;
   color: var(--accent);
@@ -7299,9 +7366,18 @@ button.palette-category-title {
   text-align: left;
 }
 
-.filter01-all > button:last-of-type,
-.filter01-all > button[aria-label="Filter categories"] {
+.filter01-category-chevron {
   color: var(--accent);
+}
+
+.filter01-all > .filter01-apply {
+  margin: 0 0.35rem 0 0.15rem;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: #6d5efc;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .filter01-categories {
