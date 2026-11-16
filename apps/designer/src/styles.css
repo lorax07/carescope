@@ -9621,14 +9621,6 @@ button.client-kpi.is-on {
   z-index: 1;
 }
 
-.client-hero-banner p {
-  margin: 0;
-  color: #6d5efc;
-  font-size: 0.78rem;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-}
-
 .client-hero-banner h1 {
   margin: 0.1rem 0 0.15rem;
   color: #1a1440;
