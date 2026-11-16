@@ -13,7 +13,8 @@ export function CrmDirectoryHeader({
     <header className="client-board-head">
       <div className="crm-studio-title">
         <p className="lims-eyebrow">Sequence CRM</p>
-        <div className="crm-view-tabs" role="tablist" aria-label="Accounts and contacts">
+        <h1 className="crm-directory-title">Manage Accounts and Contacts</h1>
+        <div className="crm-view-tabs tab01" role="tablist" aria-label="Accounts and contacts">
           <button type="button" role="tab" aria-selected={panel === "accounts"} className={panel === "accounts" ? "is-on" : undefined} onClick={() => onPanel("accounts")}>
             Accounts
           </button>

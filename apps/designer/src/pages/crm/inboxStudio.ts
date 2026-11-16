@@ -60,6 +60,16 @@ const TEAMS_REACH: Record<string, string> = {
   "acc-aether:payers@aether.example": "payers@aether.example",
 };
 
+export function contactChannels(contactId: string, email = "", phone = ""): { channel: InboxChannel; reach: string }[] {
+  const marks: { channel: InboxChannel; reach: string }[] = [];
+  if (email) marks.push({ channel: "email", reach: email });
+  if (phone) marks.push({ channel: "phone", reach: phone });
+  const assigned = THREAD_CHANNEL[contactId];
+  if (assigned === "slack") marks.push({ channel: "slack", reach: SLACK_REACH[contactId] || email || "Slack" });
+  if (assigned === "teams") marks.push({ channel: "teams", reach: TEAMS_REACH[contactId] || email || "Teams" });
+  return marks;
+}
+
 export function threadReach(contactId: string, email = "", phone = ""): { channel: InboxChannel; reach: string } {
   const channel = THREAD_CHANNEL[contactId] ?? (phone && !email ? "phone" : "email");
   if (channel === "phone") return { channel, reach: phone || "No phone on file" };

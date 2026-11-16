@@ -38,7 +38,7 @@ export function CrmRecordStrip({ activeKey, panel }: { activeKey?: string; panel
   const home = crmListPath(panel);
   const navigate = useNavigate();
   return (
-    <div className="crm-record-strip" role="tablist" aria-label={panel === "contacts" ? "Open contacts" : "Open accounts"}>
+    <div className="crm-record-strip subtab01" role="tablist" aria-label={panel === "contacts" ? "Open contacts" : "Open accounts"}>
       <Link to={home} role="tab" aria-selected={!activeKey} className={!activeKey ? "is-on" : undefined}>
         Home
       </Link>
