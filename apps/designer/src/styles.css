@@ -8002,37 +8002,48 @@ button.top-priorities-toggle {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.2rem;
+  gap: 0.15rem 1.15rem;
+  border-bottom: 1px solid #e4e7ee;
 }
 
 .client-board-head:has(.crm-view-tabs) {
   align-items: flex-end;
-  border-bottom: 1px solid #d5dbe6;
+  border-bottom: 0;
 }
 
 .tab01 button,
 .crm-view-tabs button {
-  margin: 0 0 -1px;
-  padding: 0.28rem 0.9rem 0.42rem;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 14px 14px 0 0;
+  position: relative;
+  margin: 0;
+  padding: 0.2rem 0.05rem 0.55rem;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   color: #98a2b3;
   font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 550;
-  letter-spacing: -0.03em;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
 .tab01 button.is-on,
 .crm-view-tabs button.is-on {
-  border-color: #d5dbe6;
-  border-bottom: 1px solid #f4f6fb;
-  background: #f4f6fb;
+  background: transparent;
   color: #6d5efc;
   font-weight: 750;
+}
+
+.tab01 button.is-on::after,
+.crm-view-tabs button.is-on::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: #ef4444;
 }
 
 .tab01 button:hover,
@@ -8042,7 +8053,7 @@ button.top-priorities-toggle {
 
 .tab01 button.is-on:hover,
 .crm-view-tabs button.is-on:hover {
-  color: #1d2433;
+  color: #6d5efc;
 }
 
 .client-add-actions {
