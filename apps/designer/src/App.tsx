@@ -440,7 +440,7 @@ function ShellNav({
               <span className="lims-nav-icon">
                 <ParentMark slug="operations" fallback="overview" />
               </span>
-              {stacked ? <span className="lims-nav-label">{shortNavLabel(overviewLink.label)}</span> : compact ? null : overviewLink.label}
+              {stacked ? <span className="client-rail-label">{shortNavLabel(overviewLink.label)}</span> : compact ? null : overviewLink.label}
             </NavLink>
             {includeNested && coreLinks.length > 0 ? (
               <NavCaret open={groupOpen("operations")} label={overviewLink.label} onToggle={() => onToggleGroup("operations")} />
@@ -460,7 +460,7 @@ function ShellNav({
                   <span className="lims-nav-icon">
                     <NavIcon name={item.view} />
                   </span>
-                  {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
+                  {stacked ? <span className="client-rail-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
                 </NavLink>
               ))}
             </div>
@@ -481,7 +481,7 @@ function ShellNav({
               <span className="lims-nav-icon">
                 <NavIcon name="resources" />
               </span>
-              {stacked ? <span className="lims-nav-label">Resources</span> : compact ? null : "Lab Resources"}
+              {stacked ? <span className="client-rail-label">Resources</span> : compact ? null : "Lab Resources"}
             </NavLink>
             {includeNested ? (
               <NavCaret open={groupOpen("resources")} label="Lab Resources" onToggle={() => onToggleGroup("resources")} />
@@ -501,7 +501,7 @@ function ShellNav({
                   <span className="lims-nav-icon">
                     <NavIcon name={item.id} />
                   </span>
-                  {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
+                  {stacked ? <span className="client-rail-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
                 </NavLink>
               ))}
             </div>
@@ -529,7 +529,7 @@ function ShellNav({
                 <span className="lims-nav-icon">
                   <ParentMark slug={slug} fallback={section} />
                 </span>
-                {stacked ? <span className="lims-nav-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
+                {stacked ? <span className="client-rail-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
               </NavLink>
               {includeNested && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
             </div>
@@ -552,7 +552,7 @@ function ShellNav({
                     <span className="lims-nav-icon">
                       <NavIcon name={navGlyph(sub.to, section)} />
                     </span>
-                    {stacked ? <span className="lims-nav-label">{shortNavLabel(sub.label)}</span> : compact ? null : sub.label}
+                    {stacked ? <span className="client-rail-label">{shortNavLabel(sub.label)}</span> : compact ? null : sub.label}
                   </NavLink>
                 ))}
               </div>
@@ -1033,9 +1033,20 @@ function AppFrame() {
         }}
       >
         {clientModule || !navOpen ? (
-          <div className="lims-icon-rail" onPointerDown={clientModule ? undefined : onRailPointerDown}>
+          <div
+            className="lims-icon-rail"
+            inert={clientModule && navOpen ? true : undefined}
+            onClick={clientModule ? (event) => {
+              const target = event.target as HTMLElement;
+              if (target.closest("a, button, input, select, textarea")) return;
+              setNavOpen(true);
+            } : undefined}
+            onPointerDown={clientModule ? undefined : onRailPointerDown}
+          >
             {clientModule ? (
-              <img className="client-rail-logo" src="/sequence-q.png" alt="" />
+              <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+                <img src="/sequence-logo-light.png" alt="Sequence" />
+              </button>
             ) : null}
             <nav className="lims-nav" aria-label="LIMS modules">
               <ShellNav
@@ -1062,9 +1073,22 @@ function AppFrame() {
             </button>
           </div>
         ) : null}
-      {navOpen && !clientModule ? (
-      <aside className="lims-sidebar" onPointerDown={onMenuPointerDown}>
-        {edge === "top" ? null : (
+      {clientModule || navOpen ? (
+      <aside
+        className="lims-sidebar"
+        inert={clientModule && !navOpen ? true : undefined}
+        onClick={clientModule ? (event) => {
+          const target = event.target as HTMLElement;
+          if (target.closest("a, button, input, select, textarea")) return;
+          setNavOpen((open) => !open);
+        } : undefined}
+        onPointerDown={clientModule ? undefined : onMenuPointerDown}
+      >
+        {clientModule ? (
+          <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+            <img src="/sequence-logo-light.png" alt="Sequence" />
+          </button>
+        ) : edge === "top" ? null : (
         <div className="lims-menu-brand">
         {labEnvironment}
         </div>
@@ -1115,12 +1139,11 @@ function AppFrame() {
               <b>CareScope</b>
               <span>Sequence</span>
             </div>
-            <span className="client-brand-rule" aria-hidden="true" />
-            <p className="client-tagline">Building Better Healthcare for Everyone.</p>
+            <label className="client-search-pill">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+              <input type="search" aria-label="Search" placeholder="Building better healthcare for everyone" />
+            </label>
             <div className="client-top-actions">
-              <button type="button" aria-label="Search">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
-              </button>
               <button type="button" aria-label="Notifications">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V10a6 6 0 1 1 12 0v6l1.4 2H4.6L6 16Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
                 <i />

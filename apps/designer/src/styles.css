@@ -9209,31 +9209,76 @@ button.client-kpi.is-on {
   }
 }
 
-.lims-shell.is-client .lims-nav-dock {
+.lims-shell.is-client {
+  --client-rail: 6.15rem;
+}
+
+.lims-shell.is-client.is-nav-open {
+  --client-rail: 16rem;
+}
+
+.lims-shell.is-client .lims-nav-dock,
+.lims-shell.is-client .lims-nav-dock.is-docked,
+.lims-shell.is-client .lims-nav-dock.is-docked.is-open.is-left,
+.lims-shell.is-client .lims-nav-dock.is-open {
   top: 0 !important;
   left: 0 !important;
-  width: 6.15rem;
+  width: var(--client-rail);
   height: 100vh;
+  overflow: hidden;
+  background: #1b1636;
   z-index: 45;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lims-shell.is-client .lims-icon-rail,
+.lims-shell.is-client .lims-sidebar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  transition: opacity 180ms ease;
+}
+
+.lims-shell.is-client.is-nav-open .lims-icon-rail,
+.lims-shell.is-client:not(.is-nav-open) .lims-sidebar {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .lims-shell.is-client .lims-icon-rail {
-  width: 6.15rem;
-  height: 100vh;
-  max-height: 100vh;
   padding: 0.85rem 0.4rem 0.7rem;
-  border: 0;
-  background: #1b1636;
   color: #d8d2f2;
-  box-shadow: none;
   cursor: default;
 }
 
 .lims-shell.is-client .client-rail-logo {
-  width: 2.4rem;
-  height: 2.4rem;
-  margin: 0.15rem 0 0.85rem;
-  object-fit: contain;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 5.15rem;
+  margin: 0.15rem 0 0.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lims-shell.is-client .client-rail-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lims-shell.is-client .lims-sidebar .client-rail-logo {
+  width: 8.6rem;
+  margin: 0.2rem 0.15rem 0.85rem;
+  justify-content: start;
 }
 
 .lims-shell.is-client .lims-icon-rail .lims-nav {
@@ -9247,7 +9292,7 @@ button.client-kpi.is-on {
 }
 
 .lims-shell.is-client .lims-icon-rail .lims-nav-caret,
-.lims-shell.is-client .lims-nav-children {
+.lims-shell.is-client .lims-icon-rail .lims-nav-children {
   display: none;
 }
 
@@ -9260,7 +9305,7 @@ button.client-kpi.is-on {
   padding: 0.42rem 0.2rem 0.38rem;
   border-radius: 14px;
   color: #d8d2f2;
-  font-size: 0.62rem;
+  font-size: 0.5rem;
   font-weight: 650;
   text-align: center;
 }
@@ -9278,10 +9323,18 @@ button.client-kpi.is-on {
   height: 1.15rem;
 }
 
-.lims-shell.is-client .lims-nav-label {
+.lims-shell.is-client .client-rail-label {
+  display: block;
   max-width: 100%;
-  line-height: 1.15;
-  white-space: normal;
+  margin: 0;
+  color: inherit;
+  font-size: 0.5rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-align: center;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .lims-shell.is-client .lims-icon-rail .lims-nav-item:hover .lims-nav-icon,
@@ -9311,7 +9364,7 @@ button.client-kpi.is-on {
   border-radius: 14px;
   background: transparent;
   color: #d8d2f2;
-  font-size: 0.62rem;
+  font-size: 0.5rem;
   font-weight: 650;
   box-shadow: none;
 }
@@ -9321,16 +9374,70 @@ button.client-kpi.is-on {
   height: 1.15rem;
 }
 
+.lims-shell.is-client .lims-sidebar {
+  padding: 0.85rem 0.7rem 0.7rem;
+  color: #e8e4f8;
+  cursor: default;
+  animation: none;
+}
+
+.lims-shell.is-client .lims-sidebar .lims-nav-item {
+  color: #e8e4f8;
+  border-radius: 12px;
+}
+
+.lims-shell.is-client .lims-sidebar .lims-nav-icon,
+.lims-shell.is-client .lims-sidebar .lims-nav-item:hover .lims-nav-icon,
+.lims-shell.is-client .lims-sidebar .lims-nav-item.active .lims-nav-icon,
+.lims-shell.is-client .lims-sidebar .lims-nav-item.is-module-active .lims-nav-icon,
+.lims-shell.is-client .lims-sidebar .lims-nav-item.is-core-child.active .lims-nav-icon {
+  background: transparent;
+  border-color: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
+.lims-shell.is-client .lims-sidebar .lims-nav-item.is-module-active,
+.lims-shell.is-client .lims-sidebar .lims-nav-item.active,
+.lims-shell.is-client .lims-sidebar .lims-nav-item.is-core-child.active {
+  background: #6d5efc;
+  color: #fff;
+}
+
+.lims-shell.is-client .lims-sidebar .lims-nav-caret,
+.lims-shell.is-client .lims-sidebar .lims-nav-caret:hover {
+  color: #d8d2f2;
+  background: transparent;
+}
+
+.lims-shell.is-client .lims-sidebar-foot {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.lims-shell.is-client .lims-sidebar .lims-user b,
+.lims-shell.is-client .lims-sidebar .lims-user small {
+  color: #e8e4f8;
+}
+
 .lims-shell.is-client .lims-main {
-  margin-left: 6.15rem;
+  margin-left: var(--client-rail);
   margin-right: 0;
+  padding-top: 0;
+  transition: margin-left 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .lims-shell.is-client .lims-topbar {
-  left: 6.15rem;
+  left: var(--client-rail);
   width: auto;
-  background: #fff;
-  border-bottom-color: #eceaf6;
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  transition: left 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lims-shell.is-client .lims-page:not(:has(.client-hero)) {
+  padding-top: calc(var(--header-h, 4.2rem) + 0.6rem);
 }
 
 .client-topbar {
@@ -9357,16 +9464,43 @@ button.client-kpi.is-on {
   letter-spacing: -0.03em;
 }
 
-.client-brand-rule {
-  width: 1px;
-  height: 1.8rem;
-  background: #e4e7ee;
+.client-search-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: min(28rem, 46vw);
+  height: 2.35rem;
+  margin-left: 0.35rem;
+  padding: 0 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #667085;
 }
 
-.client-tagline {
-  margin: 0;
-  color: #98a2b3;
+.client-search-pill svg {
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.client-search-pill input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1d2433;
+  font: inherit;
   font-size: 0.92rem;
+}
+
+.client-search-pill input::placeholder {
+  color: #98a2b3;
+}
+
+.client-search-pill input:focus::placeholder {
+  color: transparent;
 }
 
 .client-top-actions {
@@ -9434,6 +9568,14 @@ button.client-kpi.is-on {
 
 .lims-shell.is-left .client-hero {
   margin-left: -0.68rem;
+}
+
+.lims-shell.is-client .client-hero {
+  margin-top: 0;
+}
+
+.lims-shell.is-client .client-hero-banner {
+  padding-top: calc(var(--header-h, 4.2rem) + 0.45rem);
 }
 
 .client-hero-banner {
