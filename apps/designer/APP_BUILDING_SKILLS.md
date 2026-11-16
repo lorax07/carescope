@@ -16,4 +16,4 @@ The main tabs, such as Accounts and Contacts. The row rests on a thin gray basel
 
 ## subtab01
 
-The subtabs under a Tab01, such as Home and an open account or contact, and Activity, Documents, and Notes. The shape matches the connected folder cap: gray labels on a thin baseline, and the selected tab lifts with a rounded top, a light fill, and an open bottom into its section. On a page the fill is the page background. Inside a white card the fill is white. Add the class `subtab01`. Mark the selected control with `is-on`. Set `--subtab-fill` when the section behind the tab is not the page background.
+The subtabs under a Tab01, such as Home and an open account or contact, and Activity, Documents, and Notes. A thin gray line runs under the row. Unselected labels are gray and sit on the line with no box. The selected label is purple, and a short red bar sits under it on the line. Add the class `subtab01`. Mark the selected control with `is-on`.

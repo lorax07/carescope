@@ -8276,51 +8276,61 @@ button.top-priorities-toggle {
   color: #1d2433;
 }
 
-.subtab01,
-.crm-record-strip {
-  --subtab-fill: #f4f6fb;
-}
-
-.crm-record-strip {
+.subtab01 {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem;
   align-items: flex-end;
+  gap: 0.1rem 0.15rem;
+  border-bottom: 1px solid #e4e7ee;
+}
+
+.crm-record-strip {
   margin-top: 0.85rem;
-  border-bottom: 1px solid #d5dbe6;
 }
 
-.crm-record-strip > a,
-.crm-record-strip > span {
-  margin: 0 0 -1px;
-  padding: 0.38rem 0.75rem 0.42rem;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
-}
-
-.crm-record-strip a {
+.subtab01 > a,
+.subtab01 > span,
+.subtab01 > button {
+  position: relative;
+  margin: 0;
+  padding: 0.42rem 0.7rem 0.55rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #98a2b3;
+  font-family: inherit;
   font-size: 0.84rem;
-  font-weight: 550;
+  font-weight: 650;
   text-decoration: none;
   white-space: nowrap;
-}
-
-.crm-record-strip span a {
-  padding: 0;
+  cursor: pointer;
 }
 
 .subtab01 > a.is-on,
 .subtab01 > span.is-on,
-.subtab01 > button.is-on,
-.crm-record-strip > a.is-on,
-.crm-record-strip span.is-on {
-  border-color: #d5dbe6;
-  border-bottom: 1px solid var(--subtab-fill, #f4f6fb);
-  background: var(--subtab-fill, #f4f6fb);
+.subtab01 > button.is-on {
+  background: transparent;
   color: #6d5efc;
   font-weight: 750;
+}
+
+.subtab01 > a.is-on::after,
+.subtab01 > span.is-on::after,
+.subtab01 > button.is-on::after {
+  content: "";
+  position: absolute;
+  right: 0.85rem;
+  bottom: -1px;
+  left: 0.85rem;
+  height: 3px;
+  border-radius: 999px;
+  background: #ef4444;
+}
+
+.crm-record-strip span a {
+  padding: 0;
+  color: inherit;
+  font-weight: inherit;
 }
 
 .crm-record-strip span.is-on a,
@@ -8428,41 +8438,10 @@ button.top-priorities-toggle {
   white-space: nowrap;
 }
 
-.account-feed-tabs.subtab01 {
-  --subtab-fill: #fff;
-}
-
-.account-feed-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem;
-  align-items: flex-end;
-  border-bottom: 1px solid #d5dbe6;
-}
-
 .account-feed-tabs button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  margin: 0 0 -1px;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: 10px 10px 0 0;
-  background: transparent;
-  color: #98a2b3;
-  font: inherit;
-  font-size: 0.84rem;
-  font-weight: 550;
-  padding: 0.4rem 0.75rem 0.45rem;
-  cursor: pointer;
-}
-
-.account-feed-tabs button.is-on {
-  border-color: #d5dbe6;
-  border-bottom: 1px solid var(--subtab-fill, #fff);
-  background: var(--subtab-fill, #fff);
-  color: #6d5efc;
-  font-weight: 750;
 }
 
 .account-feed-tabs svg,
