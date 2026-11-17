@@ -9364,21 +9364,22 @@ button.client-kpi.is-on {
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-icon {
-  width: auto;
-  height: auto;
+  width: 18px;
+  height: 18px;
   border: 0;
   background: transparent;
   color: inherit;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-icon svg {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 18px;
+  height: 18px;
 }
 
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-core-child .lims-nav-icon,
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-core-child .lims-nav-icon svg {
-  width: 0.72rem;
-  height: 0.72rem;
+  width: 14px;
+  height: 14px;
 }
 
 .lims-shell.is-app-rail .client-rail-label {
@@ -9465,10 +9466,23 @@ button.client-kpi.is-on {
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-item.active .lims-nav-icon,
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-module-active .lims-nav-icon,
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-core-child.active .lims-nav-icon {
+  width: 18px;
+  height: 18px;
   background: transparent;
   border-color: transparent;
   color: inherit;
   box-shadow: none;
+}
+
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-core-child .lims-nav-icon,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-core-child .lims-nav-icon svg {
+  width: 14px;
+  height: 14px;
 }
 
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-item.is-module-active:not(.is-core-child),
