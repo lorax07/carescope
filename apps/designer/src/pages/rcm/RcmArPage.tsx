@@ -5,6 +5,7 @@ import { filter01Match } from "../../filter01";
 import { CRM_ACCOUNTS } from "../../crmAccounts";
 import { FINANCIAL_LABEL, bucketFor, formatMoney, pageRows, rcmCanWrite, useRcm, type AgingBucket } from "../../rcm";
 import { routeLabel, writeOffCharge } from "../../revenueCycle";
+import { ScreenTitle } from "../ScreenTitle";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 
 function unpack(value: string | null): string[] {
@@ -88,7 +89,7 @@ export function RcmArPage() {
   return (
     <RcmShell studio title="Receivables" lede="Outstanding balances by aging, client, payer, and route.">
       <header className="client-board-head">
-        <h1>Receivables</h1>
+        <ScreenTitle name="ar">Receivables</ScreenTitle>
         <Link to="/app/billing/payments">Cash</Link>
         <Link to="/app/billing/denials">Denials</Link>
       </header>

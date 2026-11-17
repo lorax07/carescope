@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
 import { REVENUE_CHAPTERS } from "../moduleChapters";
+import { ScreenTitle } from "../ScreenTitle";
 
 export const RCM_SUBNAV = REVENUE_CHAPTERS;
 
@@ -24,7 +25,7 @@ export function RcmShell({
         <div className="lims-page-header">
           <div>
             <p className="lims-eyebrow">Sequence Revenue</p>
-            <h1>{title}</h1>
+            <ScreenTitle>{title}</ScreenTitle>
             <p className="lims-page-lede">{lede}</p>
           </div>
           <div className="rcm-header-actions">

@@ -4,6 +4,7 @@ import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { InstrumentRecordView } from "../components/InstrumentRecordView";
 import { addInstrument, findInstrument, useInstruments, type InstrumentRecord } from "../instruments";
 import { InstrumentChrome } from "./instruments/InstrumentChrome";
+import { ScreenTitle } from "./ScreenTitle";
 import { InstrumentApiNote } from "./instruments/InstrumentWork";
 
 const STEPS = ["Identity", "Interface", "Place"] as const;
@@ -173,7 +174,7 @@ export function InstrumentRecordPage() {
   if (!instrument) {
     return (
       <div className="lims-page">
-        <h1>Instrument not found</h1>
+        <ScreenTitle name="instruments">Instrument not found</ScreenTitle>
       </div>
     );
   }

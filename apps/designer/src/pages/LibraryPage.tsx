@@ -7,6 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ScreenTitle } from "./ScreenTitle";
 import { workflowService } from "../platform";
 import { SYSTEM_WORKFLOWS, type SystemWorkflowDefinition } from "../systemWorkflows";
 
@@ -256,7 +257,7 @@ export function LibraryPage() {
       <div className="page-header">
         <div>
           <p className="lims-eyebrow">Automation</p>
-          <h1>Laboratory workflows</h1>
+          <ScreenTitle name="design">Laboratory workflows</ScreenTitle>
           <p>
             Configure no-code automations for sample receive, testing, review, CAPA,
             calibration, and CoA release across the LIMS.

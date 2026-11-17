@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { LAB_RESOURCES, labResourceById, userCanSeeLabResources } from "../labResourceAccess";
+import { ScreenTitle } from "./ScreenTitle";
 import { readLimsSession } from "../limsSession";
 
 function ResourceIcon({ id }: { id: string }) {
@@ -74,7 +75,7 @@ export function LabResourcesPage() {
         <div className="lims-page-header">
           <div>
             <p className="lims-eyebrow">Lab resources</p>
-            <h1>{resource.label}</h1>
+            <ScreenTitle>{resource.label}</ScreenTitle>
             <p className="lims-page-lede">{resource.detail}</p>
           </div>
           <Link to="/app/resources" className="btn">
@@ -96,7 +97,7 @@ export function LabResourcesPage() {
             <i />
           </span>
           <div>
-            <h1 id="lab-resources-heading">Lab Resources</h1>
+            <ScreenTitle id="lab-resources-heading">Lab Resources</ScreenTitle>
             <p>One place to manage the things your lab uses and references.</p>
           </div>
         </header>

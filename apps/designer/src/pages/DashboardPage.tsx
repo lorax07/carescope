@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ScreenTitle } from "./ScreenTitle";
 import { Link } from "react-router-dom";
 import { StageConditionCell } from "../components/StageConditionCell";
 import { DEFAULT_WORKFLOW_STAGES } from "../workflowStages";
@@ -81,7 +82,7 @@ export function DashboardPage() {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">Operations</p>
-          <h1>Laboratory dashboard</h1>
+          <ScreenTitle>Laboratory dashboard</ScreenTitle>
           <p className="lims-page-lede">
             Live work across sample intake, testing, review, and release for North Lab.
           </p>

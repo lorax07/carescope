@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { ScreenTitle } from "./ScreenTitle";
 import { CRM_ACCOUNTS } from "../crmAccounts";
 import { AccountLink } from "../components/AccountTable";
 import { accountRevenueLabel, money, useRevenue } from "../revenueCycle";
@@ -57,7 +58,7 @@ export function InsightsChatPage() {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">Overall business data, with a chat that answers from the text provided</p>
-          <h1>Sequence Insights</h1>
+          <ScreenTitle>Sequence Insights</ScreenTitle>
           <p className="lims-page-lede">
             Accounts, laboratory work, revenue, and pipeline in one view. The chat answers only from the briefing.
           </p>

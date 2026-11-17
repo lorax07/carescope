@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { ScreenTitle } from "./ScreenTitle";
 import { AccountLink } from "../components/AccountTable";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { findSample, CONDITION_LABEL, STATUS_LABEL, isOnHold, type SampleRecord } from "../samples";
@@ -118,7 +119,7 @@ export function SampleDetailBody({
       ) : null}
       <div className="lims-page-header">
         <div>
-          {showTitle ? <h1>Sample Details</h1> : null}
+          {showTitle ? <ScreenTitle name="home">Sample Details</ScreenTitle> : null}
           <p className="lims-page-lede">{sample.client} · {sample.tests}</p>
         </div>
       </div>
@@ -252,7 +253,7 @@ export function SampleDetailPage() {
     return (
       <div className="lims-page">
         <p className="lims-eyebrow">Sample</p>
-        <h1>Sample not found</h1>
+        <ScreenTitle name="home">Sample not found</ScreenTitle>
         <p>
           <Link to="/app/ops/home">Back to Home</Link>
         </p>

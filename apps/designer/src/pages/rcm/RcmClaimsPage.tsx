@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useRcm, type ClaimWorkflow } from "../../rcm";
 import { WORKFLOW_LABEL } from "../../rcm/types";
+import { ScreenTitle } from "../ScreenTitle";
 import { RcmShell } from "./RcmShell";
 import { RevenueAssist, RevenueClaimTable, claimMatches, type ClaimFilter } from "./revenueStudio";
 
@@ -25,7 +26,7 @@ export function RcmClaimsPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Claims</h1>
+            <ScreenTitle name="claims">Claims</ScreenTitle>
           </header>
           <div className="client-board-links">
             <Link to="/app/billing/capture">Charge capture</Link>

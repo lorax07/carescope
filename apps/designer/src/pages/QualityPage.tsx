@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
+import { ScreenTitle } from "./ScreenTitle";
 import { Link, useSearchParams } from "react-router-dom";
 import { buttonFormat1 } from "../buttonFormat1";
 import { pinState, useReviewerPin, verifyReviewerPin } from "../reviewerPin";
@@ -581,7 +582,7 @@ export function QualityPage() {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">This is a quality and Compliance module</p>
-          <h1>Sequence Compliance</h1>
+          <ScreenTitle>Sequence Compliance</ScreenTitle>
           <p className="lims-page-lede">
             Deviations, CAPA, change control, and documents move through signed steps. The audit trail keeps every signature and every rejected attempt.
           </p>

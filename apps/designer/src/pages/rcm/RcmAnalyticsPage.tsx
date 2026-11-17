@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { formatMoney, useRcm } from "../../rcm";
 import { SourceBars } from "../crm/clientStudio";
+import { ScreenTitle } from "../ScreenTitle";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -96,7 +97,7 @@ export function RcmAnalyticsPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Performance</h1>
+            <ScreenTitle name="analytics">Performance</ScreenTitle>
           </header>
           <div className="client-kpis">
             <Link className="client-kpi" to="/app/billing/claims">

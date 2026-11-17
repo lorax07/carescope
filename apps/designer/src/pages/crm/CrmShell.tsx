@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
 import { CLIENT_CHAPTERS } from "../moduleChapters";
+import { ScreenTitle } from "../ScreenTitle";
 import { TopPriorities } from "./TopPriorities";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
@@ -9,7 +10,7 @@ export function CrmModuleTitle({ title }: { title: string }) {
   return (
     <div className="crm-studio-title">
       <p className="lims-eyebrow">Sequence CRM</p>
-      <h1>{title}</h1>
+      <ScreenTitle>{title}</ScreenTitle>
     </div>
   );
 }
@@ -34,7 +35,7 @@ export function CrmShell({
     <div className="lims-page-header">
       <div>
         <p className="lims-eyebrow">Sequence CRM</p>
-        <h1>{title}</h1>
+        <ScreenTitle>{title}</ScreenTitle>
         {priorities ? null : <p className="lims-page-lede">{lede}</p>}
       </div>
       {actions ? <div className="rcm-header-actions">{actions}</div> : null}

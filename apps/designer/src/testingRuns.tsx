@@ -1,5 +1,6 @@
 import { findInstrument } from "./instruments";
 import { findSample } from "./samples";
+import { ScreenTitle } from "./pages/ScreenTitle";
 
 export type RunSequence = {
   id: string;
@@ -75,7 +76,7 @@ export function RunSequenceView({ run }: { run: RunSequence }) {
       <div className="run-sequence-heading">
         <div>
           <p className="lims-eyebrow">Current run sequence</p>
-          <h1>{run.id}</h1>
+          <ScreenTitle name="testing">{run.id}</ScreenTitle>
           <p className="lims-page-lede">{run.method} · {run.operator} · started {run.startedAt}</p>
         </div>
         <span className="lims-status testing">In testing</span>

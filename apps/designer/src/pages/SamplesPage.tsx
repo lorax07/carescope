@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
+import { ScreenTitle } from "./ScreenTitle";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
 import { ElectronicOrdersDialog } from "../components/ElectronicOrdersDialog";
@@ -269,7 +270,7 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">{copy.eyebrow}</p>
-          <h1>{title}</h1>
+          <ScreenTitle>{title}</ScreenTitle>
           <p className="lims-page-lede">{copy.lede}</p>
         </div>
         <div className="lims-header-side">

@@ -9213,13 +9213,14 @@ button.client-kpi.is-on {
 }
 
 .lims-shell.is-app-rail {
-  --client-rail: 13.25rem;
+  --client-rail: calc(13.25rem - 20px);
   --rail-select: #4c418f;
   --rail-select-text: #8b7cf6;
+  --screen-title: calc(2.4rem - 6px);
 }
 
 .lims-shell.is-app-rail.is-nav-open {
-  --client-rail: 16rem;
+  --client-rail: calc(16rem - 20px);
 }
 
 .lims-shell.is-app-rail .lims-nav-dock,
@@ -9785,8 +9786,8 @@ button.client-kpi.is-on {
   margin: 0.1rem 0 0.15rem;
   color: #1a1440;
   font-family: var(--font-display);
-  font-size: 2.4rem;
-  font-weight: 750;
+  font-size: var(--screen-title);
+  font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1;
 }
@@ -9812,5 +9813,53 @@ button.client-kpi.is-on {
 .client-hero-sheet .tab01 {
   min-width: min(100%, 18rem);
   margin-top: 0.35rem;
+}
+
+.screen-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--screen-title);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.screen-title-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #6d5efc;
+}
+
+.screen-title-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.lab-resources .screen-title,
+.lab-resources .screen-title-icon {
+  color: #fff;
+}
+
+.lims-shell .lims-page-header h1,
+.lims-shell .page-header h1,
+.lims-shell .crm-studio-title h1,
+.lims-shell .client-overview-title,
+.lims-shell .client-board-head h1,
+.lims-shell .account-hero h1,
+.lims-shell .lab-resources h1,
+.lims-shell .client-hero-banner h1,
+.lims-shell .crm-directory-title,
+.lims-shell .run-sequence-heading h1,
+.lims-shell .inbox-list h1 {
+  font-size: var(--screen-title);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
 }
 
