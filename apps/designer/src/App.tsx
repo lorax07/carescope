@@ -27,15 +27,22 @@ const NAV = [
 ] as const;
 
 function shortNavLabel(label: string): string {
-  if (label === "Operations Overview") return "Home";
-  if (label === "Sequence CRM") return "CRM";
-  if (label === "Sequence Instruments") return "Lab Ops";
-  if (label === "Sequence Insights") return "Insights";
-  if (label === "Sequence Compliance") return "Compliance";
-  if (label === "Sequence Revenue") return "Revenue";
-  if (label === "Workflow design") return "Design";
-  if (label === "Lab Resources") return "Resources";
-  return label.split(" ")[0] ?? label;
+  const known: Record<string, string> = {
+    "Operations Overview": "Home",
+    "Sequence CRM": "CRM",
+    "Sequence Instruments": "Lab Ops",
+    "Sequence Insights": "Insights",
+    "Sequence Compliance": "Compliance",
+    "Sequence Revenue": "Revenue",
+    "Workflow design": "Design",
+    "Lab Resources": "Resources",
+    "Growth Hub": "Growth",
+    "Laboratories & sites": "Sites",
+    "Storage locations": "Storage",
+    "Lots & materials": "Lots",
+    "Shared reference data": "Reference",
+  };
+  return known[label] ?? label;
 }
 
 function nestedNavFor(to: string) {
@@ -418,6 +425,7 @@ function ShellNav({
   const overviewLink = operationLinks.find((item) => item.view === "overview");
   const coreLinks = operationLinks.filter((item) => item.view !== "overview");
   const groupOpen = (key: string) => openGroups[key] ?? currentGroup === key;
+  const showNested = (key: string) => stacked || (includeNested && groupOpen(key));
   const moduleActive = (slug: ModuleSlug | null) => Boolean(slug && sectionToModuleSlug(sectionTabs.section) === slug);
 
   function parentClass(slug: ModuleSlug | null, hasChildren: boolean, isActive: boolean) {
@@ -442,11 +450,11 @@ function ShellNav({
               </span>
               {stacked ? <span className="client-rail-label">{shortNavLabel(overviewLink.label)}</span> : compact ? null : overviewLink.label}
             </NavLink>
-            {includeNested && coreLinks.length > 0 ? (
+            {includeNested && !stacked && coreLinks.length > 0 ? (
               <NavCaret open={groupOpen("operations")} label={overviewLink.label} onToggle={() => onToggleGroup("operations")} />
             ) : null}
           </div>
-          {includeNested && groupOpen("operations") ? (
+          {showNested("operations") && coreLinks.length > 0 ? (
             <div className="lims-nav-children" role="group" aria-label={`${overviewLink.label} pages`}>
               {coreLinks.map((item) => (
                 <NavLink
@@ -483,11 +491,11 @@ function ShellNav({
               </span>
               {stacked ? <span className="client-rail-label">Resources</span> : compact ? null : "Lab Resources"}
             </NavLink>
-            {includeNested ? (
+            {includeNested && !stacked ? (
               <NavCaret open={groupOpen("resources")} label="Lab Resources" onToggle={() => onToggleGroup("resources")} />
             ) : null}
           </div>
-          {includeNested && groupOpen("resources") ? (
+          {showNested("resources") ? (
             <div className="lims-nav-children" role="group" aria-label="Lab Resources pages">
               {LAB_RESOURCES.map((item) => (
                 <NavLink
@@ -531,9 +539,9 @@ function ShellNav({
                 </span>
                 {stacked ? <span className="client-rail-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
               </NavLink>
-              {includeNested && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
+              {includeNested && !stacked && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
             </div>
-            {includeNested && open ? (
+            {hasChildren && group && showNested(group) ? (
               <div className="lims-nav-children" role="group" aria-label={`${item.label} pages`}>
                 {nested.map((sub) => (
                   <NavLink

@@ -9294,9 +9294,20 @@ button.client-kpi.is-on {
   width: 4.7rem;
 }
 
-.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret,
-.lims-shell.is-app-rail .lims-icon-rail .lims-nav-children {
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret {
   display: none;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-children {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 4.7rem;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-core-child {
+  margin-left: 0;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-item {
