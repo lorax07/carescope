@@ -9277,7 +9277,7 @@ button.client-kpi.is-on {
   padding: 0;
   border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: default;
 }
 
 .lims-shell.is-app-rail .client-rail-logo img {
@@ -9300,9 +9300,16 @@ button.client-kpi.is-on {
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-group,
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row {
-  align-items: center;
   justify-content: flex-start;
   width: 100%;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-group {
+  align-items: stretch;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row {
+  align-items: center;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row .lims-nav-item {
@@ -9360,8 +9367,9 @@ button.client-kpi.is-on {
   align-items: stretch;
   gap: 0.05rem;
   width: auto;
-  margin: 0.05rem 0 0.3rem 1.05rem;
+  margin: 0.05rem 0 0.3rem calc(0.55rem + 18px + 0.5rem);
   padding-left: 0.8rem;
+  border-left: 0;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-core-child {
