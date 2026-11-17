@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ModuleChapters, type ModuleChapter } from "../moduleChapters";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 
 export const INSTRUMENT_CHAPTERS: ModuleChapter[] = [
   {
@@ -45,13 +45,7 @@ export function InstrumentChrome({
 }) {
   return (
     <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Sequence Instruments</p>
-          <ScreenTitle>{title}</ScreenTitle>
-          <p className="lims-page-lede">{lede}</p>
-        </div>
-      </div>
+      <ModuleHeader title={title} subtitle={lede} />
       <ModuleChapters chapters={INSTRUMENT_CHAPTERS} label="Sequence Instrument areas" />
       {children}
     </div>

@@ -7,7 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { workflowService } from "../platform";
 import { SYSTEM_WORKFLOWS, type SystemWorkflowDefinition } from "../systemWorkflows";
 
@@ -254,19 +254,12 @@ export function LibraryPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <p className="lims-eyebrow">Automation</p>
-          <ScreenTitle name="design">Laboratory workflows</ScreenTitle>
-          <p>
-            Configure no-code automations for sample receive, testing, review, CAPA,
-            calibration, and CoA release across the LIMS.
-          </p>
-        </div>
-        <button type="button" className="btn btn-primary" onClick={createNew}>
-          New workflow
-        </button>
-      </div>
+      <ModuleHeader
+        name="design"
+        title="Laboratory workflows"
+        subtitle="Configure no-code automations for sample receive, testing, review, CAPA, calibration, and CoA release across the LIMS."
+        action={<button type="button" className="btn btn-primary" onClick={createNew}>New workflow</button>}
+      />
 
       <section className="system-workflow-section">
         <div className="workflow-section-heading">

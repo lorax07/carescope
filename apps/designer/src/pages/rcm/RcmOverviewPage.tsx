@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { formatMoney, useRcm } from "../../rcm";
 import { QUEUE_META } from "../../rcm/types";
 import { RevenueChart, StudioLink, paymentBars } from "../crm/clientStudio";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmShell } from "./RcmShell";
 import { RevenueAssist, RevenueClaimTable } from "./revenueStudio";
 
@@ -29,8 +29,8 @@ export function RcmOverviewPage() {
 
   return (
     <RcmShell studio title="Revenue overview" lede="What needs attention, what money is at risk, and the next action on the laboratory ledger.">
+      <ModuleHeader name="analytics" title="Revenue Overview" subtitle="What needs attention, what money is at risk, and the next action on the laboratory ledger." />
       <div className="client-home">
-        <ScreenTitle className="client-overview-title" name="analytics">Revenue Overview</ScreenTitle>
         <div className="client-home-main">
           <div className="client-kpis">
             <StudioLink to="/app/billing/ar">

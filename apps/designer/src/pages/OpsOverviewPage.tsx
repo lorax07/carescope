@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { labMenuPath, useLabOperations } from "../labOperations";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { isOnHold, useSamples } from "../samples";
 
 const WEEK = {
@@ -30,18 +30,11 @@ export function OpsOverviewPage() {
 
   return (
     <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">Sequence Operations</p>
-          <ScreenTitle>{title}</ScreenTitle>
-          <p className="lims-page-lede">
-            Shift view of the queue, turnaround, and what is stuck. Sample work stays on Home.
-          </p>
-        </div>
-        <Link className="btn btn-primary" to={labMenuPath("home")}>
-          Open sample work
-        </Link>
-      </div>
+      <ModuleHeader
+        title={title}
+        subtitle="Shift view of the queue, turnaround, and what is stuck. Sample work stays on Home."
+        action={<Link className="btn btn-primary" to={labMenuPath("home")}>Open sample work</Link>}
+      />
 
       <div className="lims-kpi-row">
         <div className="lims-kpi">

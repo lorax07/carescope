@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatMoney, postRemittance, rcmCanWrite, useRcm } from "../../rcm";
 import { ClientAvatar, shortDate } from "../crm/clientStudio";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -13,11 +13,9 @@ export function RcmPaymentsPage() {
 
   return (
     <RcmShell studio title="Cash" lede="Remittances and the append-only payment log.">
+      <ModuleHeader name="payments" title="Cash" subtitle="Remittances and the append-only payment log." />
       <div className="client-home">
         <div className="client-home-main">
-          <header className="client-board-head">
-            <ScreenTitle name="payments">Cash</ScreenTitle>
-          </header>
           <div className="client-board-links">
             <Link to="/app/billing/denials">Denials</Link>
             <Link to="/app/billing/ar">Receivables</Link>

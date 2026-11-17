@@ -131,7 +131,7 @@ export function CrmInboxPage() {
     <CrmShell studio priorities={false} title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
       <div className="inbox">
         <div className="client-overview-head">
-          <CrmModuleTitle title="Inbox" />
+          <CrmModuleTitle title="Inbox" subtitle="Messages with the people on Sequence CRM accounts." />
         </div>
         <section className="inbox-thread" aria-label={selected ? `Conversation with ${selected.name}` : "Conversation"}>
           {selected ? (

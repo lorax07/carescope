@@ -7778,7 +7778,8 @@ button.palette-category-title {
   align-items: start;
 }
 
-.lims-page.has-priorities > .lims-page-header {
+.lims-page.has-priorities > .lims-page-header,
+.lims-page.has-priorities > .client-hero {
   grid-column: 1 / -1;
   margin-bottom: 0;
 }
@@ -9216,7 +9217,7 @@ button.client-kpi.is-on {
   --client-rail: calc(13.25rem - 20px);
   --rail-select: #4c418f;
   --rail-select-text: #8b7cf6;
-  --screen-title: calc(2.4rem - 6px);
+  --screen-title: 18px;
 }
 
 .lims-shell.is-app-rail.is-nav-open {
@@ -9585,7 +9586,8 @@ button.client-kpi.is-on {
   transition: margin-left 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lims-shell.is-client .lims-main {
+.lims-shell.is-client .lims-main,
+.lims-shell.is-app-rail:has(.client-hero) .lims-main {
   padding-top: 0;
 }
 
@@ -9595,7 +9597,8 @@ button.client-kpi.is-on {
   transition: left 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lims-shell.is-client .lims-topbar {
+.lims-shell.is-client .lims-topbar,
+.lims-shell.is-app-rail:has(.client-hero) .lims-topbar {
   background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
@@ -9606,7 +9609,9 @@ button.client-kpi.is-on {
   display: none;
 }
 
-.lims-shell.is-client .lims-page:has(.client-hero) {
+.lims-shell.is-client .lims-page:has(.client-hero),
+.lims-shell.is-app-rail:has(.client-hero) .lims-page:has(.client-hero),
+.lims-shell.is-app-rail:has(.client-hero) .page:has(.client-hero) {
   padding-top: 0;
 }
 
@@ -9725,18 +9730,26 @@ button.client-kpi.is-on {
   margin-left: -0.68rem;
 }
 
-.lims-shell.is-client .client-hero {
+.lims-shell.is-client .client-hero,
+.lims-shell.is-app-rail:has(.client-hero) .client-hero {
   margin-top: 0;
   margin-right: -1.35rem;
   margin-bottom: 0.4rem;
 }
 
-.lims-shell.is-client.is-left .client-hero {
+.lims-shell.is-client.is-left .client-hero,
+.lims-shell.is-app-rail.is-left:has(.client-hero) .lims-page .client-hero {
   margin-left: -0.68rem;
 }
 
-.lims-shell.is-client .client-hero-banner {
+.lims-shell.is-app-rail:has(.client-hero) .page .client-hero {
+  margin-left: -1.35rem;
+}
+
+.lims-shell.is-client .client-hero-banner,
+.lims-shell.is-app-rail:has(.client-hero) .client-hero-banner {
   padding-top: calc(var(--header-h, 4.2rem) + 0.45rem);
+  padding-bottom: calc(2.5rem - 30px);
 }
 
 .client-hero-banner {
@@ -9786,15 +9799,17 @@ button.client-kpi.is-on {
   margin: 0.1rem 0 0.15rem;
   color: #1a1440;
   font-family: var(--font-display);
-  font-size: var(--screen-title);
+  font-size: 18px;
   font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1;
 }
 
 .client-hero-banner small {
+  display: block;
   color: #667085;
-  font-size: 1rem;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .client-hero-sheet {
@@ -9804,7 +9819,7 @@ button.client-kpi.is-on {
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: -1.15rem;
+  margin-top: -8px;
   padding: 0.15rem 1.2rem 0;
   border-radius: 22px 0 0 0;
   background: #fff;
@@ -9815,13 +9830,24 @@ button.client-kpi.is-on {
   margin-top: 0.35rem;
 }
 
+.client-hero-action {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.client-hero-sheet:not(:has(.tab01)):not(:has(.client-hero-action)) {
+  min-height: 0.75rem;
+}
+
 .screen-title {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--screen-title);
+  font-size: 18px;
   font-weight: 650;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -9831,14 +9857,14 @@ button.client-kpi.is-on {
   display: grid;
   place-items: center;
   flex: none;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 16px;
+  height: 16px;
   color: #6d5efc;
 }
 
 .screen-title-icon svg {
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 16px;
+  height: 16px;
 }
 
 .lab-resources .screen-title,
@@ -9846,20 +9872,16 @@ button.client-kpi.is-on {
   color: #fff;
 }
 
-.lims-shell .lims-page-header h1,
-.lims-shell .page-header h1,
-.lims-shell .crm-studio-title h1,
-.lims-shell .client-overview-title,
-.lims-shell .client-board-head h1,
-.lims-shell .account-hero h1,
-.lims-shell .lab-resources h1,
-.lims-shell .client-hero-banner h1,
-.lims-shell .crm-directory-title,
-.lims-shell .run-sequence-heading h1,
-.lims-shell .inbox-list h1 {
-  font-size: var(--screen-title);
+.lims-shell .screen-title,
+.lims-shell .client-hero-banner h1 {
+  font-size: 18px;
   font-weight: 650;
   letter-spacing: -0.03em;
   line-height: 1.15;
+}
+
+.client-overview-head > .client-hero,
+.client-home > .client-hero {
+  grid-column: 1 / -1;
 }
 

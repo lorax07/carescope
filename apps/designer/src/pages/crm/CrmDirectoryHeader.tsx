@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 
 export function CrmDirectoryHeader({
   panel,
@@ -12,14 +12,12 @@ export function CrmDirectoryHeader({
 }) {
   const title = panel === "accounts" ? "Accounts" : "Contacts";
   return (
-    <header className="client-hero">
-      <div className="client-hero-banner">
-        <div>
-          <ScreenTitle name={panel === "accounts" ? "clients" : "contacts"}>{title}</ScreenTitle>
-          <small>Manage your accounts and contacts</small>
-        </div>
-      </div>
-      <div className="client-hero-sheet">
+    <ModuleHeader
+      title={title}
+      name={panel === "accounts" ? "clients" : "contacts"}
+      subtitle="Manage your accounts and contacts"
+      action={action}
+      sheet={
         <div className="crm-view-tabs tab01" role="tablist" aria-label="Accounts and contacts">
           <button type="button" role="tab" aria-selected={panel === "accounts"} className={panel === "accounts" ? "is-on" : undefined} onClick={() => onPanel("accounts")}>
             Accounts
@@ -28,8 +26,7 @@ export function CrmDirectoryHeader({
             Contacts
           </button>
         </div>
-        {action}
-      </div>
-    </header>
+      }
+    />
   );
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fileAppeal, formatMoney, rcmCanWrite, setDenialRootCause, useRcm } from "../../rcm";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 
 export function RcmDenialsPage() {
@@ -22,8 +22,8 @@ export function RcmDenialsPage() {
 
   return (
     <RcmShell studio title="Denials" lede="Why money was refused, who owns recovery, and which patterns keep coming back.">
+      <ModuleHeader name="denials" title="Denials" subtitle="Why money was refused, who owns recovery, and which patterns keep coming back." />
       <header className="client-board-head">
-        <ScreenTitle name="denials">Denials</ScreenTitle>
         <Link to="/app/billing/payments">Cash</Link>
         <Link to="/app/billing/ar">Receivables</Link>
       </header>

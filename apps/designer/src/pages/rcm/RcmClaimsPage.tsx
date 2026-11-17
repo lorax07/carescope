@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useRcm, type ClaimWorkflow } from "../../rcm";
 import { WORKFLOW_LABEL } from "../../rcm/types";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmShell } from "./RcmShell";
 import { RevenueAssist, RevenueClaimTable, claimMatches, type ClaimFilter } from "./revenueStudio";
 
@@ -23,11 +23,9 @@ export function RcmClaimsPage() {
 
   return (
     <RcmShell studio title="Claims" lede="Every claim moving through capture, scrubbing, submission, payment, and denial.">
+      <ModuleHeader name="claims" title="Claims" subtitle="Every claim moving through capture, scrubbing, submission, payment, and denial." />
       <div className="client-home">
         <div className="client-home-main">
-          <header className="client-board-head">
-            <ScreenTitle name="claims">Claims</ScreenTitle>
-          </header>
           <div className="client-board-links">
             <Link to="/app/billing/capture">Charge capture</Link>
             <Link to="/app/billing/queues">Exceptions</Link>
