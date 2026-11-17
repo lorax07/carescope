@@ -9298,12 +9298,57 @@ button.client-kpi.is-on {
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-group,
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row {
-  align-items: stretch;
+  align-items: center;
+  justify-content: flex-start;
   width: 100%;
 }
 
-.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret {
-  display: none;
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row .lims-nav-item {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.is-module-active),
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.active) {
+  border-radius: 10px;
+  background: var(--rail-select);
+  color: #fff;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) > .lims-nav-item,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.active) > .lims-nav-item {
+  background: transparent;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret:hover {
+  position: static;
+  display: grid;
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0 0.28rem 0 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #c9c2e6;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret:hover {
+  color: #fff;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) .lims-nav-caret,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.active) .lims-nav-caret,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) .lims-nav-caret:hover,
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-parent-row:has(> .lims-nav-item.active) .lims-nav-caret:hover {
+  color: #fff;
+}
+
+.lims-shell.is-app-rail .lims-icon-rail .lims-nav-caret svg {
+  width: 11px;
+  height: 11px;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-children {
@@ -9499,10 +9544,29 @@ button.client-kpi.is-on {
   color: var(--rail-select-text);
 }
 
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.is-module-active),
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.active) {
+  border-radius: 12px;
+  background: var(--rail-select);
+  color: #fff;
+}
+
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) > .lims-nav-item,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.active) > .lims-nav-item {
+  background: transparent;
+}
+
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-caret,
 .lims-shell.is-app-rail .lims-sidebar .lims-nav-caret:hover {
   color: #d8d2f2;
   background: transparent;
+}
+
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) .lims-nav-caret,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.active) .lims-nav-caret,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.is-module-active) .lims-nav-caret:hover,
+.lims-shell.is-app-rail .lims-sidebar .lims-nav-parent-row:has(> .lims-nav-item.active) .lims-nav-caret:hover {
+  color: #fff;
 }
 
 .lims-shell.is-app-rail .lims-sidebar-foot {
