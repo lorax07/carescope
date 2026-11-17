@@ -9873,6 +9873,34 @@ button.client-kpi.is-on {
   line-height: 1.15;
 }
 
+.screen-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0 0.05rem 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.screen-back:hover {
+  background: rgba(109, 94, 252, 0.12);
+}
+
+.screen-back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lab-resources .screen-back:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
 .screen-title-icon {
   display: grid;
   place-items: center;

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { NavIcon } from "../navIcons";
 import { ModuleGlyph, pathToModuleSlug } from "../sequenceModules";
 
@@ -64,10 +64,26 @@ export function ScreenTitle({
   className?: string;
 }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const glyph = name ?? glyphForPath(pathname);
   const module = glyph ? null : pathToModuleSlug(pathname);
+
+  function goBack() {
+    const idx = (window.history.state as { idx?: number } | null)?.idx;
+    if (typeof idx === "number" && idx <= 0) {
+      if (pathname !== "/app") navigate("/app");
+      return;
+    }
+    navigate(-1);
+  }
+
   return (
     <h1 id={id} className={["screen-title", className].filter(Boolean).join(" ")}>
+      <button type="button" className="screen-back" aria-label="Back to previous screen" onClick={goBack}>
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M10.2 3.1 5 8l5.2 4.9" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
       <span className="screen-title-icon" aria-hidden="true">
         {module ? <ModuleGlyph slug={module} size={20} /> : <NavIcon name={glyph ?? "overview"} />}
       </span>
