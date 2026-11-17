@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Filter01 } from "../../components/Filter01";
 import { captureAccession } from "../../revenueCycle";
 import { QUEUE_META, formatMoney, postRemittance, rcmCanWrite, useRcm, type QueueId } from "../../rcm";
+import { ScreenTitle } from "../ScreenTitle";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -43,7 +44,7 @@ export function RcmQueuesPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Exceptions</h1>
+            <ScreenTitle name="queues">Exceptions</ScreenTitle>
           </header>
           <div className="client-board-links">
             <Link to="/app/billing/capture">Charge capture</Link>

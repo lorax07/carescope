@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ModuleChapters, type ModuleChapter } from "../moduleChapters";
+import { ScreenTitle } from "../ScreenTitle";
 
 export const INSTRUMENT_CHAPTERS: ModuleChapter[] = [
   {
@@ -47,7 +48,7 @@ export function InstrumentChrome({
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">Sequence Instruments</p>
-          <h1>{title}</h1>
+          <ScreenTitle>{title}</ScreenTitle>
           <p className="lims-page-lede">{lede}</p>
         </div>
       </div>

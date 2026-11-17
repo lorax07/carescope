@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatMoney, postRemittance, rcmCanWrite, useRcm } from "../../rcm";
 import { ClientAvatar, shortDate } from "../crm/clientStudio";
+import { ScreenTitle } from "../ScreenTitle";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -15,7 +16,7 @@ export function RcmPaymentsPage() {
       <div className="client-home">
         <div className="client-home-main">
           <header className="client-board-head">
-            <h1>Cash</h1>
+            <ScreenTitle name="payments">Cash</ScreenTitle>
           </header>
           <div className="client-board-links">
             <Link to="/app/billing/denials">Denials</Link>

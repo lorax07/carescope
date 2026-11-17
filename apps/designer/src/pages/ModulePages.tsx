@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { LAB_MODULE_CATALOG, type LabModuleId } from "../intrasite/catalog";
+import { ScreenTitle } from "./ScreenTitle";
 
 type ModulePageProps = {
   eyebrow: string;
@@ -14,7 +15,7 @@ function ModulePage({ eyebrow, title, lede, rows }: ModulePageProps) {
       <div className="lims-page-header">
         <div>
           <p className="lims-eyebrow">{eyebrow}</p>
-          <h1>{title}</h1>
+          <ScreenTitle>{title}</ScreenTitle>
           <p className="lims-page-lede">{lede}</p>
         </div>
         <div className="lims-page-actions">

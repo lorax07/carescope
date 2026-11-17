@@ -1,0 +1,77 @@
+import type { ReactNode } from "react";
+import { useLocation } from "react-router-dom";
+import { NavIcon } from "../navIcons";
+import { ModuleGlyph, pathToModuleSlug } from "../sequenceModules";
+
+const SUBMODULE_GLYPHS: [string, string][] = [
+  ["/app/connectivity/clients", "clients"],
+  ["/app/connectivity/contacts", "contacts"],
+  ["/app/connectivity/documents", "documents"],
+  ["/app/connectivity/health", "health"],
+  ["/app/connectivity/tasks", "tasks"],
+  ["/app/connectivity/activities", "activities"],
+  ["/app/connectivity/issues", "issues"],
+  ["/app/connectivity/opportunities", "opportunities"],
+  ["/app/connectivity/analytics", "analytics"],
+  ["/app/connectivity/inbox", "inbox"],
+  ["/app/connectivity/communications", "communications"],
+  ["/app/instruments/queue", "queues"],
+  ["/app/instruments/acquire", "testing"],
+  ["/app/instruments/review", "review"],
+  ["/app/instruments", "instruments"],
+  ["/app/quality/deviations", "deviations"],
+  ["/app/quality/capa", "capa"],
+  ["/app/quality/documents", "documents"],
+  ["/app/quality/changes", "changes"],
+  ["/app/quality/audits", "audits"],
+  ["/app/billing/claims", "claims"],
+  ["/app/billing/capture", "claims"],
+  ["/app/billing/queues", "queues"],
+  ["/app/billing/payments", "payments"],
+  ["/app/billing/denials", "denials"],
+  ["/app/billing/ar", "ar"],
+  ["/app/billing/analytics", "analytics"],
+  ["/app/billing/config", "config"],
+  ["/app/ops/home", "home"],
+  ["/app/ops/testing", "testing"],
+  ["/app/ops/review", "review"],
+  ["/app/ops/release", "release"],
+  ["/app/resources/patients", "patients"],
+  ["/app/resources/inventory", "inventory"],
+  ["/app/resources/sites", "sites"],
+  ["/app/resources/storage", "storage"],
+  ["/app/resources/lots", "lots"],
+  ["/app/resources/reference", "reference"],
+  ["/app/resources", "resources"],
+  ["/app/design", "design"],
+  ["/app/workflows", "design"],
+];
+
+function glyphForPath(pathname: string): string | null {
+  const match = SUBMODULE_GLYPHS.find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  return match?.[1] ?? null;
+}
+
+export function ScreenTitle({
+  children,
+  name,
+  id,
+  className,
+}: {
+  children: ReactNode;
+  name?: string;
+  id?: string;
+  className?: string;
+}) {
+  const { pathname } = useLocation();
+  const glyph = name ?? glyphForPath(pathname);
+  const module = glyph ? null : pathToModuleSlug(pathname);
+  return (
+    <h1 id={id} className={["screen-title", className].filter(Boolean).join(" ")}>
+      <span className="screen-title-icon" aria-hidden="true">
+        {module ? <ModuleGlyph slug={module} size={20} /> : <NavIcon name={glyph ?? "overview"} />}
+      </span>
+      <span className="screen-title-text">{children}</span>
+    </h1>
+  );
+}
