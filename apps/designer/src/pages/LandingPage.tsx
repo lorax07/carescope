@@ -42,7 +42,7 @@ export function LandingPage() {
             Designed to scale
           </h1>
           <div className="lp-showcase-actions">
-            <Link to="/app?signup=1" className="lp-pill lp-pill-dark">
+            <Link to="/app" className="lp-pill lp-pill-dark">
               Try free for 30 days
             </Link>
             <button type="button" className="lp-pill lp-pill-light" ref={openPlanRef} onClick={() => setPlanOpen(true)}>
@@ -321,7 +321,7 @@ function TopicBlock({
             </ul>
           </div>
           <div className={`lp-reveal${showCta ? " is-open" : ""}`} aria-hidden={!showCta}>
-            <Link to="/app?signup=1" className="lp-friction-cta" tabIndex={showCta ? undefined : -1}>
+            <Link to="/app" className="lp-friction-cta" tabIndex={showCta ? undefined : -1}>
               Try free for 30 days
             </Link>
           </div>
@@ -871,7 +871,7 @@ function ItFriendly() {
           </ul>
         </div>
         <p className="lp-it-problem">Many laboratory systems add unnecessary complexity to traditional IT infrastructure.</p>
-        <Link to="/app?signup=1" className="lp-it-cta">Try free for 30 days</Link>
+        <Link to="/app" className="lp-it-cta">Try free for 30 days</Link>
         <ol className="lp-it-parts">
           <li>integrate seamlessly with existing systems</li>
           <li>simplify maintenance</li>

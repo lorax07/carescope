@@ -202,7 +202,7 @@ export function SiteHeader() {
           <button type="button" className="lp-nav-outline" onClick={openPlan}>
             Build your plan
           </button>
-          <Link to="/app?signup=1" className="lp-nav-solid">
+          <Link to={pathname === "/" ? "/app" : "/app?signup=1"} className="lp-nav-solid">
             Try free for 30 days
           </Link>
         </div>
