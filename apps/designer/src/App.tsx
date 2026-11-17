@@ -763,18 +763,10 @@ function AppFrame() {
           setNearEdge(false);
         }}
       >
-        <div
-            className="lims-icon-rail"
-            inert={navOpen ? true : undefined}
-            onClick={(event) => {
-              const target = event.target as HTMLElement;
-              if (target.closest("a, button, input, select, textarea")) return;
-              setNavOpen(true);
-            }}
-          >
-            <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+        <div className="lims-icon-rail" inert={navOpen ? true : undefined}>
+            <div className="client-rail-logo">
               <img src="/sequence-logo-light.png" alt="Sequence" />
-            </button>
+            </div>
             <nav className="lims-nav" aria-label="LIMS modules">
               <ShellNav
                 compact
@@ -795,18 +787,10 @@ function AppFrame() {
               <span>Settings</span>
             </button>
           </div>
-      <aside
-        className="lims-sidebar"
-        inert={!navOpen ? true : undefined}
-        onClick={(event) => {
-          const target = event.target as HTMLElement;
-          if (target.closest("a, button, input, select, textarea")) return;
-          setNavOpen((open) => !open);
-        }}
-      >
-        <button type="button" className="client-rail-logo" aria-expanded={navOpen} aria-label={navOpen ? "Collapse navigation" : "Expand navigation"} onClick={() => setNavOpen((open) => !open)}>
+      <aside className="lims-sidebar" inert={!navOpen ? true : undefined}>
+        <div className="client-rail-logo">
           <img src="/sequence-logo-light.png" alt="Sequence" />
-        </button>
+        </div>
 
         <nav className="lims-nav" aria-label="LIMS modules">
           <ShellNav
