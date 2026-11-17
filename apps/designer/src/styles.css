@@ -8617,11 +8617,20 @@ button.client-person-id {
 .client-avatar {
   display: grid;
   place-items: center;
+  flex: none;
+  box-sizing: border-box;
   border: 2px solid;
-  border-radius: 999px;
+  border-radius: 50%;
   background: #fff;
   font-size: 0.78rem;
   font-weight: 750;
+  line-height: 1;
+}
+
+span.client-avatar {
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
 }
 
 .account-mark {
@@ -9709,18 +9718,21 @@ button.client-kpi.is-on {
   background: #ef4444;
 }
 
-.client-avatar {
+.client-top-actions > .client-avatar {
   display: inline-flex !important;
   gap: 0.15rem;
   width: auto !important;
   padding: 0 0.45rem 0 0.15rem;
+  overflow: visible;
+  border-radius: 999px;
   background: #efeaff !important;
   color: #5b4ad6 !important;
   font-size: 0.72rem;
   font-weight: 800;
+  line-height: normal;
 }
 
-.client-avatar svg {
+.client-top-actions > .client-avatar svg {
   width: 0.7rem;
   height: 0.7rem;
 }
