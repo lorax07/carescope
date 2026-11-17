@@ -12,7 +12,7 @@ Filtering uses one field. Selected values sit in that field as chips with a colo
 
 ## Tab01
 
-The main tabs, such as Accounts and Contacts, on the client module. They sit in the white sheet under the lavender page banner. A thin gray line runs under the row. Unselected labels are gray. The selected label is purple, and a short purple bar sits under it on the line. Add the class `tab01` to the tablist. Mark the selected control with `is-on`.
+The main tabs, such as Accounts and Contacts, on the client module. They sit in the white sheet under the lavender page banner. A thin blue-gray line runs under the row. Unselected labels are light blue-gray with no box. The selected label is a darker blue, and a folder outline wraps its top and sides so the tab opens into the sheet. Add the class `tab01` to the tablist. Mark the selected control with `is-on`.
 
 ## subtab01
 
