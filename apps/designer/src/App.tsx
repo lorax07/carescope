@@ -425,7 +425,8 @@ function ShellNav({
   const overviewLink = operationLinks.find((item) => item.view === "overview");
   const coreLinks = operationLinks.filter((item) => item.view !== "overview");
   const groupOpen = (key: string) => openGroups[key] ?? currentGroup === key;
-  const showNested = (key: string) => stacked || (includeNested && groupOpen(key));
+  const showNested = (key: string) => (stacked || includeNested) && groupOpen(key);
+  const showCaret = stacked || includeNested;
   const moduleActive = (slug: ModuleSlug | null) => Boolean(slug && sectionToModuleSlug(sectionTabs.section) === slug);
 
   function parentClass(slug: ModuleSlug | null, hasChildren: boolean, isActive: boolean) {
@@ -450,7 +451,7 @@ function ShellNav({
               </span>
               {stacked ? <span className="client-rail-label">{shortNavLabel(overviewLink.label)}</span> : compact ? null : overviewLink.label}
             </NavLink>
-            {includeNested && !stacked && coreLinks.length > 0 ? (
+            {showCaret && coreLinks.length > 0 ? (
               <NavCaret open={groupOpen("operations")} label={overviewLink.label} onToggle={() => onToggleGroup("operations")} />
             ) : null}
           </div>
@@ -491,7 +492,7 @@ function ShellNav({
               </span>
               {stacked ? <span className="client-rail-label">Resources</span> : compact ? null : "Lab Resources"}
             </NavLink>
-            {includeNested && !stacked ? (
+            {showCaret ? (
               <NavCaret open={groupOpen("resources")} label="Lab Resources" onToggle={() => onToggleGroup("resources")} />
             ) : null}
           </div>
@@ -539,7 +540,7 @@ function ShellNav({
                 </span>
                 {stacked ? <span className="client-rail-label">{shortNavLabel(item.label)}</span> : compact ? null : item.label}
               </NavLink>
-              {includeNested && !stacked && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
+              {showCaret && hasChildren && group ? <NavCaret open={open} label={item.label} onToggle={() => onToggleGroup(group)} /> : null}
             </div>
             {hasChildren && group && showNested(group) ? (
               <div className="lims-nav-children" role="group" aria-label={`${item.label} pages`}>
