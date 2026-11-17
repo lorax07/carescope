@@ -29,7 +29,7 @@ export function CrmOverviewPage() {
     <CrmShell studio priorities={false} title="CRM Overview" lede="How the laboratory’s accounts are doing, what they need, and who should act next.">
       <div className="client-home">
         <div className="client-overview-head">
-          <CrmModuleTitle title="CRM Overview" />
+          <CrmModuleTitle title="CRM Overview" subtitle="How the laboratory’s accounts are doing, what they need, and who should act next." />
         </div>
         <div className="client-home-main">
           <div className="client-kpis">

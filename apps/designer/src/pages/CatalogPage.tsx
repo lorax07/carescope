@@ -1,5 +1,5 @@
 import { MODULE_INTEGRATIONS, SYSTEM_EVENT_CATALOG } from "@carescope/workflow-core";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { workflowService } from "../platform";
 
 export function CatalogPage() {
@@ -7,16 +7,11 @@ export function CatalogPage() {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <p className="lims-eyebrow">Integration map</p>
-          <ScreenTitle name="design">LIMS module catalog</ScreenTitle>
-          <p>
-            Events, actions, and entity types exposed by each laboratory module for
-            workflow automation and system integration.
-          </p>
-        </div>
-      </div>
+      <ModuleHeader
+        name="design"
+        title="LIMS module catalog"
+        subtitle="Events, actions, and entity types exposed by each laboratory module for workflow automation and system integration."
+      />
 
       <h2 style={{ fontSize: "1rem", color: "var(--text-muted)" }}>
         Modules ({MODULE_INTEGRATIONS.length})

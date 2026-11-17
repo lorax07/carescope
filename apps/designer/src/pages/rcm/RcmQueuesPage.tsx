@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Filter01 } from "../../components/Filter01";
 import { captureAccession } from "../../revenueCycle";
 import { QUEUE_META, formatMoney, postRemittance, rcmCanWrite, useRcm, type QueueId } from "../../rcm";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -41,11 +41,9 @@ export function RcmQueuesPage() {
 
   return (
     <RcmShell studio title="Exceptions" lede="Each row is one reason money is stuck.">
+      <ModuleHeader name="queues" title="Exceptions" subtitle="Each row is one reason money is stuck." />
       <div className="client-home">
         <div className="client-home-main">
-          <header className="client-board-head">
-            <ScreenTitle name="queues">Exceptions</ScreenTitle>
-          </header>
           <div className="client-board-links">
             <Link to="/app/billing/capture">Charge capture</Link>
             <Link to="/app/billing/denials">Denials</Link>

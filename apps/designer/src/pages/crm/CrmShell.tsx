@@ -1,18 +1,13 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
 import { CLIENT_CHAPTERS } from "../moduleChapters";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { TopPriorities } from "./TopPriorities";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
-export function CrmModuleTitle({ title }: { title: string }) {
-  return (
-    <div className="crm-studio-title">
-      <p className="lims-eyebrow">Sequence CRM</p>
-      <ScreenTitle>{title}</ScreenTitle>
-    </div>
-  );
+export function CrmModuleTitle({ title, subtitle }: { title: string; subtitle?: string }) {
+  return <ModuleHeader title={title} subtitle={subtitle} />;
 }
 
 export function CrmShell({
@@ -31,16 +26,7 @@ export function CrmShell({
   priorities?: boolean;
   children: ReactNode;
 }) {
-  const heading = (
-    <div className="lims-page-header">
-      <div>
-        <p className="lims-eyebrow">Sequence CRM</p>
-        <ScreenTitle>{title}</ScreenTitle>
-        {priorities ? null : <p className="lims-page-lede">{lede}</p>}
-      </div>
-      {actions ? <div className="rcm-header-actions">{actions}</div> : null}
-    </div>
-  );
+  const heading = <ModuleHeader title={title} subtitle={lede} action={actions} />;
   const header = studio ? null : heading;
   return (
     <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${priorities ? " has-priorities" : ""}`}>
@@ -48,7 +34,6 @@ export function CrmShell({
         <>
           {header}
           <div className="crm-priority-main">
-            {studio ? null : <p className="lims-page-lede">{lede}</p>}
             {children}
           </div>
           <aside className="crm-priority-side">

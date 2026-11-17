@@ -1,6 +1,6 @@
 import { findInstrument } from "./instruments";
 import { findSample } from "./samples";
-import { ScreenTitle } from "./pages/ScreenTitle";
+import { ModuleHeader } from "./pages/ModuleHeader";
 
 export type RunSequence = {
   id: string;
@@ -73,14 +73,7 @@ export function RunSequenceView({ run }: { run: RunSequence }) {
 
   return (
     <div className="lims-page run-sequence-view">
-      <div className="run-sequence-heading">
-        <div>
-          <p className="lims-eyebrow">Current run sequence</p>
-          <ScreenTitle name="testing">{run.id}</ScreenTitle>
-          <p className="lims-page-lede">{run.method} · {run.operator} · started {run.startedAt}</p>
-        </div>
-        <span className="lims-status testing">In testing</span>
-      </div>
+      <ModuleHeader name="testing" title={run.id} subtitle={`${run.method} · ${run.operator} · started ${run.startedAt}`} action={<span className="lims-status testing">In testing</span>} />
 
       <ol className="run-stepper" aria-label="Instrument progress">
         {run.steps.map((step, index) => (

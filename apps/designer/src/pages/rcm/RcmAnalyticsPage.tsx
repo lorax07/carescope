@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { formatMoney, useRcm } from "../../rcm";
 import { SourceBars } from "../crm/clientStudio";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { RcmEmpty, RcmShell } from "./RcmShell";
 import { RevenueAssist } from "./revenueStudio";
 
@@ -94,11 +94,9 @@ export function RcmAnalyticsPage() {
 
   return (
     <RcmShell studio title="Performance" lede="Patterns across payers, clients, and procedures.">
+      <ModuleHeader name="analytics" title="Performance" subtitle="Patterns across payers, clients, and procedures." />
       <div className="client-home">
         <div className="client-home-main">
-          <header className="client-board-head">
-            <ScreenTitle name="analytics">Performance</ScreenTitle>
-          </header>
           <div className="client-kpis">
             <Link className="client-kpi" to="/app/billing/claims">
               <header>

@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { Link, useSearchParams } from "react-router-dom";
 import { buttonFormat1 } from "../buttonFormat1";
 import { pinState, useReviewerPin, verifyReviewerPin } from "../reviewerPin";
@@ -579,15 +579,10 @@ export function QualityPage() {
 
   return (
     <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">This is a quality and Compliance module</p>
-          <ScreenTitle>Sequence Compliance</ScreenTitle>
-          <p className="lims-page-lede">
-            Deviations, CAPA, change control, and documents move through signed steps. The audit trail keeps every signature and every rejected attempt.
-          </p>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Sequence Compliance"
+        subtitle="Deviations, CAPA, change control, and documents move through signed steps. The audit trail keeps every signature and every rejected attempt."
+      />
       {pin !== "active" ? (
         <p className="quality-error quality-pin">Electronic signatures need a reviewer PIN. Open Settings and set one. A PIN lasts 90 days.</p>
       ) : null}

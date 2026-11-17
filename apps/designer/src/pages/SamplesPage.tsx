@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleDetailBody } from "./SampleDetailPage";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { SectionTabStrip, useSectionTabs } from "../sectionTabs";
 import { AccountLink } from "../components/AccountTable";
 import { ElectronicOrdersDialog } from "../components/ElectronicOrdersDialog";
@@ -267,29 +267,26 @@ export function SamplesPage({ view = "home" }: { view?: SampleView }) {
           : [];
   return (
     <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">{copy.eyebrow}</p>
-          <ScreenTitle>{title}</ScreenTitle>
-          <p className="lims-page-lede">{copy.lede}</p>
-        </div>
-        <div className="lims-header-side">
+      <ModuleHeader
+        title={title}
+        subtitle={copy.lede}
+        action={
           <div className="lims-page-actions">
-          {pageButtons.map((button) => (
-            <button
-              key={button.id}
-              type="button"
-              className="btn"
-              style={buttonStyle(button.color)}
-              disabled={button.id === "completeReview" && approveTarget.length === 0}
-              onClick={() => runButton(button.id)}
-            >
-              {view === "testing" && button.id === "createBatch" ? "Start Testing" : button.label}
-            </button>
-          ))}
+            {pageButtons.map((button) => (
+              <button
+                key={button.id}
+                type="button"
+                className="btn"
+                style={buttonStyle(button.color)}
+                disabled={button.id === "completeReview" && approveTarget.length === 0}
+                onClick={() => runButton(button.id)}
+              >
+                {view === "testing" && button.id === "createBatch" ? "Start Testing" : button.label}
+              </button>
+            ))}
           </div>
-        </div>
-      </div>
+        }
+      />
       <SectionTabStrip mainLabel={title} />
 
       {view === "home" ? (

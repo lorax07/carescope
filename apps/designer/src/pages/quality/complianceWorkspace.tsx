@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Filter01 } from "../../components/Filter01";
 import { filter01Match } from "../../filter01";
@@ -62,8 +62,8 @@ import {
 function Shell({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="lims-page rcm-page client-studio">
+      <ModuleHeader title={title} />
       <div className="client-home">
-        <ScreenTitle className="client-overview-title">{title}</ScreenTitle>
         {children}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 import { AccountLink } from "../components/AccountTable";
 import { ReceiptFormDialog } from "../components/ReceiptFormDialog";
 import { findSample, CONDITION_LABEL, STATUS_LABEL, isOnHold, type SampleRecord } from "../samples";
@@ -117,12 +117,7 @@ export function SampleDetailBody({
           <Link className="btn sample-back" to="/app/ops/home">Back to Home</Link>
         </div>
       ) : null}
-      <div className="lims-page-header">
-        <div>
-          {showTitle ? <ScreenTitle name="home">Sample Details</ScreenTitle> : null}
-          <p className="lims-page-lede">{sample.client} · {sample.tests}</p>
-        </div>
-      </div>
+      {showTitle ? <ModuleHeader name="home" title="Sample Details" subtitle={`${sample.client} · ${sample.tests}`} /> : null}
 
       <div className="sample-detail-grid">
         <section className="lims-panel sample-detail-panel">
@@ -253,7 +248,7 @@ export function SampleDetailPage() {
     return (
       <div className="lims-page">
         <p className="lims-eyebrow">Sample</p>
-        <ScreenTitle name="home">Sample not found</ScreenTitle>
+        <ModuleHeader name="home" title="Sample not found" subtitle="That sample is not in this laboratory." />
         <p>
           <Link to="/app/ops/home">Back to Home</Link>
         </p>

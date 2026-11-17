@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
 import { REVENUE_CHAPTERS } from "../moduleChapters";
-import { ScreenTitle } from "../ScreenTitle";
+import { ModuleHeader } from "../ModuleHeader";
 
 export const RCM_SUBNAV = REVENUE_CHAPTERS;
 
@@ -22,19 +22,18 @@ export function RcmShell({
   return (
     <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
       {studio ? null : (
-        <div className="lims-page-header">
-          <div>
-            <p className="lims-eyebrow">Sequence Revenue</p>
-            <ScreenTitle>{title}</ScreenTitle>
-            <p className="lims-page-lede">{lede}</p>
-          </div>
-          <div className="rcm-header-actions">
-            <Link className={`module-setup-link${onSetup ? " is-on" : ""}`} to="/app/billing/config">
-              Billing setup
-            </Link>
-            {actions}
-          </div>
-        </div>
+        <ModuleHeader
+          title={title}
+          subtitle={lede}
+          action={
+            <>
+              <Link className={`module-setup-link${onSetup ? " is-on" : ""}`} to="/app/billing/config">
+                Billing setup
+              </Link>
+              {actions}
+            </>
+          }
+        />
       )}
       {children}
     </div>

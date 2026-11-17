@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { LAB_MODULE_CATALOG, type LabModuleId } from "../intrasite/catalog";
-import { ScreenTitle } from "./ScreenTitle";
+import { ModuleHeader } from "./ModuleHeader";
 
 type ModulePageProps = {
   eyebrow: string;
@@ -9,21 +9,18 @@ type ModulePageProps = {
   rows: { label: string; value: string; meta?: string; tone?: string }[];
 };
 
-function ModulePage({ eyebrow, title, lede, rows }: ModulePageProps) {
+function ModulePage({ title, lede, rows }: ModulePageProps) {
   return (
     <div className="lims-page">
-      <div className="lims-page-header">
-        <div>
-          <p className="lims-eyebrow">{eyebrow}</p>
-          <ScreenTitle>{title}</ScreenTitle>
-          <p className="lims-page-lede">{lede}</p>
-        </div>
-        <div className="lims-page-actions">
+      <ModuleHeader
+        title={title}
+        subtitle={lede}
+        action={
           <Link to="/app/workflows" className="btn">
             Related workflows
           </Link>
-        </div>
-      </div>
+        }
+      />
       <section className="lims-panel">
         <ul className="lims-list dense">
           {rows.map((row) => (
