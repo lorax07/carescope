@@ -35,11 +35,7 @@ export function LandingPage() {
         <SiteHeader />
         <section className="lp-showcase" aria-labelledby="showcase-heading">
           <h1 id="showcase-heading">
-            Modern Laboratory Software
-            <br />
-            Build for change
-            <br />
-            Designed to scale
+            Sequence is the easiest laboratory platform to implement, integrate, configure, and maintain
           </h1>
           <div className="lp-showcase-actions">
             <Link to="/app" className="lp-pill lp-pill-dark">
