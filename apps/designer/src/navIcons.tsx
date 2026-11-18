@@ -242,6 +242,55 @@ export function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "migration" || name === "import") {
+    return (
+      <svg {...common}>
+        <path d="M5 7h9M11 4l3 3-3 3" />
+        <path d="M19 17H10M13 14l-3 3 3 3" />
+      </svg>
+    );
+  }
+  if (name === "mapping") {
+    return (
+      <svg {...common}>
+        <path d="M4 7h6M4 12h6M4 17h6M14 7h6M14 17h6M10 7l4 10" />
+      </svg>
+    );
+  }
+  if (name === "duplicates") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="6" width="10" height="12" rx="1.5" />
+        <rect x="10" y="4" width="10" height="12" rx="1.5" />
+      </svg>
+    );
+  }
+  if (name === "reconcile") {
+    return (
+      <svg {...common}>
+        <path d="M5 6h6v12H5zM13 6h6v12h-6zM8 10h0M16 10h0M8 14h0" />
+        <path d="M8 10h.01M16 10h.01M8 14h.01M16 14h.01" />
+      </svg>
+    );
+  }
+  if (name === "evidence") {
+    return (
+      <svg {...common}>
+        <path d="M7 3.5h7l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 20V5A1.5 1.5 0 0 1 7 3.5z" />
+        <path d="M14 3.5V8h4.5M8 13h8M8 17h5" />
+      </svg>
+    );
+  }
+  if (name === "templates") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="4" width="7" height="7" rx="1.5" />
+        <rect x="13" y="4" width="7" height="7" rx="1.5" />
+        <rect x="4" y="13" width="7" height="7" rx="1.5" />
+        <path d="M16.5 13.5v7M13 17h7" />
+      </svg>
+    );
+  }
   if (name === "resources" || name === "patients" || name === "inventory" || name === "sites" || name === "storage" || name === "lots" || name === "reference") {
     const mark = name === "patients" ? "M12 12a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 1.5c-3.2 0-6 1.6-6 3.5v1h12v-1c0-1.9-2.8-3.5-6-3.5z"
       : name === "inventory" ? "M12 3.5 20 8v8l-8 4.5L4 16V8l8-4.5z"
