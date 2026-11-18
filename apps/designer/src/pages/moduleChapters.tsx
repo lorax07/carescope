@@ -110,6 +110,13 @@ export const MIGRATION_CHAPTERS: ModuleChapter[] = [
   { id: "templates", to: "/app/migration/templates", label: "Templates", question: "Starting maps for common systems.", hideTools: true, tools: [{ to: "/app/migration/templates", label: "Templates", match: "/app/migration/templates" }] },
 ];
 
+export const CONNECT_CHAPTERS: ModuleChapter[] = [
+  { id: "interfaces", to: "/app/connect/interfaces", label: "Interfaces", question: "HL7, FHIR, REST, webhooks, gateway, and files.", hideTools: true, tools: [{ to: "/app/connect/interfaces", label: "Interfaces", match: "/app/connect/interfaces" }] },
+  { id: "messages", to: "/app/connect/messages", label: "Messages", question: "The audit trail for every message.", hideTools: true, tools: [{ to: "/app/connect/messages", label: "Messages", match: "/app/connect/messages" }] },
+  { id: "mapping", to: "/app/connect/mapping", label: "Mapping", question: "How a partner field becomes a Sequence field.", hideTools: true, tools: [{ to: "/app/connect/mapping", label: "Mapping", match: "/app/connect/mapping" }] },
+  { id: "failures", to: "/app/connect/failures", label: "Attention", question: "What failed, and the action that can clear it.", hideTools: true, tools: [{ to: "/app/connect/failures", label: "Attention", match: "/app/connect/failures" }] },
+];
+
 export const REVENUE_CHAPTERS: ModuleChapter[] = [
   {
     id: "claims",

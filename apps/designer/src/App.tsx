@@ -12,7 +12,7 @@ import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
-import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, MIGRATION_CHAPTERS, REVENUE_CHAPTERS, chapterForPath, type ModuleChapter } from "./pages/moduleChapters";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, CONNECT_CHAPTERS, MIGRATION_CHAPTERS, REVENUE_CHAPTERS, chapterForPath, type ModuleChapter } from "./pages/moduleChapters";
 import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
@@ -25,6 +25,7 @@ const NAV = [
   { to: "/app/quality", label: "Sequence Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
   { to: "/app/insights", label: "Sequence Insights" },
+  { to: "/app/connect", label: "Sequence Connect" },
   { to: "/app/migration", label: "Migration Studio" },
 ] as const;
 
@@ -34,6 +35,7 @@ function shortNavLabel(label: string): string {
     "Sequence CRM": "CRM",
     "Sequence Instruments": "Lab Ops",
     "Sequence Insights": "Insights",
+    "Sequence Connect": "Connect",
     "Migration Studio": "Migration",
     "Sequence Compliance": "Compliance",
     "Sequence Revenue": "Revenue",
@@ -54,6 +56,7 @@ function nestedNavFor(to: string) {
   if (to === "/app/instruments") return INSTRUMENT_CHAPTERS;
   if (to === "/app/quality") return COMPLIANCE_CHAPTERS;
   if (to === "/app/migration") return MIGRATION_CHAPTERS;
+  if (to === "/app/connect") return CONNECT_CHAPTERS;
   return [];
 }
 
@@ -62,6 +65,7 @@ function chaptersForGroup(group: string): readonly ModuleChapter[] {
   if (group === "instruments") return INSTRUMENT_CHAPTERS;
   if (group === "quality") return COMPLIANCE_CHAPTERS;
   if (group === "migration") return MIGRATION_CHAPTERS;
+  if (group === "connect") return CONNECT_CHAPTERS;
   return CLIENT_CHAPTERS;
 }
 
@@ -267,7 +271,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : item.to === "/app/migration" ? "migration" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : item.to === "/app/migration" ? "migration" : item.to === "/app/connect" ? "connect" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -330,6 +334,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
       billing: "Sequence Revenue",
       insights: "Sequence Insights",
       migration: "Migration Studio",
+      connect: "Sequence Connect",
       resources: "Lab Resources",
     }[section] ??
     "Workspace"

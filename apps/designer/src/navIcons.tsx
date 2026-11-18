@@ -242,6 +242,32 @@ export function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "connect" || name === "interfaces") {
+    return (
+      <svg {...common}>
+        <circle cx="6" cy="12" r="2.2" />
+        <circle cx="18" cy="7" r="2.2" />
+        <circle cx="18" cy="17" r="2.2" />
+        <path d="M8.2 11.2 15.8 8M8.2 12.8l7.6 3.2" />
+      </svg>
+    );
+  }
+  if (name === "messages") {
+    return (
+      <svg {...common}>
+        <path d="M5 6.5h14v9.5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.5z" />
+        <path d="m5 8 7 5 7-5" />
+      </svg>
+    );
+  }
+  if (name === "failures") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 8v5M12 16h.01" />
+      </svg>
+    );
+  }
   if (name === "migration" || name === "import") {
     return (
       <svg {...common}>
