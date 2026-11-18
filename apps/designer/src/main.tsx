@@ -47,6 +47,7 @@ import { CrmOpportunitiesPage } from "./pages/crm/CrmOpportunitiesPage";
 import { CrmOverviewPage } from "./pages/crm/CrmOverviewPage";
 import { CrmTasksPage } from "./pages/crm/CrmTasksPage";
 import { InsightsChatPage } from "./pages/InsightsChatPage";
+import { MigrationPage } from "./pages/migration/MigrationPages";
 import { LibraryPage } from "./pages/LibraryPage";
 import { WorkflowDesignPage } from "./pages/WorkflowDesignPage";
 import { DesignerPage } from "./pages/DesignerPage";
@@ -67,6 +68,11 @@ function ClientIndex() {
   const account = params.get("account");
   if (account) return <Navigate to={`/app/connectivity/clients/${account}`} replace />;
   return <CrmOverviewPage />;
+}
+
+function MigrationRoute() {
+  const { section } = useParams();
+  return <MigrationPage section={section} />;
 }
 
 function WorkflowRedirect() {
@@ -151,6 +157,8 @@ createRoot(document.getElementById("root")!).render(
           <Route path="billing/capture" element={<BillingPage />} />
           <Route path="billing" element={<BillingIndex />} />
           <Route path="insights" element={<InsightsChatPage />} />
+          <Route path="migration/:section" element={<MigrationRoute />} />
+          <Route path="migration" element={<MigrationPage />} />
           <Route path="resources" element={<LabResourcesPage />} />
           <Route path="resources/:resourceId" element={<LabResourcesPage />} />
           <Route path="design" element={<WorkflowDesignPage />} />

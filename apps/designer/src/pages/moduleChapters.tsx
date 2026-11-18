@@ -100,6 +100,16 @@ export const COMPLIANCE_CHAPTERS: ModuleChapter[] = [
   { id: "audits", to: "/app/quality/audits", label: "Audits", question: "Internal and external audits and findings.", hideTools: true, tools: [{ to: "/app/quality/audits", label: "Audits", match: "/app/quality/audits" }] },
 ];
 
+export const MIGRATION_CHAPTERS: ModuleChapter[] = [
+  { id: "import", to: "/app/migration/import", label: "Import", question: "Extracts from the current LIMS.", hideTools: true, tools: [{ to: "/app/migration/import", label: "Import", match: "/app/migration/import" }] },
+  { id: "mapping", to: "/app/migration/mapping", label: "Mapping", question: "Old fields onto Sequence fields.", hideTools: true, tools: [{ to: "/app/migration/mapping", label: "Mapping", match: "/app/migration/mapping" }] },
+  { id: "issues", to: "/app/migration/issues", label: "Issues", question: "Missing and inconsistent values.", hideTools: true, tools: [{ to: "/app/migration/issues", label: "Issues", match: "/app/migration/issues" }] },
+  { id: "duplicates", to: "/app/migration/duplicates", label: "Duplicates", question: "Records that already exist.", hideTools: true, tools: [{ to: "/app/migration/duplicates", label: "Duplicates", match: "/app/migration/duplicates" }] },
+  { id: "reconcile", to: "/app/migration/reconcile", label: "Reconcile", question: "Source counts beside Sequence.", hideTools: true, tools: [{ to: "/app/migration/reconcile", label: "Reconcile", match: "/app/migration/reconcile" }] },
+  { id: "evidence", to: "/app/migration/evidence", label: "Evidence", question: "The cutover packet.", hideTools: true, tools: [{ to: "/app/migration/evidence", label: "Evidence", match: "/app/migration/evidence" }] },
+  { id: "templates", to: "/app/migration/templates", label: "Templates", question: "Starting maps for common systems.", hideTools: true, tools: [{ to: "/app/migration/templates", label: "Templates", match: "/app/migration/templates" }] },
+];
+
 export const REVENUE_CHAPTERS: ModuleChapter[] = [
   {
     id: "claims",

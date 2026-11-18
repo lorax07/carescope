@@ -12,7 +12,7 @@ import { readLimsSession } from "./limsSession";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
-import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./pages/moduleChapters";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, MIGRATION_CHAPTERS, REVENUE_CHAPTERS, chapterForPath, type ModuleChapter } from "./pages/moduleChapters";
 import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
@@ -25,6 +25,7 @@ const NAV = [
   { to: "/app/quality", label: "Sequence Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
   { to: "/app/insights", label: "Sequence Insights" },
+  { to: "/app/migration", label: "Migration Studio" },
 ] as const;
 
 function shortNavLabel(label: string): string {
@@ -33,6 +34,7 @@ function shortNavLabel(label: string): string {
     "Sequence CRM": "CRM",
     "Sequence Instruments": "Lab Ops",
     "Sequence Insights": "Insights",
+    "Migration Studio": "Migration",
     "Sequence Compliance": "Compliance",
     "Sequence Revenue": "Revenue",
     "Workflow design": "Design",
@@ -51,7 +53,16 @@ function nestedNavFor(to: string) {
   if (to === "/app/connectivity") return CLIENT_CHAPTERS;
   if (to === "/app/instruments") return INSTRUMENT_CHAPTERS;
   if (to === "/app/quality") return COMPLIANCE_CHAPTERS;
+  if (to === "/app/migration") return MIGRATION_CHAPTERS;
   return [];
+}
+
+function chaptersForGroup(group: string): readonly ModuleChapter[] {
+  if (group === "billing") return REVENUE_CHAPTERS;
+  if (group === "instruments") return INSTRUMENT_CHAPTERS;
+  if (group === "quality") return COMPLIANCE_CHAPTERS;
+  if (group === "migration") return MIGRATION_CHAPTERS;
+  return CLIENT_CHAPTERS;
 }
 
 function navGlyph(to: string, fallback: string) {
@@ -256,7 +267,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : item.to === "/app/migration" ? "migration" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -288,7 +299,7 @@ function ShellNav({
                     aria-label={compact ? sub.label : undefined}
                     onClick={() => sectionTabs.showSection(section)}
                     className={() => {
-                      const chapters = group === "billing" ? REVENUE_CHAPTERS : group === "instruments" ? INSTRUMENT_CHAPTERS : group === "quality" ? COMPLIANCE_CHAPTERS : CLIENT_CHAPTERS;
+                      const chapters = chaptersForGroup(group);
                       const on = chapterForPath(chapters, pathname)?.id === sub.id;
                       return `lims-nav-item is-core-child${on ? " active" : ""}`;
                     }}
@@ -318,6 +329,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
       quality: "Sequence Compliance",
       billing: "Sequence Revenue",
       insights: "Sequence Insights",
+      migration: "Migration Studio",
       resources: "Lab Resources",
     }[section] ??
     "Workspace"
