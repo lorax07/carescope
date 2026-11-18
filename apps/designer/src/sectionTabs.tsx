@@ -36,6 +36,7 @@ export function sectionFromPath(path: string): string {
   if (path.startsWith("/app/billing")) return "billing";
   if (path.startsWith("/app/insights")) return "insights";
   if (path.startsWith("/app/migration")) return "migration";
+  if (path.startsWith("/app/connect")) return "connect";
   if (path.startsWith("/app/resources")) return "resources";
   if (path === "/app" || path === "/app/") return "overview";
   return "home";

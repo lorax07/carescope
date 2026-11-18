@@ -80,13 +80,14 @@ export function sectionToModuleSlug(section: string): ModuleSlug | null {
   return null;
 }
 
-export function pathToNavGroup(pathname: string): "operations" | "connectivity" | "billing" | "instruments" | "quality" | "resources" | "migration" | null {
+export function pathToNavGroup(pathname: string): "operations" | "connectivity" | "billing" | "instruments" | "quality" | "resources" | "migration" | "connect" | null {
   if (pathname.startsWith("/app/resources")) return "resources";
   if (pathname.startsWith("/app/connectivity")) return "connectivity";
   if (pathname.startsWith("/app/billing")) return "billing";
   if (pathname.startsWith("/app/instruments")) return "instruments";
   if (pathname.startsWith("/app/quality")) return "quality";
   if (pathname.startsWith("/app/migration")) return "migration";
+  if (pathname.startsWith("/app/connect")) return "connect";
   if (
     pathname.startsWith("/app/design") ||
     pathname.startsWith("/app/workflows") ||

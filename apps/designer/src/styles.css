@@ -10135,3 +10135,155 @@ button.client-kpi.is-on {
   }
 }
 
+.connect-studio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.connect-studio > .client-hero {
+  margin-bottom: 0;
+}
+
+.connect-split {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.4fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.connect-attention-list,
+.connect-failure-list,
+.connect-channel-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connect-attention-list li,
+.connect-failure-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 0.75rem 0;
+  border-top: 1px solid #efeaf8;
+}
+
+.connect-attention-list p,
+.connect-failure-list p,
+.connect-channel-list span,
+.connect-detail p {
+  margin: 0.15rem 0 0;
+  color: #3d3a55;
+}
+
+.connect-channel-list button {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.connect-channel-list button.is-current {
+  background: #efeaff;
+}
+
+.connect-channel-list strong,
+.connect-attention-list strong,
+.connect-failure-list strong {
+  color: #1a1440;
+}
+
+.connect-attention,
+.connect-action {
+  margin: 0.45rem 0 0;
+}
+
+.connect-attention {
+  color: #8a2a2a;
+  font-weight: 650;
+}
+
+.connect-action {
+  color: #3c345f;
+}
+
+.connect-detail h3 {
+  margin: 0.9rem 0 0.35rem;
+  color: #1a1440;
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.connect-trail {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connect-trail li {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.55rem 0 0.55rem 0.85rem;
+  border-left: 2px solid #e4def6;
+}
+
+.connect-trail li.is-fail {
+  border-left-color: #d4534b;
+}
+
+.connect-trail li.is-ok {
+  border-left-color: #1f9d62;
+}
+
+.connect-trail li.is-wait {
+  border-left-color: #c4a000;
+}
+
+.connect-trail strong {
+  display: block;
+  color: #1a1440;
+}
+
+.connect-trail span,
+.connect-trail p {
+  margin: 0;
+  color: #5c5678;
+  font-size: 0.84rem;
+}
+
+.migration-select input {
+  min-width: 12rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e2def2;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a1440;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .connect-split,
+  .connect-trail li,
+  .connect-attention-list li,
+  .connect-failure-list li {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}
+

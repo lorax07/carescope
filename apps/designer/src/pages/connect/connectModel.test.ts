@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vitest";
+import { INITIAL_MESSAGES, interfaceById, matchesQuery, withAttempt, withQuarantine, withTokenReplaced, CONNECT_INTERFACES } from "./connectModel";
+
+describe("sequence connect message handling", () => {
+  it("delivers a timeout on retry and records the attempt", () => {
+    const timeout = INITIAL_MESSAGES.find((message) => message.id === "MSG-24022");
+    expect(timeout).toBeTruthy();
+    const next = withAttempt(timeout!, "Nov 17, 4:22 PM CT", false);
+    expect(next.status).toBe("delivered");
+    expect(next.steps.at(-1)?.detail).toBe("Destination accepted the message.");
+    expect(next.steps.some((step) => step.detail.includes("timed out"))).toBe(true);
+  });
+
+  it("keeps a missing patient failed and writes the same rejection again", () => {
+    const missing = INITIAL_MESSAGES.find((message) => message.id === "MSG-24018");
+    const next = withAttempt(missing!, "Nov 17, 4:30 PM CT", false);
+    expect(next.status).toBe("failed");
+    expect(next.steps.at(-1)?.label).toBe("Delivery attempt 2");
+    expect(next.steps.at(-1)?.detail).toContain("V-104428");
+  });
+
+  it("lets a replaced token succeed on the following retry", () => {
+    const denied = INITIAL_MESSAGES.find((message) => message.id === "MSG-24031");
+    const replaced = withTokenReplaced(denied!, "Nov 17, 4:40 PM CT");
+    expect(withAttempt(denied!, "Nov 17, 4:41 PM CT", false).status).toBe("failed");
+    expect(withAttempt(replaced, "Nov 17, 4:42 PM CT", false).status).toBe("delivered");
+  });
+
+  it("blocks a retry after a file is quarantined", () => {
+    const file = INITIAL_MESSAGES.find((message) => message.id === "MSG-24040");
+    const held = withQuarantine(file!, "Nov 17, 4:45 PM CT");
+    const retried = withAttempt(held, "Nov 17, 4:46 PM CT", false);
+    expect(retried.status).toBe("held");
+    expect(retried.steps.at(-1)?.label).toBe("Retry blocked");
+  });
+
+  it("searches the audit by error text and payload", () => {
+    const channel = interfaceById(CONNECT_INTERFACES, "north-orm");
+    const hit = INITIAL_MESSAGES.filter((message) => matchesQuery(message, channel?.name ?? "", "V-104428"));
+    expect(hit.map((message) => message.id)).toContain("MSG-24018");
+    expect(INITIAL_MESSAGES.filter((message) => matchesQuery(message, "", "invalid_token")).map((message) => message.id)).toEqual(["MSG-24031"]);
+  });
+});

@@ -1,0 +1,394 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { ModuleHeader } from "../ModuleHeader";
+import {
+  CONNECT_TARGETS,
+  attentionMessages,
+  interfaceHealth,
+  matchesQuery,
+  type ConnectMessage,
+  type MessageStatus,
+} from "./connectModel";
+import {
+  quarantineFile,
+  replaceToken,
+  replayMessage,
+  retryMessage,
+  selectMessage,
+  setTransformTarget,
+  useConnect,
+} from "./connectStore";
+
+const STEPS = [
+  { to: "/app/connect/interfaces", label: "Interfaces", key: "interfaces" },
+  { to: "/app/connect/messages", label: "Messages", key: "messages" },
+  { to: "/app/connect/mapping", label: "Mapping", key: "mapping" },
+  { to: "/app/connect/failures", label: "Attention", key: "failures" },
+] as const;
+
+const COPY: Record<string, { title: string; subtitle: string }> = {
+  overview: {
+    title: "Sequence Connect",
+    subtitle: "What happened to every message, and what still needs a person.",
+  },
+  interfaces: {
+    title: "Interfaces",
+    subtitle: "HL7, FHIR, REST, webhooks, the instrument gateway, and file drops.",
+  },
+  messages: {
+    title: "Message audit",
+    subtitle: "Search the trail. Each message keeps every attempt.",
+  },
+  mapping: {
+    title: "Transformation",
+    subtitle: "Reusable maps from a partner field to a Sequence field.",
+  },
+  failures: {
+    title: "Needs attention",
+    subtitle: "Failed and retrying messages, with the next action that can actually clear them.",
+  },
+};
+
+function Pill({ tone, children }: { tone: string; children: string }) {
+  return <span className={`migration-pill is-${tone}`}>{children}</span>;
+}
+
+function statusTone(status: MessageStatus): string {
+  if (status === "delivered") return "ok";
+  if (status === "retrying") return "warn";
+  if (status === "held") return "wait";
+  return "block";
+}
+
+function statusLabel(status: MessageStatus): string {
+  if (status === "delivered") return "Delivered";
+  if (status === "retrying") return "Retrying";
+  if (status === "held") return "Held";
+  return "Failed";
+}
+
+function StepLinks({ current }: { current: string }) {
+  return (
+    <nav className="migration-steps" aria-label="Connect sections">
+      {STEPS.map((step) => (
+        <Link key={step.key} to={step.to} className={step.key === current ? "is-current" : undefined} aria-current={step.key === current ? "page" : undefined}>
+          {step.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function MessageActions({ message }: { message: ConnectMessage }) {
+  return (
+    <div className="migration-actions">
+      {message.credential && !message.recoverable ? (
+        <button type="button" className="btn" onClick={() => replaceToken(message.id)}>Replace token</button>
+      ) : null}
+      {message.interfaceId === "ref-file" && message.status === "failed" ? (
+        <button type="button" className="btn" onClick={() => quarantineFile(message.id)}>Quarantine file</button>
+      ) : null}
+      <button type="button" className="btn btn-primary" onClick={() => retryMessage(message.id)}>Retry now</button>
+      <button type="button" className="btn" onClick={() => replayMessage(message.id)}>Replay</button>
+    </div>
+  );
+}
+
+function Trail({ message }: { message: ConnectMessage }) {
+  return (
+    <ol className="connect-trail">
+      {message.steps.map((item, index) => (
+        <li key={`${item.label}-${index}`} className={`is-${item.state}`}>
+          <div>
+            <strong>{item.label}</strong>
+            <span>{item.at}</span>
+          </div>
+          <p>{item.detail}</p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function MessageDetail({ messageId }: { messageId: string }) {
+  const state = useConnect();
+  const message = state.messages.find((item) => item.id === messageId) ?? state.messages[0];
+  const channel = state.interfaces.find((item) => item.id === message.interfaceId);
+  if (!message) return null;
+  return (
+    <article className="lims-panel migration-panel connect-detail">
+      <div className="migration-panel-head">
+        <div>
+          <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
+          <h2>{message.id} · {message.messageType}</h2>
+          <p>{channel?.name} · {channel?.kind} · {message.summary}</p>
+        </div>
+        <MessageActions message={message} />
+      </div>
+      {message.attention ? <p className="connect-attention">{message.attention}</p> : null}
+      {message.action ? <p className="connect-action">{message.action}</p> : null}
+      <h3>What happened</h3>
+      <Trail message={message} />
+      {message.mapped.length ? (
+        <>
+          <h3>Fields written</h3>
+          <table className="lims-table">
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Sequence</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {message.mapped.map((row) => (
+                <tr key={row.source}>
+                  <td>{row.source}</td>
+                  <td>{row.target}</td>
+                  <td>{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : null}
+      <h3>Payload</h3>
+      <pre className="migration-evidence">{message.payload}</pre>
+    </article>
+  );
+}
+
+function OverviewView() {
+  const state = useConnect();
+  const attention = attentionMessages(state.messages);
+  const retrying = state.messages.filter((message) => message.status === "retrying").length;
+  const delivered = state.messages.filter((message) => message.status === "delivered").length;
+  const held = state.messages.filter((message) => message.status === "held").length;
+  return (
+    <>
+      <section className="lims-kpi-row" aria-label="Integration status">
+        <article className="lims-kpi"><span>Needs attention</span><strong>{attention.length}</strong><small>Failed or waiting on a retry</small></article>
+        <article className="lims-kpi"><span>Retrying</span><strong>{retrying}</strong><small>Payload unchanged, destination did not reject it</small></article>
+        <article className="lims-kpi"><span>Delivered</span><strong>{delivered}</strong><small>Accepted by Sequence or the partner</small></article>
+        <article className="lims-kpi"><span>Held</span><strong>{held}</strong><small>Stopped before anything was sent</small></article>
+      </section>
+      <section className="lims-panel migration-panel">
+        <h2>What needs a person</h2>
+        <ul className="connect-attention-list">
+          {attention.map((message) => {
+            const channel = state.interfaces.find((item) => item.id === message.interfaceId);
+            return (
+              <li key={message.id}>
+                <div>
+                  <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
+                  <strong>{message.id} · {channel?.name}</strong>
+                  <p>{message.attention}</p>
+                  <p>{message.action}</p>
+                </div>
+                <Link to="/app/connect/messages" onClick={() => selectMessage(message.id)}>Open trail</Link>
+              </li>
+            );
+          })}
+          {attention.length === 0 ? <li>Nothing is waiting. Delivered messages stay in the audit.</li> : null}
+        </ul>
+      </section>
+    </>
+  );
+}
+
+function InterfacesView() {
+  const state = useConnect();
+  const [selected, setSelected] = useState(state.interfaces[1]?.id ?? state.interfaces[0].id);
+  const channel = state.interfaces.find((item) => item.id === selected) ?? state.interfaces[0];
+  const health = interfaceHealth(state.messages, state.transforms, channel);
+  const recent = state.messages.filter((message) => message.interfaceId === channel.id);
+  return (
+    <div className="connect-split">
+      <section className="lims-panel migration-panel">
+        <h2>Channels</h2>
+        <ul className="connect-channel-list">
+          {state.interfaces.map((item) => {
+            const itemHealth = interfaceHealth(state.messages, state.transforms, item);
+            return (
+              <li key={item.id}>
+                <button type="button" className={item.id === channel.id ? "is-current" : undefined} aria-pressed={item.id === channel.id} onClick={() => setSelected(item.id)}>
+                  <strong>{item.name}</strong>
+                  <span>{item.kind} · {item.direction}</span>
+                  <Pill tone={itemHealth.tone}>{itemHealth.label}</Pill>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+      <section className="lims-panel migration-panel">
+        <Pill tone={health.tone}>{health.label}</Pill>
+        <h2>{channel.name}</h2>
+        <p>{channel.note}</p>
+        <p>{channel.endpoint}</p>
+        <p className="connect-attention">{health.detail}</p>
+        <table className="lims-table">
+          <thead>
+            <tr>
+              <th>Message</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recent.map((message) => (
+              <tr key={message.id}>
+                <td><Link to="/app/connect/messages" onClick={() => selectMessage(message.id)}>{message.id}</Link></td>
+                <td>{message.messageType}</td>
+                <td><Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
+
+function MessagesView() {
+  const state = useConnect();
+  const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<"all" | MessageStatus>("all");
+  const rows = useMemo(() => state.messages.filter((message) => {
+    const channel = state.interfaces.find((item) => item.id === message.interfaceId);
+    if (status !== "all" && message.status !== status) return false;
+    return matchesQuery(message, channel?.name ?? "", query);
+  }), [state, query, status]);
+  const selected = rows.find((message) => message.id === state.selectedId) ?? rows[0];
+  return (
+    <div className="connect-split connect-audit">
+      <section className="lims-panel migration-panel">
+        <label className="migration-select">
+          Search messages
+          <input aria-label="Search messages" value={query} placeholder="Id, MRN, error, payload" onChange={(event) => setQuery(event.target.value)} />
+        </label>
+        <div className="migration-filters" role="group" aria-label="Message status">
+          {(["all", "failed", "retrying", "held", "delivered"] as const).map((key) => (
+            <button key={key} type="button" className={status === key ? "is-current" : undefined} aria-pressed={status === key} onClick={() => setStatus(key)}>
+              {key === "all" ? "All" : statusLabel(key)}
+            </button>
+          ))}
+        </div>
+        <ul className="connect-channel-list">
+          {rows.map((message) => {
+            const channel = state.interfaces.find((item) => item.id === message.interfaceId);
+            return (
+              <li key={message.id}>
+                <button type="button" className={selected?.id === message.id ? "is-current" : undefined} aria-pressed={selected?.id === message.id} onClick={() => selectMessage(message.id)}>
+                  <strong>{message.id} · {message.messageType}</strong>
+                  <span>{channel?.name} · {message.summary}</span>
+                  <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
+                </button>
+              </li>
+            );
+          })}
+          {rows.length === 0 ? <li>No messages match that search.</li> : null}
+        </ul>
+      </section>
+      {selected ? <MessageDetail messageId={selected.id} /> : null}
+    </div>
+  );
+}
+
+function MappingView() {
+  const state = useConnect();
+  const [interfaceId, setInterfaceId] = useState("fhir-patient");
+  const rows = state.transforms.filter((row) => row.interfaceId === interfaceId);
+  const channel = state.interfaces.find((item) => item.id === interfaceId);
+  return (
+    <section className="lims-panel migration-panel">
+      <div className="migration-panel-head">
+        <div>
+          <h2>{channel?.name}</h2>
+          <p>{channel?.kind}. This map is reused the next time the same profile arrives.</p>
+        </div>
+        <label className="migration-select">
+          Interface
+          <select aria-label="Interface map" value={interfaceId} onChange={(event) => setInterfaceId(event.target.value)}>
+            {state.interfaces.map((item) => (
+              <option key={item.id} value={item.id}>{item.name}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <table className="lims-table">
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Sample</th>
+            <th>Sequence field</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.id} className={row.target ? undefined : "is-diff"}>
+              <td>{row.source}</td>
+              <td>{row.sample}</td>
+              <td>
+                <select aria-label={`Sequence field for ${row.source}`} value={row.target} onChange={(event) => setTransformTarget(row.id, event.target.value)}>
+                  <option value="">Leave unmapped</option>
+                  {CONNECT_TARGETS.map((field) => (
+                    <option key={field.id} value={field.id}>{field.label}</option>
+                  ))}
+                </select>
+              </td>
+              <td>{row.note || (row.target ? "" : "Unmapped. The message stays held.")}</td>
+            </tr>
+          ))}
+          {rows.length === 0 ? <tr><td colSpan={4}>This interface has no map rows yet.</td></tr> : null}
+        </tbody>
+      </table>
+      <p>{rows.some((row) => !row.target) ? "Unmapped fields hold the message until someone maps them." : "Every field on this profile has a Sequence field."}</p>
+    </section>
+  );
+}
+
+function FailuresView() {
+  const state = useConnect();
+  const rows = state.messages.filter((message) => message.status !== "delivered");
+  return (
+    <section className="lims-panel migration-panel">
+      <h2>Open messages</h2>
+      <ul className="connect-failure-list">
+        {rows.map((message) => {
+          const channel = state.interfaces.find((item) => item.id === message.interfaceId);
+          return (
+            <li key={message.id}>
+              <div>
+                <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
+                <strong>{message.id} · {channel?.kind} · {message.messageType}</strong>
+                <p>{message.attention}</p>
+                <p>{message.action}</p>
+                <Link to="/app/connect/messages" onClick={() => selectMessage(message.id)}>Open the full trail</Link>
+              </div>
+              <MessageActions message={message} />
+            </li>
+          );
+        })}
+        {rows.length === 0 ? <li>Every message has delivered. The audit still has the attempts.</li> : null}
+      </ul>
+    </section>
+  );
+}
+
+export function ConnectPage({ section }: { section?: string }) {
+  const view = section && section in COPY ? section : "overview";
+  const copy = COPY[view];
+  return (
+    <div className="lims-page connect-studio">
+      <ModuleHeader title={copy.title} subtitle={copy.subtitle} />
+      <StepLinks current={view === "overview" ? "" : view} />
+      {view === "overview" ? <OverviewView /> : null}
+      {view === "interfaces" ? <InterfacesView /> : null}
+      {view === "messages" ? <MessagesView /> : null}
+      {view === "mapping" ? <MappingView /> : null}
+      {view === "failures" ? <FailuresView /> : null}
+    </div>
+  );
+}
