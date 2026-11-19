@@ -9737,6 +9737,33 @@ button.client-kpi.is-on {
   height: 0.7rem;
 }
 
+.client-top-zone {
+  margin-left: 0.2rem;
+  color: #344054;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.client-top-actions .lims-bookmark-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  background: transparent;
+  color: #344054;
+}
+
+.lims-shell.is-app-rail:not(:has(.client-hero)) .client-search-pill {
+  border-color: #e4e0f2;
+  background: #f7f5ff;
+}
+
+.lims-shell.is-app-rail .lims-page:not(:has(.client-hero)),
+.lims-shell.is-app-rail .page:not(:has(.client-hero)) {
+  padding-top: calc(var(--header-h, 4.2rem) + 0.6rem);
+}
+
 .lims-shell.is-app-rail .client-studio,
 .lims-shell.is-app-rail .lims-page.client-studio {
   background: #fff;
