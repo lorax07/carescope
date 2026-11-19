@@ -1,5 +1,5 @@
 import { NavIcon } from "./navIcons";
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
 import { BookmarkMenu } from "./components/BookmarkMenu";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
@@ -86,29 +86,6 @@ type OpenEdge = "left" | "right" | "top";
 
 const LAUNCHER = 64;
 const EDGE_PAD = 0;
-
-const MAGNET = 168;
-
-function pointerDistances(x: number, y: number, width: number): Record<OpenEdge, number> {
-  return {
-    top: Math.max(0, y),
-    left: Math.max(0, x),
-    right: Math.max(0, width - x),
-  };
-}
-
-function nearestEdge(x: number, y: number, width: number, current: OpenEdge): OpenEdge {
-  const distances = pointerDistances(x, y, width);
-  let edge = current;
-  let best = distances[current];
-  for (const side of ["left", "right", "top"] as const) {
-    if (distances[side] < best - 12) {
-      best = distances[side];
-      edge = side;
-    }
-  }
-  return edge;
-}
 
 function snappedPos(edge: OpenEdge, width: number, dockWidth: number): { x: number; y: number } {
   if (edge === "right") return { x: Math.max(EDGE_PAD, width - EDGE_PAD - dockWidth), y: EDGE_PAD };
@@ -399,15 +376,14 @@ function AppFrame() {
   }, []);
   const labOps = useLabOperations();
   const sectionTabs = useSectionTabs();
-  const [infraOpen, setInfraOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [navOpen, setNavOpen] = useState(false);
+  const [navOpen] = useState(false);
   const currentGroup = pathToNavGroup(location.pathname);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const [navPos, setNavPos] = useState({ x: EDGE_PAD, y: EDGE_PAD });
-  const [openEdge, setOpenEdge] = useState<OpenEdge>("left");
+  const [openEdge] = useState<OpenEdge>("left");
   const [docked, setDocked] = useState(true);
-  const [dragging, setDragging] = useState(false);
+  const [dragging] = useState(false);
   const [settling, setSettling] = useState(false);
   const [nearEdge, setNearEdge] = useState(false);
   const navPosRef = useRef(navPos);
@@ -491,7 +467,7 @@ function AppFrame() {
         ? current
         : next,
     );
-  }, [navOpen, navPos, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
+  }, [navOpen, navPos, edge, viewport, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -518,7 +494,7 @@ function AppFrame() {
     measure();
     const timer = window.setTimeout(measure, 340);
     return () => window.clearTimeout(timer);
-  }, [navOpen, edge, viewport, infraOpen, dragging, settling, docked, dockTick]);
+  }, [navOpen, edge, viewport, dragging, settling, docked, dockTick]);
 
   useLayoutEffect(() => {
     if (!docked || dragging || settling) return;
@@ -541,47 +517,6 @@ function AppFrame() {
     }, 480);
   }
 
-  function finishDrag(pointer: { x: number; y: number }) {
-    setDragging(false);
-    draggingRef.current = false;
-    const dockBox = dockRef.current?.getBoundingClientRect();
-    const dockWidth = dockBox?.width ?? LAUNCHER;
-    const candidate = nearestEdge(pointer.x, pointer.y, window.innerWidth, openEdgeRef.current);
-    const gap = pointerDistances(pointer.x, pointer.y, window.innerWidth)[candidate];
-    if (gap > MAGNET) {
-      window.clearTimeout(settleTimer.current);
-      setDocked(false);
-      setSettling(false);
-      setNearEdge(false);
-      return;
-    }
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setSettling(!reduce);
-    setOpenEdge(candidate);
-    openEdgeRef.current = candidate;
-    const seat = () => {
-      const measured = dockRef.current?.offsetWidth ?? dockWidth;
-      const next = snappedPos(candidate, window.innerWidth, measured);
-      const current = navPosRef.current;
-      if (reduce || (Math.abs(next.x - current.x) < 1 && Math.abs(next.y - current.y) < 1)) {
-        navPosRef.current = next;
-        setNavPos(next);
-        setSettling(false);
-        setDocked(true);
-        setNearEdge(false);
-        return;
-      }
-      navPosRef.current = next;
-      setNavPos(next);
-      armDocked();
-    };
-    if (reduce) {
-      seat();
-      return;
-    }
-    requestAnimationFrame(() => requestAnimationFrame(seat));
-  }
-
   function returnToLastEdge() {
     const side = openEdgeRef.current;
     const measured = dockRef.current?.offsetWidth ?? LAUNCHER;
@@ -601,63 +536,6 @@ function AppFrame() {
     navPosRef.current = next;
     setNavPos(next);
     armDocked();
-  }
-
-  function beginNavDrag(event: ReactPointerEvent<HTMLElement>, options?: { toggle?: boolean }) {
-    if (event.button !== 0) return;
-    const target = event.target as HTMLElement;
-    if (!target.closest("a")) event.preventDefault();
-    const startX = event.clientX;
-    const startY = event.clientY;
-    const origin = navPosRef.current;
-    let moved = false;
-    let pointerX = startX;
-    let pointerY = startY;
-    function move(ev: { clientX: number; clientY: number }) {
-      pointerX = ev.clientX;
-      pointerY = ev.clientY;
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
-      if (!moved) {
-        if (Math.hypot(dx, dy) <= 4) return;
-        moved = true;
-        window.clearTimeout(settleTimer.current);
-        draggingRef.current = true;
-        setDragging(true);
-        setDocked(false);
-        setSettling(false);
-      }
-      const bounds = dockRef.current?.getBoundingClientRect();
-      const limitX = window.innerWidth - Math.ceil(bounds?.width ?? LAUNCHER) - 8;
-      const limitY = window.innerHeight - Math.ceil(bounds?.height ?? LAUNCHER) - 8;
-      const x = Math.min(Math.max(0, origin.x + dx), Math.max(0, limitX));
-      const y = Math.min(Math.max(0, origin.y + dy), Math.max(0, limitY));
-      const next = { x, y };
-      navPosRef.current = next;
-      const candidate = nearestEdge(ev.clientX, ev.clientY, window.innerWidth, openEdgeRef.current);
-      const gap = pointerDistances(ev.clientX, ev.clientY, window.innerWidth)[candidate];
-      setNearEdge(gap <= MAGNET);
-      setNavPos(next);
-    }
-    function up() {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("mouseup", up);
-      if (!moved) {
-        draggingRef.current = false;
-        setDragging(false);
-        if (options?.toggle) setNavOpen((open) => !open);
-        return;
-      }
-      suppressClick.current = true;
-      window.getSelection()?.removeAllRanges();
-      finishDrag({ x: pointerX, y: pointerY });
-    }
-    window.addEventListener("pointermove", move);
-    window.addEventListener("mousemove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("mouseup", up);
   }
 
   function toggleNavGroup(key: string) {
@@ -690,63 +568,6 @@ function AppFrame() {
   }
 
   const operationLinks = labOps.menu.filter((item) => item.enabled && item.label.trim());
-
-  const labEnvironment = (
-        <div className="lims-site-block">
-          <div className="lims-site">
-            <span className="lims-site-dot" />
-            <span className="lims-site-name">
-              {lims ? `${lims.labName} · ${lims.envLabel}` : "North Lab · Production"}
-            </span>
-            {lims ? (
-              <button
-                type="button"
-                className="lims-site-expand"
-                aria-expanded={infraOpen}
-                aria-label="Backend infrastructure"
-                onClick={() => setInfraOpen((open) => !open)}
-              >
-                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-                  <path
-                    d={infraOpen ? "M4 10l4-4 4 4" : "M4 6l4 4 4-4"}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            ) : null}
-          </div>
-          {lims && infraOpen ? (
-            <dl className="lims-infra">
-              <div>
-                <dt>Connection speed</dt>
-                <dd>{lims.connectionSpeed || "18 ms"}</dd>
-              </div>
-              <div>
-                <dt>Database</dt>
-                <dd>
-                  <code>{lims.databaseName || "cs_apex_diagnostics_dev1"}</code>
-                </dd>
-              </div>
-              <div>
-                <dt>Error log</dt>
-                <dd>{lims.errorLog || "Clear"}</dd>
-              </div>
-              <div>
-                <dt>Last backup</dt>
-                <dd>
-                  {lims.lastBackup
-                    ? new Date(lims.lastBackup).toLocaleString()
-                    : new Date("2026-09-23T02:15:00.000Z").toLocaleString()}
-                </dd>
-              </div>
-            </dl>
-          ) : null}
-        </div>
-  );
 
   return (
     <div
@@ -846,61 +667,23 @@ function AppFrame() {
       </aside>
       </div>
 
-      <header className={clientModule ? "lims-topbar client-topbar" : "lims-topbar"} ref={headerRef}>
-        {clientModule ? (
-          <>
-            <label className="client-search-pill">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
-              <input type="search" aria-label="Search" placeholder="Building better healthcare for everyone" />
-            </label>
-            <div className="client-top-actions">
-              <button type="button" aria-label="Notifications">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V10a6 6 0 1 1 12 0v6l1.4 2H4.6L6 16Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
-                <i />
-              </button>
-              <button type="button" className="client-avatar" aria-label={`Account for ${signedInName}`} onClick={() => setSettingsOpen(true)}>
-                {railInitials}
-                <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 4.4 6 8l3.8-3.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
-              </button>
-            </div>
-          </>
-        ) : null}
-        {clientModule ? null : (
-        <>
-        <div className="lims-topbar-brand" ref={brandRef}>
-        <button
-          ref={logoRef}
-          type="button"
-          className="sequence-nav-toggle"
-          aria-expanded={navOpen}
-          aria-label={navOpen ? "Minimize navigation" : "Expand navigation"}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-            beginNavDrag(event, { toggle: true });
-          }}
-        >
-          <span className="sequence-nav-wordmark" aria-hidden="true"><img src="/sequence-logo.png" alt="" /></span>
-          <span className="sequence-stage-mark" aria-hidden="true"><img src="/sequence-q.png" alt="" /></span>
-        </button>
-        {edge === "top" ? <div className="lims-topbar-site">{labEnvironment}</div> : null}
-        </div>
-        <div className="lims-topbar-nav-slot" aria-hidden="true" />
-        <div className="lims-search">
-          <input
-            type="search"
-            placeholder="Search accession, order, client…"
-            aria-label="Search laboratory records"
-          />
-        </div>
-        <div className="lims-topbar-meta">
+      <header className="lims-topbar client-topbar" ref={headerRef}>
+        <label className="client-search-pill">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+          <input type="search" aria-label="Search laboratory records" placeholder="Search accession, order, client…" />
+        </label>
+        <div className="client-top-actions">
           <BookmarkMenu userId={lims?.userId || lims?.username || "M. Chen"} />
-          <time className="lims-chip" dateTime={now.toISOString()}>
-            {signedInName} · {now.toLocaleString()}
-          </time>
-          <span className="lims-chip muted">{utcOffsetLabel(now)}</span>
+          <button type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V10a6 6 0 1 1 12 0v6l1.4 2H4.6L6 16Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+            <i />
+          </button>
+          <button type="button" className="client-avatar" aria-label={`Account for ${signedInName}`} onClick={() => setSettingsOpen(true)}>
+            {railInitials}
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 4.4 6 8l3.8-3.6" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
+          </button>
+          <span className="client-top-zone">{utcOffsetLabel(now)}</span>
         </div>
-        </>
-        )}
       </header>
 
       <div className="lims-main">
