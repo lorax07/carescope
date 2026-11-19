@@ -39,7 +39,7 @@ const VIEW_COPY: Record<SampleView, { eyebrow: string; title: string; lede: stri
   home: {
     eyebrow: "Sequence Operations",
     title: "Home",
-    lede: "Receive, prioritize, and move samples. The list follows the priority order set in Workflow design.",
+    lede: "Receive, prioritize, and move samples. The list follows the priority order set in Workflow Designer.",
   },
   testing: {
     eyebrow: "Sequence Operations",

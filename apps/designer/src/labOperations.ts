@@ -57,7 +57,7 @@ function operationsKey(instanceId = currentInstanceId()): string {
 export const DEFAULT_LAB_OPERATIONS: LabOperationsConfig = {
   priorities: ["STAT", "Rush", "Routine"],
   menu: [
-    { id: "overview", label: "Operations Overview", view: "overview", enabled: true },
+    { id: "overview", label: "Lab Operations", view: "overview", enabled: true },
     { id: "home", label: "Home", view: "home", enabled: true },
     { id: "testing", label: "Testing", view: "testing", enabled: true },
     { id: "review", label: "Review", view: "review", enabled: true },
@@ -127,8 +127,8 @@ function mergeMenu(saved: LabMenuItem[] | undefined): LabMenuItem[] {
   const overview = missing.filter((item) => item.view === "overview");
   const rest = missing.filter((item) => item.view !== "overview");
   return [...overview, ...known, ...rest].map((item) =>
-    item.view === "overview" && (!item.label.trim() || item.label.trim() === "Overview")
-      ? { ...item, label: "Operations Overview" }
+    item.view === "overview" && (!item.label.trim() || item.label.trim() === "Overview" || item.label.trim() === "Operations Overview" || item.label.trim() === "Home")
+      ? { ...item, label: "Lab Operations" }
       : item,
   );
 }

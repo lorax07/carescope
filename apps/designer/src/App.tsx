@@ -19,8 +19,7 @@ import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 
 const NAV = [
-  { to: "/app/design", label: "Workflow design" },
-  { to: "/app/instruments", label: "Sequence Instruments" },
+  { to: "/app/design", label: "Workflow Designer" },
   { to: "/app/connectivity", label: "Sequence CRM" },
   { to: "/app/quality", label: "Sequence Compliance" },
   { to: "/app/billing", label: "Sequence Revenue" },
@@ -31,15 +30,16 @@ const NAV = [
 
 function shortNavLabel(label: string): string {
   const known: Record<string, string> = {
-    "Operations Overview": "Home",
+    "Operations Overview": "Lab Operations",
+    "Lab Operations": "Lab Operations",
     "Sequence CRM": "CRM",
-    "Sequence Instruments": "Lab Ops",
     "Sequence Insights": "Insights",
     "Sequence Connect": "Connect",
     "Migration Studio": "Migration",
     "Sequence Compliance": "Compliance",
     "Sequence Revenue": "Revenue",
-    "Workflow design": "Design",
+    "Workflow design": "Workflow Designer",
+    "Workflow Designer": "Workflow Designer",
     "Lab Resources": "Resources",
     "Growth Hub": "Growth",
     "Laboratories & sites": "Sites",
@@ -271,7 +271,7 @@ function ShellNav({
         const nested = nestedNavFor(item.to);
         const section = sectionFromPath(item.to);
         const slug = pathToModuleSlug(item.to);
-        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/instruments" ? "instruments" : item.to === "/app/quality" ? "quality" : item.to === "/app/migration" ? "migration" : item.to === "/app/connect" ? "connect" : null;
+        const group = item.to === "/app/billing" ? "billing" : item.to === "/app/connectivity" ? "connectivity" : item.to === "/app/quality" ? "quality" : item.to === "/app/migration" ? "migration" : item.to === "/app/connect" ? "connect" : null;
         const hasChildren = nested.length > 0;
         const open = Boolean(group && groupOpen(group));
         return (
@@ -328,7 +328,7 @@ function workspaceTabLabel(section: string, menu: { view: string; label: string 
   return (
     menu.find((item) => item.view === section)?.label ??
     {
-      design: "Workflow design",
+      design: "Workflow Designer",
       connectivity: "Sequence CRM",
       quality: "Sequence Compliance",
       billing: "Sequence Revenue",

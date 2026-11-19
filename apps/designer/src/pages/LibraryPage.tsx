@@ -256,7 +256,7 @@ export function LibraryPage() {
     <div className="page">
       <ModuleHeader
         name="design"
-        title="Laboratory workflows"
+        title="Workflow Designer"
         subtitle="Configure no-code automations for sample receive, testing, review, CAPA, calibration, and CoA release across the LIMS."
         action={<button type="button" className="btn btn-primary" onClick={createNew}>New workflow</button>}
       />
