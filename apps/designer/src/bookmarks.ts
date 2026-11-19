@@ -62,7 +62,7 @@ function screenTarget(pathname: string): BookmarkTarget {
     "/app/instruments": "Instruments",
     "/app/quality": "Compliance",
     "/app/billing": "Revenue",
-    "/app/design": "Workflow design",
+    "/app/design": "Workflow Designer",
     "/app/workflows": "Workflows",
     "/app/insights": "Insights",
     "/app/resources": "Lab resources",
