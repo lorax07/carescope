@@ -770,81 +770,24 @@ function IndustryMark({ title }: { title: string }) {
   );
 }
 
-const IT_LINKS = [
-  { d: "M 166 68 L 267 168", begin: "0.6s" },
-  { d: "M 434 68 L 333 168", begin: "1.1s" },
-  { d: "M 166 332 L 267 232", begin: "1.5s" },
-  { d: "M 434 332 L 333 232", begin: "1.9s" },
-] as const;
-
-function ItInfrastructure({ motion }: { motion: boolean }) {
-  return (
-    <figure className="lp-it-stage">
-      <svg className="lp-it-diagram" viewBox="0 0 600 400" role="img" aria-label="Sequence connecting directory, storage, instruments, and network">
-        {IT_LINKS.map((link) => (
-          <path key={link.d} className="lp-it-link" d={link.d} pathLength={1} />
-        ))}
-        {motion
-          ? IT_LINKS.map((link) => (
-              <circle key={link.begin} className="lp-it-packet" r="3.4">
-                <animateMotion dur="2.8s" repeatCount="indefinite" begin={link.begin} path={link.d} />
-              </circle>
-            ))
-          : null}
-        {motion ? (
-          <circle className="lp-it-pulse" cx="300" cy="200" r="52" fill="none" stroke="#1b6ef3" strokeWidth="1.5">
-            <animate attributeName="r" values="52;78" dur="3.4s" repeatCount="indefinite" />
-            <animate attributeName="stroke-opacity" values="0.45;0" dur="3.4s" repeatCount="indefinite" />
-          </circle>
-        ) : (
-          <circle cx="300" cy="200" r="58" fill="none" stroke="#1b6ef3" strokeOpacity="0.28" strokeWidth="1.5" />
-        )}
-        <g className="lp-it-hub">
-          <circle cx="300" cy="200" r="46" />
-          <text x="300" y="204">Sequence</text>
-        </g>
-        <g className="lp-it-node">
-          <rect x="16" y="36" width="150" height="64" rx="16" />
-          <path d="M48 52a6 6 0 1 0 0.1 0M40 78c1.4-6 4.2-8 8-8s6.6 2 8 8" />
-          <text x="70" y="73">Directory</text>
-        </g>
-        <g className="lp-it-node">
-          <rect x="434" y="36" width="150" height="64" rx="16" />
-          <ellipse cx="462" cy="56" rx="8" ry="3.2" />
-          <path d="M454 56v12c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2V56M454 62c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2" />
-          <text x="482" y="73">Storage</text>
-        </g>
-        <g className="lp-it-node">
-          <rect x="16" y="300" width="150" height="64" rx="16" />
-          <path d="M40 332h4l2-6 3 12 2-6h5" />
-          <text x="70" y="337">Instruments</text>
-        </g>
-        <g className="lp-it-node">
-          <rect x="434" y="300" width="150" height="64" rx="16" />
-          <circle cx="454" cy="332" r="2.2" />
-          <circle cx="474" cy="322" r="2.2" />
-          <circle cx="474" cy="342" r="2.2" />
-          <path d="M456 330.5 472 323.5M456 333.5 472 340.5M474 324.4v15" />
-          <text x="488" y="337">Network</text>
-        </g>
-      </svg>
-    </figure>
-  );
-}
-
 const IT_BADGES = ["Directory", "Storage", "Instruments", "Network"] as const;
 
+const IT_OWNERSHIP = [
+  {
+    title: "Grant access once",
+    detail: "People in the laboratory get access in Sequence, instead of a separate account in every connected tool.",
+  },
+  {
+    title: "Review the record itself",
+    detail: "Who opened or changed an accession is on that accession, so a security review does not start in a second system.",
+  },
+  {
+    title: "Keep ownership in one place",
+    detail: "Retention, export, and who can see the data are decisions IT makes in the system the laboratory runs.",
+  },
+] as const;
+
 function ItFriendly() {
-  const [motion, setMotion] = useState(true);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setMotion(!media.matches);
-    update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
-
   return (
     <section className="lp-section lp-it" id="it-friendly" aria-labelledby="it-friendly-heading">
       <div className="lp-it-band">
@@ -873,9 +816,20 @@ function ItFriendly() {
           <li>simplify maintenance</li>
           <li>and give IT teams greater flexibility and control</li>
         </ol>
-      </div>
-      <div className="lp-it-visual">
-        <ItInfrastructure motion={motion} />
+        <div className="lp-it-own">
+          <h3>Security and data ownership are easier to manage.</h3>
+          <p>
+            Splitting laboratory data across a LIMS, a file share, and a vendor portal makes security and ownership harder to manage. Sequence keeps that data in one system the laboratory controls.
+          </p>
+          <ul>
+            {IT_OWNERSHIP.map((item) => (
+              <li key={item.title}>
+                <strong>{item.title}</strong>
+                {item.detail}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );
