@@ -1,9 +1,11 @@
 import { useSyncExternalStore } from "react";
 import {
+  catalogInstrument,
   connectorById,
   initialConnectState,
   targetLabel,
   withAppConnection,
+  withInstrumentIntegration,
   withAttempt,
   withQuarantine,
   withTokenReplaced,
@@ -79,6 +81,13 @@ export function startAppConnection(connectorId: string, account: string) {
   const connector = connectorById(connectorId);
   if (!connector) return;
   state = withAppConnection(state, connector, account, nowLabel());
+  emit();
+}
+
+export function startInstrumentIntegration(catalogId: string, site: string, labId: string) {
+  const instrument = catalogInstrument(catalogId);
+  if (!instrument) return;
+  state = withInstrumentIntegration(state, instrument, site, labId, nowLabel());
   emit();
 }
 

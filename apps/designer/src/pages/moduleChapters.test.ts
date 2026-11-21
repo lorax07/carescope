@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./moduleChapters";
+import { CLIENT_CHAPTERS, COMPLIANCE_CHAPTERS, CONNECT_CHAPTERS, REVENUE_CHAPTERS, chapterForPath } from "./moduleChapters";
 
 describe("client and revenue chapters", () => {
   it("keeps revenue to four work areas and adds Inbox beside the client areas", () => {
@@ -50,5 +50,13 @@ describe("client and revenue chapters", () => {
     expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/deviations")?.id).toBe("deviations");
     expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/capa/CAPA-015")?.id).toBe("capa");
     expect(chapterForPath(COMPLIANCE_CHAPTERS, "/app/quality/admin")).toBeNull();
+  });
+
+  it("keeps connect messages inside the interfaces submodule", () => {
+    expect(CONNECT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Interfaces", "Instrument integration"]);
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/messages")?.id).toBe("interfaces");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/mapping")?.id).toBe("interfaces");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/failures")?.id).toBe("interfaces");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/instruments")?.id).toBe("instruments");
   });
 });

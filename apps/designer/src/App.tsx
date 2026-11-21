@@ -9,6 +9,7 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations";
 import { LAB_RESOURCES, LAB_RESOURCE_ACCESS_EVENT, userCanSeeLabResources } from "./labResourceAccess";
 import { readLimsSession } from "./limsSession";
+import { InstrumentCatalogScreen } from "./pages/connect/ConnectPages";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
@@ -329,6 +330,9 @@ function PinnedScreen({ tab }: { tab: PinnedTab }) {
   }
   if (tab.kind === "testing") {
     return <div className="lims-page"><section className="lims-panel"><StartTestingWorkflow pool={getSamples().filter((sample) => sample.status === "testing" || sample.status === "received" || sample.status === "accessioning" || sample.status === "processing")} /></section></div>;
+  }
+  if (tab.kind === "instrument-catalog") {
+    return <div className="lims-page"><InstrumentCatalogScreen /></div>;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
