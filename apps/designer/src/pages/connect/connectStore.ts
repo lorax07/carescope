@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from "react";
 import {
+  connectorById,
   initialConnectState,
   targetLabel,
+  withAppConnection,
   withAttempt,
   withQuarantine,
   withTokenReplaced,
@@ -71,6 +73,13 @@ export function replaceToken(id: string) {
 export function quarantineFile(id: string) {
   const at = nowLabel();
   updateMessage(id, (message) => withQuarantine(message, at));
+}
+
+export function startAppConnection(connectorId: string, account: string) {
+  const connector = connectorById(connectorId);
+  if (!connector) return;
+  state = withAppConnection(state, connector, account, nowLabel());
+  emit();
 }
 
 export function setTransformTarget(id: string, target: string) {

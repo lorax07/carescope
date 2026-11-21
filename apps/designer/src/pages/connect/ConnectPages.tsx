@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ModuleHeader } from "../ModuleHeader";
 import {
+  APP_CONNECTORS,
+  CONNECTOR_CATEGORIES,
   CONNECT_TARGETS,
   attentionMessages,
   interfaceHealth,
   matchesQuery,
+  type AppConnector,
   type ConnectMessage,
   type MessageStatus,
 } from "./connectModel";
@@ -16,6 +19,7 @@ import {
   retryMessage,
   selectMessage,
   setTransformTarget,
+  startAppConnection,
   useConnect,
 } from "./connectStore";
 
@@ -33,7 +37,7 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
   },
   interfaces: {
     title: "Interfaces",
-    subtitle: "HL7, FHIR, REST, webhooks, the instrument gateway, and file drops.",
+    subtitle: "HL7, FHIR, REST, webhooks, the instrument gateway, file drops, and known apps.",
   },
   messages: {
     title: "Message audit",
@@ -196,13 +200,84 @@ function OverviewView() {
   );
 }
 
+function ConnectorDialog({ connector, onClose, onStarted }: { connector: AppConnector; onClose: () => void; onStarted: (interfaceId: string) => void }) {
+  const state = useConnect();
+  const existing = state.connections.find((item) => item.connectorId === connector.id);
+  const [account, setAccount] = useState(existing?.account ?? "");
+  const [done, setDone] = useState(Boolean(existing));
+  const inputRef = useRef<HTMLInputElement>(null);
+  const trimmed = account.trim();
+
+  useEffect(() => {
+    if (!done) inputRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [done, onClose]);
+
+  function start() {
+    if (!trimmed || existing) return;
+    startAppConnection(connector.id, trimmed);
+    setDone(true);
+    onStarted(`app-${connector.id}`);
+  }
+
+  return (
+    <div className="lims-modal-backdrop" onClick={onClose}>
+      <div className="lims-modal connect-connector-dialog" role="dialog" aria-modal="true" aria-labelledby="connect-app-title" onClick={(event) => event.stopPropagation()}>
+        <div className="lims-dialog-bar">
+          <div>
+            <p className="lims-eyebrow">{connector.category}</p>
+            <h2 id="connect-app-title">{done ? `${connector.name} API connected` : `Connect ${connector.name}`}</h2>
+          </div>
+          <button type="button" className="btn" onClick={onClose}>Close</button>
+        </div>
+        <div className="connect-connector-body">
+          <p>{connector.summary}</p>
+          <p>
+            {connector.kind} · {connector.direction}. {trimmed
+              ? `Sequence calls ${connector.endpoint.replaceAll("{account}", trimmed)}.`
+              : `Enter the ${connector.accountLabel.toLowerCase()} and Sequence will call the ${connector.name} API.`}
+          </p>
+          {done ? (
+            <p className="connect-action">The handshake is in the message audit, and {connector.name} is in the channel list for {trimmed}.</p>
+          ) : (
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                start();
+              }}
+            >
+              <label className="migration-select">
+                {connector.accountLabel}
+                <input ref={inputRef} aria-label={connector.accountLabel} value={account} placeholder={connector.accountHint} onChange={(event) => setAccount(event.target.value)} />
+              </label>
+              <div className="connect-connector-actions">
+                <button type="submit" className="btn btn-primary" disabled={!trimmed}>Start API connection</button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InterfacesView() {
   const state = useConnect();
   const [selected, setSelected] = useState(state.interfaces[1]?.id ?? state.interfaces[0].id);
+  const [query, setQuery] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
   const channel = state.interfaces.find((item) => item.id === selected) ?? state.interfaces[0];
   const health = interfaceHealth(state.messages, state.transforms, channel);
   const recent = state.messages.filter((message) => message.interfaceId === channel.id);
+  const needle = query.trim().toLowerCase();
+  const openConnector = APP_CONNECTORS.find((item) => item.id === openId) ?? null;
+  const closeConnector = useCallback(() => setOpenId(null), []);
   return (
+    <>
     <div className="connect-split">
       <section className="lims-panel migration-panel">
         <h2>Channels</h2>
@@ -247,6 +322,51 @@ function InterfacesView() {
         </table>
       </section>
     </div>
+    <section className="lims-panel migration-panel connect-catalog" aria-labelledby="app-connectors-heading">
+      <div className="migration-panel-head">
+        <div>
+          <h2 id="app-connectors-heading">App connectors</h2>
+          <p>Known apps, grouped by what they do. Open one to start its API connection.</p>
+        </div>
+        <label className="migration-select">
+          Find an app
+          <input aria-label="Find an app" value={query} placeholder="Slack, CRM, email" onChange={(event) => setQuery(event.target.value)} />
+        </label>
+      </div>
+      {CONNECTOR_CATEGORIES.map((category) => {
+        const apps = APP_CONNECTORS.filter((item) => item.category === category && (!needle || `${item.name} ${item.category} ${item.summary} ${item.kind}`.toLowerCase().includes(needle)));
+        if (!apps.length) return null;
+        return (
+          <div className="connect-catalog-group" key={category}>
+            <h3>{category}</h3>
+            <ul>
+              {apps.map((app) => {
+                const connection = state.connections.find((item) => item.connectorId === app.id);
+                return (
+                  <li key={app.id}>
+                    <button type="button" onClick={() => setOpenId(app.id)}>
+                      <strong>{app.name}</strong>
+                      <span>{app.kind} · {app.summary}</span>
+                      {connection ? <Pill tone="ok">{`Connected · ${connection.account}`}</Pill> : <span className="connect-catalog-start">Start API connection</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+      {needle && !APP_CONNECTORS.some((item) => `${item.name} ${item.category} ${item.summary} ${item.kind}`.toLowerCase().includes(needle)) ? <p>No app matches that search.</p> : null}
+    </section>
+    {openConnector ? (
+      <ConnectorDialog
+        key={openConnector.id}
+        connector={openConnector}
+        onClose={closeConnector}
+        onStarted={(interfaceId) => setSelected(interfaceId)}
+      />
+    ) : null}
+    </>
   );
 }
 

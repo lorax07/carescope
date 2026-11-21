@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { INITIAL_MESSAGES, interfaceById, matchesQuery, withAttempt, withQuarantine, withTokenReplaced, CONNECT_INTERFACES } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, connectorById, initialConnectState, interfaceById, matchesQuery, withAppConnection, withAttempt, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -32,6 +32,19 @@ describe("sequence connect message handling", () => {
     const retried = withAttempt(held, "Nov 17, 4:46 PM CT", false);
     expect(retried.status).toBe("held");
     expect(retried.steps.at(-1)?.label).toBe("Retry blocked");
+  });
+
+  it("starts an app API connection once and keeps the categories", () => {
+    const slack = connectorById("slack");
+    expect(slack?.category).toBe("Messaging");
+    expect(new Set(APP_CONNECTORS.map((item) => item.category))).toEqual(new Set(["Messaging", "CRM", "Email", "EHR", "Storage", "Identity"]));
+    const started = withAppConnection(initialConnectState(), slack!, "  north-lab  ", "Nov 17, 5:00 PM CT");
+    expect(started.connections).toEqual([{ connectorId: "slack", account: "north-lab", interfaceId: "app-slack" }]);
+    expect(started.interfaces.at(-1)?.endpoint).toBe("https://hooks.slack.com/services/north-lab");
+    expect(started.messages[0]?.status).toBe("delivered");
+    expect(started.messages[0]?.steps[0]?.label).toBe("API connection started");
+    expect(withAppConnection(started, slack!, "other", "Nov 17, 5:01 PM CT").connections).toHaveLength(1);
+    expect(withAppConnection(initialConnectState(), slack!, "   ", "Nov 17, 5:02 PM CT").connections).toHaveLength(0);
   });
 
   it("searches the audit by error text and payload", () => {

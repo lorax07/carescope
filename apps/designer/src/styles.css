@@ -10292,6 +10292,92 @@ button.client-kpi.is-on {
   font-size: 0.84rem;
 }
 
+.connect-catalog-group + .connect-catalog-group {
+  margin-top: 1.15rem;
+}
+
+.connect-catalog-group h3 {
+  margin: 0 0 0.45rem;
+  color: #6a6488;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.connect-catalog-group ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connect-catalog-group button {
+  display: grid;
+  align-content: start;
+  gap: 0.28rem;
+  width: 100%;
+  min-height: 7.4rem;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid #e6e1f4;
+  border-radius: 14px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.connect-catalog-group button:hover,
+.connect-catalog-group button:focus-visible {
+  border-color: #6d5efc;
+}
+
+.connect-catalog-group strong {
+  color: #1a1440;
+}
+
+.connect-catalog-group span {
+  color: #3d3a55;
+  font-size: 0.84rem;
+}
+
+.connect-catalog-start {
+  color: #4c3fd4;
+  font-weight: 700;
+}
+
+.connect-catalog-group .migration-pill {
+  white-space: normal;
+  justify-self: start;
+}
+
+.connect-connector-dialog {
+  width: min(520px, calc(100vw - 2rem));
+  min-height: 0;
+  resize: none;
+  background: #fff;
+}
+
+.connect-connector-body {
+  padding: 0.35rem 1rem 1rem;
+}
+
+.connect-connector-body p {
+  margin: 0.35rem 0 0;
+  color: #3d3a55;
+}
+
+.connect-connector-actions {
+  margin-top: 0.9rem;
+}
+
+.connect-connector-body .migration-select {
+  margin-top: 0.9rem;
+}
+
 .migration-select input {
   min-width: 12rem;
   padding: 0.35rem 0.5rem;
