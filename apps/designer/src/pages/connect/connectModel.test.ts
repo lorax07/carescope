@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, connectorById, initialConnectState, interfaceById, matchesQuery, withAppConnection, withAttempt, withQuarantine, withTokenReplaced } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, matchesQuery, withAppConnection, withAttempt, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -45,6 +45,18 @@ describe("sequence connect message handling", () => {
     expect(started.messages[0]?.steps[0]?.label).toBe("API connection started");
     expect(withAppConnection(started, slack!, "other", "Nov 17, 5:01 PM CT").connections).toHaveLength(1);
     expect(withAppConnection(initialConnectState(), slack!, "   ", "Nov 17, 5:02 PM CT").connections).toHaveLength(0);
+  });
+
+  it("starts one instrument integration for a lab", () => {
+    const alinity = catalogInstrument("alinity-c");
+    const seeded = initialConnectState();
+    expect(seeded.instruments.map((item) => item.catalogId)).toEqual(["cobas-8000", "xn-1000", "bact-alert", "hplc-1260"]);
+    const started = withInstrumentIntegration(seeded, alinity!, "East Lab", "lab-east", "Nov 17, 5:10 PM CT");
+    expect(started.instruments.at(-1)).toMatchObject({ catalogId: "alinity-c", site: "East Lab", labId: "lab-east", interfaceId: "gw-alinity-c" });
+    expect(started.interfaces.some((item) => item.id === "gw-alinity-c")).toBe(true);
+    expect(started.messages[0]?.steps[0]?.label).toBe("Integration started");
+    expect(withInstrumentIntegration(started, alinity!, "East Lab", "lab-east", "Nov 17, 5:11 PM CT").instruments.filter((item) => item.catalogId === "alinity-c")).toHaveLength(1);
+    expect(withInstrumentIntegration(seeded, alinity!, "   ", "lab-east", "Nov 17, 5:12 PM CT").instruments).toHaveLength(seeded.instruments.length);
   });
 
   it("searches the audit by error text and payload", () => {

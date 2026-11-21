@@ -5,7 +5,7 @@ import { buttonFormat1 } from "./buttonFormat1";
 export type PinnedTab = {
   id: string;
   title: string;
-  kind: "sample" | "instrument" | "run" | "testing";
+  kind: "sample" | "instrument" | "instrument-catalog" | "run" | "testing";
   recordId: string;
 };
 
@@ -116,7 +116,7 @@ function TabGlyph({ name }: { name: "main" | PinnedTab["kind"] }) {
       </svg>
     );
   }
-  if (name === "instrument" || name === "run" || name === "testing") {
+  if (name === "instrument" || name === "instrument-catalog" || name === "run" || name === "testing") {
     return (
       <svg {...common}>
         <rect x="1.8" y="3.2" width="12.4" height="8" rx="1.4" />

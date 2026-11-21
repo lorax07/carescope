@@ -9466,6 +9466,7 @@ button.client-kpi.is-on {
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-item.is-core-child .client-rail-label {
   font-size: 0.72rem;
   font-weight: 600;
+  white-space: normal;
 }
 
 .lims-shell.is-app-rail .lims-icon-rail .lims-nav-item:hover .lims-nav-icon,
@@ -10170,6 +10171,84 @@ button.client-kpi.is-on {
 
 .connect-studio > .client-hero {
   margin-bottom: 0;
+}
+
+.connect-interface-tabs {
+  margin-top: -0.15rem;
+}
+
+.connect-instrument-catalog h2 {
+  margin-bottom: 0.25rem;
+}
+
+.connect-instrument-group + .connect-instrument-group,
+.connect-instrument-start {
+  margin-top: 0.9rem;
+}
+
+.connect-instrument-group h3,
+.connect-instrument-start h3 {
+  margin: 0 0 0.4rem;
+  color: #6a6488;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.connect-instrument-start h3 {
+  color: #1a1440;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.connect-instrument-group ul {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connect-instrument-group button {
+  display: grid;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid #e6e1f4;
+  border-radius: 12px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.connect-instrument-group button.is-current,
+.connect-instrument-group button:hover,
+.connect-instrument-group button:focus-visible {
+  border-color: #6d5efc;
+}
+
+.connect-instrument-group strong {
+  color: #1a1440;
+}
+
+.connect-instrument-group span {
+  color: #3d3a55;
+  font-size: 0.82rem;
+}
+
+.connect-instrument-start {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid #efeaf8;
+}
+
+.connect-instrument-start .btn {
+  justify-self: start;
 }
 
 .connect-split {

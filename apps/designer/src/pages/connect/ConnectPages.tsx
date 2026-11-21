@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { SectionTabStrip, useSectionTabs } from "../../sectionTabs";
+import { currentLabId, currentLabName, labIdFromSite } from "../../storageScope";
 import { ModuleHeader } from "../ModuleHeader";
 import {
   APP_CONNECTORS,
   CONNECTOR_CATEGORIES,
   CONNECT_TARGETS,
+  INSTRUMENT_CATALOG,
+  INSTRUMENT_CATEGORIES,
   attentionMessages,
   interfaceHealth,
   matchesQuery,
@@ -20,10 +24,11 @@ import {
   selectMessage,
   setTransformTarget,
   startAppConnection,
+  startInstrumentIntegration,
   useConnect,
 } from "./connectStore";
 
-const STEPS = [
+const INTERFACE_TABS = [
   { to: "/app/connect/interfaces", label: "Interfaces", key: "interfaces" },
   { to: "/app/connect/messages", label: "Messages", key: "messages" },
   { to: "/app/connect/mapping", label: "Mapping", key: "mapping" },
@@ -51,6 +56,10 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
     title: "Needs attention",
     subtitle: "Failed and retrying messages, with the next action that can actually clear them.",
   },
+  instruments: {
+    title: "Instrument integration",
+    subtitle: "Analyzers connected to this lab instance.",
+  },
 };
 
 function Pill({ tone, children }: { tone: string; children: string }) {
@@ -71,12 +80,12 @@ function statusLabel(status: MessageStatus): string {
   return "Failed";
 }
 
-function StepLinks({ current }: { current: string }) {
+function InterfaceTabs({ current }: { current: string }) {
   return (
-    <nav className="migration-steps" aria-label="Connect sections">
-      {STEPS.map((step) => (
-        <Link key={step.key} to={step.to} className={step.key === current ? "is-current" : undefined} aria-current={step.key === current ? "page" : undefined}>
-          {step.label}
+    <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="Interface pages">
+      {INTERFACE_TABS.map((tab) => (
+        <Link key={tab.key} to={tab.to} role="tab" aria-selected={tab.key === current} className={tab.key === current ? "is-on" : undefined}>
+          {tab.label}
         </Link>
       ))}
     </nav>
@@ -497,18 +506,149 @@ function FailuresView() {
   );
 }
 
+function InstrumentsView() {
+  const state = useConnect();
+  const labId = currentLabId();
+  const labName = currentLabName() || "this lab instance";
+  const rows = labId ? state.instruments.filter((item) => item.labId === labId) : state.instruments;
+  return (
+    <section className="lims-panel migration-panel">
+      <h2>Connected to {labName}</h2>
+      <p>{rows.length ? "These analyzers already have a gateway on this instance." : "No analyzer is connected to this lab instance yet."}</p>
+      <table className="lims-table">
+        <thead>
+          <tr>
+            <th>Instrument</th>
+            <th>Category</th>
+            <th>Protocol</th>
+            <th>Site</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((item) => (
+            <tr key={item.id}>
+              <td>{item.name}</td>
+              <td>{item.category}</td>
+              <td>{item.protocol}</td>
+              <td>{item.site}</td>
+              <td><Pill tone={item.status === "Online" ? "ok" : "wait"}>{item.status}</Pill></td>
+            </tr>
+          ))}
+          {rows.length === 0 ? <tr><td colSpan={5}>Use Add connection to start an integration.</td></tr> : null}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+export function InstrumentCatalogScreen() {
+  const state = useConnect();
+  const labId = currentLabId();
+  const [query, setQuery] = useState("");
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [site, setSite] = useState(currentLabName() || "North Lab");
+  const [started, setStarted] = useState("");
+  const needle = query.trim().toLowerCase();
+  const picked = INSTRUMENT_CATALOG.find((item) => item.id === pickedId) ?? null;
+  const scopedLab = labId || labIdFromSite(site);
+  const already = picked ? state.instruments.some((item) => item.catalogId === picked.id && item.labId === scopedLab) : false;
+
+  function start() {
+    if (!picked || already || !site.trim()) return;
+    startInstrumentIntegration(picked.id, site, scopedLab);
+    setStarted(picked.name);
+  }
+
+  return (
+    <section className="lims-panel migration-panel connect-instrument-catalog">
+      <h2>Add an instrument</h2>
+      <p>Choose an analyzer. Starting the integration opens its gateway on this lab instance.</p>
+      <label className="migration-select">
+        Find an instrument
+        <input aria-label="Find an instrument" value={query} placeholder="Chemistry, Sysmex, HPLC" onChange={(event) => setQuery(event.target.value)} />
+      </label>
+      {INSTRUMENT_CATEGORIES.map((category) => {
+        const items = INSTRUMENT_CATALOG.filter((item) => item.category === category && (!needle || `${item.maker} ${item.name} ${item.category} ${item.protocol}`.toLowerCase().includes(needle)));
+        if (!items.length) return null;
+        return (
+          <div className="connect-instrument-group" key={category}>
+            <h3>{category}</h3>
+            <ul>
+              {items.map((item) => {
+                const connected = state.instruments.some((row) => row.catalogId === item.id && (!labId || row.labId === labId));
+                return (
+                  <li key={item.id}>
+                    <button type="button" className={pickedId === item.id ? "is-current" : undefined} aria-pressed={pickedId === item.id} onClick={() => { setPickedId(item.id); setStarted(""); }}>
+                      <strong>{item.maker} {item.name}</strong>
+                      <span>{item.protocol} · {item.summary}</span>
+                      {connected ? <Pill tone="ok">Connected</Pill> : <span className="connect-catalog-start">Select</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+      {picked ? (
+        <form
+          className="connect-instrument-start"
+          onSubmit={(event) => {
+            event.preventDefault();
+            start();
+          }}
+        >
+          <h3>{picked.maker} {picked.name}</h3>
+          {already || started === picked.name ? (
+            <p>{picked.name} is connected for {site.trim() || "this lab"}. The gateway is on the channel list.</p>
+          ) : (
+            <>
+              <label className="migration-select">
+                Site
+                <select aria-label="Instrument site" value={site} onChange={(event) => setSite(event.target.value)}>
+                  <option>North Lab</option>
+                  <option>East Lab</option>
+                </select>
+              </label>
+              <button type="submit" className="btn btn-primary">Start integration</button>
+            </>
+          )}
+        </form>
+      ) : null}
+    </section>
+  );
+}
+
 export function ConnectPage({ section }: { section?: string }) {
+  const sectionTabs = useSectionTabs();
   const view = section && section in COPY ? section : "overview";
-  const copy = COPY[view];
+  const interfaceView = view === "interfaces" || view === "messages" || view === "mapping" || view === "failures";
+  const copy = interfaceView ? { title: "Interfaces", subtitle: COPY[view].subtitle } : COPY[view];
   return (
     <div className="lims-page connect-studio">
-      <ModuleHeader title={copy.title} subtitle={copy.subtitle} />
-      <StepLinks current={view === "overview" ? "" : view} />
+      <ModuleHeader
+        name={view === "instruments" ? "instruments" : interfaceView ? "interfaces" : undefined}
+        title={copy.title}
+        subtitle={copy.subtitle}
+        action={view === "instruments" ? (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => sectionTabs.pin({ kind: "instrument-catalog", recordId: "new", title: "Add instrument" })}
+          >
+            Add connection
+          </button>
+        ) : undefined}
+      />
+      {view === "instruments" ? <SectionTabStrip mainLabel="Instrument integration" /> : null}
+      {interfaceView ? <InterfaceTabs current={view} /> : null}
       {view === "overview" ? <OverviewView /> : null}
       {view === "interfaces" ? <InterfacesView /> : null}
       {view === "messages" ? <MessagesView /> : null}
       {view === "mapping" ? <MappingView /> : null}
       {view === "failures" ? <FailuresView /> : null}
+      {view === "instruments" ? <InstrumentsView /> : null}
     </div>
   );
 }

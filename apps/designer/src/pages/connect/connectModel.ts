@@ -375,17 +375,90 @@ export type AppConnection = {
   interfaceId: string;
 };
 
+export const INSTRUMENT_CATEGORIES = ["Chemistry", "Hematology", "Immunoassay", "Microbiology", "Molecular", "Mass spectrometry", "Chromatography"] as const;
+
+export type InstrumentCategory = (typeof INSTRUMENT_CATEGORIES)[number];
+
+export type LabInstrument = {
+  id: string;
+  name: string;
+  maker: string;
+  category: InstrumentCategory;
+  protocol: string;
+  summary: string;
+};
+
+export type ConnectedInstrument = {
+  id: string;
+  catalogId: string;
+  name: string;
+  category: InstrumentCategory;
+  protocol: string;
+  site: string;
+  labId: string;
+  status: "Online" | "Idle";
+  interfaceId: string;
+};
+
+export const INSTRUMENT_CATALOG: LabInstrument[] = [
+  { id: "cobas-8000", name: "cobas 8000", maker: "Roche", category: "Chemistry", protocol: "ASTM", summary: "Chemistry line already on the local gateway." },
+  { id: "alinity-c", name: "Alinity c", maker: "Abbott", category: "Chemistry", protocol: "HL7", summary: "Chemistry orders down and results back." },
+  { id: "au5800", name: "AU5800", maker: "Beckman Coulter", category: "Chemistry", protocol: "ASTM", summary: "High-volume chemistry with host query." },
+  { id: "atellica-ch", name: "Atellica CH", maker: "Siemens", category: "Chemistry", protocol: "HL7", summary: "Chemistry module on an Atellica track." },
+  { id: "xn-1000", name: "XN-1000", maker: "Sysmex", category: "Hematology", protocol: "ASTM", summary: "CBC and differential from the hematology bench." },
+  { id: "dxh-900", name: "DxH 900", maker: "Beckman Coulter", category: "Hematology", protocol: "HL7", summary: "Hematology results with slide review flags." },
+  { id: "alinity-h", name: "Alinity h", maker: "Abbott", category: "Hematology", protocol: "HL7", summary: "Hematology on the same host as Alinity c." },
+  { id: "cobas-e801", name: "cobas e 801", maker: "Roche", category: "Immunoassay", protocol: "ASTM", summary: "Immunoassay results beside the chemistry line." },
+  { id: "alinity-i", name: "Alinity i", maker: "Abbott", category: "Immunoassay", protocol: "HL7", summary: "Immunoassay orders and released results." },
+  { id: "liaison-xl", name: "Liaison XL", maker: "DiaSorin", category: "Immunoassay", protocol: "ASTM", summary: "Specialty immunoassay from a standalone analyzer." },
+  { id: "bact-alert", name: "BacT/ALERT 3D", maker: "bioMérieux", category: "Microbiology", protocol: "Result file", summary: "Blood culture positives as they signal." },
+  { id: "bactec-fx", name: "BACTEC FX", maker: "BD", category: "Microbiology", protocol: "Result file", summary: "Blood culture signals from the FX cabinet." },
+  { id: "vitek-2", name: "VITEK 2", maker: "bioMérieux", category: "Microbiology", protocol: "HL7", summary: "Identification and susceptibility cards." },
+  { id: "cobas-6800", name: "cobas 6800", maker: "Roche", category: "Molecular", protocol: "HL7", summary: "Molecular orders and the released result." },
+  { id: "quantstudio-5", name: "QuantStudio 5", maker: "Thermo Fisher", category: "Molecular", protocol: "File drop", summary: "qPCR exports dropped by the instrument PC." },
+  { id: "panther", name: "Panther", maker: "Hologic", category: "Molecular", protocol: "HL7", summary: "Molecular testing with host query." },
+  { id: "exploris-120", name: "Orbitrap Exploris 120", maker: "Thermo Fisher", category: "Mass spectrometry", protocol: "File drop", summary: "Raw files and a result summary from the MS PC." },
+  { id: "icp-7900", name: "7900 ICP-MS", maker: "Agilent", category: "Mass spectrometry", protocol: "File drop", summary: "Metals results from the ICP-MS batch." },
+  { id: "tq-6500", name: "Triple Quad 6500", maker: "SCIEX", category: "Mass spectrometry", protocol: "File drop", summary: "Quantitation batches from the triple quad." },
+  { id: "xevo-tqs", name: "Xevo TQ-S", maker: "Waters", category: "Mass spectrometry", protocol: "File drop", summary: "LC-MS/MS batches from the Xevo." },
+  { id: "hplc-1260", name: "1260 Infinity II", maker: "Agilent", category: "Chromatography", protocol: "File drop", summary: "HPLC chromatograms and peak tables." },
+  { id: "acquity", name: "ACQUITY UPLC", maker: "Waters", category: "Chromatography", protocol: "File drop", summary: "UPLC batches from Empower." },
+  { id: "vanquish", name: "Vanquish", maker: "Thermo Fisher", category: "Chromatography", protocol: "File drop", summary: "UHPLC runs from Chromeleon." },
+];
+
+const SEEDED_INSTRUMENTS: ConnectedInstrument[] = [
+  { id: "conn-cobas-8000", catalogId: "cobas-8000", name: "cobas 8000", category: "Chemistry", protocol: "ASTM", site: "North Lab", labId: "lab-north", status: "Online", interfaceId: "cobas-gw" },
+  { id: "conn-xn-1000", catalogId: "xn-1000", name: "XN-1000", category: "Hematology", protocol: "ASTM", site: "North Lab", labId: "lab-north", status: "Online", interfaceId: "gw-xn-1000" },
+  { id: "conn-bact-alert", catalogId: "bact-alert", name: "BacT/ALERT 3D", category: "Microbiology", protocol: "Result file", site: "North Lab", labId: "lab-north", status: "Idle", interfaceId: "gw-bact-alert" },
+  { id: "conn-hplc-1260", catalogId: "hplc-1260", name: "1260 Infinity II", category: "Chromatography", protocol: "File drop", site: "North Lab", labId: "lab-north", status: "Idle", interfaceId: "gw-hplc-1260" },
+];
+
+function instrumentChannel(item: ConnectedInstrument, note: string): ConnectInterface {
+  return {
+    id: item.interfaceId,
+    name: item.name,
+    kind: "Instrument gateway",
+    direction: "Inbound",
+    endpoint: `Agent LAB-GW · ${item.protocol} · ${item.site}`,
+    note,
+  };
+}
+
 export type ConnectState = {
   interfaces: ConnectInterface[];
   messages: ConnectMessage[];
   transforms: TransformRow[];
   connections: AppConnection[];
+  instruments: ConnectedInstrument[];
   selectedId: string;
 };
 
 export function initialConnectState(): ConnectState {
+  const seededChannels = SEEDED_INSTRUMENTS
+    .filter((item) => !CONNECT_INTERFACES.some((channel) => channel.id === item.interfaceId))
+    .map((item) => instrumentChannel(item, `${item.name} is connected to this lab instance.`));
   return {
-    interfaces: CONNECT_INTERFACES.map((item) => ({ ...item })),
+    interfaces: [...CONNECT_INTERFACES.map((item) => ({ ...item })), ...seededChannels],
     messages: INITIAL_MESSAGES.map((message) => ({
       ...message,
       mapped: message.mapped.map((row) => ({ ...row })),
@@ -393,12 +466,64 @@ export function initialConnectState(): ConnectState {
     })),
     transforms: INITIAL_TRANSFORMS.map((row) => ({ ...row })),
     connections: [],
+    instruments: SEEDED_INSTRUMENTS.map((item) => ({ ...item })),
     selectedId: "MSG-24018",
   };
 }
 
+export function catalogInstrument(id: string): LabInstrument | undefined {
+  return INSTRUMENT_CATALOG.find((item) => item.id === id);
+}
+
 export function connectorById(id: string): AppConnector | undefined {
   return APP_CONNECTORS.find((item) => item.id === id);
+}
+
+export function withInstrumentIntegration(state: ConnectState, instrument: LabInstrument, site: string, labId: string, at: string): ConnectState {
+  const trimmed = site.trim();
+  if (!trimmed) return state;
+  const scopedLab = labId || "lab-north";
+  if (state.instruments.some((item) => item.catalogId === instrument.id && item.labId === scopedLab)) return state;
+  const interfaceId = `gw-${instrument.id}`;
+  const connected: ConnectedInstrument = {
+    id: `conn-${instrument.id}`,
+    catalogId: instrument.id,
+    name: instrument.name,
+    category: instrument.category,
+    protocol: instrument.protocol,
+    site: trimmed,
+    labId: scopedLab,
+    status: "Online",
+    interfaceId,
+  };
+  const channel = instrumentChannel(connected, `Integration started ${at}. ${instrument.summary}`);
+  const exists = state.interfaces.some((item) => item.id === interfaceId);
+  const message: ConnectMessage = {
+    id: `MSG-INST-${instrument.id.toUpperCase()}`,
+    interfaceId,
+    messageType: "Gateway handshake",
+    summary: `${instrument.maker} ${instrument.name} integration for ${trimmed}`,
+    correlation: trimmed,
+    status: "delivered",
+    recoverable: true,
+    credential: false,
+    quarantine: false,
+    attention: "",
+    action: "",
+    payload: `HANDSHAKE ${channel.endpoint}`,
+    mapped: [],
+    steps: [
+      { at, label: "Integration started", detail: `Sequence opened the ${instrument.protocol} gateway for ${instrument.maker} ${instrument.name} at ${trimmed}.`, state: "ok" },
+      { at, label: "Gateway accepted", detail: "The local gateway answered. Results can arrive on this channel.", state: "ok" },
+    ],
+  };
+  return {
+    ...state,
+    interfaces: exists ? state.interfaces : [...state.interfaces, channel],
+    messages: [message, ...state.messages],
+    instruments: [...state.instruments, connected],
+    selectedId: message.id,
+  };
 }
 
 export function withAppConnection(state: ConnectState, connector: AppConnector, account: string, at: string): ConnectState {
@@ -439,6 +564,7 @@ export function withAppConnection(state: ConnectState, connector: AppConnector, 
     interfaces: [...state.interfaces, channel],
     messages: [message, ...state.messages],
     connections: [...state.connections, { connectorId: connector.id, account: trimmed, interfaceId }],
+    instruments: state.instruments,
     selectedId: message.id,
   };
 }
