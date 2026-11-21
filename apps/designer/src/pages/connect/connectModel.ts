@@ -331,10 +331,55 @@ export const INITIAL_TRANSFORMS: TransformRow[] = [
   { id: "file-fac", interfaceId: "ref-file", source: "MSH-4", sample: "NORTH", target: "accession.site", note: "A blank MSH-4 rejects the whole file." },
 ];
 
+export const CONNECTOR_CATEGORIES = ["Messaging", "CRM", "Email", "EHR", "Storage", "Identity"] as const;
+
+export type ConnectorCategory = (typeof CONNECTOR_CATEGORIES)[number];
+
+export type AppConnector = {
+  id: string;
+  name: string;
+  category: ConnectorCategory;
+  kind: InterfaceKind;
+  direction: ConnectInterface["direction"];
+  summary: string;
+  accountLabel: string;
+  accountHint: string;
+  endpoint: string;
+  handshake: string;
+  accepted: string;
+};
+
+export const APP_CONNECTORS: AppConnector[] = [
+  { id: "slack", name: "Slack", category: "Messaging", kind: "Webhook", direction: "Outbound", summary: "Holds and released results posted to a lab channel.", accountLabel: "Workspace", accountHint: "north-lab", endpoint: "https://hooks.slack.com/services/{account}", handshake: "POST hook", accepted: "Slack accepted the connection and returned a channel id." },
+  { id: "teams", name: "Microsoft Teams", category: "Messaging", kind: "Webhook", direction: "Outbound", summary: "The same hold and release notices in a Teams channel.", accountLabel: "Team", accountHint: "North Hospital Lab", endpoint: "https://outlook.office.com/webhook/{account}", handshake: "POST hook", accepted: "Teams accepted the connector for that team." },
+  { id: "twilio", name: "Twilio", category: "Messaging", kind: "REST", direction: "Outbound", summary: "Text the ordering provider when a result is released.", accountLabel: "Account SID", accountHint: "AC-north-lab", endpoint: "https://api.twilio.com/2010-04-01/Accounts/{account}/Messages.json", handshake: "POST /Messages", accepted: "Twilio accepted the account and can send from the lab number." },
+  { id: "salesforce", name: "Salesforce", category: "CRM", kind: "REST", direction: "Outbound", summary: "Accounts and open cases stay in step with Sequence CRM.", accountLabel: "Org", accountHint: "north-health", endpoint: "https://{account}.my.salesforce.com/services/data/v60.0", handshake: "GET /limits", accepted: "Salesforce returned the org limits. The API session is live." },
+  { id: "hubspot", name: "HubSpot", category: "CRM", kind: "REST", direction: "Outbound", summary: "Client accounts and outreach written to HubSpot companies.", accountLabel: "Portal", accountHint: "44102", endpoint: "https://api.hubapi.com/crm/v3/objects/companies", handshake: "GET /companies", accepted: "HubSpot listed the portal companies. Sequence can write accounts." },
+  { id: "dynamics", name: "Dynamics 365", category: "CRM", kind: "REST", direction: "Outbound", summary: "Accounts and activities for labs that already run Dynamics.", accountLabel: "Environment", accountHint: "north-health", endpoint: "https://{account}.crm.dynamics.com/api/data/v9.2", handshake: "GET /WhoAmI", accepted: "Dynamics confirmed the environment user. The API is open." },
+  { id: "m365", name: "Microsoft 365", category: "Email", kind: "REST", direction: "Outbound", summary: "Result letters sent from the laboratory mailbox.", accountLabel: "Mailbox domain", accountHint: "northlab.org", endpoint: "https://graph.microsoft.com/v1.0/users/{account}/sendMail", handshake: "GET /users", accepted: "Microsoft Graph accepted the mailbox domain." },
+  { id: "gmail", name: "Gmail", category: "Email", kind: "REST", direction: "Outbound", summary: "The same result letters from a Google Workspace mailbox.", accountLabel: "Domain", accountHint: "northlab.org", endpoint: "https://gmail.googleapis.com/gmail/v1/users/{account}/messages/send", handshake: "GET /profile", accepted: "Gmail returned the mailbox profile. Sending is allowed." },
+  { id: "sendgrid", name: "SendGrid", category: "Email", kind: "REST", direction: "Outbound", summary: "Bulk client notices when the laboratory mailbox should stay quiet.", accountLabel: "Sender domain", accountHint: "notify.northlab.org", endpoint: "https://api.sendgrid.com/v3/mail/send", handshake: "GET /scopes", accepted: "SendGrid confirmed mail.send for that sender domain." },
+  { id: "epic", name: "Epic", category: "EHR", kind: "FHIR R4", direction: "Inbound", summary: "Patients and orders from another Epic site, on the same FHIR profile.", accountLabel: "Site", accountHint: "west-campus", endpoint: "https://{account}.epic.example/fhir/R4", handshake: "GET /metadata", accepted: "The Epic FHIR server returned its capability statement." },
+  { id: "oracle-health", name: "Oracle Health", category: "EHR", kind: "FHIR R4", direction: "Inbound", summary: "Patients and service requests from a Cerner Millennium site.", accountLabel: "Tenant", accountHint: "millennium-north", endpoint: "https://{account}.oraclehealth.example/r4", handshake: "GET /metadata", accepted: "Oracle Health returned the R4 capability statement." },
+  { id: "athena", name: "athenahealth", category: "EHR", kind: "REST", direction: "Inbound", summary: "Orders and results for practices that chart in athenaOne.", accountLabel: "Practice", accountHint: "1959", endpoint: "https://api.platform.athenahealth.com/v1/{account}", handshake: "GET /practiceinfo", accepted: "athenahealth returned the practice. Orders can be read." },
+  { id: "sharepoint", name: "SharePoint", category: "Storage", kind: "REST", direction: "Outbound", summary: "Released reports filed in the laboratory document library.", accountLabel: "Site", accountHint: "north-lab", endpoint: "https://{account}.sharepoint.com/sites/lab", handshake: "GET /sites", accepted: "SharePoint returned the lab site. The document library is reachable." },
+  { id: "box", name: "Box", category: "Storage", kind: "REST", direction: "Outbound", summary: "The same reports in a Box folder the client already uses.", accountLabel: "Enterprise", accountHint: "north-health", endpoint: "https://api.box.com/2.0/folders", handshake: "GET /users/me", accepted: "Box confirmed the enterprise user. The folder can take files." },
+  { id: "s3", name: "Amazon S3", category: "Storage", kind: "File", direction: "Outbound", summary: "A bucket for reference-lab files and released report copies.", accountLabel: "Bucket", accountHint: "north-lab-results", endpoint: "s3://{account}", handshake: "HEAD bucket", accepted: "The bucket exists and Sequence can write objects to it." },
+  { id: "okta", name: "Okta", category: "Identity", kind: "REST", direction: "Inbound", summary: "Laboratory people and groups, so access is not a second directory.", accountLabel: "Org domain", accountHint: "northlab.okta.com", endpoint: "https://{account}/api/v1/users", handshake: "GET /users", accepted: "Okta listed the org users. Sequence can match people to access." },
+  { id: "entra", name: "Microsoft Entra ID", category: "Identity", kind: "REST", direction: "Inbound", summary: "The same directory when the laboratory already uses Entra.", accountLabel: "Tenant", accountHint: "northlab.onmicrosoft.com", endpoint: "https://graph.microsoft.com/v1.0/users", handshake: "GET /users", accepted: "Entra returned the tenant users. Directory matching can start." },
+];
+
+export type AppConnection = {
+  connectorId: string;
+  account: string;
+  interfaceId: string;
+};
+
 export type ConnectState = {
   interfaces: ConnectInterface[];
   messages: ConnectMessage[];
   transforms: TransformRow[];
+  connections: AppConnection[];
   selectedId: string;
 };
 
@@ -347,7 +392,54 @@ export function initialConnectState(): ConnectState {
       steps: message.steps.map((row) => ({ ...row })),
     })),
     transforms: INITIAL_TRANSFORMS.map((row) => ({ ...row })),
+    connections: [],
     selectedId: "MSG-24018",
+  };
+}
+
+export function connectorById(id: string): AppConnector | undefined {
+  return APP_CONNECTORS.find((item) => item.id === id);
+}
+
+export function withAppConnection(state: ConnectState, connector: AppConnector, account: string, at: string): ConnectState {
+  const trimmed = account.trim();
+  if (!trimmed) return state;
+  if (state.connections.some((item) => item.connectorId === connector.id)) return state;
+  const interfaceId = `app-${connector.id}`;
+  const endpoint = connector.endpoint.replaceAll("{account}", trimmed);
+  const channel: ConnectInterface = {
+    id: interfaceId,
+    name: connector.name,
+    kind: connector.kind,
+    direction: connector.direction,
+    endpoint,
+    note: `API connection started for ${trimmed}. ${connector.summary}`,
+  };
+  const message: ConnectMessage = {
+    id: `MSG-APP-${connector.id.toUpperCase()}`,
+    interfaceId,
+    messageType: connector.handshake,
+    summary: `${connector.name} API handshake for ${trimmed}`,
+    correlation: trimmed,
+    status: "delivered",
+    recoverable: true,
+    credential: false,
+    quarantine: false,
+    attention: "",
+    action: "",
+    payload: `${connector.handshake} ${endpoint}`,
+    mapped: [],
+    steps: [
+      { at, label: "API connection started", detail: `Sequence called the ${connector.name} ${connector.kind} API for ${trimmed}.`, state: "ok" },
+      { at, label: "Handshake accepted", detail: connector.accepted, state: "ok" },
+    ],
+  };
+  return {
+    ...state,
+    interfaces: [...state.interfaces, channel],
+    messages: [message, ...state.messages],
+    connections: [...state.connections, { connectorId: connector.id, account: trimmed, interfaceId }],
+    selectedId: message.id,
   };
 }
 
