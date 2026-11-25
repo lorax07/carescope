@@ -242,6 +242,16 @@ export function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "workflows") {
+    return (
+      <svg {...common}>
+        <circle cx="6" cy="8" r="2" />
+        <circle cx="18" cy="8" r="2" />
+        <circle cx="12" cy="17" r="2" />
+        <path d="M8 8h8M7.2 9.6 10.4 15.2M16.8 9.6 13.6 15.2" />
+      </svg>
+    );
+  }
   if (name === "connect" || name === "interfaces") {
     return (
       <svg {...common}>

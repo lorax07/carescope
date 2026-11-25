@@ -9,6 +9,7 @@ import { findInstrument } from "./instruments";
 import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations";
 import { LAB_RESOURCES, LAB_RESOURCE_ACCESS_EVENT, userCanSeeLabResources } from "./labResourceAccess";
 import { readLimsSession } from "./limsSession";
+import { startConnectAutomation } from "./connectAutomation/runtime";
 import { InstrumentCatalogScreen } from "./pages/connect/ConnectPages";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
@@ -366,6 +367,7 @@ function AppFrame() {
   );
   const lims = readLimsSession();
   const [showResources, setShowResources] = useState(() => userCanSeeLabResources(lims?.labId, lims?.userId));
+  useEffect(() => startConnectAutomation(), []);
   useEffect(() => {
     const sync = () => {
       const session = readLimsSession();
