@@ -39,6 +39,8 @@ export type ConnectMessage = {
   payload: string;
   mapped: MappedField[];
   steps: TrailStep[];
+  /** Set when a workflow recorded the message, so it does not trigger another workflow. */
+  origin?: "workflow";
 };
 
 export type TransformRow = {
@@ -676,6 +678,31 @@ export function withQuarantine(message: ConnectMessage, at: string): ConnectMess
     action: "Ask the reference lab to resend the file with MSH-4 filled in.",
     steps: [...message.steps, { at, label: "Quarantined", detail: "The file will not be retried. The header failure stays in the trail.", state: "wait" }],
   };
+}
+
+export function withWorkflowDelivery(
+  state: ConnectState,
+  input: { id: string; interfaceId: string; summary: string; payload: string; at: string },
+): ConnectState {
+  if (state.messages.some((message) => message.id === input.id)) return state;
+  const message: ConnectMessage = {
+    id: input.id,
+    interfaceId: input.interfaceId,
+    messageType: "Workflow delivery",
+    summary: input.summary,
+    correlation: input.id,
+    status: "delivered",
+    recoverable: true,
+    credential: false,
+    quarantine: false,
+    attention: "",
+    action: "",
+    payload: input.payload,
+    mapped: [],
+    origin: "workflow",
+    steps: [{ at: input.at, label: "Workflow delivery", detail: "A workflow recorded this delivery on the connection. It was not sent outside Sequence.", state: "ok" }],
+  };
+  return { ...state, messages: [message, ...state.messages], selectedId: message.id };
 }
 
 export function attentionMessages(messages: ConnectMessage[]): ConnectMessage[] {

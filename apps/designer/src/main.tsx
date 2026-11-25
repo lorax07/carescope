@@ -49,6 +49,8 @@ import { CrmTasksPage } from "./pages/crm/CrmTasksPage";
 import { InsightsChatPage } from "./pages/InsightsChatPage";
 import { MigrationPage } from "./pages/migration/MigrationPages";
 import { ConnectPage } from "./pages/connect/ConnectPages";
+import { WorkflowCreatePage, WorkflowExceptionsPage, WorkflowHistoryPage, WorkflowListPage } from "./pages/connect/WorkflowPages";
+import { WorkflowDesignerPage } from "./pages/connect/WorkflowDesigner";
 import { LibraryPage } from "./pages/LibraryPage";
 import { WorkflowDesignPage } from "./pages/WorkflowDesignPage";
 import { DesignerPage } from "./pages/DesignerPage";
@@ -163,6 +165,11 @@ createRoot(document.getElementById("root")!).render(
           <Route path="billing/capture" element={<BillingPage />} />
           <Route path="billing" element={<BillingIndex />} />
           <Route path="insights" element={<InsightsChatPage />} />
+          <Route path="connect/workflows/new" element={<WorkflowCreatePage />} />
+          <Route path="connect/workflows/history" element={<WorkflowHistoryPage />} />
+          <Route path="connect/workflows/exceptions" element={<WorkflowExceptionsPage />} />
+          <Route path="connect/workflows/:workflowId" element={<WorkflowDesignerPage />} />
+          <Route path="connect/workflows" element={<WorkflowListPage />} />
           <Route path="connect/:section" element={<ConnectRoute />} />
           <Route path="connect" element={<ConnectPage />} />
           <Route path="migration/:section" element={<MigrationRoute />} />

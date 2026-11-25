@@ -53,10 +53,13 @@ describe("client and revenue chapters", () => {
   });
 
   it("keeps connect messages inside the interfaces submodule", () => {
-    expect(CONNECT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Interfaces", "Instrument integration"]);
+    expect(CONNECT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Interfaces", "Instrument integration", "Workflows"]);
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/messages")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/mapping")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/failures")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/instruments")?.id).toBe("instruments");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/workflows")?.id).toBe("workflows");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/workflows/history")?.id).toBe("workflows");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/workflows/new")?.id).toBe("workflows");
   });
 });

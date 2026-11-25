@@ -43,6 +43,7 @@ const SUBMODULE_GLYPHS: [string, string][] = [
   ["/app/resources/lots", "lots"],
   ["/app/resources/reference", "reference"],
   ["/app/resources", "resources"],
+  ["/app/connect/workflows", "workflows"],
   ["/app/connect/instruments", "instruments"],
   ["/app/connect/interfaces", "interfaces"],
   ["/app/connect/messages", "messages"],
