@@ -118,7 +118,7 @@ export const CONNECT_CHAPTERS: ModuleChapter[] = [
     question: "Channels, messages, maps, and what needs attention.",
     hideTools: true,
     tools: [
-      { to: "/app/connect/interfaces", label: "Interfaces", match: "/app/connect/interfaces" },
+      { to: "/app/connect/interfaces", label: "Channels", match: "/app/connect/interfaces" },
       { to: "/app/connect/messages", label: "Messages", match: "/app/connect/messages" },
       { to: "/app/connect/mapping", label: "Mapping", match: "/app/connect/mapping" },
       { to: "/app/connect/failures", label: "Attention", match: "/app/connect/failures" },

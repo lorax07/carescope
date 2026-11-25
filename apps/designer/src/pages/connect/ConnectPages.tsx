@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Filter01, type Filter01Option } from "../../components/Filter01";
+import { filter01Match } from "../../filter01";
 import { SectionTabStrip, useSectionTabs } from "../../sectionTabs";
 import { currentLabId, currentLabName, labIdFromSite } from "../../storageScope";
 import { ModuleHeader } from "../ModuleHeader";
@@ -29,9 +31,7 @@ import {
 } from "./connectStore";
 
 const INTERFACE_TABS = [
-  { to: "/app/connect/interfaces", label: "Interfaces", key: "interfaces" },
-  { to: "/app/connect/messages", label: "Messages", key: "messages" },
-  { to: "/app/connect/mapping", label: "Mapping", key: "mapping" },
+  { to: "/app/connect/interfaces", label: "Channels", key: "channels" },
   { to: "/app/connect/failures", label: "Attention", key: "failures" },
 ] as const;
 
@@ -41,7 +41,7 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
     subtitle: "What happened to every message, and what still needs a person.",
   },
   interfaces: {
-    title: "Interfaces",
+    title: "Channels",
     subtitle: "HL7, FHIR, REST, webhooks, the instrument gateway, file drops, and known apps.",
   },
   messages: {
@@ -80,14 +80,22 @@ function statusLabel(status: MessageStatus): string {
   return "Failed";
 }
 
+function channelTabOn(key: string, view: string): boolean {
+  if (key === "channels") return view === "interfaces" || view === "messages" || view === "mapping";
+  return key === view;
+}
+
 function InterfaceTabs({ current }: { current: string }) {
   return (
     <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="Interface pages">
-      {INTERFACE_TABS.map((tab) => (
-        <Link key={tab.key} to={tab.to} role="tab" aria-selected={tab.key === current} className={tab.key === current ? "is-on" : undefined}>
-          {tab.label}
-        </Link>
-      ))}
+      {INTERFACE_TABS.map((tab) => {
+        const on = channelTabOn(tab.key, current);
+        return (
+          <Link key={tab.key} to={tab.to} role="tab" aria-selected={on} className={on ? "is-on" : undefined}>
+            {tab.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
@@ -274,62 +282,177 @@ function ConnectorDialog({ connector, onClose, onStarted }: { connector: AppConn
   );
 }
 
-function InterfacesView() {
+function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) {
   const state = useConnect();
-  const [selected, setSelected] = useState(state.interfaces[1]?.id ?? state.interfaces[0].id);
+  const navigate = useNavigate();
+  const opened = state.messages.find((message) => message.id === state.selectedId);
+  const [selected, setSelected] = useState(opened?.interfaceId ?? state.interfaces[0]?.id ?? "");
+  const [pane, setPane] = useState(initialPane);
+  const [filters, setFilters] = useState<string[]>([]);
   const [query, setQuery] = useState("");
+  const [catalogQuery, setCatalogQuery] = useState("");
+  const [messageQuery, setMessageQuery] = useState("");
+  const [messageStatus, setMessageStatus] = useState<"all" | MessageStatus>("all");
   const [openId, setOpenId] = useState<string | null>(null);
-  const channel = state.interfaces.find((item) => item.id === selected) ?? state.interfaces[0];
-  const health = interfaceHealth(state.messages, state.transforms, channel);
-  const recent = state.messages.filter((message) => message.interfaceId === channel.id);
-  const needle = query.trim().toLowerCase();
+  useEffect(() => setPane(initialPane), [initialPane]);
+  const filterOptions = useMemo<Filter01Option[]>(() => {
+    const kinds = [...new Set(state.interfaces.map((item) => item.kind))];
+    const directions = [...new Set(state.interfaces.map((item) => item.direction))];
+    const statuses = [...new Set(state.interfaces.map((item) => interfaceHealth(state.messages, state.transforms, item).label))];
+    return [
+      ...kinds.map((kind) => ({ id: `kind:${kind}`, label: kind, category: "Kind" })),
+      ...directions.map((direction) => ({ id: `direction:${direction}`, label: direction, category: "Direction" })),
+      ...statuses.map((status) => ({ id: `status:${status}`, label: status, category: "Status" })),
+    ];
+  }, [state]);
+  const visible = state.interfaces.filter((item) => {
+    const health = interfaceHealth(state.messages, state.transforms, item);
+    const kinds = filters.filter((id) => id.startsWith("kind:")).map((id) => id.slice(5));
+    const directions = filters.filter((id) => id.startsWith("direction:")).map((id) => id.slice(10));
+    const statuses = filters.filter((id) => id.startsWith("status:")).map((id) => id.slice(7));
+    if (kinds.length && !kinds.includes(item.kind)) return false;
+    if (directions.length && !directions.includes(item.direction)) return false;
+    if (statuses.length && !statuses.includes(health.label)) return false;
+    const searches = [query, ...filters.filter((id) => id.startsWith("search:")).map((id) => id.slice(7))].map((item) => item.trim()).filter(Boolean);
+    const text = `${item.name} ${item.kind} ${item.direction} ${item.endpoint} ${item.note}`;
+    return searches.every((search) => filter01Match(text, search));
+  });
+  const channel = visible.find((item) => item.id === selected) ?? visible[0];
+  const health = channel ? interfaceHealth(state.messages, state.transforms, channel) : null;
+  const channelMessages = channel ? state.messages.filter((message) => message.interfaceId === channel.id).filter((message) => {
+    if (messageStatus !== "all" && message.status !== messageStatus) return false;
+    return matchesQuery(message, channel.name, messageQuery);
+  }) : [];
+  const openMessage = channelMessages.find((message) => message.id === state.selectedId) ?? channelMessages[0];
+  const mapRows = channel ? state.transforms.filter((row) => row.interfaceId === channel.id) : [];
+  const needle = catalogQuery.trim().toLowerCase();
   const openConnector = APP_CONNECTORS.find((item) => item.id === openId) ?? null;
   const closeConnector = useCallback(() => setOpenId(null), []);
+
+  function showPane(next: "messages" | "mapping") {
+    setPane(next);
+    navigate(next === "mapping" ? "/app/connect/mapping" : "/app/connect/messages");
+  }
+
   return (
     <>
-    <div className="connect-split">
-      <section className="lims-panel migration-panel">
-        <h2>Channels</h2>
-        <ul className="connect-channel-list">
-          {state.interfaces.map((item) => {
+    <Filter01
+      className="connect-channel-filter"
+      label="Channels"
+      scope="connect-channels"
+      options={filterOptions}
+      selected={filters}
+      onChange={setFilters}
+      query={query}
+      onQuery={setQuery}
+    />
+    <div className="connect-split connect-channel-screen">
+      <section className="lims-panel migration-panel" aria-label="Channels">
+        <h2>{visible.length} {visible.length === 1 ? "channel" : "channels"}</h2>
+        <ul className="connect-channel-board">
+          {visible.map((item) => {
             const itemHealth = interfaceHealth(state.messages, state.transforms, item);
+            const count = state.messages.filter((message) => message.interfaceId === item.id).length;
             return (
               <li key={item.id}>
-                <button type="button" className={item.id === channel.id ? "is-current" : undefined} aria-pressed={item.id === channel.id} onClick={() => setSelected(item.id)}>
+                <button type="button" className={item.id === channel?.id ? "is-current" : undefined} aria-pressed={item.id === channel?.id} onClick={() => setSelected(item.id)}>
+                  <span className="connect-channel-kind">{item.kind}</span>
                   <strong>{item.name}</strong>
-                  <span>{item.kind} · {item.direction}</span>
-                  <Pill tone={itemHealth.tone}>{itemHealth.label}</Pill>
+                  <span>{item.direction} · {item.endpoint}</span>
+                  <span className="connect-channel-meta">
+                    <Pill tone={itemHealth.tone}>{itemHealth.label}</Pill>
+                    <span>{count} {count === 1 ? "message" : "messages"}</span>
+                  </span>
                 </button>
               </li>
             );
           })}
         </ul>
+        {visible.length === 0 ? <p>No channel matches that filter.</p> : null}
       </section>
-      <section className="lims-panel migration-panel">
-        <Pill tone={health.tone}>{health.label}</Pill>
-        <h2>{channel.name}</h2>
-        <p>{channel.note}</p>
-        <p>{channel.endpoint}</p>
-        <p className="connect-attention">{health.detail}</p>
-        <table className="lims-table">
-          <thead>
-            <tr>
-              <th>Message</th>
-              <th>Type</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recent.map((message) => (
-              <tr key={message.id}>
-                <td><Link to="/app/connect/messages" onClick={() => selectMessage(message.id)}>{message.id}</Link></td>
-                <td>{message.messageType}</td>
-                <td><Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+      {channel && health ? (
+        <section className="lims-panel migration-panel connect-channel-pane" aria-label={`${channel.name} details`}>
+          <div className="connect-channel-meta">
+            <Pill tone={health.tone}>{health.label}</Pill>
+            <span>{channel.kind}</span>
+            <span>{channel.direction}</span>
+          </div>
+          <h2>{channel.name}</h2>
+          <p>{channel.note}</p>
+          <p className="connect-channel-endpoint">{channel.endpoint}</p>
+          <p className="connect-attention">{health.detail}</p>
+          <nav className="subtab01" role="tablist" aria-label={`${channel.name} menus`}>
+            <button type="button" role="tab" aria-selected={pane === "messages"} className={pane === "messages" ? "is-on" : undefined} onClick={() => showPane("messages")}>Messages</button>
+            <button type="button" role="tab" aria-selected={pane === "mapping"} className={pane === "mapping" ? "is-on" : undefined} onClick={() => showPane("mapping")}>Mapping</button>
+          </nav>
+          {pane === "messages" ? (
+            <div className="connect-channel-menu">
+              <label className="migration-select">
+                Search this channel
+                <input aria-label="Search this channel" value={messageQuery} placeholder="Id, MRN, error, payload" onChange={(event) => setMessageQuery(event.target.value)} />
+              </label>
+              <div className="migration-filters" role="group" aria-label="Message status">
+                {(["all", "failed", "retrying", "held", "delivered"] as const).map((key) => (
+                  <button key={key} type="button" className={messageStatus === key ? "is-current" : undefined} aria-pressed={messageStatus === key} onClick={() => setMessageStatus(key)}>
+                    {key === "all" ? "All" : statusLabel(key)}
+                  </button>
+                ))}
+              </div>
+              <ul className="connect-channel-list">
+                {channelMessages.map((message) => (
+                  <li key={message.id}>
+                    <button type="button" className={openMessage?.id === message.id ? "is-current" : undefined} aria-pressed={openMessage?.id === message.id} onClick={() => selectMessage(message.id)}>
+                      <strong>{message.id} · {message.messageType}</strong>
+                      <span>{message.summary}</span>
+                      <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
+                    </button>
+                  </li>
+                ))}
+                {channelMessages.length === 0 ? <li>No messages on this channel match.</li> : null}
+              </ul>
+              {openMessage ? <MessageDetail messageId={openMessage.id} /> : null}
+            </div>
+          ) : (
+            <div className="connect-channel-menu">
+              <p>This map is reused the next time the same profile arrives.</p>
+              <table className="lims-table">
+                <thead>
+                  <tr>
+                    <th>Source</th>
+                    <th>Sample</th>
+                    <th>Sequence field</th>
+                    <th>Note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mapRows.map((row) => (
+                    <tr key={row.id} className={row.target ? undefined : "is-diff"}>
+                      <td>{row.source}</td>
+                      <td>{row.sample}</td>
+                      <td>
+                        <select aria-label={`Sequence field for ${row.source}`} value={row.target} onChange={(event) => setTransformTarget(row.id, event.target.value)}>
+                          <option value="">Leave unmapped</option>
+                          {CONNECT_TARGETS.map((field) => (
+                            <option key={field.id} value={field.id}>{field.label}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>{row.note || (row.target ? "" : "Unmapped. The message stays held.")}</td>
+                    </tr>
+                  ))}
+                  {mapRows.length === 0 ? <tr><td colSpan={4}>This channel has no map rows yet.</td></tr> : null}
+                </tbody>
+              </table>
+              <p>{mapRows.some((row) => !row.target) ? "Unmapped fields hold the message until someone maps them." : "Every field on this profile has a Sequence field."}</p>
+            </div>
+          )}
+        </section>
+      ) : (
+        <section className="lims-panel migration-panel">
+          <h2>Channel</h2>
+          <p>Choose a channel to see its messages and mapping.</p>
+        </section>
+      )}
     </div>
     <section className="lims-panel migration-panel connect-catalog" aria-labelledby="app-connectors-heading">
       <div className="migration-panel-head">
@@ -339,7 +462,7 @@ function InterfacesView() {
         </div>
         <label className="migration-select">
           Find an app
-          <input aria-label="Find an app" value={query} placeholder="Slack, CRM, email" onChange={(event) => setQuery(event.target.value)} />
+          <input aria-label="Find an app" value={catalogQuery} placeholder="Slack, CRM, email" onChange={(event) => setCatalogQuery(event.target.value)} />
         </label>
       </div>
       {CONNECTOR_CATEGORIES.map((category) => {
@@ -376,105 +499,6 @@ function InterfacesView() {
       />
     ) : null}
     </>
-  );
-}
-
-function MessagesView() {
-  const state = useConnect();
-  const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<"all" | MessageStatus>("all");
-  const rows = useMemo(() => state.messages.filter((message) => {
-    const channel = state.interfaces.find((item) => item.id === message.interfaceId);
-    if (status !== "all" && message.status !== status) return false;
-    return matchesQuery(message, channel?.name ?? "", query);
-  }), [state, query, status]);
-  const selected = rows.find((message) => message.id === state.selectedId) ?? rows[0];
-  return (
-    <div className="connect-split connect-audit">
-      <section className="lims-panel migration-panel">
-        <label className="migration-select">
-          Search messages
-          <input aria-label="Search messages" value={query} placeholder="Id, MRN, error, payload" onChange={(event) => setQuery(event.target.value)} />
-        </label>
-        <div className="migration-filters" role="group" aria-label="Message status">
-          {(["all", "failed", "retrying", "held", "delivered"] as const).map((key) => (
-            <button key={key} type="button" className={status === key ? "is-current" : undefined} aria-pressed={status === key} onClick={() => setStatus(key)}>
-              {key === "all" ? "All" : statusLabel(key)}
-            </button>
-          ))}
-        </div>
-        <ul className="connect-channel-list">
-          {rows.map((message) => {
-            const channel = state.interfaces.find((item) => item.id === message.interfaceId);
-            return (
-              <li key={message.id}>
-                <button type="button" className={selected?.id === message.id ? "is-current" : undefined} aria-pressed={selected?.id === message.id} onClick={() => selectMessage(message.id)}>
-                  <strong>{message.id} · {message.messageType}</strong>
-                  <span>{channel?.name} · {message.summary}</span>
-                  <Pill tone={statusTone(message.status)}>{statusLabel(message.status)}</Pill>
-                </button>
-              </li>
-            );
-          })}
-          {rows.length === 0 ? <li>No messages match that search.</li> : null}
-        </ul>
-      </section>
-      {selected ? <MessageDetail messageId={selected.id} /> : null}
-    </div>
-  );
-}
-
-function MappingView() {
-  const state = useConnect();
-  const [interfaceId, setInterfaceId] = useState("fhir-patient");
-  const rows = state.transforms.filter((row) => row.interfaceId === interfaceId);
-  const channel = state.interfaces.find((item) => item.id === interfaceId);
-  return (
-    <section className="lims-panel migration-panel">
-      <div className="migration-panel-head">
-        <div>
-          <h2>{channel?.name}</h2>
-          <p>{channel?.kind}. This map is reused the next time the same profile arrives.</p>
-        </div>
-        <label className="migration-select">
-          Interface
-          <select aria-label="Interface map" value={interfaceId} onChange={(event) => setInterfaceId(event.target.value)}>
-            {state.interfaces.map((item) => (
-              <option key={item.id} value={item.id}>{item.name}</option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <table className="lims-table">
-        <thead>
-          <tr>
-            <th>Source</th>
-            <th>Sample</th>
-            <th>Sequence field</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className={row.target ? undefined : "is-diff"}>
-              <td>{row.source}</td>
-              <td>{row.sample}</td>
-              <td>
-                <select aria-label={`Sequence field for ${row.source}`} value={row.target} onChange={(event) => setTransformTarget(row.id, event.target.value)}>
-                  <option value="">Leave unmapped</option>
-                  {CONNECT_TARGETS.map((field) => (
-                    <option key={field.id} value={field.id}>{field.label}</option>
-                  ))}
-                </select>
-              </td>
-              <td>{row.note || (row.target ? "" : "Unmapped. The message stays held.")}</td>
-            </tr>
-          ))}
-          {rows.length === 0 ? <tr><td colSpan={4}>This interface has no map rows yet.</td></tr> : null}
-        </tbody>
-      </table>
-      <p>{rows.some((row) => !row.target) ? "Unmapped fields hold the message until someone maps them." : "Every field on this profile has a Sequence field."}</p>
-    </section>
   );
 }
 
@@ -623,8 +647,13 @@ export function InstrumentCatalogScreen() {
 export function ConnectPage({ section }: { section?: string }) {
   const sectionTabs = useSectionTabs();
   const view = section && section in COPY ? section : "overview";
-  const interfaceView = view === "interfaces" || view === "messages" || view === "mapping" || view === "failures";
-  const copy = interfaceView ? { title: "Interfaces", subtitle: COPY[view].subtitle } : COPY[view];
+  const channelScreen = view === "interfaces" || view === "messages" || view === "mapping";
+  const interfaceView = channelScreen || view === "failures";
+  const copy = channelScreen
+    ? { title: "Channels", subtitle: COPY.interfaces.subtitle }
+    : view === "failures"
+      ? { title: "Needs attention", subtitle: COPY.failures.subtitle }
+      : COPY[view];
   return (
     <div className="lims-page connect-studio">
       <ModuleHeader
@@ -644,9 +673,7 @@ export function ConnectPage({ section }: { section?: string }) {
       {view === "instruments" ? <SectionTabStrip mainLabel="Instrument integration" /> : null}
       {interfaceView ? <InterfaceTabs current={view} /> : null}
       {view === "overview" ? <OverviewView /> : null}
-      {view === "interfaces" ? <InterfacesView /> : null}
-      {view === "messages" ? <MessagesView /> : null}
-      {view === "mapping" ? <MappingView /> : null}
+      {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} /> : null}
       {view === "failures" ? <FailuresView /> : null}
       {view === "instruments" ? <InstrumentsView /> : null}
     </div>
