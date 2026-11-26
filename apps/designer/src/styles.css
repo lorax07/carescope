@@ -6962,9 +6962,14 @@ button.palette-category-title {
 .client-home,
 .client-board {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(260px, 0.82fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.9rem;
   align-items: start;
+}
+
+.client-home.is-priorities-pinned,
+.client-board.is-priorities-pinned {
+  grid-template-columns: minmax(0, 1.75fr) minmax(260px, 0.82fr);
 }
 
 .client-kpis {
@@ -7788,6 +7793,50 @@ button.palette-category-title {
   margin-top: 0;
 }
 
+.top-priorities-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.top-priorities-bar .top-priorities-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.top-priorities-pin {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #667085;
+  cursor: pointer;
+}
+
+.top-priorities-pin svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.top-priorities-pin.is-on {
+  color: #6d5efc;
+  background: #efeaff;
+}
+
+.top-priorities-pin.is-on svg {
+  fill: #efeaff;
+}
+
 .top-priorities-toggle {
   display: flex;
   align-items: center;
@@ -7801,6 +7850,79 @@ button.palette-category-title {
   color: #1d2433;
   font: inherit;
   text-align: left;
+}
+
+.priority-flyout {
+  position: fixed;
+  z-index: 50;
+  width: min(420px, calc(100vw - 1.5rem));
+  max-height: min(78vh, 760px);
+  overflow: auto;
+  transform-origin: top right;
+  animation: priority-from-bell 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.priority-flyout.is-closing {
+  animation: priority-to-bell 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.priority-flyout .top-priorities {
+  margin: 0;
+  box-shadow: 0 18px 48px rgba(31, 41, 79, 0.16);
+}
+
+.top-priorities.is-pinning {
+  animation: priority-pin-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.top-priorities.is-unpinning {
+  animation: priority-unpin 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.top-priorities.is-bell-pulse {
+  animation: priority-bell-pulse 520ms ease;
+}
+
+@keyframes priority-from-bell {
+  from { opacity: 0; transform: translate(16px, -18px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes priority-to-bell {
+  to { opacity: 0; transform: translate(18px, -20px) scale(0.92); }
+}
+
+@keyframes priority-pin-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes priority-unpin {
+  to { opacity: 0; transform: translate(28px, -36px) scale(0.92); }
+}
+
+@keyframes priority-bell-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(109, 94, 252, 0.35); }
+  100% { box-shadow: 0 0 0 12px rgba(109, 94, 252, 0); }
+}
+
+@media (max-width: 720px) {
+  .priority-flyout {
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-height: calc(100vh - 5.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .priority-flyout,
+  .priority-flyout.is-closing,
+  .top-priorities.is-pinning,
+  .top-priorities.is-unpinning,
+  .top-priorities.is-bell-pulse {
+    animation: none;
+  }
 }
 
 button.top-priorities-toggle {
@@ -8736,6 +8858,8 @@ span.client-avatar {
 @media (max-width: 1180px) {
   .client-home,
   .client-board,
+  .client-home.is-priorities-pinned,
+  .client-board.is-priorities-pinned,
   .client-analytics-body,
   .inbox,
   .lims-page.has-priorities {
@@ -9705,11 +9829,16 @@ button.client-kpi.is-on {
   height: 1.15rem;
 }
 
-.client-top-actions button[aria-label="Notifications"] {
+.client-top-actions button[aria-label="Top priorities"].is-open {
+  background: #efeaff;
+  color: #6d5efc;
+}
+
+.client-top-actions button[aria-label="Top priorities"] {
   position: relative;
 }
 
-.client-top-actions button[aria-label="Notifications"] i {
+.client-top-actions button[aria-label="Top priorities"] i {
   position: absolute;
   top: 0.45rem;
   right: 0.5rem;
@@ -10304,8 +10433,44 @@ button.client-kpi.is-on {
   background: #efeaff;
 }
 
+.connect-channel-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.85rem 0 0.2rem;
+}
+
+.connect-channel-toolbar .connect-channel-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.connect-channel-toolbar > .btn {
+  flex: none;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .connect-channel-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .connect-channel-toolbar > .btn {
+    margin-left: auto;
+  }
+}
+
 .connect-channel-filter {
   margin: 0.85rem 0 0.2rem;
+}
+
+@media (min-width: 901px) {
+  .connect-channel-screen {
+    grid-template-columns: minmax(220px, calc(100% * 0.85 / 2.25 - 50px)) minmax(0, 1fr);
+  }
 }
 
 .connect-channel-board {
@@ -10335,6 +10500,13 @@ button.client-kpi.is-on {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.connect-channel-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .connect-channel-kind {
   color: var(--accent);
   font-size: 0.75rem;
@@ -10361,8 +10533,31 @@ button.client-kpi.is-on {
 
 .connect-connection-details div {
   display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
+  grid-template-columns: 9.4rem minmax(0, 1fr);
   gap: 0.6rem;
+}
+
+.connect-date-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+
+.connect-date-range label {
+  display: grid;
+  gap: 0.2rem;
+  color: #6b6584;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.connect-date-range input {
+  border: 1px solid #e7e3f4;
+  border-radius: 10px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  color: inherit;
 }
 
 .connect-connection-details dt {

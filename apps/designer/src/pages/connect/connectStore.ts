@@ -7,12 +7,15 @@ import {
   initialConnectState,
   targetLabel,
   withAppConnection,
+  withConfiguredChannel,
   withInstrumentIntegration,
   withAttempt,
   withQuarantine,
   withTokenReplaced,
   withWorkflowDelivery,
   type ConnectState,
+  type InteractionModel,
+  type InterfaceKind,
 } from "./connectModel";
 
 let state: ConnectState = initialConnectState();
@@ -172,4 +175,22 @@ export function setTransformTarget(id: string, target: string) {
   }
   emit();
   publishChanges(before, state);
+}
+
+export function configureChannel(input: {
+  name: string;
+  fromSystem: string;
+  toSystem: string;
+  kind: InterfaceKind;
+  interaction: InteractionModel;
+  endpoint: string;
+  note: string;
+}) {
+  const before = state;
+  const next = withConfiguredChannel(state, input);
+  if (next === state) return "";
+  state = next;
+  emit();
+  publishChanges(before, state);
+  return state.interfaces.at(-1)?.id ?? "";
 }

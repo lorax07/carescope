@@ -1,5 +1,7 @@
 export type InterfaceKind = "HL7 v2" | "FHIR R4" | "REST" | "Webhook" | "Instrument gateway" | "File";
 
+export type InteractionModel = "Push" | "Request and response" | "Query" | "File drop";
+
 export type ConnectInterface = {
   id: string;
   name: string;
@@ -8,10 +10,19 @@ export type ConnectInterface = {
   /** System that receives on this connection. */
   toSystem: string;
   kind: InterfaceKind;
+  /** How the two systems exchange data on this connection. */
+  interaction: InteractionModel;
   direction: "Inbound" | "Outbound";
   endpoint: string;
   note: string;
 };
+
+export function interactionFor(kind: InterfaceKind): InteractionModel {
+  if (kind === "File") return "File drop";
+  if (kind === "FHIR R4") return "Query";
+  if (kind === "REST") return "Request and response";
+  return "Push";
+}
 
 /** Interface channels are system-to-system connections. Instrument gateways and app APIs stay in their own submodules. */
 export function isInterfaceChannel(channel: ConnectInterface): boolean {
@@ -75,13 +86,13 @@ export const CONNECT_TARGETS = [
 ];
 
 export const CONNECT_INTERFACES: ConnectInterface[] = [
-  { id: "north-adt", name: "Registration", fromSystem: "North Hospital registration", toSystem: "Sequence", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
-  { id: "north-orm", name: "Orders", fromSystem: "North Hospital orders", toSystem: "Sequence", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
-  { id: "fhir-patient", name: "Patients and orders", fromSystem: "Epic", toSystem: "Sequence", kind: "FHIR R4", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
-  { id: "results-hook", name: "Released results", fromSystem: "Sequence", toSystem: "North Hospital results", kind: "Webhook", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
-  { id: "accession-api", name: "Accession create", fromSystem: "Sequence", toSystem: "Sequence accession", kind: "REST", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
-  { id: "cobas-gw", name: "Cobas 8000 gateway", fromSystem: "cobas 8000", toSystem: "Sequence", kind: "Instrument gateway", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
-  { id: "ref-file", name: "Reference lab files", fromSystem: "Reference lab", toSystem: "Sequence", kind: "File", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
+  { id: "north-adt", name: "Registration", fromSystem: "North Hospital registration", toSystem: "Sequence", kind: "HL7 v2", interaction: "Push", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
+  { id: "north-orm", name: "Orders", fromSystem: "North Hospital orders", toSystem: "Sequence", kind: "HL7 v2", interaction: "Push", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
+  { id: "fhir-patient", name: "Patients and orders", fromSystem: "Epic", toSystem: "Sequence", kind: "FHIR R4", interaction: "Query", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
+  { id: "results-hook", name: "Released results", fromSystem: "Sequence", toSystem: "North Hospital results", kind: "Webhook", interaction: "Push", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
+  { id: "accession-api", name: "Accession create", fromSystem: "Sequence", toSystem: "Sequence accession", kind: "REST", interaction: "Request and response", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
+  { id: "cobas-gw", name: "Cobas 8000 gateway", fromSystem: "cobas 8000", toSystem: "Sequence", kind: "Instrument gateway", interaction: "Push", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
+  { id: "ref-file", name: "Reference lab files", fromSystem: "Reference lab", toSystem: "Sequence", kind: "File", interaction: "File drop", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
 ];
 
 function step(at: string, label: string, detail: string, state: TrailStep["state"]): TrailStep {
@@ -451,6 +462,7 @@ function instrumentChannel(item: ConnectedInstrument, note: string): ConnectInte
     fromSystem: item.name,
     toSystem: "Sequence",
     kind: "Instrument gateway",
+    interaction: "Push",
     direction: "Inbound",
     endpoint: `Agent LAB-GW · ${item.protocol} · ${item.site}`,
     note,
@@ -551,6 +563,7 @@ export function withAppConnection(state: ConnectState, connector: AppConnector, 
     fromSystem: connector.direction === "Inbound" ? connector.name : "Sequence",
     toSystem: connector.direction === "Inbound" ? "Sequence" : connector.name,
     kind: connector.kind,
+    interaction: interactionFor(connector.kind),
     direction: connector.direction,
     endpoint,
     note: `API connection started for ${trimmed}. ${connector.summary}`,
@@ -590,6 +603,49 @@ export function targetLabel(id: string): string {
 
 export function interfaceById(interfaces: ConnectInterface[], id: string): ConnectInterface | undefined {
   return interfaces.find((item) => item.id === id);
+}
+
+const MESSAGE_MONTHS: Record<string, string> = {
+  Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+  Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+};
+
+/** Calendar day of the first trail step, as YYYY-MM-DD. Seeded trails are from 2026. */
+export function messageOn(message: ConnectMessage): string {
+  const match = /^([A-Za-z]{3})\s+(\d{1,2}),/.exec(message.steps[0]?.at ?? "");
+  const month = match ? MESSAGE_MONTHS[match[1]] : "";
+  if (!match || !month) return "";
+  return `2026-${month}-${match[2].padStart(2, "0")}`;
+}
+
+/** Delivered without a failed step. A later retry can still be Delivered. */
+export function messageIsSuccess(message: ConnectMessage): boolean {
+  return message.status === "delivered" && message.steps.every((step) => step.state !== "fail");
+}
+
+export function withConfiguredChannel(
+  state: ConnectState,
+  input: { name: string; fromSystem: string; toSystem: string; kind: InterfaceKind; interaction: InteractionModel; endpoint: string; note: string },
+): ConnectState {
+  const name = input.name.trim();
+  const fromSystem = input.fromSystem.trim();
+  const toSystem = input.toSystem.trim();
+  const endpoint = input.endpoint.trim();
+  if (!name || !fromSystem || !toSystem || !endpoint) return state;
+  const id = `ch-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "channel"}`;
+  if (state.interfaces.some((item) => item.id === id)) return state;
+  const channel: ConnectInterface = {
+    id,
+    name,
+    fromSystem,
+    toSystem,
+    kind: input.kind,
+    interaction: input.interaction,
+    direction: fromSystem === "Sequence" ? "Outbound" : "Inbound",
+    endpoint,
+    note: input.note.trim() || `${fromSystem} exchanges ${input.kind} with ${toSystem}.`,
+  };
+  return { ...state, interfaces: [...state.interfaces, channel] };
 }
 
 export function messagesFor(messages: ConnectMessage[], interfaceId: string): ConnectMessage[] {

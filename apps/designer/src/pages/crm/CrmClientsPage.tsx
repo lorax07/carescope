@@ -7,6 +7,7 @@ import { crmSubtabPath, openCrmRecordTab, recordPath, rememberCrmHome, rememberC
 import { filter01Match } from "../../filter01";
 import { AccountCompanyCard, AccountPersonCard, clientBudget } from "./clientStudio";
 import { CrmDirectoryHeader } from "./CrmDirectoryHeader";
+import { usePriorityPanel } from "../../priorityPanel";
 import { TopPriorities } from "./TopPriorities";
 import { CrmEmpty, CrmShell } from "./CrmShell";
 import { CrmImportPanel } from "./CrmImportPanel";
@@ -55,6 +56,7 @@ function accountMatches(card: ClientCard, ids: string[], wildcard: string): bool
 }
 
 export function CrmClientsPage() {
+  const pinned = usePriorityPanel().pinned;
   const { cards, canWrite, accounts, overlay } = useCrm();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -162,7 +164,7 @@ export function CrmClientsPage() {
 
   return (
     <CrmShell studio priorities={false} title="Account" lede="The people on Sequence CRM accounts.">
-      <div className="client-board">
+      <div className={`client-board${pinned ? " is-priorities-pinned" : ""}`}>
         <div className="client-overview-head">
           <CrmDirectoryHeader
             panel={panel}
@@ -238,9 +240,11 @@ export function CrmClientsPage() {
             />
           )}
         </div>
-        <aside className="client-board-side">
-          <TopPriorities defaultOpen hint="A saved star stays on this screen until you leave it." />
-        </aside>
+        {pinned ? (
+          <aside className="client-board-side">
+            <TopPriorities defaultOpen hint="A saved star stays on this screen until you leave it." />
+          </aside>
+        ) : null}
       </div>
       {adding ? (
         <div className="lims-modal-backdrop" role="presentation" onClick={() => setAdding(false)}>

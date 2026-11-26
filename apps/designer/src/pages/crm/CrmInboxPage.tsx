@@ -5,6 +5,7 @@ import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from ".
 import { ClientAvatar } from "./clientStudio";
 import { InboxChannelMark } from "./InboxChannelMark";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
+import { usePriorityPanel } from "../../priorityPanel";
 import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import {
@@ -46,6 +47,7 @@ function snippet(thread: InboxThread): string {
 }
 
 export function CrmInboxPage() {
+  const prioritiesPinned = usePriorityPanel().pinned;
   const { overlay, contacts, accounts } = useCrm();
   const canWrite = crmCanWrite();
   const [params, setParams] = useSearchParams();
@@ -234,7 +236,7 @@ export function CrmInboxPage() {
         </section>
 
         <div className="inbox-side">
-          <TopPriorities defaultOpen={false} messages={false} />
+          {prioritiesPinned ? <TopPriorities defaultOpen={false} messages={false} /> : null}
         <section className="inbox-list" aria-label="All messages">
           <header>
             <h1>All messages</h1>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, withAppConnection, withAttempt, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, messageIsSuccess, messageOn, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -59,6 +59,25 @@ describe("sequence connect message handling", () => {
     expect(started.messages[0]?.steps[0]?.label).toBe("Integration started");
     expect(withInstrumentIntegration(started, alinity!, "East Lab", "lab-east", "Nov 17, 5:11 PM CT").instruments.filter((item) => item.catalogId === "alinity-c")).toHaveLength(1);
     expect(withInstrumentIntegration(seeded, alinity!, "   ", "lab-east", "Nov 17, 5:12 PM CT").instruments).toHaveLength(seeded.instruments.length);
+  });
+
+  it("records a configured channel and reads message days", () => {
+    const epic = INITIAL_MESSAGES.find((message) => message.id === "MSG-24022");
+    expect(messageOn(epic!)).toBe("2026-11-17");
+    expect(messageIsSuccess(epic!)).toBe(false);
+    const delivered = INITIAL_MESSAGES.find((message) => message.id === "MSG-24019");
+    expect(messageIsSuccess(delivered!)).toBe(true);
+    const next = withConfiguredChannel(initialConnectState(), {
+      name: "West campus ADT",
+      fromSystem: "West Hospital",
+      toSystem: "Sequence",
+      kind: "HL7 v2",
+      interaction: "Push",
+      endpoint: "MLLP 10.8.1.4:2575",
+      note: "ADT from the west campus.",
+    });
+    expect(next.interfaces.at(-1)).toMatchObject({ id: "ch-west-campus-adt", interaction: "Push", fromSystem: "West Hospital" });
+    expect(next.interfaces.filter(isInterfaceChannel).some((item) => item.id === "ch-west-campus-adt")).toBe(true);
   });
 
   it("searches the audit by error text and payload", () => {

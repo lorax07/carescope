@@ -114,17 +114,17 @@ export const CONNECT_CHAPTERS: ModuleChapter[] = [
   {
     id: "interfaces",
     to: "/app/connect/interfaces",
-    label: "Interfaces",
-    question: "Channels, messages, maps, and what needs attention.",
+    label: "EHR Integration",
+    question: "Integrations with the systems that exchange lab data.",
     hideTools: true,
     tools: [
-      { to: "/app/connect/interfaces", label: "Channels", match: "/app/connect/interfaces" },
+      { to: "/app/connect/interfaces", label: "Integrations", match: "/app/connect/interfaces" },
       { to: "/app/connect/messages", label: "Messages", match: "/app/connect/messages" },
       { to: "/app/connect/mapping", label: "Mapping", match: "/app/connect/mapping" },
       { to: "/app/connect/failures", label: "Attention", match: "/app/connect/failures" },
     ],
   },
-  { id: "instruments", to: "/app/connect/instruments", label: "Instrument integration", question: "Instruments connected to this lab instance.", hideTools: true, tools: [{ to: "/app/connect/instruments", label: "Instrument integration", match: "/app/connect/instruments" }] },
+  { id: "instruments", to: "/app/connect/instruments", label: "Instrument Manager", question: "Instruments connected to this lab instance.", hideTools: true, tools: [{ to: "/app/connect/instruments", label: "Instrument Manager", match: "/app/connect/instruments" }] },
   {
     id: "apps",
     to: "/app/connect/apps",

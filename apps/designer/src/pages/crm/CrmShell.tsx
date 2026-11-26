@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
+import { usePriorityPanel } from "../../priorityPanel";
 import { CLIENT_CHAPTERS } from "../moduleChapters";
 import { ModuleHeader } from "../ModuleHeader";
 import { TopPriorities } from "./TopPriorities";
@@ -28,9 +29,11 @@ export function CrmShell({
 }) {
   const heading = <ModuleHeader title={title} subtitle={lede} action={actions} />;
   const header = studio ? null : heading;
+  const pinned = usePriorityPanel().pinned;
+  const showPriorities = priorities && pinned;
   return (
-    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${priorities ? " has-priorities" : ""}`}>
-      {priorities ? (
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${showPriorities ? " has-priorities" : ""}`}>
+      {showPriorities ? (
         <>
           {header}
           <div className="crm-priority-main">
