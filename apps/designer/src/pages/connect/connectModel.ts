@@ -623,6 +623,117 @@ export function messageIsSuccess(message: ConnectMessage): boolean {
   return message.status === "delivered" && message.steps.every((step) => step.state !== "fail");
 }
 
+export const EHR_PRODUCTS = ["Epic", "Oracle Health", "MEDITECH", "athenahealth", "Sunquest", "Other"] as const;
+export const CHANNEL_PAYLOADS = ["Registration", "Orders", "Results"] as const;
+export type EhrProduct = (typeof EHR_PRODUCTS)[number];
+export type ChannelPayload = (typeof CHANNEL_PAYLOADS)[number];
+
+export type ChannelSetup = {
+  name: string;
+  ehrSystem: string;
+  product: EhrProduct;
+  flow: "into-sequence" | "out-of-sequence";
+  payloads: ChannelPayload[];
+  kind: InterfaceKind;
+  interaction: InteractionModel;
+  hl7Version: string;
+  host: string;
+  port: string;
+  sendingApp: string;
+  sendingFacility: string;
+  receivingApp: string;
+  receivingFacility: string;
+  fhirBase: string;
+  restMethod: "GET" | "POST";
+  restUrl: string;
+  webhookUrl: string;
+  filePath: string;
+};
+
+export function emptyChannelSetup(): ChannelSetup {
+  return {
+    name: "",
+    ehrSystem: "",
+    product: "Epic",
+    flow: "into-sequence",
+    payloads: ["Orders"],
+    kind: "HL7 v2",
+    interaction: "Push",
+    hl7Version: "2.5.1",
+    host: "",
+    port: "2575",
+    sendingApp: "",
+    sendingFacility: "",
+    receivingApp: "SEQUENCE",
+    receivingFacility: "LAB",
+    fhirBase: "",
+    restMethod: "POST",
+    restUrl: "",
+    webhookUrl: "",
+    filePath: "",
+  };
+}
+
+export function suggestInteraction(kind: InterfaceKind, flow: ChannelSetup["flow"]): InteractionModel {
+  if (kind === "File") return "File drop";
+  if (kind === "REST") return "Request and response";
+  if (kind === "FHIR R4") return flow === "into-sequence" ? "Query" : "Push";
+  return "Push";
+}
+
+function httpsUrl(value: string): boolean {
+  return /^https:\/\/\S+$/.test(value.trim());
+}
+
+/** Turn an EHR–LIMS setup into the connection Sequence stores. */
+export function channelFromSetup(setup: ChannelSetup): { ok: true; input: { name: string; fromSystem: string; toSystem: string; kind: InterfaceKind; interaction: InteractionModel; endpoint: string; note: string } } | { ok: false; error: string } {
+  const name = setup.name.trim();
+  const ehr = setup.ehrSystem.trim();
+  if (!name) return { ok: false, error: "Name the channel." };
+  if (!ehr) return { ok: false, error: "Name the EHR system this channel talks to." };
+  if (!setup.payloads.length) return { ok: false, error: "Choose what this channel carries." };
+  let endpoint = "";
+  if (setup.kind === "HL7 v2") {
+    const host = setup.host.trim();
+    const port = setup.port.trim();
+    if (!host || !port) return { ok: false, error: "HL7 needs the MLLP host and port." };
+    if (!/^\d+$/.test(port)) return { ok: false, error: "The MLLP port should be a number." };
+    endpoint = `MLLP ${host}:${port}`;
+  } else if (setup.kind === "FHIR R4") {
+    if (!httpsUrl(setup.fhirBase)) return { ok: false, error: "The FHIR base URL should start with https://." };
+    endpoint = setup.fhirBase.trim().replace(/\/$/, "");
+  } else if (setup.kind === "REST") {
+    if (!httpsUrl(setup.restUrl)) return { ok: false, error: "The REST URL should start with https://." };
+    endpoint = `${setup.restMethod} ${setup.restUrl.trim()}`;
+  } else if (setup.kind === "Webhook") {
+    if (!httpsUrl(setup.webhookUrl)) return { ok: false, error: "The webhook URL should start with https://." };
+    endpoint = setup.webhookUrl.trim();
+  } else if (setup.kind === "File") {
+    const path = setup.filePath.trim();
+    if (!path) return { ok: false, error: "Give the folder or SFTP path the files land in." };
+    endpoint = path;
+  } else {
+    return { ok: false, error: "Choose how the EHR and Sequence connect." };
+  }
+  const into = setup.flow === "into-sequence";
+  const transport = setup.kind === "HL7 v2" ? `HL7 v${setup.hl7Version}` : setup.kind;
+  const hl7 = setup.kind === "HL7 v2"
+    ? ` MSH-3 ${setup.sendingApp.trim() || "unset"}, MSH-4 ${setup.sendingFacility.trim() || "unset"}, MSH-5 ${setup.receivingApp.trim() || "SEQUENCE"}, MSH-6 ${setup.receivingFacility.trim() || "LAB"}.`
+    : "";
+  return {
+    ok: true,
+    input: {
+      name,
+      fromSystem: into ? ehr : "Sequence",
+      toSystem: into ? "Sequence" : ehr,
+      kind: setup.kind,
+      interaction: setup.interaction,
+      endpoint,
+      note: `${setup.product} ${setup.payloads.join(", ")} ${into ? "into Sequence" : "from Sequence to the EHR"} on ${transport}.${hl7}`,
+    },
+  };
+}
+
 export function withConfiguredChannel(
   state: ConnectState,
   input: { name: string; fromSystem: string; toSystem: string; kind: InterfaceKind; interaction: InteractionModel; endpoint: string; note: string },

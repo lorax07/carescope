@@ -57,6 +57,7 @@ describe("client and revenue chapters", () => {
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/messages")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/mapping")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/failures")?.id).toBe("interfaces");
+    expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/configure")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/instruments")?.id).toBe("instruments");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/apps")?.id).toBe("apps");
   });
