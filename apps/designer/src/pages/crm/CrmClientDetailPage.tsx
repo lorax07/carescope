@@ -14,8 +14,6 @@ import { contactChannels } from "./inboxStudio";
 import { AccountEditDialog } from "./AccountEditDialog";
 import { CrmRecordStrip } from "./CrmRecordStrip";
 import { CrmEmpty, CrmShell, SignalList } from "./CrmShell";
-import { usePriorityPanel } from "../../priorityPanel";
-import { TopPriorities } from "./TopPriorities";
 
 function FeedIcon({ kind }: { kind: "activity" | "documents" | "notes" }) {
   const path = kind === "activity"
@@ -37,7 +35,6 @@ function monthLabel(value: string): string {
 }
 
 export function CrmClientDetailPage() {
-  const pinned = usePriorityPanel().pinned;
   const { accountId = "" } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -88,8 +85,8 @@ export function CrmClientDetailPage() {
 
   if (!card) {
     return (
-      <CrmShell studio priorities={false} title="Account" lede="This account is not in the current tenant.">
-        <div className={`client-board${pinned ? " is-priorities-pinned" : ""}`}>
+      <CrmShell studio title="Account" lede="This account is not in the current tenant.">
+        <div className="client-board">
           <div className="client-overview-head">
             <CrmDirectoryHeader panel={home} onPanel={chooseHome} />
           </div>
@@ -97,11 +94,6 @@ export function CrmClientDetailPage() {
             <CrmRecordStrip panel={home} />
             <CrmEmpty title="Account not found." detail="It may belong to another laboratory database." />
           </div>
-          {pinned ? (
-            <aside className="client-board-side">
-              <TopPriorities />
-            </aside>
-          ) : null}
         </div>
       </CrmShell>
     );
@@ -151,8 +143,8 @@ export function CrmClientDetailPage() {
   }
 
   return (
-    <CrmShell studio priorities={false} title={focus ? focus.name : account.name} lede={focus ? focus.role : `${account.number} · ${account.owner}`}>
-      <div className={`client-board${pinned ? " is-priorities-pinned" : ""}`}>
+    <CrmShell studio title={focus ? focus.name : account.name} lede={focus ? focus.role : `${account.number} · ${account.owner}`}>
+      <div className="client-board">
         <div className="client-overview-head">
           <CrmDirectoryHeader
             panel={focus ? "contacts" : "accounts"}
@@ -301,11 +293,6 @@ export function CrmClientDetailPage() {
           ) : null}
         </section>}
         </div>
-        {pinned ? (
-          <aside className="client-board-side">
-            <TopPriorities />
-          </aside>
-        ) : null}
       </div>
       {editing ? (
         <AccountEditDialog

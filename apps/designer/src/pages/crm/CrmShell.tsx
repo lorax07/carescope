@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import type { HealthSignal } from "../../crm";
-import { usePriorityPanel } from "../../priorityPanel";
 import { CLIENT_CHAPTERS } from "../moduleChapters";
 import { ModuleHeader } from "../ModuleHeader";
-import { TopPriorities } from "./TopPriorities";
 
 export const CRM_SUBNAV = CLIENT_CHAPTERS;
 
@@ -16,39 +14,19 @@ export function CrmShell({
   lede,
   actions,
   studio,
-  priorities = true,
   children,
 }: {
   title: string;
   lede: string;
   actions?: ReactNode;
   studio?: boolean;
-  /** Pages that already place Top Priorities in their own right column pass false. */
-  priorities?: boolean;
   children: ReactNode;
 }) {
   const heading = <ModuleHeader title={title} subtitle={lede} action={actions} />;
-  const header = studio ? null : heading;
-  const pinned = usePriorityPanel().pinned;
-  const showPriorities = priorities && pinned;
   return (
-    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}${showPriorities ? " has-priorities" : ""}`}>
-      {showPriorities ? (
-        <>
-          {header}
-          <div className="crm-priority-main">
-            {children}
-          </div>
-          <aside className="crm-priority-side">
-            <TopPriorities />
-          </aside>
-        </>
-      ) : (
-        <>
-          {header}
-          {children}
-        </>
-      )}
+    <div className={`lims-page rcm-page${studio ? " client-studio" : ""}`}>
+      {studio ? null : heading}
+      {children}
     </div>
   );
 }

@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import { useCrm } from "../../crm";
 import type { Charge } from "../../revenueCycle";
 import { ProjectTable, RevenueChart, StudioLink, paymentBars } from "./clientStudio";
-import { usePriorityPanel } from "../../priorityPanel";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
-import { TopPriorities } from "./TopPriorities";
 
 function postedPayments(charges: Charge[]): { at: string; cents: number }[] {
   return charges.flatMap((charge) =>
@@ -25,11 +23,10 @@ export function CrmOverviewPage() {
   const openTasks = overlay.tasks.filter((item) => item.status !== "done");
   const series = useMemo(() => paymentBars(postedPayments(charges), 2026, 7), [charges]);
   const watch = cards.filter((card) => card.health === "At risk" || card.health === "Critical").length;
-  const pinned = usePriorityPanel().pinned;
 
   return (
-    <CrmShell studio priorities={false} title="CRM Overview" lede="How the laboratory’s accounts are doing, what they need, and who should act next.">
-      <div className={`client-home${pinned ? " is-priorities-pinned" : ""}`}>
+    <CrmShell studio title="CRM Overview" lede="How the laboratory’s accounts are doing, what they need, and who should act next.">
+      <div className="client-home">
         <div className="client-overview-head">
           <CrmModuleTitle title="CRM Overview" subtitle="How the laboratory’s accounts are doing, what they need, and who should act next." />
         </div>
@@ -88,12 +85,6 @@ export function CrmOverviewPage() {
 
           <ProjectTable scroll title="Manage Cases" rows={opportunities} accounts={accounts} filters={filters} onFilter={setFilters} query={query} onQuery={setQuery} />
         </div>
-
-        {pinned ? (
-          <aside className="client-home-side">
-            <TopPriorities defaultOpen hint="Search uses the same accounts as the laboratory and Sequence Revenue." />
-          </aside>
-        ) : null}
       </div>
     </CrmShell>
   );
