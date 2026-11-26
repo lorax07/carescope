@@ -10342,6 +10342,64 @@ button.client-kpi.is-on {
   letter-spacing: 0.02em;
 }
 
+.connect-channel-arrow {
+  color: #3c3658;
+  font-weight: 650;
+}
+
+.connect-channel-link {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 750;
+}
+
+.connect-connection-details {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.7rem 0 0.9rem;
+}
+
+.connect-connection-details div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+.connect-connection-details dt {
+  color: #6b6584;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.connect-connection-details dd {
+  margin: 0;
+}
+
+.connect-home-modules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.4rem;
+}
+
+.connect-home-modules ul {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.connect-home-modules li {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.connect-home-modules li span {
+  color: #6b6584;
+  font-size: 0.82rem;
+}
+
 .connect-channel-meta {
   display: flex;
   flex-wrap: wrap;
@@ -10621,6 +10679,7 @@ button.client-kpi.is-on {
 
 @media (max-width: 900px) {
   .connect-split,
+  .connect-home-modules,
   .connect-trail li,
   .connect-attention-list li,
   .connect-failure-list li {

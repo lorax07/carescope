@@ -3,11 +3,20 @@ export type InterfaceKind = "HL7 v2" | "FHIR R4" | "REST" | "Webhook" | "Instrum
 export type ConnectInterface = {
   id: string;
   name: string;
+  /** System that sends on this connection. */
+  fromSystem: string;
+  /** System that receives on this connection. */
+  toSystem: string;
   kind: InterfaceKind;
   direction: "Inbound" | "Outbound";
   endpoint: string;
   note: string;
 };
+
+/** Interface channels are system-to-system connections. Instrument gateways and app APIs stay in their own submodules. */
+export function isInterfaceChannel(channel: ConnectInterface): boolean {
+  return channel.kind !== "Instrument gateway" && !channel.id.startsWith("gw-") && !channel.id.startsWith("app-");
+}
 
 export type TrailStep = {
   at: string;
@@ -66,13 +75,13 @@ export const CONNECT_TARGETS = [
 ];
 
 export const CONNECT_INTERFACES: ConnectInterface[] = [
-  { id: "north-adt", name: "North Hospital ADT", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
-  { id: "north-orm", name: "North Hospital orders", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
-  { id: "fhir-patient", name: "Epic FHIR", kind: "FHIR R4", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
-  { id: "results-hook", name: "Result webhook", kind: "Webhook", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
-  { id: "accession-api", name: "Accession API", kind: "REST", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
-  { id: "cobas-gw", name: "Cobas 8000 gateway", kind: "Instrument gateway", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
-  { id: "ref-file", name: "Reference lab drop", kind: "File", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
+  { id: "north-adt", name: "Registration", fromSystem: "North Hospital registration", toSystem: "Sequence", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
+  { id: "north-orm", name: "Orders", fromSystem: "North Hospital orders", toSystem: "Sequence", kind: "HL7 v2", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
+  { id: "fhir-patient", name: "Patients and orders", fromSystem: "Epic", toSystem: "Sequence", kind: "FHIR R4", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
+  { id: "results-hook", name: "Released results", fromSystem: "Sequence", toSystem: "North Hospital results", kind: "Webhook", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
+  { id: "accession-api", name: "Accession create", fromSystem: "Sequence", toSystem: "Sequence accession", kind: "REST", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
+  { id: "cobas-gw", name: "Cobas 8000 gateway", fromSystem: "cobas 8000", toSystem: "Sequence", kind: "Instrument gateway", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
+  { id: "ref-file", name: "Reference lab files", fromSystem: "Reference lab", toSystem: "Sequence", kind: "File", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
 ];
 
 function step(at: string, label: string, detail: string, state: TrailStep["state"]): TrailStep {
@@ -439,6 +448,8 @@ function instrumentChannel(item: ConnectedInstrument, note: string): ConnectInte
   return {
     id: item.interfaceId,
     name: item.name,
+    fromSystem: item.name,
+    toSystem: "Sequence",
     kind: "Instrument gateway",
     direction: "Inbound",
     endpoint: `Agent LAB-GW · ${item.protocol} · ${item.site}`,
@@ -537,6 +548,8 @@ export function withAppConnection(state: ConnectState, connector: AppConnector, 
   const channel: ConnectInterface = {
     id: interfaceId,
     name: connector.name,
+    fromSystem: connector.direction === "Inbound" ? connector.name : "Sequence",
+    toSystem: connector.direction === "Inbound" ? "Sequence" : connector.name,
     kind: connector.kind,
     direction: connector.direction,
     endpoint,

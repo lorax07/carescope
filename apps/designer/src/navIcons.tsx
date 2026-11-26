@@ -252,6 +252,16 @@ export function NavIcon({ name }: { name: string }) {
       </svg>
     );
   }
+  if (name === "apps") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="4" width="6.5" height="6.5" rx="1.4" />
+        <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4" />
+        <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4" />
+        <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4" />
+      </svg>
+    );
+  }
   if (name === "connect" || name === "interfaces") {
     return (
       <svg {...common}>
