@@ -10549,6 +10549,20 @@ button.client-kpi.is-on {
   white-space: nowrap;
 }
 
+.connect-channel-pane > .connect-channel-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.connect-channel-pane > .connect-channel-kind {
+  display: block;
+  margin: 0.15rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .connect-channel-kind {
   color: var(--accent);
   font-size: 0.75rem;

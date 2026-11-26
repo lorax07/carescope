@@ -16,6 +16,7 @@ import {
   channelFromSetup,
   EHR_PRODUCTS,
   emptyChannelSetup,
+  INTERACTION_MODELS,
   isInterfaceChannel,
   matchesQuery,
   messageIsSuccess,
@@ -48,7 +49,6 @@ const INTERFACE_TABS = [
 ] as const;
 
 const CHANNEL_KINDS: InterfaceKind[] = ["HL7 v2", "FHIR R4", "REST", "Webhook", "File"];
-const INTERACTION_MODELS: InteractionModel[] = ["Push", "Request and response", "Query", "File drop"];
 const HL7_VERSIONS = ["2.3", "2.5", "2.5.1", "2.8"];
 
 type ChannelSession = {
@@ -436,8 +436,8 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
       </section>
       {channel ? (
         <section className="lims-panel migration-panel connect-channel-pane" aria-label={`${channel.fromSystem} to ${channel.toSystem}`}>
-          <p className="connect-channel-link">{channel.fromSystem} → {channel.toSystem}</p>
-          <h2>{channel.name}</h2>
+          <h2 className="connect-channel-title">{channel.fromSystem} → {channel.toSystem}</h2>
+          <p className="connect-channel-kind">{channel.kind} · {channel.name}</p>
           <dl className="connect-connection-details">
             <div><dt>From</dt><dd>{channel.fromSystem}</dd></div>
             <div><dt>To</dt><dd>{channel.toSystem}</dd></div>
