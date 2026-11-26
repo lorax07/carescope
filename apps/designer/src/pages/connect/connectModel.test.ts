@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, channelFromSetup, emptyChannelSetup, messageIsSuccess, messageOn, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, channelFromSetup, emptyChannelSetup, messageIsSuccess, messageOn, suggestInteraction, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -75,10 +75,12 @@ describe("sequence connect message handling", () => {
     });
     expect(ready.ok).toBe(true);
     if (ready.ok) {
-      expect(ready.input).toMatchObject({ fromSystem: "North Hospital Epic", toSystem: "Sequence", endpoint: "MLLP 10.4.1.20:2576", interaction: "Push" });
+      expect(ready.input).toMatchObject({ fromSystem: "North Hospital Epic", toSystem: "Sequence", endpoint: "MLLP 10.4.1.20:2576", interaction: "Unidirectional (One-Way Push)" });
       expect(ready.input.note).toContain("Orders");
       expect(ready.input.note).toContain("MSH-3 EPIC");
     }
+    expect(suggestInteraction("Webhook", "out-of-sequence")).toBe("Publish-Subscribe (Event-Driven / Webhook)");
+    expect(suggestInteraction("FHIR R4", "into-sequence")).toBe("Synchronous Request-Response (Real-Time Query)");
   });
 
   it("records a configured channel and reads message days", () => {
@@ -92,11 +94,11 @@ describe("sequence connect message handling", () => {
       fromSystem: "West Hospital",
       toSystem: "Sequence",
       kind: "HL7 v2",
-      interaction: "Push",
+      interaction: "Unidirectional (One-Way Push)",
       endpoint: "MLLP 10.8.1.4:2575",
       note: "ADT from the west campus.",
     });
-    expect(next.interfaces.at(-1)).toMatchObject({ id: "ch-west-campus-adt", interaction: "Push", fromSystem: "West Hospital" });
+    expect(next.interfaces.at(-1)).toMatchObject({ id: "ch-west-campus-adt", interaction: "Unidirectional (One-Way Push)", fromSystem: "West Hospital" });
     expect(next.interfaces.filter(isInterfaceChannel).some((item) => item.id === "ch-west-campus-adt")).toBe(true);
   });
 

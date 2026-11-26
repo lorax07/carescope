@@ -1,6 +1,14 @@
 export type InterfaceKind = "HL7 v2" | "FHIR R4" | "REST" | "Webhook" | "Instrument gateway" | "File";
 
-export type InteractionModel = "Push" | "Request and response" | "Query" | "File drop";
+export const INTERACTION_MODELS = [
+  "Unidirectional (One-Way Push)",
+  "Bidirectional (Asynchronous Loop)",
+  "Synchronous Request-Response (Real-Time Query)",
+  "Publish-Subscribe (Event-Driven / Webhook)",
+  "Embedded / In-Context UI (SMART on FHIR / Iframe)",
+] as const;
+
+export type InteractionModel = (typeof INTERACTION_MODELS)[number];
 
 export type ConnectInterface = {
   id: string;
@@ -18,10 +26,9 @@ export type ConnectInterface = {
 };
 
 export function interactionFor(kind: InterfaceKind): InteractionModel {
-  if (kind === "File") return "File drop";
-  if (kind === "FHIR R4") return "Query";
-  if (kind === "REST") return "Request and response";
-  return "Push";
+  if (kind === "Webhook") return "Publish-Subscribe (Event-Driven / Webhook)";
+  if (kind === "FHIR R4" || kind === "REST") return "Synchronous Request-Response (Real-Time Query)";
+  return "Unidirectional (One-Way Push)";
 }
 
 /** Interface channels are system-to-system connections. Instrument gateways and app APIs stay in their own submodules. */
@@ -86,13 +93,13 @@ export const CONNECT_TARGETS = [
 ];
 
 export const CONNECT_INTERFACES: ConnectInterface[] = [
-  { id: "north-adt", name: "Registration", fromSystem: "North Hospital registration", toSystem: "Sequence", kind: "HL7 v2", interaction: "Push", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
-  { id: "north-orm", name: "Orders", fromSystem: "North Hospital orders", toSystem: "Sequence", kind: "HL7 v2", interaction: "Push", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
-  { id: "fhir-patient", name: "Patients and orders", fromSystem: "Epic", toSystem: "Sequence", kind: "FHIR R4", interaction: "Query", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
-  { id: "results-hook", name: "Released results", fromSystem: "Sequence", toSystem: "North Hospital results", kind: "Webhook", interaction: "Push", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
-  { id: "accession-api", name: "Accession create", fromSystem: "Sequence", toSystem: "Sequence accession", kind: "REST", interaction: "Request and response", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
-  { id: "cobas-gw", name: "Cobas 8000 gateway", fromSystem: "cobas 8000", toSystem: "Sequence", kind: "Instrument gateway", interaction: "Push", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
-  { id: "ref-file", name: "Reference lab files", fromSystem: "Reference lab", toSystem: "Sequence", kind: "File", interaction: "File drop", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
+  { id: "north-adt", name: "Registration", fromSystem: "North Hospital registration", toSystem: "Sequence", kind: "HL7 v2", interaction: "Unidirectional (One-Way Push)", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2575", note: "ADT^A08 and ADT^A31 from the hospital registration system." },
+  { id: "north-orm", name: "Orders", fromSystem: "North Hospital orders", toSystem: "Sequence", kind: "HL7 v2", interaction: "Unidirectional (One-Way Push)", direction: "Inbound", endpoint: "MLLP 10.4.1.20:2576", note: "ORM^O01 orders. Reused by any hospital that sends the same v2 profile." },
+  { id: "fhir-patient", name: "Patients and orders", fromSystem: "Epic", toSystem: "Sequence", kind: "FHIR R4", interaction: "Synchronous Request-Response (Real-Time Query)", direction: "Inbound", endpoint: "https://epic.north.example/fhir/R4", note: "Patient and ServiceRequest. The same map covers the next Epic site." },
+  { id: "results-hook", name: "Released results", fromSystem: "Sequence", toSystem: "North Hospital results", kind: "Webhook", interaction: "Publish-Subscribe (Event-Driven / Webhook)", direction: "Outbound", endpoint: "https://north.example/hooks/results", note: "POST when a result is released. The partner returns an acknowledgement id." },
+  { id: "accession-api", name: "Accession create", fromSystem: "Sequence", toSystem: "Sequence accession", kind: "REST", interaction: "Synchronous Request-Response (Real-Time Query)", direction: "Outbound", endpoint: "POST /api/v1/accessions", note: "Creates the Sequence accession after an order is transformed." },
+  { id: "cobas-gw", name: "Cobas 8000 gateway", fromSystem: "cobas 8000", toSystem: "Sequence", kind: "Instrument gateway", interaction: "Unidirectional (One-Way Push)", direction: "Inbound", endpoint: "Agent LAB-GW-03 · ASTM", note: "The analyzer never leaves the lab network. The local gateway forwards results." },
+  { id: "ref-file", name: "Reference lab files", fromSystem: "Reference lab", toSystem: "Sequence", kind: "File", interaction: "Unidirectional (One-Way Push)", direction: "Inbound", endpoint: "sftp /inbound/ref-lab", note: "HL7 batch files. A bad header stops the file before any order is created." },
 ];
 
 function step(at: string, label: string, detail: string, state: TrailStep["state"]): TrailStep {
@@ -462,7 +469,7 @@ function instrumentChannel(item: ConnectedInstrument, note: string): ConnectInte
     fromSystem: item.name,
     toSystem: "Sequence",
     kind: "Instrument gateway",
-    interaction: "Push",
+    interaction: "Unidirectional (One-Way Push)",
     direction: "Inbound",
     endpoint: `Agent LAB-GW · ${item.protocol} · ${item.site}`,
     note,
@@ -658,7 +665,7 @@ export function emptyChannelSetup(): ChannelSetup {
     flow: "into-sequence",
     payloads: ["Orders"],
     kind: "HL7 v2",
-    interaction: "Push",
+    interaction: "Unidirectional (One-Way Push)",
     hl7Version: "2.5.1",
     host: "",
     port: "2575",
@@ -675,10 +682,10 @@ export function emptyChannelSetup(): ChannelSetup {
 }
 
 export function suggestInteraction(kind: InterfaceKind, flow: ChannelSetup["flow"]): InteractionModel {
-  if (kind === "File") return "File drop";
-  if (kind === "REST") return "Request and response";
-  if (kind === "FHIR R4") return flow === "into-sequence" ? "Query" : "Push";
-  return "Push";
+  if (kind === "Webhook") return "Publish-Subscribe (Event-Driven / Webhook)";
+  if (kind === "REST") return "Synchronous Request-Response (Real-Time Query)";
+  if (kind === "FHIR R4") return flow === "into-sequence" ? "Synchronous Request-Response (Real-Time Query)" : "Unidirectional (One-Way Push)";
+  return "Unidirectional (One-Way Push)";
 }
 
 function httpsUrl(value: string): boolean {
