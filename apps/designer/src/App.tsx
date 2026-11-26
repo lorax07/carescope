@@ -19,6 +19,8 @@ import { INSTRUMENT_CHAPTERS } from "./pages/instruments/InstrumentChrome";
 import { ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, type ModuleSlug } from "./sequenceModules";
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
+import { pulsePriorities, togglePriorityFlyout, usePriorityPanel } from "./priorityPanel";
+import { PriorityFlyout } from "./pages/crm/TopPriorities";
 
 const NAV = [
   { to: "/app/design", label: "Workflow Designer" },
@@ -383,6 +385,7 @@ function AppFrame() {
   const labOps = useLabOperations();
   const sectionTabs = useSectionTabs();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const priorityPanel = usePriorityPanel();
   const [navOpen] = useState(false);
   const currentGroup = pathToNavGroup(location.pathname);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -680,7 +683,23 @@ function AppFrame() {
         </label>
         <div className="client-top-actions">
           <BookmarkMenu userId={lims?.userId || lims?.username || "M. Chen"} />
-          <button type="button" aria-label="Notifications">
+          <button
+            type="button"
+            data-priority-bell=""
+            aria-label="Top priorities"
+            aria-expanded={priorityPanel.open}
+            aria-controls="top-priorities-flyout"
+            className={priorityPanel.open ? "is-open" : undefined}
+            onClick={() => {
+              const slot = document.querySelector("[data-priorities-slot]");
+              if (priorityPanel.pinned && slot) {
+                slot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                pulsePriorities();
+                return;
+              }
+              togglePriorityFlyout();
+            }}
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V10a6 6 0 1 1 12 0v6l1.4 2H4.6L6 16Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M10 19a2 2 0 0 0 4 0" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
             <i />
           </button>
@@ -780,6 +799,7 @@ function AppFrame() {
         </div>
       </div>
 
+      <PriorityFlyout />
       <SandboxSignupModal open={signupOpen} onClose={closeSignup} />
       {settingsOpen ? <SettingsDialog onClose={() => setSettingsOpen(false)} /> : null}
     </div>

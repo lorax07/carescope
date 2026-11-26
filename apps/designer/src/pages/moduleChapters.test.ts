@@ -53,7 +53,7 @@ describe("client and revenue chapters", () => {
   });
 
   it("keeps connect messages inside the interfaces submodule", () => {
-    expect(CONNECT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["Interfaces", "Instrument integration", "App connectors"]);
+    expect(CONNECT_CHAPTERS.map((chapter) => chapter.label)).toEqual(["EHR Integration", "Instrument Manager", "App connectors"]);
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/messages")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/mapping")?.id).toBe("interfaces");
     expect(chapterForPath(CONNECT_CHAPTERS, "/app/connect/failures")?.id).toBe("interfaces");

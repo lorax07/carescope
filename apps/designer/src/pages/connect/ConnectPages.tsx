@@ -12,13 +12,19 @@ import {
   INSTRUMENT_CATALOG,
   INSTRUMENT_CATEGORIES,
   attentionMessages,
+  interactionFor,
   isInterfaceChannel,
   matchesQuery,
+  messageIsSuccess,
+  messageOn,
   type AppConnector,
   type ConnectMessage,
+  type InteractionModel,
+  type InterfaceKind,
   type MessageStatus,
 } from "./connectModel";
 import {
+  configureChannel,
   quarantineFile,
   replaceToken,
   replayMessage,
@@ -31,9 +37,12 @@ import {
 } from "./connectStore";
 
 const INTERFACE_TABS = [
-  { to: "/app/connect/interfaces", label: "Channels", key: "channels" },
+  { to: "/app/connect/interfaces", label: "Integrations", key: "channels" },
   { to: "/app/connect/failures", label: "Attention", key: "failures" },
 ] as const;
+
+const CHANNEL_KINDS: InterfaceKind[] = ["HL7 v2", "FHIR R4", "REST", "Webhook", "File"];
+const INTERACTION_MODELS: InteractionModel[] = ["Push", "Request and response", "Query", "File drop"];
 
 const COPY: Record<string, { title: string; subtitle: string }> = {
   overview: {
@@ -41,7 +50,7 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
     subtitle: "What happened to every message, and what still needs a person.",
   },
   interfaces: {
-    title: "Channels",
+    title: "EHR Integration",
     subtitle: "Connections between Sequence and the other systems that exchange lab data.",
   },
   apps: {
@@ -61,7 +70,7 @@ const COPY: Record<string, { title: string; subtitle: string }> = {
     subtitle: "Failed and retrying messages, with the next action that can actually clear them.",
   },
   instruments: {
-    title: "Instrument integration",
+    title: "Instrument Manager",
     subtitle: "Analyzers connected to this lab instance.",
   },
 };
@@ -91,7 +100,7 @@ function channelTabOn(key: string, view: string): boolean {
 
 function InterfaceTabs({ current }: { current: string }) {
   return (
-    <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="Interface pages">
+    <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="EHR Integration">
       {INTERFACE_TABS.map((tab) => {
         const on = channelTabOn(tab.key, current);
         return (
@@ -204,7 +213,7 @@ function OverviewView() {
       </section>
     <section className="connect-home-modules" aria-label="Connect modules">
       <article className="lims-panel migration-panel">
-        <h2>Interfaces</h2>
+        <h2>EHR Integration</h2>
         <p>System connections that exchange lab data with Sequence.</p>
         <ul>
           <li><Link to="/app/connect/interfaces">{channels.length} {channels.length === 1 ? "channel" : "channels"}</Link></li>
@@ -218,7 +227,7 @@ function OverviewView() {
         </ul>
       </article>
       <article className="lims-panel migration-panel">
-        <h2>Instrument integration</h2>
+        <h2>Instrument Manager</h2>
         <p>Analyzers connected to this lab instance.</p>
         <ul>
           <li><Link to="/app/connect/instruments">{instruments.length} {instruments.length === 1 ? "analyzer" : "analyzers"} on this instance</Link></li>
@@ -336,7 +345,11 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
   const [filters, setFilters] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [messageQuery, setMessageQuery] = useState("");
-  const [messageStatus, setMessageStatus] = useState<"all" | MessageStatus>("all");
+  const [messageStatus, setMessageStatus] = useState<"all" | "success" | MessageStatus>("all");
+  const [rangeOn, setRangeOn] = useState(false);
+  const [rangeFrom, setRangeFrom] = useState("");
+  const [rangeTo, setRangeTo] = useState("");
+  const [configuring, setConfiguring] = useState(false);
   useEffect(() => setPane(initialPane), [initialPane]);
   const filterOptions = useMemo<Filter01Option[]>(() => {
     const kinds = [...new Set(channels.map((item) => item.kind))];
@@ -357,7 +370,13 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
   });
   const channel = visible.find((item) => item.id === selected) ?? visible[0];
   const channelMessages = channel ? state.messages.filter((message) => message.interfaceId === channel.id).filter((message) => {
-    if (messageStatus !== "all" && message.status !== messageStatus) return false;
+    if (messageStatus === "success") {
+      if (!messageIsSuccess(message)) return false;
+    } else if (messageStatus !== "all" && message.status !== messageStatus) return false;
+    if (rangeOn && (rangeFrom || rangeTo)) {
+      const day = messageOn(message);
+      if (!day || (rangeFrom && day < rangeFrom) || (rangeTo && day > rangeTo)) return false;
+    }
     return matchesQuery(message, channel.name, messageQuery);
   }) : [];
   const openMessage = channelMessages.find((message) => message.id === state.selectedId) ?? channelMessages[0];
@@ -369,25 +388,27 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
 
   return (
     <>
-    <Filter01
-      className="connect-channel-filter"
-      label="Channels"
-      scope="connect-channels"
-      options={filterOptions}
-      selected={filters}
-      onChange={setFilters}
-      query={query}
-      onQuery={setQuery}
-    />
+    <div className="connect-channel-toolbar">
+      <Filter01
+        className="connect-channel-filter"
+        label="Integrations"
+        scope="connect-channels"
+        options={filterOptions}
+        selected={filters}
+        onChange={setFilters}
+        query={query}
+        onQuery={setQuery}
+      />
+      <button type="button" className="btn btn-primary" onClick={() => setConfiguring(true)}>Configure a new Channel</button>
+    </div>
     <div className="connect-split connect-channel-screen">
-      <section className="lims-panel migration-panel" aria-label="Channels">
+      <section className="lims-panel migration-panel" aria-label="Integrations">
         <h2>{visible.length} {visible.length === 1 ? "channel" : "channels"}</h2>
         <ul className="connect-channel-board">
           {visible.map((item) => (
               <li key={item.id}>
                 <button type="button" className={item.id === channel?.id ? "is-current" : undefined} aria-pressed={item.id === channel?.id} onClick={() => setSelected(item.id)}>
-                  <strong>{item.fromSystem}</strong>
-                  <span className="connect-channel-arrow">→ {item.toSystem}</span>
+                  <strong className="connect-channel-title">{item.fromSystem} → {item.toSystem}</strong>
                   <span className="connect-channel-kind">{item.kind} · {item.name}</span>
                 </button>
               </li>
@@ -403,6 +424,7 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
             <div><dt>From</dt><dd>{channel.fromSystem}</dd></div>
             <div><dt>To</dt><dd>{channel.toSystem}</dd></div>
             <div><dt>Protocol</dt><dd>{channel.kind}</dd></div>
+            <div><dt>Interaction model</dt><dd>{channel.interaction}</dd></div>
             <div><dt>Endpoint</dt><dd>{channel.endpoint}</dd></div>
             <div><dt>What it carries</dt><dd>{channel.note}</dd></div>
           </dl>
@@ -417,12 +439,19 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
                 <input aria-label="Search this channel" value={messageQuery} placeholder="Id, MRN, error, payload" onChange={(event) => setMessageQuery(event.target.value)} />
               </label>
               <div className="migration-filters" role="group" aria-label="Message status">
-                {(["all", "failed", "retrying", "held", "delivered"] as const).map((key) => (
+                {(["all", "success", "failed", "retrying", "held", "delivered"] as const).map((key) => (
                   <button key={key} type="button" className={messageStatus === key ? "is-current" : undefined} aria-pressed={messageStatus === key} onClick={() => setMessageStatus(key)}>
-                    {key === "all" ? "All" : statusLabel(key)}
+                    {key === "all" ? "All" : key === "success" ? "Success" : statusLabel(key)}
                   </button>
                 ))}
+                <button type="button" className={rangeOn ? "is-current" : undefined} aria-pressed={rangeOn} onClick={() => setRangeOn((current) => !current)}>Date range</button>
               </div>
+              {rangeOn ? (
+                <div className="connect-date-range">
+                  <label>From <input type="date" aria-label="Messages from" value={rangeFrom} onChange={(event) => setRangeFrom(event.target.value)} /></label>
+                  <label>To <input type="date" aria-label="Messages to" value={rangeTo} onChange={(event) => setRangeTo(event.target.value)} /></label>
+                </div>
+              ) : null}
               <ul className="connect-channel-list">
                 {channelMessages.map((message) => (
                   <li key={message.id}>
@@ -479,7 +508,71 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
         </section>
       )}
     </div>
+    {configuring ? <ChannelConfigDialog onClose={() => setConfiguring(false)} onCreated={(id) => { setConfiguring(false); setSelected(id); }} /> : null}
     </>
+  );
+}
+
+function ChannelConfigDialog({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
+  const [name, setName] = useState("");
+  const [fromSystem, setFromSystem] = useState("");
+  const [toSystem, setToSystem] = useState("Sequence");
+  const [kind, setKind] = useState<InterfaceKind>("HL7 v2");
+  const [interaction, setInteraction] = useState<InteractionModel>(interactionFor("HL7 v2"));
+  const [endpoint, setEndpoint] = useState("");
+  const [note, setNote] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const ready = name.trim() && fromSystem.trim() && toSystem.trim() && endpoint.trim();
+  return (
+    <div className="lims-modal-backdrop" role="presentation" onClick={onClose}>
+      <form
+        className="lims-modal connect-connector-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="configure-channel-title"
+        onClick={(event) => event.stopPropagation()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!ready) return;
+          const id = configureChannel({ name, fromSystem, toSystem, kind, interaction, endpoint, note });
+          if (id) onCreated(id);
+        }}
+      >
+        <h2 id="configure-channel-title">Configure a new Channel</h2>
+        <p>This adds a system-to-system connection on EHR Integration. Messages arrive on it after the endpoint is live.</p>
+        <label className="migration-select">Channel name<input ref={inputRef} aria-label="Channel name" value={name} onChange={(event) => setName(event.target.value)} /></label>
+        <label className="migration-select">From<input aria-label="From system" value={fromSystem} onChange={(event) => setFromSystem(event.target.value)} /></label>
+        <label className="migration-select">To<input aria-label="To system" value={toSystem} onChange={(event) => setToSystem(event.target.value)} /></label>
+        <label className="migration-select">Protocol
+          <select aria-label="Protocol" value={kind} onChange={(event) => {
+            const next = event.target.value as InterfaceKind;
+            setKind(next);
+            setInteraction(interactionFor(next));
+          }}>
+            {CHANNEL_KINDS.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="migration-select">Interaction model
+          <select aria-label="Interaction model" value={interaction} onChange={(event) => setInteraction(event.target.value as InteractionModel)}>
+            {INTERACTION_MODELS.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="migration-select">Endpoint<input aria-label="Endpoint" value={endpoint} onChange={(event) => setEndpoint(event.target.value)} /></label>
+        <label className="migration-select">What it carries<input aria-label="What it carries" value={note} onChange={(event) => setNote(event.target.value)} /></label>
+        <div className="connect-connector-actions">
+          <button type="button" className="btn" onClick={onClose}>Cancel</button>
+          <button type="submit" className="btn btn-primary" disabled={!ready}>Add channel</button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -680,11 +773,9 @@ export function ConnectPage({ section }: { section?: string }) {
   const view = section && section in COPY ? section : "overview";
   const channelScreen = view === "interfaces" || view === "messages" || view === "mapping";
   const interfaceView = channelScreen || view === "failures";
-  const copy = channelScreen
-    ? { title: "Channels", subtitle: COPY.interfaces.subtitle }
-    : view === "failures"
-      ? { title: "Needs attention", subtitle: COPY.failures.subtitle }
-      : COPY[view];
+  const copy = interfaceView
+    ? { title: "EHR Integration", subtitle: view === "failures" ? COPY.failures.subtitle : COPY.interfaces.subtitle }
+    : COPY[view];
   return (
     <div className="lims-page connect-studio">
       <ModuleHeader
@@ -701,7 +792,7 @@ export function ConnectPage({ section }: { section?: string }) {
           </button>
         ) : undefined}
       />
-      {view === "instruments" ? <SectionTabStrip mainLabel="Instrument integration" /> : null}
+      {view === "instruments" ? <SectionTabStrip mainLabel="Instrument Manager" /> : null}
       {interfaceView ? <InterfaceTabs current={view} /> : null}
       {view === "overview" ? <OverviewView /> : null}
       {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} /> : null}
