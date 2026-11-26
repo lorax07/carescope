@@ -10560,6 +10560,56 @@ button.client-kpi.is-on {
   color: inherit;
 }
 
+.connect-channel-form h2,
+.connect-validate h2 {
+  margin-bottom: 0.25rem;
+}
+
+.connect-channel-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin-top: 0.9rem;
+}
+
+.connect-channel-span {
+  grid-column: 1 / -1;
+}
+
+.connect-channel-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.1rem;
+  margin: 0.95rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.connect-channel-choices legend {
+  width: 100%;
+  margin-bottom: 0.15rem;
+  color: #6b6584;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.connect-channel-choices label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.connect-channel-form .connect-connector-actions,
+.connect-validate .btn {
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .connect-channel-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .connect-connection-details dt {
   color: #6b6584;
   font-size: 0.78rem;

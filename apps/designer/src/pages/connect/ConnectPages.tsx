@@ -12,12 +12,18 @@ import {
   INSTRUMENT_CATALOG,
   INSTRUMENT_CATEGORIES,
   attentionMessages,
-  interactionFor,
+  CHANNEL_PAYLOADS,
+  channelFromSetup,
+  EHR_PRODUCTS,
+  emptyChannelSetup,
   isInterfaceChannel,
   matchesQuery,
   messageIsSuccess,
   messageOn,
+  suggestInteraction,
   type AppConnector,
+  type ChannelPayload,
+  type ChannelSetup,
   type ConnectMessage,
   type InteractionModel,
   type InterfaceKind,
@@ -43,6 +49,14 @@ const INTERFACE_TABS = [
 
 const CHANNEL_KINDS: InterfaceKind[] = ["HL7 v2", "FHIR R4", "REST", "Webhook", "File"];
 const INTERACTION_MODELS: InteractionModel[] = ["Push", "Request and response", "Query", "File drop"];
+const HL7_VERSIONS = ["2.3", "2.5", "2.5.1", "2.8"];
+
+type ChannelSession = {
+  setup: ChannelSetup;
+  step: "form" | "validation";
+  error: string;
+  savedId: string;
+};
 
 const COPY: Record<string, { title: string; subtitle: string }> = {
   overview: {
@@ -98,7 +112,7 @@ function channelTabOn(key: string, view: string): boolean {
   return key === view;
 }
 
-function InterfaceTabs({ current }: { current: string }) {
+function InterfaceTabs({ current, configureLabel }: { current: string; configureLabel?: string }) {
   return (
     <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="EHR Integration">
       {INTERFACE_TABS.map((tab) => {
@@ -109,6 +123,11 @@ function InterfaceTabs({ current }: { current: string }) {
           </Link>
         );
       })}
+      {configureLabel ? (
+        <Link to="/app/connect/configure" role="tab" aria-selected={current === "configure"} className={current === "configure" ? "is-on" : undefined}>
+          {configureLabel}
+        </Link>
+      ) : null}
     </nav>
   );
 }
@@ -332,7 +351,7 @@ function ConnectorDialog({ connector, onClose, onStarted }: { connector: AppConn
   );
 }
 
-function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) {
+function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | "mapping"; onConfigure: () => void }) {
   const state = useConnect();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -349,7 +368,6 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
   const [rangeOn, setRangeOn] = useState(false);
   const [rangeFrom, setRangeFrom] = useState("");
   const [rangeTo, setRangeTo] = useState("");
-  const [configuring, setConfiguring] = useState(false);
   useEffect(() => setPane(initialPane), [initialPane]);
   const filterOptions = useMemo<Filter01Option[]>(() => {
     const kinds = [...new Set(channels.map((item) => item.kind))];
@@ -399,7 +417,7 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
         query={query}
         onQuery={setQuery}
       />
-      <button type="button" className="btn btn-primary" onClick={() => setConfiguring(true)}>Configure a new Channel</button>
+      <button type="button" className="btn btn-primary" onClick={onConfigure}>Configure a new Channel</button>
     </div>
     <div className="connect-split connect-channel-screen">
       <section className="lims-panel migration-panel" aria-label="Integrations">
@@ -508,71 +526,154 @@ function ChannelsView({ initialPane }: { initialPane: "messages" | "mapping" }) 
         </section>
       )}
     </div>
-    {configuring ? <ChannelConfigDialog onClose={() => setConfiguring(false)} onCreated={(id) => { setConfiguring(false); setSelected(id); }} /> : null}
     </>
   );
 }
 
-function ChannelConfigDialog({ onClose, onCreated }: { onClose: () => void; onCreated: (id: string) => void }) {
-  const [name, setName] = useState("");
-  const [fromSystem, setFromSystem] = useState("");
-  const [toSystem, setToSystem] = useState("Sequence");
-  const [kind, setKind] = useState<InterfaceKind>("HL7 v2");
-  const [interaction, setInteraction] = useState<InteractionModel>(interactionFor("HL7 v2"));
-  const [endpoint, setEndpoint] = useState("");
-  const [note, setNote] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  const ready = name.trim() && fromSystem.trim() && toSystem.trim() && endpoint.trim();
+function ChannelConfigureView({ session, onChange, onValidate }: { session: ChannelSession; onChange: (next: ChannelSession) => void; onValidate: () => void }) {
+  const setup = session.setup;
+  function patch(partial: Partial<ChannelSetup>) {
+    const next = { ...setup, ...partial };
+    if (partial.kind || partial.flow) next.interaction = suggestInteraction(next.kind, next.flow);
+    onChange({ ...session, setup: next, error: "" });
+  }
+  function togglePayload(payload: ChannelPayload) {
+    const payloads = setup.payloads.includes(payload) ? setup.payloads.filter((item) => item !== payload) : [...setup.payloads, payload];
+    patch({ payloads });
+  }
+  if (session.step === "validation") {
+    const saved = channelFromSetup(setup);
+    const input = saved.ok ? saved.input : null;
+    return (
+      <section className="lims-panel migration-panel connect-validate" aria-labelledby="channel-validation-title">
+        <h2 id="channel-validation-title">Validation</h2>
+        <p>The connection is saved.</p>
+        {input ? (
+          <dl className="connect-connection-details">
+            <div><dt>Channel</dt><dd>{input.name}</dd></div>
+            <div><dt>From</dt><dd>{input.fromSystem}</dd></div>
+            <div><dt>To</dt><dd>{input.toSystem}</dd></div>
+            <div><dt>Protocol</dt><dd>{input.kind}</dd></div>
+            <div><dt>Interaction model</dt><dd>{input.interaction}</dd></div>
+            <div><dt>Endpoint</dt><dd>{input.endpoint}</dd></div>
+            <div><dt>What it carries</dt><dd>{input.note}</dd></div>
+          </dl>
+        ) : null}
+        <button type="button" className="btn btn-primary">Publish</button>
+      </section>
+    );
+  }
   return (
-    <div className="lims-modal-backdrop" role="presentation" onClick={onClose}>
-      <form
-        className="lims-modal connect-connector-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="configure-channel-title"
-        onClick={(event) => event.stopPropagation()}
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!ready) return;
-          const id = configureChannel({ name, fromSystem, toSystem, kind, interaction, endpoint, note });
-          if (id) onCreated(id);
-        }}
-      >
-        <h2 id="configure-channel-title">Configure a new Channel</h2>
-        <p>This adds a system-to-system connection on EHR Integration. Messages arrive on it after the endpoint is live.</p>
-        <label className="migration-select">Channel name<input ref={inputRef} aria-label="Channel name" value={name} onChange={(event) => setName(event.target.value)} /></label>
-        <label className="migration-select">From<input aria-label="From system" value={fromSystem} onChange={(event) => setFromSystem(event.target.value)} /></label>
-        <label className="migration-select">To<input aria-label="To system" value={toSystem} onChange={(event) => setToSystem(event.target.value)} /></label>
+    <form
+      className="lims-panel migration-panel connect-channel-form"
+      aria-labelledby="configure-channel-title"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onValidate();
+      }}
+    >
+      <h2 id="configure-channel-title">Configure a new channel</h2>
+      <p>Tell Sequence which EHR this is, what clinical data moves, and how the two systems connect.</p>
+      <div className="connect-channel-form-grid">
+        <label className="migration-select">Channel name
+          <input aria-label="Channel name" value={setup.name} placeholder="North Hospital orders" onChange={(event) => patch({ name: event.target.value })} />
+        </label>
+        <label className="migration-select">EHR system
+          <input aria-label="EHR system" value={setup.ehrSystem} placeholder="North Hospital Epic" onChange={(event) => patch({ ehrSystem: event.target.value })} />
+        </label>
+        <label className="migration-select">EHR product
+          <select aria-label="EHR product" value={setup.product} onChange={(event) => patch({ product: event.target.value as ChannelSetup["product"] })}>
+            {EHR_PRODUCTS.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="migration-select">Direction
+          <select aria-label="Direction" value={setup.flow} onChange={(event) => patch({ flow: event.target.value as ChannelSetup["flow"] })}>
+            <option value="into-sequence">EHR sends into Sequence</option>
+            <option value="out-of-sequence">Sequence sends to the EHR</option>
+          </select>
+        </label>
+      </div>
+      <fieldset className="connect-channel-choices">
+        <legend>What it carries</legend>
+        {CHANNEL_PAYLOADS.map((payload) => (
+          <label key={payload}>
+            <input type="checkbox" checked={setup.payloads.includes(payload)} onChange={() => togglePayload(payload)} />
+            {payload === "Registration" ? "Registration (ADT / Patient)" : payload === "Orders" ? "Orders (ORM / ServiceRequest)" : "Results (ORU / DiagnosticReport)"}
+          </label>
+        ))}
+      </fieldset>
+      <div className="connect-channel-form-grid">
         <label className="migration-select">Protocol
-          <select aria-label="Protocol" value={kind} onChange={(event) => {
-            const next = event.target.value as InterfaceKind;
-            setKind(next);
-            setInteraction(interactionFor(next));
-          }}>
+          <select aria-label="Protocol" value={setup.kind} onChange={(event) => patch({ kind: event.target.value as InterfaceKind })}>
             {CHANNEL_KINDS.map((item) => <option key={item}>{item}</option>)}
           </select>
         </label>
         <label className="migration-select">Interaction model
-          <select aria-label="Interaction model" value={interaction} onChange={(event) => setInteraction(event.target.value as InteractionModel)}>
+          <select aria-label="Interaction model" value={setup.interaction} onChange={(event) => onChange({ ...session, setup: { ...setup, interaction: event.target.value as InteractionModel }, error: "" })}>
             {INTERACTION_MODELS.map((item) => <option key={item}>{item}</option>)}
           </select>
         </label>
-        <label className="migration-select">Endpoint<input aria-label="Endpoint" value={endpoint} onChange={(event) => setEndpoint(event.target.value)} /></label>
-        <label className="migration-select">What it carries<input aria-label="What it carries" value={note} onChange={(event) => setNote(event.target.value)} /></label>
-        <div className="connect-connector-actions">
-          <button type="button" className="btn" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary" disabled={!ready}>Add channel</button>
-        </div>
-      </form>
-    </div>
+        {setup.kind === "HL7 v2" ? (
+          <>
+            <label className="migration-select">HL7 version
+              <select aria-label="HL7 version" value={setup.hl7Version} onChange={(event) => patch({ hl7Version: event.target.value })}>
+                {HL7_VERSIONS.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label className="migration-select">MLLP host
+              <input aria-label="MLLP host" value={setup.host} placeholder="10.4.1.20" onChange={(event) => patch({ host: event.target.value })} />
+            </label>
+            <label className="migration-select">MLLP port
+              <input aria-label="MLLP port" value={setup.port} inputMode="numeric" onChange={(event) => patch({ port: event.target.value })} />
+            </label>
+            <label className="migration-select">Sending application (MSH-3)
+              <input aria-label="Sending application" value={setup.sendingApp} placeholder="EPIC" onChange={(event) => patch({ sendingApp: event.target.value })} />
+            </label>
+            <label className="migration-select">Sending facility (MSH-4)
+              <input aria-label="Sending facility" value={setup.sendingFacility} placeholder="NORTH" onChange={(event) => patch({ sendingFacility: event.target.value })} />
+            </label>
+            <label className="migration-select">Receiving application (MSH-5)
+              <input aria-label="Receiving application" value={setup.receivingApp} onChange={(event) => patch({ receivingApp: event.target.value })} />
+            </label>
+            <label className="migration-select">Receiving facility (MSH-6)
+              <input aria-label="Receiving facility" value={setup.receivingFacility} onChange={(event) => patch({ receivingFacility: event.target.value })} />
+            </label>
+          </>
+        ) : null}
+        {setup.kind === "FHIR R4" ? (
+          <label className="migration-select connect-channel-span">FHIR base URL
+            <input aria-label="FHIR base URL" value={setup.fhirBase} placeholder="https://epic.north.example/fhir/R4" onChange={(event) => patch({ fhirBase: event.target.value })} />
+          </label>
+        ) : null}
+        {setup.kind === "REST" ? (
+          <>
+            <label className="migration-select">HTTP method
+              <select aria-label="HTTP method" value={setup.restMethod} onChange={(event) => patch({ restMethod: event.target.value as ChannelSetup["restMethod"] })}>
+                <option>POST</option>
+                <option>GET</option>
+              </select>
+            </label>
+            <label className="migration-select">REST URL
+              <input aria-label="REST URL" value={setup.restUrl} placeholder="https://north.example/api/orders" onChange={(event) => patch({ restUrl: event.target.value })} />
+            </label>
+          </>
+        ) : null}
+        {setup.kind === "Webhook" ? (
+          <label className="migration-select connect-channel-span">Webhook URL
+            <input aria-label="Webhook URL" value={setup.webhookUrl} placeholder="https://north.example/hooks/results" onChange={(event) => patch({ webhookUrl: event.target.value })} />
+          </label>
+        ) : null}
+        {setup.kind === "File" ? (
+          <label className="migration-select connect-channel-span">File drop
+            <input aria-label="File drop" value={setup.filePath} placeholder="sftp /inbound/ehr" onChange={(event) => patch({ filePath: event.target.value })} />
+          </label>
+        ) : null}
+      </div>
+      {session.error ? <p className="connect-attention" role="alert">{session.error}</p> : null}
+      <div className="connect-connector-actions">
+        <button type="submit" className="btn btn-primary">Proceed to validation</button>
+      </div>
+    </form>
   );
 }
 
@@ -770,12 +871,35 @@ export function InstrumentCatalogScreen() {
 
 export function ConnectPage({ section }: { section?: string }) {
   const sectionTabs = useSectionTabs();
-  const view = section && section in COPY ? section : "overview";
+  const navigate = useNavigate();
+  const [session, setSession] = useState<ChannelSession | null>(null);
+  if (section === "configure" && !session) {
+    setSession({ setup: emptyChannelSetup(), step: "form", error: "", savedId: "" });
+  }
+  const view = section === "configure" ? "configure" : section && section in COPY ? section : "overview";
   const channelScreen = view === "interfaces" || view === "messages" || view === "mapping";
-  const interfaceView = channelScreen || view === "failures";
+  const interfaceView = channelScreen || view === "failures" || view === "configure";
   const copy = interfaceView
-    ? { title: "EHR Integration", subtitle: view === "failures" ? COPY.failures.subtitle : COPY.interfaces.subtitle }
+    ? { title: "EHR Integration", subtitle: view === "failures" ? COPY.failures.subtitle : view === "configure" ? "Name the EHR, the data that moves, and how the connection is made." : COPY.interfaces.subtitle }
     : COPY[view];
+  function openConfigure() {
+    if (!session) setSession({ setup: emptyChannelSetup(), step: "form", error: "", savedId: "" });
+    navigate("/app/connect/configure");
+  }
+  function validateChannel() {
+    if (!session) return;
+    const built = channelFromSetup(session.setup);
+    if (!built.ok) {
+      setSession({ ...session, error: built.error });
+      return;
+    }
+    const id = session.savedId || configureChannel(built.input);
+    if (!id) {
+      setSession({ ...session, error: "A channel with that name is already configured." });
+      return;
+    }
+    setSession({ ...session, step: "validation", error: "", savedId: id });
+  }
   return (
     <div className="lims-page connect-studio">
       <ModuleHeader
@@ -793,9 +917,10 @@ export function ConnectPage({ section }: { section?: string }) {
         ) : undefined}
       />
       {view === "instruments" ? <SectionTabStrip mainLabel="Instrument Manager" /> : null}
-      {interfaceView ? <InterfaceTabs current={view} /> : null}
+      {interfaceView ? <InterfaceTabs current={view} configureLabel={session ? session.setup.name.trim() || "New channel" : undefined} /> : null}
       {view === "overview" ? <OverviewView /> : null}
-      {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} /> : null}
+      {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} onConfigure={openConfigure} /> : null}
+      {view === "configure" && session ? <ChannelConfigureView session={session} onChange={setSession} onValidate={validateChannel} /> : null}
       {view === "failures" ? <FailuresView /> : null}
       {view === "instruments" ? <InstrumentsView /> : null}
       {view === "apps" ? <AppsView /> : null}

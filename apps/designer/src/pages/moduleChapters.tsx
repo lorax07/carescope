@@ -122,6 +122,7 @@ export const CONNECT_CHAPTERS: ModuleChapter[] = [
       { to: "/app/connect/messages", label: "Messages", match: "/app/connect/messages" },
       { to: "/app/connect/mapping", label: "Mapping", match: "/app/connect/mapping" },
       { to: "/app/connect/failures", label: "Attention", match: "/app/connect/failures" },
+      { to: "/app/connect/configure", label: "New channel", match: "/app/connect/configure" },
     ],
   },
   { id: "instruments", to: "/app/connect/instruments", label: "Instrument Manager", question: "Instruments connected to this lab instance.", hideTools: true, tools: [{ to: "/app/connect/instruments", label: "Instrument Manager", match: "/app/connect/instruments" }] },

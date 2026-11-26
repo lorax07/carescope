@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, messageIsSuccess, messageOn, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, channelFromSetup, emptyChannelSetup, messageIsSuccess, messageOn, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -59,6 +59,26 @@ describe("sequence connect message handling", () => {
     expect(started.messages[0]?.steps[0]?.label).toBe("Integration started");
     expect(withInstrumentIntegration(started, alinity!, "East Lab", "lab-east", "Nov 17, 5:11 PM CT").instruments.filter((item) => item.catalogId === "alinity-c")).toHaveLength(1);
     expect(withInstrumentIntegration(seeded, alinity!, "   ", "lab-east", "Nov 17, 5:12 PM CT").instruments).toHaveLength(seeded.instruments.length);
+  });
+
+  it("builds an HL7 EHR channel and rejects a missing MLLP host", () => {
+    const setup = emptyChannelSetup();
+    expect(channelFromSetup(setup).ok).toBe(false);
+    const ready = channelFromSetup({
+      ...setup,
+      name: "North orders",
+      ehrSystem: "North Hospital Epic",
+      host: "10.4.1.20",
+      port: "2576",
+      sendingApp: "EPIC",
+      sendingFacility: "NORTH",
+    });
+    expect(ready.ok).toBe(true);
+    if (ready.ok) {
+      expect(ready.input).toMatchObject({ fromSystem: "North Hospital Epic", toSystem: "Sequence", endpoint: "MLLP 10.4.1.20:2576", interaction: "Push" });
+      expect(ready.input.note).toContain("Orders");
+      expect(ready.input.note).toContain("MSH-3 EPIC");
+    }
   });
 
   it("records a configured channel and reads message days", () => {
