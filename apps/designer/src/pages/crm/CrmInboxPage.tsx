@@ -5,8 +5,6 @@ import { crmCanWrite, logCommunication, useCrm, type CommunicationKind } from ".
 import { ClientAvatar } from "./clientStudio";
 import { InboxChannelMark } from "./InboxChannelMark";
 import { CrmModuleTitle, CrmShell } from "./CrmShell";
-import { usePriorityPanel } from "../../priorityPanel";
-import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import {
   attachmentNote,
@@ -47,7 +45,6 @@ function snippet(thread: InboxThread): string {
 }
 
 export function CrmInboxPage() {
-  const prioritiesPinned = usePriorityPanel().pinned;
   const { overlay, contacts, accounts } = useCrm();
   const canWrite = crmCanWrite();
   const [params, setParams] = useSearchParams();
@@ -130,7 +127,7 @@ export function CrmInboxPage() {
   const ordered = [...visible].sort((a, b) => Number(pinned.includes(b.contactId)) - Number(pinned.includes(a.contactId)));
 
   return (
-    <CrmShell studio priorities={false} title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
+    <CrmShell studio title="Inbox" lede="Messages with the people on Sequence CRM accounts.">
       <div className="inbox">
         <div className="client-overview-head">
           <CrmModuleTitle title="Inbox" subtitle="Messages with the people on Sequence CRM accounts." />
@@ -236,7 +233,6 @@ export function CrmInboxPage() {
         </section>
 
         <div className="inbox-side">
-          {prioritiesPinned ? <TopPriorities defaultOpen={false} messages={false} /> : null}
         <section className="inbox-list" aria-label="All messages">
           <header>
             <h1>All messages</h1>

@@ -3025,6 +3025,31 @@ a {
   min-width: 0;
 }
 
+.lims-workspace.is-priorities-pinned > .app-priorities-rail {
+  position: sticky;
+  top: calc(var(--header-h, 3.85rem) + 1.35rem);
+  flex: 0 0 360px;
+  width: 360px;
+  align-self: flex-start;
+  max-height: calc(100vh - var(--header-h, 3.85rem) - 2.4rem);
+  margin: 1.35rem 1.1rem 1.5rem 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lims-workspace.is-priorities-pinned .lims-page {
+  padding-right: 0.45rem;
+}
+
+.app-priorities-rail .top-priorities {
+  margin-top: 0;
+}
+
+.lims-workspace.has-dock.is-priorities-pinned > .app-priorities-rail {
+  flex-basis: 320px;
+  width: 320px;
+}
+
 .lims-screen-dock-wrap {
   position: sticky;
   top: 0;
@@ -8864,6 +8889,23 @@ span.client-avatar {
   .inbox,
   .lims-page.has-priorities {
     grid-template-columns: 1fr;
+  }
+
+  .lims-workspace.is-priorities-pinned {
+    flex-wrap: wrap;
+  }
+
+  .lims-workspace.is-priorities-pinned > .app-priorities-rail,
+  .lims-workspace.has-dock.is-priorities-pinned > .app-priorities-rail {
+    position: static;
+    flex: 1 1 100%;
+    width: auto;
+    max-height: none;
+    margin: 0 0.85rem 1.25rem;
+  }
+
+  .lims-workspace.is-priorities-pinned .lims-page {
+    padding-right: 0.68rem;
   }
 
   .client-grid {

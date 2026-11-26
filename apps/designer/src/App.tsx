@@ -20,7 +20,7 @@ import { ModuleGlyph, pathToModuleSlug, pathToNavGroup, sectionToModuleSlug, typ
 import { findRunSequence, RunSequenceView } from "./testingRuns";
 import { StartTestingWorkflow } from "./components/StartTestingWorkflow";
 import { pulsePriorities, togglePriorityFlyout, usePriorityPanel } from "./priorityPanel";
-import { PriorityFlyout } from "./pages/crm/TopPriorities";
+import { PriorityFlyout, TopPriorities } from "./pages/crm/TopPriorities";
 
 const NAV = [
   { to: "/app/design", label: "Workflow Designer" },
@@ -714,7 +714,7 @@ function AppFrame() {
       <div className="lims-main">
         <div
           ref={workspaceRef}
-          className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}`}
+          className={`lims-workspace${sectionTabs.presentation === "tab" && sectionTabs.activeId ? " has-dock" : ""}${sectionTabs.presentation === "screen" && sectionTabs.activeId ? " is-screen" : ""}${resizingDock ? " is-resizing" : ""}${priorityPanel.pinned ? " is-priorities-pinned" : ""}`}
           style={{ "--screen-dock-width": `${dockWidth}px` } as CSSProperties}
         >
           {sectionTabs.presentation === "screen" && sectionTabs.activeId ? (
@@ -735,6 +735,11 @@ function AppFrame() {
               <Outlet />
             </div>
           )}
+          {priorityPanel.pinned ? (
+            <aside className="app-priorities-rail" aria-label="Top priorities">
+              <TopPriorities />
+            </aside>
+          ) : null}
           {sectionTabs.presentation === "tab"
             ? sectionTabs.tabs
             .filter((tab) => tab.id === sectionTabs.activeId)

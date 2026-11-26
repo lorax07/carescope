@@ -2,8 +2,6 @@ import { useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { completeTask, crmCanWrite, setTaskStatus, useCrm, type TaskPriority, type TaskStatus } from "../../crm";
 import { ClientAvatar, shortDate } from "./clientStudio";
-import { usePriorityPanel } from "../../priorityPanel";
-import { TopPriorities } from "./TopPriorities";
 import { CrmAccountLink } from "./CrmRecordStrip";
 import { Filter01 } from "../../components/Filter01";
 import { CrmEmpty, CrmModuleTitle, CrmShell } from "./CrmShell";
@@ -28,7 +26,6 @@ function priorityTone(priority: TaskPriority): string {
 }
 
 export function CrmTasksPage() {
-  const pinned = usePriorityPanel().pinned;
   const { overlay, accounts } = useCrm();
   const [params, setParams] = useSearchParams();
   const canWrite = crmCanWrite();
@@ -61,8 +58,8 @@ export function CrmTasksPage() {
   }
 
   return (
-    <CrmShell studio priorities={false} title="Cases" lede="What someone owes an account today.">
-      <div className={`client-home${pinned ? " is-priorities-pinned" : ""}`}>
+    <CrmShell studio title="Cases" lede="What someone owes an account today.">
+      <div className="client-home">
         <div className="client-overview-head">
           <CrmModuleTitle title="Cases" subtitle="What someone owes an account today." />
         </div>
@@ -160,11 +157,6 @@ export function CrmTasksPage() {
             )}
           </section>
         </div>
-        {pinned ? (
-          <aside className="client-home-side">
-            <TopPriorities hint="Start and complete stay on the case. Account status does not change with them." />
-          </aside>
-        ) : null}
       </div>
     </CrmShell>
   );
