@@ -126,15 +126,13 @@ export const CONNECT_CHAPTERS: ModuleChapter[] = [
   },
   { id: "instruments", to: "/app/connect/instruments", label: "Instrument integration", question: "Instruments connected to this lab instance.", hideTools: true, tools: [{ to: "/app/connect/instruments", label: "Instrument integration", match: "/app/connect/instruments" }] },
   {
-    id: "workflows",
-    to: "/app/connect/workflows",
-    label: "Workflows",
-    question: "Automate what a connection does with the data it receives.",
+    id: "apps",
+    to: "/app/connect/apps",
+    label: "App connectors",
+    question: "Known apps you can connect by API.",
     hideTools: true,
     tools: [
-      { to: "/app/connect/workflows", label: "Workflows", match: "/app/connect/workflows" },
-      { to: "/app/connect/workflows/history", label: "History", match: "/app/connect/workflows/history" },
-      { to: "/app/connect/workflows/exceptions", label: "Exceptions", match: "/app/connect/workflows/exceptions" },
+      { to: "/app/connect/apps", label: "App connectors", match: "/app/connect/apps" },
     ],
   },
 ];
