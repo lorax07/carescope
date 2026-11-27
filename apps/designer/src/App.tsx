@@ -10,7 +10,7 @@ import { labMenuPath, useLabOperations, type LabMenuItem } from "./labOperations
 import { LAB_RESOURCES, LAB_RESOURCE_ACCESS_EVENT, userCanSeeLabResources } from "./labResourceAccess";
 import { readLimsSession } from "./limsSession";
 import { startConnectAutomation } from "./connectAutomation/runtime";
-import { InstrumentCatalogScreen } from "./pages/connect/ConnectPages";
+import { InstrumentCatalogScreen, InstrumentConnectionScreen } from "./pages/connect/ConnectPages";
 import { SampleDetailBody } from "./pages/SampleDetailPage";
 import { findSample, getSamples } from "./samples";
 import { SectionTabStrip, SectionTabsProvider, sectionFromPath, useSectionTabs, type PinnedTab } from "./sectionTabs";
@@ -336,6 +336,9 @@ function PinnedScreen({ tab }: { tab: PinnedTab }) {
   }
   if (tab.kind === "instrument-catalog") {
     return <div className="lims-page"><InstrumentCatalogScreen /></div>;
+  }
+  if (tab.kind === "instrument-connection") {
+    return <div className="lims-page"><InstrumentConnectionScreen recordId={tab.recordId} /></div>;
   }
   const instrument = findInstrument(tab.recordId);
   if (!instrument) return null;
@@ -720,7 +723,7 @@ function AppFrame() {
           {sectionTabs.presentation === "screen" && sectionTabs.activeId ? (
             <div className="lims-content">
               <div className="lims-page screen-view-page">
-                <SectionTabStrip mainLabel={workspaceTabLabel(sectionTabs.section, labOps.menu)} />
+                <SectionTabStrip mainLabel={location.pathname.startsWith("/app/connect/instruments") ? "Instruments" : workspaceTabLabel(sectionTabs.section, labOps.menu)} />
                 <div className="screen-view-body">
                   {sectionTabs.tabs
                     .filter((tab) => tab.id === sectionTabs.activeId)

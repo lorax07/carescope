@@ -8,6 +8,7 @@ import {
   targetLabel,
   withAppConnection,
   withConfiguredChannel,
+  withInstrumentConnection,
   withInstrumentIntegration,
   withAttempt,
   withQuarantine,
@@ -130,6 +131,13 @@ export function startInstrumentIntegration(catalogId: string, site: string, labI
   state = withInstrumentIntegration(state, instrument, site, labId, nowLabel());
   emit();
   publishChanges(before, state);
+}
+
+export function saveInstrumentConnection(id: string, patch: { protocol: string; site: string; status: "Online" | "Idle" }) {
+  const next = withInstrumentConnection(state, id, patch);
+  if (next === state) return;
+  state = next;
+  emit();
 }
 
 export function recordWorkflowDelivery(input: { interfaceId: string; summary: string; payload: string }): { id: string; delivered: boolean; pending?: string } {

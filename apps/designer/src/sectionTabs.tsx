@@ -1,11 +1,11 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { buttonFormat1 } from "./buttonFormat1";
 
 export type PinnedTab = {
   id: string;
   title: string;
-  kind: "sample" | "instrument" | "instrument-catalog" | "run" | "testing";
+  kind: "sample" | "instrument" | "instrument-catalog" | "instrument-connection" | "run" | "testing";
   recordId: string;
 };
 
@@ -21,6 +21,10 @@ type SectionTabsValue = {
   close: (id: string) => void;
   showSection: (sectionId?: string) => void;
   setPresentation: (presentation: WorkspacePresentation) => void;
+  setDirty: (id: string, dirty: boolean) => void;
+  leaveRequest: { token: number; tabId: string } | null;
+  acceptLeave: () => void;
+  cancelLeave: () => void;
 };
 
 const SectionTabsContext = createContext<SectionTabsValue | null>(null);
@@ -48,42 +52,77 @@ export function SectionTabsProvider({ children }: { children: ReactNode }) {
   const [bySection, setBySection] = useState<Record<string, PinnedTab[]>>({});
   const [active, setActive] = useState<Record<string, string | null>>({});
   const [presentationBySection, setPresentationBySection] = useState<Record<string, WorkspacePresentation>>({});
+  const [leaveRequest, setLeaveRequest] = useState<{ token: number; tabId: string } | null>(null);
+  const dirtyRef = useRef(new Set<string>());
+  const pendingRef = useRef<(() => void) | null>(null);
 
   const value = useMemo<SectionTabsValue>(() => {
     const tabs = bySection[section] ?? [];
+    const activeId = active[section] ?? null;
+    function requestLeave(action: () => void) {
+      if (activeId && dirtyRef.current.has(activeId)) {
+        pendingRef.current = action;
+        setLeaveRequest({ token: Date.now(), tabId: activeId });
+        return;
+      }
+      action();
+    }
     return {
       section,
       tabs,
-      activeId: active[section] ?? null,
+      activeId,
       presentation: presentationBySection[section] ?? "tab",
+      leaveRequest,
       pin(tab) {
-        const id = `${tab.kind}:${tab.recordId}`;
-        setBySection((current) => {
-          const list = current[section] ?? [];
-          if (list.some((item) => item.id === id)) return current;
-          return { ...current, [section]: [...list, { ...tab, id }] };
+        requestLeave(() => {
+          const id = `${tab.kind}:${tab.recordId}`;
+          setBySection((current) => {
+            const list = current[section] ?? [];
+            if (list.some((item) => item.id === id)) return current;
+            return { ...current, [section]: [...list, { ...tab, id }] };
+          });
+          setActive((current) => ({ ...current, [section]: id }));
         });
-        setActive((current) => ({ ...current, [section]: id }));
       },
       select(id) {
-        setActive((current) => ({ ...current, [section]: id }));
+        if (id === activeId) return;
+        requestLeave(() => setActive((current) => ({ ...current, [section]: id })));
       },
       close(id) {
-        setBySection((current) => ({
-          ...current,
-          [section]: (current[section] ?? []).filter((tab) => tab.id !== id),
-        }));
-        setActive((current) => ({ ...current, [section]: current[section] === id ? null : current[section] }));
+        const action = () => {
+          dirtyRef.current.delete(id);
+          setBySection((current) => ({
+            ...current,
+            [section]: (current[section] ?? []).filter((tab) => tab.id !== id),
+          }));
+          setActive((current) => ({ ...current, [section]: current[section] === id ? null : current[section] }));
+        };
+        if (id === activeId) requestLeave(action);
+        else action();
       },
       showSection(sectionId) {
         const key = sectionId ?? section;
-        setActive((current) => ({ ...current, [key]: null }));
+        requestLeave(() => setActive((current) => ({ ...current, [key]: null })));
       },
       setPresentation(presentation) {
         setPresentationBySection((current) => ({ ...current, [section]: presentation }));
       },
+      setDirty(id, dirty) {
+        if (dirty) dirtyRef.current.add(id);
+        else dirtyRef.current.delete(id);
+      },
+      acceptLeave() {
+        const action = pendingRef.current;
+        pendingRef.current = null;
+        setLeaveRequest(null);
+        action?.();
+      },
+      cancelLeave() {
+        pendingRef.current = null;
+        setLeaveRequest(null);
+      },
     };
-  }, [section, bySection, active, presentationBySection]);
+  }, [section, bySection, active, presentationBySection, leaveRequest]);
 
   return <SectionTabsContext.Provider value={value}>{children}</SectionTabsContext.Provider>;
 }
@@ -116,7 +155,7 @@ function TabGlyph({ name }: { name: "main" | PinnedTab["kind"] }) {
       </svg>
     );
   }
-  if (name === "instrument" || name === "instrument-catalog" || name === "run" || name === "testing") {
+  if (name === "instrument" || name === "instrument-catalog" || name === "instrument-connection" || name === "run" || name === "testing") {
     return (
       <svg {...common}>
         <rect x="1.8" y="3.2" width="12.4" height="8" rx="1.4" />
@@ -151,9 +190,9 @@ function WorkspaceViewToggle() {
 }
 
 /** The section stays the first tab. Tab Screen adds the next one. */
-export function SectionTabStrip({ mainLabel }: { mainLabel: string }) {
+export function SectionTabStrip({ mainLabel, always = false }: { mainLabel: string; always?: boolean }) {
   const tabs = useSectionTabs();
-  if (tabs.tabs.length === 0) return null;
+  if (!always && tabs.tabs.length === 0) return null;
   const mainOn = tabs.activeId == null;
 
   return (
@@ -178,7 +217,7 @@ export function SectionTabStrip({ mainLabel }: { mainLabel: string }) {
           );
         })}
       </div>
-      <WorkspaceViewToggle />
+      {tabs.tabs.length > 0 ? <WorkspaceViewToggle /> : null}
     </div>
   );
 }
