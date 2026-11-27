@@ -32,6 +32,7 @@ import {
 } from "./connectModel";
 import {
   configureChannel,
+  saveInstrumentConnection,
   quarantineFile,
   replaceToken,
   replayMessage,
@@ -757,6 +758,7 @@ function FailuresView() {
 
 function InstrumentsView() {
   const state = useConnect();
+  const sectionTabs = useSectionTabs();
   const labId = currentLabId();
   const labName = currentLabName() || "this lab instance";
   const rows = labId ? state.instruments.filter((item) => item.labId === labId) : state.instruments;
@@ -777,36 +779,173 @@ function InstrumentsView() {
         <tbody>
           {rows.map((item) => (
             <tr key={item.id}>
-              <td>{item.name}</td>
+              <td>
+                <button
+                  type="button"
+                  className="connect-record-link"
+                  onClick={() => sectionTabs.pin({ kind: "instrument-connection", recordId: item.id, title: item.name })}
+                >
+                  {item.name}
+                </button>
+              </td>
               <td>{item.category}</td>
               <td>{item.protocol}</td>
               <td>{item.site}</td>
               <td><Pill tone={item.status === "Online" ? "ok" : "wait"}>{item.status}</Pill></td>
             </tr>
           ))}
-          {rows.length === 0 ? <tr><td colSpan={5}>Use Add connection to start an integration.</td></tr> : null}
+          {rows.length === 0 ? <tr><td colSpan={5}>Use New Instrument Connection to start an integration.</td></tr> : null}
         </tbody>
       </table>
     </section>
   );
 }
 
+const INSTRUMENT_PROTOCOLS = ["ASTM", "HL7", "Result file", "File drop"];
+
+type InstrumentDraft = { protocol: string; site: string; status: "Online" | "Idle" };
+const instrumentDrafts = new Map<string, InstrumentDraft>();
+
+export function InstrumentConnectionScreen({ recordId }: { recordId: string }) {
+  const state = useConnect();
+  const tabs = useSectionTabs();
+  const navigate = useNavigate();
+  const instrument = state.instruments.find((item) => item.id === recordId);
+  const stored = instrumentDrafts.get(recordId);
+  const tabId = `instrument-connection:${recordId}`;
+  const [editing, setEditing] = useState(Boolean(stored));
+  const [protocol, setProtocol] = useState(stored?.protocol ?? instrument?.protocol ?? "");
+  const [site, setSite] = useState(stored?.site ?? instrument?.site ?? "North Lab");
+  const [status, setStatus] = useState<"Online" | "Idle">(stored?.status ?? instrument?.status ?? "Idle");
+  const [dialog, setDialog] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const protocols = instrument && INSTRUMENT_PROTOCOLS.includes(instrument.protocol) ? INSTRUMENT_PROTOCOLS : [instrument?.protocol, ...INSTRUMENT_PROTOCOLS].filter((item): item is string => Boolean(item));
+
+  useEffect(() => {
+    if (editing) instrumentDrafts.set(recordId, { protocol, site, status });
+    else instrumentDrafts.delete(recordId);
+  }, [editing, protocol, site, status, recordId]);
+
+  const setDirtyRef = useRef(tabs.setDirty);
+  setDirtyRef.current = tabs.setDirty;
+  useEffect(() => {
+    setDirtyRef.current(tabId, editing);
+    return () => setDirtyRef.current(tabId, false);
+  }, [editing, tabId]);
+
+  useEffect(() => {
+    if (tabs.leaveRequest?.tabId === tabId) setDialog(true);
+  }, [tabs.leaveRequest, tabId]);
+
+  useEffect(() => {
+    if (!editing) return;
+    function onClick(event: MouseEvent) {
+      const target = event.target instanceof Element ? event.target : null;
+      const link = target?.closest("a[href]");
+      if (!link || link.closest(".instrument-connection") || link.closest(".instrument-leave-dialog")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingHref(link.getAttribute("href"));
+      setDialog(true);
+    }
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [editing]);
+
+  if (!instrument) {
+    return (
+      <section className="lims-panel migration-panel">
+        <h2>Instrument</h2>
+        <p>This connection is not on the lab instance.</p>
+      </section>
+    );
+  }
+  const maker = INSTRUMENT_CATALOG.find((item) => item.id === instrument.catalogId)?.maker;
+  const gateway = state.interfaces.find((item) => item.id === instrument.interfaceId);
+
+  function persist() {
+    saveInstrumentConnection(instrument!.id, { protocol, site, status });
+    setEditing(false);
+    tabs.setDirty(tabId, false);
+  }
+
+  function keepEditing() {
+    setPendingHref(null);
+    setDialog(false);
+    tabs.cancelLeave();
+  }
+
+  function saveAndLeave() {
+    persist();
+    const href = pendingHref;
+    setPendingHref(null);
+    setDialog(false);
+    tabs.acceptLeave();
+    if (href) navigate(href);
+  }
+
+  return (
+    <section className="lims-panel migration-panel instrument-connection" aria-labelledby="instrument-connection-title">
+      <h2 id="instrument-connection-title" className="connect-channel-title">{instrument.name}</h2>
+      <p className="connect-channel-kind">{maker ? `${maker} · ` : ""}{instrument.category}</p>
+      <div className="connect-channel-form-grid">
+        <label className="migration-select">Protocol
+          <select aria-label="Connection protocol" value={protocol} disabled={!editing} onChange={(event) => setProtocol(event.target.value)}>
+            {protocols.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="migration-select">Site
+          <select aria-label="Connection site" value={site} disabled={!editing} onChange={(event) => setSite(event.target.value)}>
+            {[site, "North Lab", "East Lab"].filter((item, index, list) => list.indexOf(item) === index).map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </label>
+        <label className="migration-select">Status
+          <select aria-label="Connection status" value={status} disabled={!editing} onChange={(event) => setStatus(event.target.value as "Online" | "Idle")}>
+            <option>Online</option>
+            <option>Idle</option>
+          </select>
+        </label>
+        <label className="migration-select">Gateway
+          <input aria-label="Gateway" value={editing ? `Agent LAB-GW · ${protocol} · ${site}` : gateway?.endpoint ?? ""} readOnly />
+        </label>
+      </div>
+      <div className="connect-connector-actions">
+        <button type="button" className="btn btn-primary" onClick={() => (editing ? persist() : setEditing(true))}>
+          {editing ? "Save" : "Edit connection"}
+        </button>
+      </div>
+      {dialog ? (
+        <div className="lims-modal-backdrop instrument-leave-dialog" role="presentation">
+          <div className="lims-modal instrument-leave-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-save-title">
+            <h2 id="instrument-save-title">Save this connection</h2>
+            <p>This tab stays open until the connection is saved.</p>
+            <div className="connect-connector-actions">
+              <button type="button" className="btn" onClick={keepEditing}>Keep editing</button>
+              <button type="button" className="btn btn-primary" onClick={saveAndLeave}>Save</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function InstrumentCatalogScreen() {
   const state = useConnect();
+  const sectionTabs = useSectionTabs();
   const labId = currentLabId();
   const [query, setQuery] = useState("");
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [site, setSite] = useState(currentLabName() || "North Lab");
-  const [started, setStarted] = useState("");
   const needle = query.trim().toLowerCase();
   const picked = INSTRUMENT_CATALOG.find((item) => item.id === pickedId) ?? null;
   const scopedLab = labId || labIdFromSite(site);
   const already = picked ? state.instruments.some((item) => item.catalogId === picked.id && item.labId === scopedLab) : false;
 
-  function start() {
-    if (!picked || already || !site.trim()) return;
-    startInstrumentIntegration(picked.id, site, scopedLab);
-    setStarted(picked.name);
+  function connectInstrument() {
+    if (!picked || !site.trim()) return;
+    if (!already) startInstrumentIntegration(picked.id, site, scopedLab);
+    sectionTabs.pin({ kind: "instrument-connection", recordId: `conn-${picked.id}`, title: picked.name });
   }
 
   return (
@@ -828,7 +967,7 @@ export function InstrumentCatalogScreen() {
                 const connected = state.instruments.some((row) => row.catalogId === item.id && (!labId || row.labId === labId));
                 return (
                   <li key={item.id}>
-                    <button type="button" className={pickedId === item.id ? "is-current" : undefined} aria-pressed={pickedId === item.id} onClick={() => { setPickedId(item.id); setStarted(""); }}>
+                    <button type="button" className={pickedId === item.id ? "is-current" : undefined} aria-pressed={pickedId === item.id} onClick={() => setPickedId(item.id)}>
                       <strong>{item.maker} {item.name}</strong>
                       <span>{item.protocol} · {item.summary}</span>
                       {connected ? <Pill tone="ok">Connected</Pill> : <span className="connect-catalog-start">Select</span>}
@@ -845,24 +984,20 @@ export function InstrumentCatalogScreen() {
           className="connect-instrument-start"
           onSubmit={(event) => {
             event.preventDefault();
-            start();
+            connectInstrument();
           }}
         >
           <h3>{picked.maker} {picked.name}</h3>
-          {already || started === picked.name ? (
-            <p>{picked.name} is connected for {site.trim() || "this lab"}. The gateway is on the channel list.</p>
-          ) : (
-            <>
-              <label className="migration-select">
-                Site
-                <select aria-label="Instrument site" value={site} onChange={(event) => setSite(event.target.value)}>
-                  <option>North Lab</option>
-                  <option>East Lab</option>
-                </select>
-              </label>
-              <button type="submit" className="btn btn-primary">Start integration</button>
-            </>
+          {already ? <p>{picked.name} is already connected for {site.trim() || "this lab"}.</p> : (
+            <label className="migration-select">
+              Site
+              <select aria-label="Instrument site" value={site} onChange={(event) => setSite(event.target.value)}>
+                <option>North Lab</option>
+                <option>East Lab</option>
+              </select>
+            </label>
           )}
+          <button type="submit" className="btn btn-primary">Connect Instrument</button>
         </form>
       ) : null}
     </section>
@@ -910,13 +1045,13 @@ export function ConnectPage({ section }: { section?: string }) {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => sectionTabs.pin({ kind: "instrument-catalog", recordId: "new", title: "Add instrument" })}
+            onClick={() => sectionTabs.pin({ kind: "instrument-catalog", recordId: "new", title: "New Instrument Connection" })}
           >
-            Add connection
+            New Instrument Connection
           </button>
         ) : undefined}
       />
-      {view === "instruments" ? <SectionTabStrip mainLabel="Instrument Manager" /> : null}
+      {view === "instruments" ? <SectionTabStrip mainLabel="Instruments" always /> : null}
       {interfaceView ? <InterfaceTabs current={view} configureLabel={session ? session.setup.name.trim() || "New channel" : undefined} /> : null}
       {view === "overview" ? <OverviewView /> : null}
       {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} onConfigure={openConfigure} /> : null}

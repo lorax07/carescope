@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, channelFromSetup, emptyChannelSetup, messageIsSuccess, messageOn, suggestInteraction, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
+import { APP_CONNECTORS, INITIAL_MESSAGES, CONNECT_INTERFACES, catalogInstrument, connectorById, initialConnectState, interfaceById, isInterfaceChannel, matchesQuery, channelFromSetup, emptyChannelSetup, messageIsSuccess, messageOn, suggestInteraction, withAppConnection, withAttempt, withConfiguredChannel, withInstrumentConnection, withInstrumentIntegration, withQuarantine, withTokenReplaced } from "./connectModel";
 
 describe("sequence connect message handling", () => {
   it("delivers a timeout on retry and records the attempt", () => {
@@ -59,6 +59,9 @@ describe("sequence connect message handling", () => {
     expect(started.messages[0]?.steps[0]?.label).toBe("Integration started");
     expect(withInstrumentIntegration(started, alinity!, "East Lab", "lab-east", "Nov 17, 5:11 PM CT").instruments.filter((item) => item.catalogId === "alinity-c")).toHaveLength(1);
     expect(withInstrumentIntegration(seeded, alinity!, "   ", "lab-east", "Nov 17, 5:12 PM CT").instruments).toHaveLength(seeded.instruments.length);
+    const saved = withInstrumentConnection(started, "conn-alinity-c", { protocol: "ASTM", site: "East Lab", status: "Idle" });
+    expect(saved.instruments.find((item) => item.id === "conn-alinity-c")).toMatchObject({ protocol: "ASTM", site: "East Lab", status: "Idle" });
+    expect(saved.interfaces.find((item) => item.id === "gw-alinity-c")?.endpoint).toBe("Agent LAB-GW · ASTM · East Lab");
   });
 
   it("builds an HL7 EHR channel and rejects a missing MLLP host", () => {

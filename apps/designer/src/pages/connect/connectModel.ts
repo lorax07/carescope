@@ -558,6 +558,27 @@ export function withInstrumentIntegration(state: ConnectState, instrument: LabIn
   };
 }
 
+export function withInstrumentConnection(
+  state: ConnectState,
+  id: string,
+  patch: { protocol: string; site: string; status: ConnectedInstrument["status"] },
+): ConnectState {
+  const current = state.instruments.find((item) => item.id === id);
+  const protocol = patch.protocol.trim();
+  const site = patch.site.trim();
+  if (!current || !protocol || !site) return state;
+  const next: ConnectedInstrument = { ...current, protocol, site, status: patch.status };
+  return {
+    ...state,
+    instruments: state.instruments.map((item) => (item.id === id ? next : item)),
+    interfaces: state.interfaces.map((channel) => (
+      channel.id === current.interfaceId
+        ? { ...channel, endpoint: `Agent LAB-GW · ${protocol} · ${site}` }
+        : channel
+    )),
+  };
+}
+
 export function withAppConnection(state: ConnectState, connector: AppConnector, account: string, at: string): ConnectState {
   const trimmed = account.trim();
   if (!trimmed) return state;

@@ -10570,6 +10570,38 @@ button.client-kpi.is-on {
   letter-spacing: 0.02em;
 }
 
+.connect-record-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.instrument-connection .connect-channel-form-grid {
+  grid-template-columns: 1fr;
+}
+
+.instrument-connection .migration-select select:disabled,
+.instrument-connection .migration-select input:read-only {
+  background: #f7f6fb;
+  color: #3d3a55;
+}
+
+.instrument-leave-dialog {
+  z-index: 70;
+}
+
+.instrument-leave-modal {
+  width: min(440px, calc(100vw - 2rem));
+  min-width: 0;
+  min-height: 0;
+  padding: 1.1rem 1.15rem 1.2rem;
+}
+
 .connect-channel-arrow {
   color: #3c3658;
   font-weight: 650;
