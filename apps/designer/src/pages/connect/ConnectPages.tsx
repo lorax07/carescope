@@ -364,6 +364,7 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
   const opened = state.messages.find((message) => message.id === state.selectedId);
   const openedChannel = channels.some((item) => item.id === requested) ? requested : channels.some((item) => item.id === opened?.interfaceId) ? opened?.interfaceId : channels[0]?.id;
   const [selected, setSelected] = useState(openedChannel ?? "");
+  const [detailOpen, setDetailOpen] = useState(true);
   const [pane, setPane] = useState(initialPane);
   const [filters, setFilters] = useState<string[]>([]);
   const [query, setQuery] = useState("");
@@ -390,7 +391,7 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
     const text = `${item.fromSystem} ${item.toSystem} ${item.name} ${item.kind} ${item.endpoint} ${item.note}`;
     return searches.every((search) => filter01Match(text, search));
   });
-  const channel = visible.find((item) => item.id === selected) ?? visible[0];
+  const channel = detailOpen ? visible.find((item) => item.id === selected) ?? visible[0] : undefined;
   const channelMessages = channel ? state.messages.filter((message) => message.interfaceId === channel.id).filter((message) => {
     if (messageStatus === "success") {
       if (!messageIsSuccess(message)) return false;
@@ -429,7 +430,7 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
         <ul className="connect-channel-board">
           {visible.map((item) => (
               <li key={item.id}>
-                <button type="button" className={item.id === channel?.id ? "is-current" : undefined} aria-pressed={item.id === channel?.id} onClick={() => setSelected(item.id)}>
+                <button type="button" className={item.id === channel?.id ? "is-current" : undefined} aria-pressed={item.id === channel?.id} onClick={() => { setDetailOpen(true); setSelected(item.id); }}>
                   <strong className="connect-channel-title">{item.fromSystem} → {item.toSystem}</strong>
                   <span className="connect-channel-kind">{item.kind} · {item.name}</span>
                 </button>
@@ -439,7 +440,8 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
         {visible.length === 0 ? <p>No channel matches that filter.</p> : null}
       </section>
       {channel ? (
-        <section className="lims-panel migration-panel connect-channel-pane" aria-label={`${channel.fromSystem} to ${channel.toSystem}`}>
+        <section className="lims-panel migration-panel connect-channel-pane tabview01" aria-label={`${channel.fromSystem} to ${channel.toSystem}`}>
+          <button type="button" className="tabview01-close" aria-label={`Close ${channel.fromSystem} to ${channel.toSystem}`} onClick={() => setDetailOpen(false)}>×</button>
           <h2 className="connect-channel-title">{channel.fromSystem} → {channel.toSystem}</h2>
           <p className="connect-channel-kind">{channel.kind} · {channel.name}</p>
           <dl className="connect-connection-details">
