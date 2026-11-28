@@ -766,10 +766,9 @@ function InstrumentsView() {
   const labName = currentLabName() || "this lab instance";
   const rows = labId ? state.instruments.filter((item) => item.labId === labId) : state.instruments;
   const open = sectionTabs.presentation === "tab" ? sectionTabs.tabs.find((tab) => tab.id === sectionTabs.activeId) : undefined;
-  const openConnection = open?.kind === "instrument-connection";
-  const openCatalog = open?.kind === "instrument-catalog";
+  const sideTab = open?.kind === "instrument-connection" || open?.kind === "instrument-catalog" ? open : undefined;
   return (
-    <div className={openConnection || openCatalog ? "instrument-manager-row" : undefined}>
+    <div className={sideTab ? "instrument-manager-row" : undefined}>
     <section className="lims-panel migration-panel">
       <h2>Connected to {labName}</h2>
       <p>{rows.length ? "These analyzers already have a gateway on this instance." : "No analyzer is connected to this lab instance yet."}</p>
@@ -805,9 +804,10 @@ function InstrumentsView() {
         </tbody>
       </table>
     </section>
-    {openConnection || openCatalog ? (
-      <div className="instrument-tab-screen">
-        {openConnection ? <InstrumentConnectionScreen recordId={open.recordId} /> : <InstrumentCatalogScreen />}
+    {sideTab ? (
+      <div className="instrument-tab-screen tabview01">
+        <button type="button" className="tabview01-close" aria-label={`Close ${sideTab.title}`} onClick={() => sectionTabs.close(sideTab.id)}>×</button>
+        {sideTab.kind === "instrument-connection" ? <InstrumentConnectionScreen recordId={sideTab.recordId} /> : <InstrumentCatalogScreen />}
       </div>
     ) : null}
     </div>
@@ -955,10 +955,12 @@ export function InstrumentCatalogScreen() {
   const scopedLab = labId || labIdFromSite(site);
   const already = picked ? state.instruments.some((item) => item.catalogId === picked.id && item.labId === scopedLab) : false;
 
-  function connectInstrument() {
-    if (!picked || !site.trim()) return;
-    if (!already) startInstrumentIntegration(picked.id, site, scopedLab);
-    sectionTabs.pin({ kind: "instrument-connection", recordId: `conn-${picked.id}`, title: picked.name });
+  function connectInstrument(item = picked) {
+    if (!item || !site.trim()) return;
+    const itemLab = labId || labIdFromSite(site);
+    const connected = state.instruments.some((row) => row.catalogId === item.id && row.labId === itemLab);
+    if (!connected) startInstrumentIntegration(item.id, site, itemLab);
+    sectionTabs.pin({ kind: "instrument-connection", recordId: `conn-${item.id}`, title: item.name });
   }
 
   return (
@@ -980,7 +982,7 @@ export function InstrumentCatalogScreen() {
                 const connected = state.instruments.some((row) => row.catalogId === item.id && (!labId || row.labId === labId));
                 return (
                   <li key={item.id}>
-                    <button type="button" className={pickedId === item.id ? "is-current" : undefined} aria-pressed={pickedId === item.id} onClick={() => setPickedId(item.id)}>
+                    <button type="button" className={pickedId === item.id ? "is-current" : undefined} aria-pressed={pickedId === item.id} onClick={() => setPickedId(item.id)} onDoubleClick={() => connectInstrument(item)}>
                       <strong>{item.maker} {item.name}</strong>
                       <span>{item.protocol} · {item.summary}</span>
                       {connected ? <Pill tone="ok">Connected</Pill> : <span className="connect-catalog-start">Select</span>}

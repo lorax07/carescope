@@ -17,3 +17,7 @@ The main tabs, such as Accounts and Contacts, on the client module. They sit in 
 ## subtab01
 
 The subtabs under a Tab01, such as Home and an open account or contact, and Activity, Documents, and Notes. A thin gray line runs under the row. Unselected labels are gray and sit on the line with no box. The selected label is purple, and a short red bar sits under it on the line. Add the class `subtab01`. Mark the selected control with `is-on`. A tab that can be closed, such as a new channel or an open account, is a `span` holding the label and an × button on the right of that label. Put `is-on` on the span, and give the button an accessible name that starts with Close.
+
+## Tabview01
+
+The card that opens beside a list when a record tab is selected, such as an instrument connection. The card grows tall enough to show its fields. The list beside it is 300 pixels narrower than the page's usual split, and the tab view fills the width that remains. A small × sits at the top right of the card and closes that tab. Add the class `tabview01` to the card. The close control is a button with an accessible name that starts with Close.
