@@ -20,4 +20,4 @@ The subtabs under a Tab01, such as Home and an open account or contact, and Acti
 
 ## Tabview01
 
-The card that opens beside a list when a record tab is selected, such as an instrument connection. The card grows tall enough to show its fields. The list beside it is 300 pixels narrower than the page's usual split, and the tab view fills the width that remains. A small × sits at the top right of the card and closes that tab. Add the class `tabview01` to the card. The close control is a button with an accessible name that starts with Close.
+The card that opens beside a list when a record tab is selected, such as an instrument connection or a channel. The card grows tall enough to show its fields. On a new split, the list beside it is 300 pixels narrower than the page's usual split, and the tab view fills the width that remains. When the list and the card already have their widths, leave that split and add only the close button. A small × sits at the top right of the card and closes that tab. Add the class `tabview01` to the card. The close control is a button with an accessible name that starts with Close.

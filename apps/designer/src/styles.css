@@ -10624,7 +10624,8 @@ button.client-kpi.is-on {
   position: relative;
 }
 
-.tabview01 > .lims-panel {
+.tabview01 > .lims-panel,
+.tabview01.migration-panel {
   margin: 0;
   padding-right: 2.15rem;
 }
