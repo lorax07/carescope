@@ -16,4 +16,4 @@ The main tabs, such as Accounts and Contacts, on the client module. They sit in 
 
 ## subtab01
 
-The subtabs under a Tab01, such as Home and an open account or contact, and Activity, Documents, and Notes. A thin gray line runs under the row. Unselected labels are gray and sit on the line with no box. The selected label is purple, and a short red bar sits under it on the line. Add the class `subtab01`. Mark the selected control with `is-on`.
+The subtabs under a Tab01, such as Home and an open account or contact, and Activity, Documents, and Notes. A thin gray line runs under the row. Unselected labels are gray and sit on the line with no box. The selected label is purple, and a short red bar sits under it on the line. Add the class `subtab01`. Mark the selected control with `is-on`. A tab that can be closed, such as a new channel or an open account, is a `span` holding the label and an × button on the right of that label. Put `is-on` on the span, and give the button an accessible name that starts with Close.

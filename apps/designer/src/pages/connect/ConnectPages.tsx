@@ -113,7 +113,7 @@ function channelTabOn(key: string, view: string): boolean {
   return key === view;
 }
 
-function InterfaceTabs({ current, configureLabel }: { current: string; configureLabel?: string }) {
+function InterfaceTabs({ current, configureLabel, onCloseConfigure }: { current: string; configureLabel?: string; onCloseConfigure?: () => void }) {
   return (
     <nav className="subtab01 connect-interface-tabs" role="tablist" aria-label="EHR Integration">
       {INTERFACE_TABS.map((tab) => {
@@ -125,9 +125,12 @@ function InterfaceTabs({ current, configureLabel }: { current: string; configure
         );
       })}
       {configureLabel ? (
-        <Link to="/app/connect/configure" role="tab" aria-selected={current === "configure"} className={current === "configure" ? "is-on" : undefined}>
-          {configureLabel}
-        </Link>
+        <span className={current === "configure" ? "is-on" : undefined}>
+          <Link to="/app/connect/configure" role="tab" aria-selected={current === "configure"}>
+            {configureLabel}
+          </Link>
+          <button type="button" aria-label={`Close ${configureLabel}`} onClick={onCloseConfigure}>×</button>
+        </span>
       ) : null}
     </nav>
   );
@@ -762,7 +765,11 @@ function InstrumentsView() {
   const labId = currentLabId();
   const labName = currentLabName() || "this lab instance";
   const rows = labId ? state.instruments.filter((item) => item.labId === labId) : state.instruments;
+  const open = sectionTabs.presentation === "tab" ? sectionTabs.tabs.find((tab) => tab.id === sectionTabs.activeId) : undefined;
+  const openConnection = open?.kind === "instrument-connection";
+  const openCatalog = open?.kind === "instrument-catalog";
   return (
+    <div className={openConnection || openCatalog ? "instrument-manager-row" : undefined}>
     <section className="lims-panel migration-panel">
       <h2>Connected to {labName}</h2>
       <p>{rows.length ? "These analyzers already have a gateway on this instance." : "No analyzer is connected to this lab instance yet."}</p>
@@ -798,6 +805,12 @@ function InstrumentsView() {
         </tbody>
       </table>
     </section>
+    {openConnection || openCatalog ? (
+      <div className="instrument-tab-screen">
+        {openConnection ? <InstrumentConnectionScreen recordId={open.recordId} /> : <InstrumentCatalogScreen />}
+      </div>
+    ) : null}
+    </div>
   );
 }
 
@@ -1008,9 +1021,13 @@ export function ConnectPage({ section }: { section?: string }) {
   const sectionTabs = useSectionTabs();
   const navigate = useNavigate();
   const [session, setSession] = useState<ChannelSession | null>(null);
-  if (section === "configure" && !session) {
-    setSession({ setup: emptyChannelSetup(), step: "form", error: "", savedId: "" });
-  }
+  const configureClosed = useRef(false);
+  useEffect(() => {
+    if (section === "configure" && !session && !configureClosed.current) {
+      setSession({ setup: emptyChannelSetup(), step: "form", error: "", savedId: "" });
+    }
+    if (section !== "configure") configureClosed.current = false;
+  }, [section, session]);
   const view = section === "configure" ? "configure" : section && section in COPY ? section : "overview";
   const channelScreen = view === "interfaces" || view === "messages" || view === "mapping";
   const interfaceView = channelScreen || view === "failures" || view === "configure";
@@ -1018,8 +1035,14 @@ export function ConnectPage({ section }: { section?: string }) {
     ? { title: "EHR Integration", subtitle: view === "failures" ? COPY.failures.subtitle : view === "configure" ? "Name the EHR, the data that moves, and how the connection is made." : COPY.interfaces.subtitle }
     : COPY[view];
   function openConfigure() {
+    configureClosed.current = false;
     if (!session) setSession({ setup: emptyChannelSetup(), step: "form", error: "", savedId: "" });
     navigate("/app/connect/configure");
+  }
+  function closeConfigure() {
+    configureClosed.current = true;
+    setSession(null);
+    if (view === "configure") navigate("/app/connect/interfaces");
   }
   function validateChannel() {
     if (!session) return;
@@ -1052,7 +1075,7 @@ export function ConnectPage({ section }: { section?: string }) {
         ) : undefined}
       />
       {view === "instruments" ? <SectionTabStrip mainLabel="Instruments" always /> : null}
-      {interfaceView ? <InterfaceTabs current={view} configureLabel={session ? session.setup.name.trim() || "New channel" : undefined} /> : null}
+      {interfaceView ? <InterfaceTabs current={view} configureLabel={session ? session.setup.name.trim() || "New channel" : undefined} onCloseConfigure={closeConfigure} /> : null}
       {view === "overview" ? <OverviewView /> : null}
       {channelScreen ? <ChannelsView initialPane={view === "mapping" ? "mapping" : "messages"} onConfigure={openConfigure} /> : null}
       {view === "configure" && session ? <ChannelConfigureView session={session} onChange={setSession} onValidate={validateChannel} /> : null}
