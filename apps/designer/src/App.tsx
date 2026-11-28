@@ -743,7 +743,7 @@ function AppFrame() {
               <TopPriorities />
             </aside>
           ) : null}
-          {sectionTabs.presentation === "tab"
+          {sectionTabs.presentation === "tab" && !location.pathname.startsWith("/app/connect/instruments")
             ? sectionTabs.tabs
             .filter((tab) => tab.id === sectionTabs.activeId)
             .map((tab) => (
