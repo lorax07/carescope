@@ -10270,6 +10270,49 @@ button.client-kpi.is-on {
   color: #fff;
 }
 
+.filter-button-01 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.filter-button-01 button {
+  padding: 0.28rem 0.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f0fb;
+  color: #3c345f;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter-button-01 button.is-current {
+  background: #4c418f;
+  color: #fff;
+}
+
+.filter-button-01.is-plus-3 {
+  gap: 0.55rem;
+}
+
+.filter-button-01.is-plus-3 button {
+  padding: 0.48rem 1.05rem;
+  font-size: 1.125rem;
+}
+
+.connect-app-toolbar {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  margin: 0.15rem 0 1rem;
+}
+
+.connect-app-find input {
+  width: 16rem;
+}
+
 .migration-pill {
   display: inline-flex;
   align-items: center;

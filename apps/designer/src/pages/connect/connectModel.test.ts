@@ -38,15 +38,19 @@ describe("sequence connect message handling", () => {
     const slack = connectorById("slack");
     expect(slack?.category).toBe("Messaging");
     expect(new Set(APP_CONNECTORS.map((item) => item.category))).toEqual(new Set(["Messaging", "CRM", "Email", "EHR", "Storage", "Identity"]));
+    expect(initialConnectState().connections).toEqual([{ connectorId: "gmail", account: "northlab.org", interfaceId: "app-gmail" }]);
     const started = withAppConnection(initialConnectState(), slack!, "  north-lab  ", "Nov 17, 5:00 PM CT");
-    expect(started.connections).toEqual([{ connectorId: "slack", account: "north-lab", interfaceId: "app-slack" }]);
+    expect(started.connections).toEqual([
+      { connectorId: "gmail", account: "northlab.org", interfaceId: "app-gmail" },
+      { connectorId: "slack", account: "north-lab", interfaceId: "app-slack" },
+    ]);
     expect(started.interfaces.at(-1)?.endpoint).toBe("https://hooks.slack.com/services/north-lab");
     expect(started.interfaces.filter(isInterfaceChannel).map((item) => item.id)).toEqual(CONNECT_INTERFACES.filter(isInterfaceChannel).map((item) => item.id));
     expect(started.interfaces.filter(isInterfaceChannel).some((item) => item.kind === "Instrument gateway" || item.id.startsWith("app-"))).toBe(false);
     expect(started.messages[0]?.status).toBe("delivered");
     expect(started.messages[0]?.steps[0]?.label).toBe("API connection started");
-    expect(withAppConnection(started, slack!, "other", "Nov 17, 5:01 PM CT").connections).toHaveLength(1);
-    expect(withAppConnection(initialConnectState(), slack!, "   ", "Nov 17, 5:02 PM CT").connections).toHaveLength(0);
+    expect(withAppConnection(started, slack!, "other", "Nov 17, 5:01 PM CT").connections).toHaveLength(2);
+    expect(withAppConnection(initialConnectState(), slack!, "   ", "Nov 17, 5:02 PM CT").connections).toEqual(initialConnectState().connections);
   });
 
   it("starts one instrument integration for a lab", () => {
