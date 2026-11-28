@@ -21,3 +21,7 @@ The subtabs under a Tab01, such as Home and an open account or contact, and Acti
 ## Tabview01
 
 The card that opens beside a list when a record tab is selected, such as an instrument connection or a channel. The card grows tall enough to show its fields. On a new split, the list beside it is 300 pixels narrower than the page's usual split, and the tab view fills the width that remains. When the list and the card already have their widths, leave that split and add only the close button. A small × sits at the top right of the card and closes that tab. Add the class `tabview01` to the card. The close control is a button with an accessible name that starts with Close.
+
+## FilterButton01
+
+A row of pill buttons that filters a list, such as All, Success, Failed, Retrying, Held, Delivered, and Date range. Each pill is fully rounded. At rest the fill is light lavender and the label is dark purple. The selected pill is a darker purple with a white label. Add the class `filter-button-01`. Mark the selected button with `is-current`. Add `is-plus-3` when the pills should be three sizes larger: the label is 1.125rem and the padding is roomier.

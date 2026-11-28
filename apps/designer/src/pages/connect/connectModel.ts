@@ -489,7 +489,7 @@ export function initialConnectState(): ConnectState {
   const seededChannels = SEEDED_INSTRUMENTS
     .filter((item) => !CONNECT_INTERFACES.some((channel) => channel.id === item.interfaceId))
     .map((item) => instrumentChannel(item, `${item.name} is connected to this lab instance.`));
-  return {
+  const base: ConnectState = {
     interfaces: [...CONNECT_INTERFACES.map((item) => ({ ...item })), ...seededChannels],
     messages: INITIAL_MESSAGES.map((message) => ({
       ...message,
@@ -501,6 +501,9 @@ export function initialConnectState(): ConnectState {
     instruments: SEEDED_INSTRUMENTS.map((item) => ({ ...item })),
     selectedId: "MSG-24018",
   };
+  const gmail = connectorById("gmail");
+  if (!gmail) return base;
+  return { ...withAppConnection(base, gmail, "northlab.org", "Nov 17, 9:00 AM CT"), selectedId: "MSG-24018" };
 }
 
 export function catalogInstrument(id: string): LabInstrument | undefined {

@@ -462,7 +462,7 @@ function ChannelsView({ initialPane, onConfigure }: { initialPane: "messages" | 
                 Search this channel
                 <input aria-label="Search this channel" value={messageQuery} placeholder="Id, MRN, error, payload" onChange={(event) => setMessageQuery(event.target.value)} />
               </label>
-              <div className="migration-filters" role="group" aria-label="Message status">
+              <div className="migration-filters filter-button-01" role="group" aria-label="Message status">
                 {(["all", "success", "failed", "retrying", "held", "delivered"] as const).map((key) => (
                   <button key={key} type="button" className={messageStatus === key ? "is-current" : undefined} aria-pressed={messageStatus === key} onClick={() => setMessageStatus(key)}>
                     {key === "all" ? "All" : key === "success" ? "Success" : statusLabel(key)}
@@ -687,9 +687,15 @@ function AppsView() {
   const state = useConnect();
   const [catalogQuery, setCatalogQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [appTab, setAppTab] = useState<"all" | "connected">("all");
   const needle = catalogQuery.trim().toLowerCase();
   const openConnector = APP_CONNECTORS.find((item) => item.id === openId) ?? null;
   const closeConnector = useCallback(() => setOpenId(null), []);
+  const connectedIds = new Set(state.connections.map((item) => item.connectorId));
+  const visibleApps = APP_CONNECTORS.filter((item) => {
+    if (appTab === "connected" && !connectedIds.has(item.id)) return false;
+    return !needle || `${item.name} ${item.category} ${item.summary} ${item.kind}`.toLowerCase().includes(needle);
+  });
   return (
     <>
       <section className="lims-panel migration-panel connect-catalog" aria-labelledby="app-connectors-heading">
@@ -698,13 +704,19 @@ function AppsView() {
             <h2 id="app-connectors-heading">{state.connections.length} connected · {APP_CONNECTORS.length} known apps</h2>
             <p>Grouped by what they do. Open one to start its API connection.</p>
           </div>
-          <label className="migration-select">
+        </div>
+        <div className="connect-app-toolbar">
+          <div className="filter-button-01 is-plus-3" role="tablist" aria-label="App connectors">
+            <button type="button" role="tab" aria-selected={appTab === "all"} className={appTab === "all" ? "is-current" : undefined} onClick={() => setAppTab("all")}>All apps</button>
+            <button type="button" role="tab" aria-selected={appTab === "connected"} className={appTab === "connected" ? "is-current" : undefined} onClick={() => setAppTab("connected")}>Connected Apps</button>
+          </div>
+          <label className="migration-select connect-app-find">
             Find an app
             <input aria-label="Find an app" value={catalogQuery} placeholder="Slack, CRM, email" onChange={(event) => setCatalogQuery(event.target.value)} />
           </label>
         </div>
         {CONNECTOR_CATEGORIES.map((category) => {
-          const apps = APP_CONNECTORS.filter((item) => item.category === category && (!needle || `${item.name} ${item.category} ${item.summary} ${item.kind}`.toLowerCase().includes(needle)));
+          const apps = visibleApps.filter((item) => item.category === category);
           if (!apps.length) return null;
           return (
             <div className="connect-catalog-group" key={category}>
@@ -726,7 +738,7 @@ function AppsView() {
             </div>
           );
         })}
-        {needle && !APP_CONNECTORS.some((item) => `${item.name} ${item.category} ${item.summary} ${item.kind}`.toLowerCase().includes(needle)) ? <p>No app matches that search.</p> : null}
+        {visibleApps.length === 0 ? <p>{appTab === "connected" ? "No connected app matches that search." : "No app matches that search."}</p> : null}
       </section>
       {openConnector ? <ConnectorDialog key={openConnector.id} connector={openConnector} onClose={closeConnector} /> : null}
     </>
