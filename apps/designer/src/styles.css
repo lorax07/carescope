@@ -10611,30 +10611,47 @@ button.client-kpi.is-on {
 
 .instrument-manager-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.72fr);
+  grid-template-columns: minmax(260px, calc(67.4% - 300px)) minmax(0, 1fr);
   gap: 0.9rem;
-  align-items: stretch;
+  align-items: start;
 }
 
-.instrument-manager-row > .instrument-tab-screen {
-  height: 0;
-  min-height: 100%;
-  overflow: auto;
+.instrument-tab-screen {
+  min-width: 0;
 }
 
-.instrument-tab-screen > .lims-panel {
-  min-height: 100%;
+.tabview01 {
+  position: relative;
+}
+
+.tabview01 > .lims-panel {
   margin: 0;
+  padding-right: 2.15rem;
+}
+
+.tabview01-close {
+  position: absolute;
+  top: 0.72rem;
+  right: 0.7rem;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  margin: 0;
+  padding: 0.1rem 0.2rem;
+  color: #b0b7c6;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tabview01-close:hover,
+.tabview01-close:focus-visible {
+  color: #6d5efc;
 }
 
 @media (max-width: 900px) {
   .instrument-manager-row {
     grid-template-columns: 1fr;
-  }
-
-  .instrument-manager-row > .instrument-tab-screen {
-    height: auto;
-    max-height: 70vh;
   }
 }
 
